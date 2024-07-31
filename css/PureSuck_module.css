@@ -1,0 +1,233 @@
+.info-window-box {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 20px 0; 
+    transition: all 0.3s ease-in-out;
+    transform: scale(1);
+}
+
+.info-window-box:hover {
+    transform: scale(1.05);
+}
+
+.info-window-header {
+    color: white;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.info-window-content {
+    padding: 20px;
+}
+
+.info-window-content p {
+    margin: 10px 0;
+}
+
+.info-window-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.info-window-content a:hover {
+    text-decoration: underline;
+}
+
+/* 红色版本 */
+.info-window-box.red {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.info-window-header.red {
+    background-color: #dc3545;
+}
+
+/* 黄色版本 */
+.info-window-box.yellow {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+
+.info-window-header.yellow {
+    background-color: #ffc107;
+}
+
+/* 绿色版本 */
+.info-window-box.green {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.info-window-header.green {
+    background-color: #28a745;
+}
+
+/* 蓝色版本 */
+.info-window-box.blue {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+}
+
+.info-window-header.blue {
+    background-color: #007bff;
+}
+
+/* 粉色版本 */
+.info-window-box.pink {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.info-window-header.pink {
+    background-color: #e83e8c;
+}
+
+
+
+.text-xs.font-semibold {
+    margin-top: 0 !important;
+    margin-bottom: 0px !important;
+}
+
+.alert-box {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 20px 0 !important; 
+    margin-top: 0 !important;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    transition: all 0.3s ease-in-out;
+    transform: scale(1);
+    color: white;
+    font-weight: bold;
+}
+
+.alert-box:hover {
+    transform: scale(1.05);
+}
+
+.alert-icon {
+    margin-right: 10px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* 绿色版本 */
+.alert-box.green {
+    background-color: #28a745;
+    border-left: 4px solid #1e7e34;
+}
+
+.text-green-600 { color: #1e7e34; }
+
+/* 蓝色版本 */
+.alert-box.blue {
+    background-color: #007bff;
+    border-left: 4px solid #0056b3;
+}
+
+.text-blue-600 { color: #0056b3; }
+
+/* 黄色版本 */
+.alert-box.yellow {
+    background-color: #ffc107;
+    border-left: 4px solid #e0a800;
+}
+
+.text-yellow-600 { color: #e0a800; }
+
+/* 红色版本 */
+.alert-box.red {
+    background-color: #dc3545;
+    border-left: 4px solid #bd2130;
+}
+
+.text-red-600 { color: #bd2130; }
+
+/* 粉色版本 */
+.alert-box.pink {
+    background-color: #e83e8c;
+    border-left: 4px solid #c2226d;
+}
+
+.text-pink-600 { color: #c2226d; }
+
+
+.info-card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-bottom: 1em;
+}
+.info-card {
+    display: flex;
+    align-items: center;
+    padding: 1em;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: inherit;
+    box-sizing: border-box;
+}
+.info-card img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-right: 1em;
+}
+.info-card .info-text {
+    display: flex;
+    flex-direction: column;
+}
+.info-card .info-title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+.info-card .info-desc {
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* 预设样式 */
+.info-card.style-1 {
+    background: #e3f2fd;
+    border-left: 5px solid #2196f3;
+}
+.info-card.style-2 {
+    background: #f3e5f5;
+    border-left: 5px solid #9c27b0;
+}
+.info-card.style-3 {
+    background: #e8f5e9;
+    border-left: 5px solid #4caf50;
+}
+.info-card.style-4 {
+    background: #fff3e0;
+    border-left: 5px solid #ff9800;
+}
+
+/* 卡片宽度 */
+.info-card.one-per-row {
+    flex: 1 1 100%;
+}
+.info-card.two-per-row {
+    flex: 1 1 calc(50% - 1em);
+}
+.info-card.three-per-row {
+    flex: 1 1 calc(33.333% - 1em);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .info-card.one-per-row,
+    .info-card.two-per-row,
+    .info-card.three-per-row {
+        flex: 1 1 100%;
+    }
+}

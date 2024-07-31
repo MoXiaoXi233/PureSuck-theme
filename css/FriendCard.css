@@ -1,0 +1,93 @@
+.friendsboard-list {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    margin-top: 1em;
+    width: calc(100% + 15px);
+    margin-left: -15px;
+}
+.friendsboard-list, .friendsboard-list * {
+    box-sizing: border-box;
+}
+.friendsboard-item {
+    position: relative;
+    cursor: pointer;
+    box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
+    transition: ease all 0.3s;
+    overflow: hidden;
+    background: #f8fafc;
+    border-radius: 8px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    border: none!important;
+    display: block;
+    margin-left: 15px;
+    margin-bottom: 25px;
+    width: calc(33.3333% - 15px);
+    padding: 20px;
+}
+.friendsboard-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
+}
+
+.friendsboard-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin-bottom: 10px;
+}
+
+.friendsboard-title, .friendsboard-title a {
+    margin: 5px 0!important;
+    font-size: 1em!important;
+    overflow: hidden!important;
+    text-overflow: ellipsis!important;
+    white-space: nowrap!important;
+    text-align: left!important;
+    color: #333333!important;
+    font-weight: bold!important;
+    border: none!important;
+}
+
+.friendsboard-role {
+    font-size: 0.875em;
+    color: #6c757d;
+}
+
+.friendsboard-contact {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.friendsboard-contact a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875em;
+}
+
+.friendsboard-contact a:hover {
+    text-decoration: underline;
+}
+
+.friendsboard-contact i {
+    margin-right: 5px;
+}
+
+/* media query for responsive design */
+@media screen and (max-width: 767.5px) {
+    .friendsboard-item {
+        width: calc(50% - 15px);
+    }
+}
+@media screen and (max-width: 450px) {
+    .friendsboard-item {
+        width: calc(100% - 15px);
+    }
+}

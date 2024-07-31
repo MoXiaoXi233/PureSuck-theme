@@ -1,0 +1,208 @@
+<?php
+if (!defined('__TYPECHO_ROOT_DIR__')) exit;
+
+function themeFields($layout) {
+    $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('描述'), _t('简单一句话描述'));$description->input->setAttribute('class', 'text w-100');
+    $layout->addItem($description);
+    $keyword = new Typecho_Widget_Helper_Form_Element_Text('keyword', NULL, NULL, _t('文章关键词'), _t('多个关键词用英文下逗号隔开'));$keyword->input->setAttribute('class', 'text w-100');
+    $layout->addItem($keyword);
+}
+
+function themeConfig($form)
+{
+    // 网页 icon URL 配置项
+    $logoUrl = new \Typecho\Widget\Helper\Form\Element\Text(
+        'logoUrl',
+        null,
+        null,
+        _t('网页 ICON 地址'),
+        _t('填写ico格式图片 URL 地址, 在网站标题前加上一个 icon')
+    );
+    $form->addInput($logoUrl);
+
+
+    // 左侧 LOGO URL 配置项
+    $logoIndex = new \Typecho\Widget\Helper\Form\Element\Text(
+        'logoIndex',
+        null,
+        null,
+        _t('左侧 LOGO 地址'),
+        _t('填写JPG/PNG/Webp等图片 URL 地址, 网站左侧头像的显示(512*512最佳)')
+    );
+    $form->addInput($logoIndex);
+
+    // 左侧描述
+    $customDescription = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'customDescription',
+        null,
+        null,
+        _t('左侧描述'),
+        _t('填写自定义描述内容，将在网站左侧显示')
+    );
+    $form->addInput($customDescription);
+
+    // 左侧自定义
+    $leftSideCustomCode = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'leftSideCustomCode',
+        null,
+        null,
+        _t('左侧自定义区域'),
+        _t('支持自定义html，支持fontawesome，将在网站左侧显示')
+    );
+    $form->addInput($leftSideCustomCode);
+
+    //作者头像
+    $authorAvatar = new \Typecho\Widget\Helper\Form\Element\Text(
+        'authorAvatar',
+        null,
+        null,
+        _t('作者头像地址'),
+        _t('填写JPG/PNG/Webp等图片 URL 地址, 用于显示文章作者头像')
+    );
+    $form->addInput($authorAvatar);
+
+    // 网站标题配置项
+    $titleIndex = new \Typecho\Widget\Helper\Form\Element\Text(
+        'titleIndex',
+        null,
+        null,
+        _t('网站标题'),
+        _t('网站左侧标题文字')
+    );
+    $form->addInput($titleIndex);
+
+    // Footer script标签
+    $footerScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'footerScript',
+        null,
+        null,
+        _t('Script标签'),
+        _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签')
+    );
+    $form->addInput($footerScript);
+
+    // 分类模块显示选项
+    $showCategory = new Typecho_Widget_Helper_Form_Element_Radio('showCategory', 
+        array('1' => _t('显示'), '0' => _t('隐藏')), 
+        '1', _t('是否显示分类模块'));
+    $form->addInput($showCategory);
+
+    // 标签模块显示选项
+    $showTag = new Typecho_Widget_Helper_Form_Element_Radio('showTag', 
+        array('1' => _t('显示'), '0' => _t('隐藏')), 
+        '1', _t('是否显示标签模块'));
+    $form->addInput($showTag);
+
+    // TOC 模块显示选项
+    $showTOC = new Typecho_Widget_Helper_Form_Element_Radio('showTOC', 
+        array('1' => _t('显示'), '0' => _t('隐藏')), 
+        '1', _t('是否显示目录树'));
+    $form->addInput($showTOC);
+}
+
+//文章TOC树函数
+// 提取标题
+function extractHeadings($content) {
+    $pattern = '/<h([1-6])[^>]*>(.*?)<\/h\1>/i';
+    preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
+    $headings = [];
+    foreach ($matches as $index => $match) {
+        $headings[] = [
+            'level' => (int)$match[1],
+            'text' => strip_tags($match[2]),
+            'count' => $index + 1
+        ];
+    }
+    return $headings;
+}
+
+// 生成树形列表
+function generateTreeList($list, $depth = 6) {
+    if (count($list) <= 0 || $depth <= 1) {
+        return $list;
+    }
+
+    for ($i = count($list) - 1; $i >= 0; $i--) {
+        $item = $list[$i];
+        if ($item['level'] == $depth) {
+            $parentIndex = $i - 1;
+            while ($parentIndex >= 0) {
+                $parent = &$list[$parentIndex];
+                if ($parent['level'] < $depth) {
+                    break;
+                }
+                $parentIndex--;
+            }
+
+            if ($parentIndex < 0) {
+                break;
+            }
+
+            if (!isset($parent['children']) || !is_array($parent['children'])) {
+                $parent['children'] = [];
+            }
+
+            array_unshift($parent['children'], $item);
+            array_splice($list, $i, 1);
+        }
+    }
+
+    $list = array_values($list);
+    return generateTreeList($list, $depth - 1);
+}
+
+// 生成目录树的HTML模板
+function generateTreeTemplate($arr, $depth, $currentDepth = 1, $isChildren = false) {
+    if (count($arr) <= 0) {
+        return '<div>暂无目录</div>';
+    }
+    if ($currentDepth > $depth) {
+        return '';
+    }
+    $output = !$isChildren ? '<ul class="directory-tree">' : '';
+    foreach ($arr as $item) {
+        $output .= '<li><a href="#heading-' . $item['count'] . '" title="' . $item['text'] . '">' . $item['text'] . '</a>';
+        if (!empty($item['children']) && $currentDepth < $depth) {
+            $output .= '<ul>';
+            $output .= generateTreeTemplate($item['children'], $depth, $currentDepth + 1, true);
+            $output .= '</ul>';
+        }
+        $output .= '</li>';
+    }
+    $output .= !$isChildren ? '</ul>' : '';
+    return $output;
+}
+
+// 为标题添加ID
+function addHeadingIds($content) {
+    $pattern = '/<h([1-6])[^>]*>(.*?)<\/h\1>/i';
+    $count = 0;
+    $content = preg_replace_callback($pattern, function($matches) use (&$count) {
+        $count++;
+        return '<h' . $matches[1] . ' id="heading-' . $count . '">' . $matches[2] . '</h' . $matches[1] . '>';
+    }, $content);
+    return $content;
+}
+
+// 生成并输出目录树
+function getJJDirectoryTree($content, $maxDirectory = 3) {
+    $headings = extractHeadings($content);
+    $treeList = generateTreeList($headings);
+    echo generateTreeTemplate($treeList, $maxDirectory);
+}
+
+// 在Typecho的适当钩子中调用这些函数
+Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = function($content, $widget, $lastResult) {
+    return addHeadingIds($content);
+};
+Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = function($content, $widget, $lastResult) {
+    return addHeadingIds($content);
+};
+
+// 在模板文件中调用 outputDirectoryTree 函数
+function outputDirectoryTree($content) {
+    getJJDirectoryTree($content);
+}
+
+?>
+
