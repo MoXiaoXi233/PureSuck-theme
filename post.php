@@ -1,18 +1,21 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
+<?php if (!defined('__TYPECHO_ROOT_DIR__'))
+    exit; ?>
 <?php $this->need('header.php'); ?>
 
 <div class="wrapper">
 
-    <?php 
+    <?php
     $fields = unserialize($this->___fields());
     $hasImg = isset($fields['img']);
     ?>
-    <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item main-post">
+    <article
+        class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
         <div class="post-inner">
             <header class="post-item post-header <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
-                        <img src="<?= $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" class="avatar-item avatar-img">
+                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>"
+                            alt="作者头像" class="avatar-item avatar-img">
                         <span class="avatar-item">
                             <?php $this->author(); ?>
                         </span>
@@ -22,9 +25,9 @@
 
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
-            <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                <img itemprop="image" src="<?php $this->fields->img(); ?>">
-            </figure>
+                <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
+                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy">
+                </figure>
             <?php endif; ?>
 
             <section class="post-item post-body">
@@ -34,19 +37,50 @@
                             <?php $this->title() ?>
                         </a>
                     </h2>
-                    <?php $this->content(); ?>
+                    <?php
+                    // 获取内容
+                    ob_start();
+                    $this->content();
+                    $content = ob_get_clean();
+
+                    // 使用正则表达式查找所有 img 标签并添加新属性
+                    $pattern = '/<img(.*?)>/i';
+                    $replacement = '<img\$1 loading="lazy" data-zoomable>';
+                    $modifiedContent = preg_replace_callback($pattern, function ($matches) {
+                        // 获取 img 标签内容
+                        $imgTag = $matches[0];
+
+                        // 添加 loading="lazy" 属性
+                        if (strpos($imgTag, 'loading=') === false) {
+                            $imgTag = str_replace('<img', '<img loading="lazy"', $imgTag);
+                        }
+
+                        // 添加 data-zoomable 属性
+                        if (strpos($imgTag, 'data-zoomable') === false) {
+                            $imgTag = str_replace('<img', '<img data-zoomable', $imgTag);
+                        }
+
+                        return $imgTag;
+                    }, $content);
+
+                    // 输出修改后的内容
+                    echo $modifiedContent;
+                    ?>
+                    
                 </div>
             </section>
 
             <footer class="post-item post-footer">
                 <div class="wrapper post-wrapper">
                     <div class="meta post-meta">
-                        <a itemprop="datePublished" href="<?php $this->permalink() ?>" class="icon-ui icon-ui-date meta-item meta-date">
+                        <a itemprop="datePublished" href="<?php $this->permalink() ?>"
+                            class="icon-ui icon-ui-date meta-item meta-date">
                             <span class="meta-count">
                                 <?php $this->date(); ?>
                             </span>
                         </a>
-                        <a href="<?php $this->permalink() ?>#comments" class="icon-ui icon-ui-comment meta-item meta-comment">
+                        <a href="<?php $this->permalink() ?>#comments"
+                            class="icon-ui icon-ui-comment meta-item meta-comment">
                             <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
                         </a>
                     </div>

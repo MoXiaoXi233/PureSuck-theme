@@ -673,7 +673,6 @@ body>.wrapper {
 
 .header {
 	position: relative;
-	z-index: 1;
 	float: left;
 	width: 100%;
 	padding-top: 24px;
@@ -2064,7 +2063,7 @@ textarea.ci {
 
 /* 分类和标签模块样式 */
 .category-section, .tag-section, .toc-section {
-    margin-bottom: 40px; /* 增加模块之间的间距 */
+    margin-bottom: 20px; 
 }
 
 .section-header {
@@ -2093,7 +2092,7 @@ textarea.ci {
 
 .category-cloud .category, .tag-cloud .tag {
     display: inline-block;
-    padding: 8px 12px; /* 调整标签的内边距 */
+    padding: 2px 12px; /* 调整标签的内边距 */
     background-color: #fff;
     color: #333;
     border-radius: 5px;
@@ -2165,7 +2164,7 @@ textarea.ci {
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		max-height: 220px; 
+		max-height: 240px; 
 		overflow-y: auto; 
 		line-height: 1.5;
 		opacity: .5;
@@ -2219,12 +2218,7 @@ textarea.ci {
 		transform: translateX(5px); /* 向右移动一点点 */
 	}
 
-	.directory-tree::after {
-		content: "";
-		display: block;
-		height: 1px; 
-		width: 50%; 
-		background: black; 
-		position: sticky;
-		bottom: 0; 
+	.medium-zoom-overlay,
+	.medium-zoom-image--opened {
+	  z-index: 999;
 	}

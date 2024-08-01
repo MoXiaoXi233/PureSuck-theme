@@ -77,8 +77,8 @@
 	</div>
 </div>
 
-		<!-- CSS引入 -->
-	<link rel="stylesheet" href="<?php $this->options->themeUrl('css/OwO.min.css'); ?>">
+	<!-- CSS引入 -->
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/OwO.min.css'); ?>">
     <script src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script>
         var OwO_demo = new OwO({
