@@ -1,16 +1,15 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
     <?php $this->footer(); ?>
 
-    <!-- 后台script标签 -->
-    <?php if ($this->options->footerScript): ?>
-        <?php echo $this->options->footerScript; ?>
-    <?php endif; ?>
-    <link href="<?php echo $this->options->themeUrl('css/gotop.css'); ?>" rel="stylesheet">
+<!-- AOS -->
+<script>
+  AOS.init();
+</script>
 
     <!-- 回到顶端 -->
 <body>
     <div class="go-top dn" id="go-top" style="display: none;">
-        <a href="javascript:void(0);" class="go fa fa-chevron-up"></a>
+        <a href="javascript:void(0);" class="go icon-up-open"></a>
     </div>
 
     <script type="text/javascript">
@@ -48,7 +47,7 @@
     <!-- 代码高亮 -->
     <?php $this->header('wlw=&xmlrpc=&rss2=&atom=&rss1=&template=&pingback=&generator'); ?>
     <link href="<?php $this->options->themeUrl('/css/a11y-dark.min.css'); ?>" rel="stylesheet" type="text/css">
-    <script src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             hljs.highlightAll();
@@ -56,8 +55,8 @@
     </script>
 
     <!-- JS引入 -->
-    <script src="<?php $this->options->themeUrl('/js/PureSuck_module.js'); ?>"></script>
-    <script src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_module.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
   
 
 <!-- TOC目录JS-->
@@ -162,17 +161,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <!-- Medium Zoom -->
-<script src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
+<script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     mediumZoom('[data-zoomable]');
 });
 </script>
 
-<!-- AOS -->
-<script>
-  AOS.init();
-</script>
+    <!-- 后台script标签 -->
+    <?php if ($this->options->footerScript): ?>
+        <?php echo $this->options->footerScript; ?>
+    <?php endif; ?>
+    <link href="<?php echo $this->options->themeUrl('css/gotop.css'); ?>" rel="stylesheet">
 
 </body>
 </html>

@@ -99,47 +99,18 @@ textarea {
 	margin-right: 0
 }
 
-@font-face {
-	font-family: FontAwesome;
-	src: url(https://note.moxiify.cn/usr/themes/PureSuck/fonts/fontawesome-webfont.woff) format('woff');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-
 .icon-ui:before {
-	font-family: FontAwesome;
-	width: 1em;
-	font-style: normal;
-	font-weight: 400;
-	text-decoration: inherit;
-	text-align: center;
-	font-variant: normal;
-	text-transform: none;
 	vertical-align: bottom;
-	line-height: inherit;
 	font-size: 20px;
-	margin: 6px
-}
-
-.icon-ui-post:before {
-	content: "\e609"
-}
-
-.icon-ui-mail:before {
-	content: "\e60b"
-}
-
-.icon-ui-load:before {
-	content: "\e602"
+	margin: 4px
 }
 
 .icon-ui-comment:before {
-	content: "\f0e5"
+	content: "\E802"
 }
 
 .icon-ui-date:before {
-	content: "\f073"
+	content: "\E80D"
 }
 
 a,

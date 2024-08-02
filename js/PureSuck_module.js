@@ -45,19 +45,19 @@ document.addEventListener('DOMContentLoaded', function() {
             let iconClass;
             switch(type) {
                 case 'green':
-                    iconClass = 'fa fa-check-circle';
+                    iconClass = 'icon-ok-circle';
                     break;
                 case 'blue':
-                    iconClass = 'fa fa-info-circle';
+                    iconClass = 'icon-info-circled';
                     break;
                 case 'yellow':
-                    iconClass = 'fa fa-exclamation-circle';
+                    iconClass = 'icon-attention';
                     break;
                 case 'red':
-                    iconClass = 'fa fa-times-circle';
+                    iconClass = 'icon-cancel-circle';
                     break;
                 default:
-                    iconClass = 'fa fa-info-circle';
+                    iconClass = 'icon-info-circled';
             }
 
             let newContent = `

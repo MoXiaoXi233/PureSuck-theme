@@ -66,6 +66,7 @@
     </span>
     <div class="nav nav--pager">
         <?php $this->pageLink('上一页', 'prev'); ?>
+        <i class="icon-record-outline"></i>
         <?php $this->pageLink('下一页', 'next'); ?>
     </div>
 </nav>

@@ -66,9 +66,6 @@
                     
                 </div>
             </section>
-        ?>
-            </div>
-            </section>
 
             <footer class="post-item post-footer">
                 <div class="wrapper post-wrapper">

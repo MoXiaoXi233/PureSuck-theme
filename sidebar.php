@@ -6,7 +6,7 @@
     <?php if (!empty($toc)): ?>
         <div class="toc-section">
             <header class="section-header">
-                <span class="icon">🌳</span>
+                <span class="icon-article"></span>
                 <span class="title">TOC</span>
             </header>
             <section class="section-body">
@@ -20,7 +20,7 @@
 <?php if ($this->options->showCategory == '1'): ?>
     <div class="category-section">
         <header class="section-header">
-            <span class="icon">#</span>
+            <span class="icon-emo-wink"></span>
             <span class="title">CATEGORIES</span>
         </header>
         <section class="section-body">
@@ -42,7 +42,7 @@
 <?php if ($this->options->showTag == '1'): ?>
 <div class="tag-section">
     <header class="section-header">
-        <span class="icon">🏷️</span>
+        <span class="icon-hashtag"></span>
         <span class="title">TAGS</span>
     </header>
     <section class="section-body">

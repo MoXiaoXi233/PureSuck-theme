@@ -18,9 +18,9 @@
     </title>
     <!-- CSS引入 -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/font-awesome.min.css'); ?>">
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_module.css'); ?>">    
-    
+    <link defer rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_module.css'); ?>">    
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">    
+
     <!-- AOS引入 -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/aos.css'); ?>">
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
@@ -28,7 +28,6 @@
     <!-- 网站icon图标 -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.png'; ?>" type="image/x-icon">
 </head>
-
 <body>
     <div class="wrapper">
         <header role="header" class="header" data-js="header">

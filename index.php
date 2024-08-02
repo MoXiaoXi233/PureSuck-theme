@@ -3,7 +3,7 @@
  * A cute theme for MoXiify
  * 
  * @package PureSuck
- * @version 1.0.8
+ * @version 1.0.9
  * @link https://www.moxiify.cn
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -78,7 +78,7 @@ $this->need('header.php');
     </span>
     <div class="nav nav--pager">
         <?php $this->pageLink('上一页'); ?>
-        <i class="fa fa-circle-thin"></i>
+        <i class="icon-record-outline"></i>
         <?php $this->pageLink('下一页', 'next'); ?>
     </div>
 </nav>
