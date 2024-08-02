@@ -2,15 +2,18 @@
 
 <!-- TOC -->
 <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
-    <div class="toc-section">
-        <header class="section-header">
-            <span class="icon">🌳</span>
-            <span class="title">TOC</span>
-        </header>
-        <section class="section-body">
-        <?php outputDirectoryTree($this->content); ?>
-        </section>
-    </div>
+    <?php $toc = getJJDirectoryTree($this->content); ?>
+    <?php if (!empty($toc)): ?>
+        <div class="toc-section">
+            <header class="section-header">
+                <span class="icon">🌳</span>
+                <span class="title">TOC</span>
+            </header>
+            <section class="section-body">
+                <?php echo $toc; ?>
+            </section>
+        </div>
+    <?php endif; ?>
 <?php endif; ?>
 
 <!-- 分类模块 -->

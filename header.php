@@ -7,7 +7,6 @@
     <meta name="renderer" content="webkit">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="<?= empty($this->fields->description) || !$this->is('single') ? ($this->getDescription() ?: '') : $this->fields->description; ?>" />
-    <meta name="keywords" content="<?= empty($this->fields->keyword) || !$this->is('single') ? $this->keywords() : $this->fields->keyword; ?>" />
     <title>
         <?php $this->archiveTitle([
             'category'  =>  _t('分类 %s 下的文章'),
@@ -26,16 +25,12 @@
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.png'; ?>" type="image/x-icon">
 </head>
 
-<!-- AOS -->
-<link rel="stylesheet" href="<?= $this->options->themeUrl('css/aos.css'); ?>">
-<script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
-
 <body>
     <div class="wrapper">
         <header role="header" class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
                 <span class="el-avatar el-avatar--circle">
-                    <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像">
+                    <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="512" height="512">
                 </span>
 
                 <div class="header-title">

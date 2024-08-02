@@ -4,8 +4,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 function themeFields($layout) {
     $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('描述'), _t('简单一句话描述'));$description->input->setAttribute('class', 'text w-100');
     $layout->addItem($description);
-    $keyword = new Typecho_Widget_Helper_Form_Element_Text('keyword', NULL, NULL, _t('文章关键词'), _t('多个关键词用英文下逗号隔开'));$keyword->input->setAttribute('class', 'text w-100');
-    $layout->addItem($keyword);
 }
 
 function themeConfig($form)
@@ -81,6 +79,12 @@ function themeConfig($form)
     );
     $form->addInput($footerScript);
 
+    // TOC 模块显示选项
+    $showTOC = new Typecho_Widget_Helper_Form_Element_Radio('showTOC', 
+        array('1' => _t('显示'), '0' => _t('隐藏')), 
+        '1', _t('是否显示目录树'));
+    $form->addInput($showTOC);
+
     // 分类模块显示选项
     $showCategory = new Typecho_Widget_Helper_Form_Element_Radio('showCategory', 
         array('1' => _t('显示'), '0' => _t('隐藏')), 
@@ -93,11 +97,6 @@ function themeConfig($form)
         '1', _t('是否显示标签模块'));
     $form->addInput($showTag);
 
-    // TOC 模块显示选项
-    $showTOC = new Typecho_Widget_Helper_Form_Element_Radio('showTOC', 
-        array('1' => _t('显示'), '0' => _t('隐藏')), 
-        '1', _t('是否显示目录树'));
-    $form->addInput($showTOC);
 }
 
 //文章TOC树函数
@@ -151,10 +150,9 @@ function generateTreeList($list, $depth = 6) {
     return generateTreeList($list, $depth - 1);
 }
 
-// 生成目录树的HTML模板
 function generateTreeTemplate($arr, $depth, $currentDepth = 1, $isChildren = false) {
     if (count($arr) <= 0) {
-        return '<div>暂无目录</div>';
+        return ''; // 没有目录时返回空字符串
     }
     if ($currentDepth > $depth) {
         return '';
@@ -184,11 +182,13 @@ function addHeadingIds($content) {
     return $content;
 }
 
-// 生成并输出目录树
 function getJJDirectoryTree($content, $maxDirectory = 3) {
     $headings = extractHeadings($content);
+    if (empty($headings)) {
+        return ''; // 没有标题时返回空字符串
+    }
     $treeList = generateTreeList($headings);
-    echo generateTreeTemplate($treeList, $maxDirectory);
+    return generateTreeTemplate($treeList, $maxDirectory);
 }
 
 // 在Typecho的适当钩子中调用这些函数
@@ -199,10 +199,11 @@ Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = function($conte
     return addHeadingIds($content);
 };
 
-// 在模板文件中调用 outputDirectoryTree 函数
 function outputDirectoryTree($content) {
-    getJJDirectoryTree($content);
+    echo getJJDirectoryTree($content);
 }
+
+
 
 ?>
 

@@ -23,7 +23,7 @@
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
             <figure class="post-media <?= $this->is('page') ? 'single' : ''; ?>">
-                <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图">
+                <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy" width="2000" height="800">
             </figure>
             <?php endif; ?>
 
@@ -49,7 +49,7 @@
 
                         // 添加 loading="lazy" 属性
                         if (strpos($imgTag, 'loading=') === false) {
-                            $imgTag = str_replace('<img', '<img loading="lazy"', $imgTag);
+                        $imgTag = str_replace('<img', '<img loading="lazy" width="3000" height="2000"', $imgTag);
                         }
 
                         // 添加 data-zoomable 属性
@@ -62,7 +62,12 @@
 
                     // 输出修改后的内容
                     echo $modifiedContent;
-                    ?>                </div>
+                    ?>
+                    
+                </div>
+            </section>
+        ?>
+            </div>
             </section>
 
             <footer class="post-item post-footer">

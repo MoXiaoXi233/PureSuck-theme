@@ -1,5 +1,4 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__'))
-    exit; ?>
+<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
 <?php $this->need('header.php'); ?>
 
 <div class="wrapper">
@@ -8,14 +7,12 @@
     $fields = unserialize($this->___fields());
     $hasImg = isset($fields['img']);
     ?>
-    <article
-        class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+    <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
         <div class="post-inner">
             <header class="post-item post-header <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
-                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>"
-                            alt="作者头像" class="avatar-item avatar-img">
+                    <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
                         <span class="avatar-item">
                             <?php $this->author(); ?>
                         </span>
@@ -26,7 +23,7 @@
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy">
+                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy" alt="头图" width="2000" height="800">
                 </figure>
             <?php endif; ?>
 
@@ -52,7 +49,7 @@
 
                         // 添加 loading="lazy" 属性
                         if (strpos($imgTag, 'loading=') === false) {
-                            $imgTag = str_replace('<img', '<img loading="lazy"', $imgTag);
+                        $imgTag = str_replace('<img', '<img loading="lazy" width="3000" height="2000"', $imgTag);
                         }
 
                         // 添加 data-zoomable 属性

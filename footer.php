@@ -63,135 +63,103 @@
 <!-- TOC目录JS-->
 <?php if ($this->is('post') || $this->is('page')): ?>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-            const links = document.querySelectorAll('.directory-tree a');
-            const directoryTree = document.querySelector('.directory-tree');
-            const offset = window.innerHeight * 0.1; // 偏移量，视口高度的10%
-            let lastActiveIndex = -1;
+document.addEventListener('DOMContentLoaded', () => {
+    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const links = document.querySelectorAll('.directory-tree a');
+    const directoryTree = document.querySelector('.directory-tree');
+    let activeIndex = -1;
+    let isScrolling = false;
 
-            // 平滑滚动到目标元素
-            function smoothScrollTo(element) {
-                const targetPosition = element.getBoundingClientRect().top + window.scrollY;
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+    // 平滑滚动到目标元素，并在滚动结束后调用回调函数
+    const smoothScrollTo = (element, callback) => {
+        isScrolling = true;
+        const scrollOptions = {
+            behavior: 'smooth',
+            block: 'start'
+        };
+        element.scrollIntoView(scrollOptions);
+
+        // 监听滚动结束事件
+        const onScrollEnd = () => {
+            if (isScrolling) {
+                isScrolling = false;
+                window.removeEventListener('scroll', onScrollEnd);
+                if (callback) callback();
             }
+        };
 
-            // 更新活动链接
-            function updateActiveLink() {
-                let lastActiveLink = null;
-                let minDistance = Infinity;
-                let activeIndex = -1;
+        // 延迟检测滚动结束
+        setTimeout(onScrollEnd, 800);//测试低于800有可能出现检测错误qwq
+    };
 
-                headings.forEach((heading, index) => {
-                    const rect = heading.getBoundingClientRect();
-                    const distance = Math.abs(rect.top - offset);
+    // 更新活动链接
+    const updateActiveLink = (newIndex) => {
+        if (newIndex !== activeIndex) {
+            links.forEach(link => link.classList.remove('active'));
+            if (newIndex >= 0 && newIndex < links.length) {
+                links[newIndex].classList.add('active');
+                activeIndex = newIndex;
 
-                    // 检查标题是否在合理的距离内
-                    if (rect.top <= offset && rect.bottom > offset) {
-                        minDistance = distance;
-                        lastActiveLink = links[index];
-                        activeIndex = index;
-                    } else if (rect.top > offset && rect.top < window.innerHeight) {
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            lastActiveLink = links[index];
-                            activeIndex = index;
-                        }
-                    }
-                });
+                // 确保选中的链接在视口内
+                const linkRect = links[newIndex].getBoundingClientRect();
+                const treeRect = directoryTree.getBoundingClientRect();
+                const scrollTop = directoryTree.scrollTop;
+                const linkTop = linkRect.top - treeRect.top + scrollTop;
 
-                // 避免频繁切换
-                if (activeIndex !== lastActiveIndex) {
-                    links.forEach(link => link.classList.remove('active'));
-
-                    if (lastActiveLink) {
-                        lastActiveLink.classList.add('active');
-                        lastActiveIndex = activeIndex;
-
-                        // 确保选中的链接在视口内
-                        const linkRect = lastActiveLink.getBoundingClientRect();
-                        const treeRect = directoryTree.getBoundingClientRect();
-                        const scrollTop = directoryTree.scrollTop;
-                        const linkTop = linkRect.top - treeRect.top + scrollTop;
-
-                        if (linkTop < scrollTop || linkTop > scrollTop + directoryTree.clientHeight) {
-                            directoryTree.scrollTo({
-                                top: linkTop - directoryTree.clientHeight / 2,
-                                behavior: 'smooth'
-                            });
-                        }
-                    } else {
-                        // 如果没有找到活动链接，默认设置为上一个标题的下一个
-                        if (lastActiveIndex >= 0 && lastActiveIndex < links.length - 1) {
-                            links[lastActiveIndex + 1].classList.add('active');
-                            lastActiveIndex++;
-                        } else {
-                            // 如果没有找到活动链接，默认显示第一个或最后一个
-                            if (window.scrollY === 0) {
-                                links[0].classList.add('active'); // 页面顶部时显示第一个
-                                lastActiveIndex = 0;
-                            } else {
-                                links[links.length - 1].classList.add('active'); // 页面底部时显示最后一个
-                                lastActiveIndex = links.length - 1;
-                            }
-                        }
-                    }
+                if (linkTop < scrollTop || linkTop > scrollTop + directoryTree.clientHeight) {
+                    directoryTree.scrollTo({
+                        top: linkTop - directoryTree.clientHeight / 2,
+                        behavior: 'smooth'
+                    });
                 }
             }
+        }
+    };
 
-            // 监听链接点击事件
-            links.forEach(link => {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const targetId = this.getAttribute('href').substring(1);
-                    const targetElement = document.getElementById(targetId);
-                    if (targetElement) {
-                        smoothScrollTo(targetElement);
-                    }
+    // 监听链接点击事件
+    links.forEach((link, index) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                smoothScrollTo(targetElement, () => {
+                    updateActiveLink(index);
                 });
-            });
-
-            window.addEventListener('scroll', () => {
-                requestAnimationFrame(updateActiveLink);
-            });
-            updateActiveLink(); // 初始化时调用一次
+            }
         });
-    </script>
+    });
+
+    // 使用Intersection Observer API检测标题
+    const observer = new IntersectionObserver((entries) => {
+        if (isScrolling) return; // 如果正在滚动，则不更新活动链接
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const index = Array.from(headings).indexOf(entry.target);
+                updateActiveLink(index);
+            }
+        });
+    }, {
+        root: null,
+        rootMargin: '0px 0px -80% 0px', // 提前触发，避免滚动到最底部时才触发
+        threshold: 0.1 // 目标元素进入视口10%时触发
+    });
+
+    // 观察所有标题
+    headings.forEach(heading => observer.observe(heading));
+
+    // 初始化时调用一次
+    updateActiveLink();
+});
+</script>
 
 
 <?php endif; ?>
 
-<!-- pjax -->
-<script src="<?php $this->options->themeUrl('/js/pjax.js'); ?>"></script>
-<script>
-    var pjax = new Pjax({
-      selectors: [
-        "title",
-        "meta[name=description]",
-        ".the-header",
-        ".the-content",
-        ".the-sidebar",
-        ".wrapper"
-      ]
-    });
-  </script>
+
 </body>
 </html>
 
-<script src="<?php $this->options->themeUrl('/js/nprogress.min.js'); ?>"></script>
-<link rel="stylesheet" href="<?= $this->options->themeUrl('css/nprogress.css'); ?>">
-<script>
-document.addEventListener('pjax:send', function (){
-    NProgress.start();
-});
- 
-document.addEventListener('pjax:complete', function (){
-    NProgress.done(); ;
-});
-</script>
 
 <!-- Medium Zoom -->
 <script src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
@@ -202,10 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <!-- AOS -->
+<link rel="stylesheet" href="<?= $this->options->themeUrl('css/aos.css'); ?>">
+<script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
 <script>
   AOS.init();
 </script>
-
 
 </body>
 </html>

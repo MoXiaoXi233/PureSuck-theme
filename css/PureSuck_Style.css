@@ -103,7 +103,8 @@ textarea {
 	font-family: FontAwesome;
 	src: url(https://note.moxiify.cn/usr/themes/PureSuck/fonts/fontawesome-webfont.woff) format('woff');
 	font-weight: 400;
-	font-style: normal
+	font-style: normal;
+	font-display: swap;
 }
 
 .icon-ui:before {
@@ -2156,6 +2157,11 @@ textarea.ci {
 }
 
 
+	.medium-zoom-overlay,
+	.medium-zoom-image--opened {
+	  z-index: 999;
+	}
+
 
 
 
@@ -2218,7 +2224,4 @@ textarea.ci {
 		transform: translateX(5px); /* 向右移动一点点 */
 	}
 
-	.medium-zoom-overlay,
-	.medium-zoom-image--opened {
-	  z-index: 999;
-	}
+
