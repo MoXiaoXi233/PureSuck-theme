@@ -170,8 +170,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <!-- AOS -->
-<link rel="stylesheet" href="<?= $this->options->themeUrl('css/aos.css'); ?>">
-<script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
 <script>
   AOS.init();
 </script>
