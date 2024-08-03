@@ -122,11 +122,14 @@ $this->need('header.php');
     </article>
 </div>
 
-<div class="nav main-lastinfo">
-    <span class="nav-item-alt">
-        Theme PureSuck
-    </span>
-</div>
+<nav class="nav main-pager" role="navigation" aria-label="Pagination" data-js="pager">
+    <div class="nav main-lastinfo">
+        <span class="nav-item-alt">
+            Theme PureSuck
+        </span>
+    </div>
+</nav>
+
 
 <?php $this->need('sidebar.php'); ?>
 <?php $this->need('footer.php'); ?>
