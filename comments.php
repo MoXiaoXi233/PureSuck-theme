@@ -23,6 +23,7 @@ function tg_c(id, nc) {
         }
     }
 }
+
 </script>
 
 <?php 
@@ -45,7 +46,7 @@ function threadedComments($comments, $options) {
         <div class="cp">
             <?php $comments->content(); ?>
             <div class="cm">
-			<span class="ca"><?php echo $author; ?></span>
+                <span class="ca"><?php echo $author; ?></span>
                 <?php if ($isAdmin): ?>
                 <span class="badge">博主</span>
                 <?php endif; ?>
@@ -71,7 +72,9 @@ function threadedComments($comments, $options) {
         <?php $this->commentsNum(_t('暂无评论'), _t('仅有 1 条评论'), _t('已有 %d 条评论')); ?>
     </h4>
     <?php $comments->listComments(); ?>
-    <?php $comments->pageNav('&laquo;', '&raquo;'); ?>
+    <div class="page-navigator">
+        <?php $comments->pageNav('上一页', '下一页', 10, '...', array('wrapTag' => 'ul', 'wrapClass' => 'pagination', 'itemTag' => 'li', 'currentClass' => 'active')); ?>
+    </div>
     <?php endif; ?>
     <div id="<?php $this->respondId(); ?>" class="respond">
         <div class="ccr">
@@ -102,8 +105,8 @@ function threadedComments($comments, $options) {
                     </div>
                 </div>
                 <?php endif; ?>
-                                    <a href="javascript: void(0);"class="btn btn-sm btn-primary OwO-logo" rel="external nofollow"><i class="mdi mdi-emoticon-wink-outline"></i></a>
-<div class="OwO"></div>
+                <a href="javascript: void(0);"class="btn btn-sm btn-primary OwO-logo" rel="external nofollow"><i class="mdi mdi-emoticon-wink-outline"></i></a>
+                <div class="OwO"></div>
                 <div class="tbox">
                     <textarea name="text" id="textarea" class="ci OwO-textarea" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text',false); ?></textarea>
                 </div>

@@ -1797,8 +1797,8 @@ body {
 .badge{
 	padding: .1rem .2rem;
     border-radius: 2px;
-	color:var(--themehovercolor);
-    background: #eee;
+	color: #ffffff;
+    background: var(--themecolor);
     font-size: .766rem;
 }
 

@@ -121,10 +121,10 @@ function generateDynamicCSS() {
     
     // 定义颜色映射数组
     $colorMap = [
-        'pink' => ['theme' => '#ea868f', 'hover' => '#d1606e'],  // 粉色
-        'green' => ['theme' => '#48c774', 'hover' => '#3aa65b'], // 绿色
-        'blue' => ['theme' => '#3273dc', 'hover' => '#275bb5'],  // 蓝色
-        'yellow' => ['theme' => '#feb272', 'hover' => '#e89b5a'] // 黄色
+        'pink' => ['theme' => '#ea868f', 'hover' => '#DB2777'],  // 粉色
+        'green' => ['theme' => '#48c774', 'hover' => '#15803d'], // 绿色
+        'blue' => ['theme' => '#3273dc', 'hover' => '#3B82F6'],  // 蓝色
+        'yellow' => ['theme' => '#feb272', 'hover' => '#B45309'] // 黄色
     ];
 
     // 设置默认颜色
@@ -244,8 +244,6 @@ Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = function($conte
 function outputDirectoryTree($content) {
     echo getJJDirectoryTree($content);
 }
-
-
 
 ?>
 

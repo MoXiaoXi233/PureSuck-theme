@@ -158,8 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <?php endif; ?>
 
 
-</body>
-</html>
 
 
 <!-- Medium Zoom -->
@@ -175,5 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
         <?php echo $this->options->footerScript; ?>
     <?php endif; ?>
 
+    
 </body>
 </html>
