@@ -5,7 +5,7 @@
     <meta charset="<?= $this->options->charset(); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="renderer" content="webkit">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="<?= empty($this->fields->description) || !$this->is('single') ? ($this->getDescription() ?: '') : $this->fields->description; ?>" />
     <title>
         <?php $this->archiveTitle([
@@ -28,7 +28,7 @@
 </head>
 <body>
     <div class="wrapper">
-        <header role="header" class="header" data-js="header">
+        <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
                 <span class="el-avatar el-avatar--circle">
                     <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="512" height="512">
@@ -52,7 +52,7 @@
                     <a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #5c6a70;">Theme PureSuck</a>
                 </div>
 				<br>
-                <nav class="nav header-item header-nav" role="navigation">
+                <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
                         <a href="<?= $this->options->siteUrl(); ?>" title="首页">
                             <span itemprop="name">首页</span>
@@ -73,4 +73,4 @@
             </div>
         </header>
 
-        <main role="main" class="main">
+        <main class="main">

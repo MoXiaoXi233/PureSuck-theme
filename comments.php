@@ -23,7 +23,6 @@ function tg_c(id, nc) {
         }
     }
 }
-
 </script>
 
 <?php 
@@ -68,9 +67,9 @@ function threadedComments($comments, $options) {
 <div id="comments" class="cf">
     <?php $this->comments()->to($comments); ?>
     <?php if ($comments->have()): ?>
-    <h4>
+    <div class="comment-title">
         <?php $this->commentsNum(_t('暂无评论'), _t('仅有 1 条评论'), _t('已有 %d 条评论')); ?>
-    </h4>
+    </div>
     <?php $comments->listComments(); ?>
     <div class="page-navigator">
         <?php $comments->pageNav('上一页', '下一页', 10, '...', array('wrapTag' => 'ul', 'wrapClass' => 'pagination', 'itemTag' => 'li', 'currentClass' => 'active')); ?>
@@ -80,8 +79,8 @@ function threadedComments($comments, $options) {
         <div class="ccr">
             <?php $comments->cancelReply(); ?>
         </div>
-        <h4 class="response">发表新评论</h4>
-        <form method="post" action="<?php $this->commentUrl() ?>" id="cf" role="form">
+        <div class="response comment-title">发表新评论</div>
+        <form method="post" action="<?php $this->commentUrl() ?>" id="cf">
             <?php if($this->user->hasLogin()): ?>
             <span>亲爱的<a href="<?php $this->options->profileUrl(); ?>">
                     <?php $this->user->screenName(); ?>
@@ -105,7 +104,6 @@ function threadedComments($comments, $options) {
                     </div>
                 </div>
                 <?php endif; ?>
-                <a href="javascript: void(0);"class="btn btn-sm btn-primary OwO-logo" rel="external nofollow"><i class="mdi mdi-emoticon-wink-outline"></i></a>
                 <div class="OwO"></div>
                 <div class="tbox">
                     <textarea name="text" id="textarea" class="ci OwO-textarea" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text',false); ?></textarea>
@@ -119,13 +117,24 @@ function threadedComments($comments, $options) {
 <link rel="stylesheet" href="<?= $this->options->themeUrl('css/OwO.min.css'); ?>">
 <script src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
 <script>
-    var OwO_demo = new OwO({
-        logo: 'OωO表情',
-        container: document.getElementsByClassName('OwO')[0],
-        target: document.getElementsByClassName('OwO-textarea')[0],
-        api: '/usr/themes/PureSuck/js/OwO.json',
-        position: 'down',
-        width: '100%',
-        maxHeight: '260px'
+    document.addEventListener('DOMContentLoaded', function () {
+        var OwO_demo = new OwO({
+            logo: 'OωO表情',
+            container: document.getElementsByClassName('OwO')[0],
+            target: document.getElementsByClassName('OwO-textarea')[0],
+            api: '/usr/themes/PureSuck/js/OwO.json',
+            position: 'down',
+            width: '100%',
+            maxHeight: '260px'
+        });
+
+        // Check if the owoButton element exists before adding the event listener
+        var owoButton = document.getElementById('owo-button');
+        if (owoButton) {
+            owoButton.addEventListener('click', function (event) {
+                // 打开 OwO 表情选择器
+                OwO_demo.toggle();
+            });
+        }
     });
 </script>

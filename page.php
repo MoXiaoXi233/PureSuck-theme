@@ -34,6 +34,19 @@
                             <?php $this->title() ?>
                         </a>
                     </h2>
+                    <div class="wrapper post-wrapper">
+                    <div class="meta post-meta">
+                        <a itemprop="datePublished" href="<?php $this->permalink() ?>"
+                            class="icon-ui icon-ui-date meta-item meta-date">
+                            <span class="meta-count">
+                                <?php $this->date(); ?>
+                            </span>
+                        </a>
+                        <a href="<?php $this->permalink() ?>#comments"
+                            class="icon-ui icon-ui-comment meta-item meta-comment">
+                            <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
+                        </a>
+                    </div>
                     <?php
                     // 获取内容
                     ob_start();
@@ -66,23 +79,6 @@
                     
                 </div>
             </section>
-
-            <footer class="post-item post-footer">
-                <div class="wrapper post-wrapper">
-                    <div class="meta post-meta">
-                        <a itemprop="datePublished" href="<?php $this->permalink() ?>"
-                            class="icon-ui icon-ui-date meta-item meta-date">
-                            <span class="meta-count">
-                                <?php $this->date(); ?>
-                            </span>
-                        </a>
-                        <a href="<?php $this->permalink() ?>#comments"
-                            class="icon-ui icon-ui-comment meta-item meta-comment">
-                            <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
-                        </a>
-                    </div>
-                </div>
-            </footer>
 
             <section class="post-item post-comments">
                 <div class="wrapper post-wrapper">

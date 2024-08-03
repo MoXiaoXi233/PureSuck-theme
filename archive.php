@@ -60,7 +60,7 @@
 
 </div>
 
-<nav class="nav main-pager" role="pagination" data-js="pager">
+<nav class="nav main-pager" data-js="pager">
     <span class="nav-item-alt">
         第 <?php if($this->_currentPage>1) echo $this->_currentPage; else echo 1;?> 页 / 共 <?php echo ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
     </span>

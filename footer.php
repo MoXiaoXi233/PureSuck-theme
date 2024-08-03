@@ -10,41 +10,42 @@
 
     <!-- 回到顶端 -->
 <body>
-    <div class="go-top dn" id="go-top" style="display: none;">
-        <a href="javascript:void(0);" class="go icon-up-open"></a>
-    </div>
+<div class="go-top dn" id="go-top" style="display: none;">
+    <a href="#" class="go icon-up-open" aria-label="返回顶部"></a>
+</div>
 
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            var goTopBtn = document.getElementById('go-top');
-            var goTopAnchor = document.querySelector('#go-top .go');
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        var goTopBtn = document.getElementById('go-top');
+        var goTopAnchor = document.querySelector('#go-top .go');
 
-            window.addEventListener('scroll', function() {
-                var st = document.documentElement.scrollTop || document.body.scrollTop;
-                if (st > 0) {
-                    if (document.getElementById('main-container')) {
-                        var w = window.innerWidth;
-                        var mw = document.getElementById('main-container').offsetWidth;
-                        if ((w - mw) / 2 > 70) {
-                            goTopBtn.style.left = (w - mw) / 2 + mw + 20 + 'px';
-                        } else {
-                            goTopBtn.style.left = 'auto';
-                        }
+        window.addEventListener('scroll', function() {
+            var st = document.documentElement.scrollTop || document.body.scrollTop;
+            if (st > 0) {
+                if (document.getElementById('main-container')) {
+                    var w = window.innerWidth;
+                    var mw = document.getElementById('main-container').offsetWidth;
+                    if ((w - mw) / 2 > 70) {
+                        goTopBtn.style.left = (w - mw) / 2 + mw + 20 + 'px';
+                    } else {
+                        goTopBtn.style.left = 'auto';
                     }
-                    goTopBtn.style.display = 'block';
-                    goTopBtn.classList.remove('dn');
-                } else {
-                    goTopBtn.style.display = 'none';
-                    goTopBtn.classList.add('dn');
                 }
-            });
-
-            goTopAnchor.addEventListener('click', function() {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-
+                goTopBtn.style.display = 'block';
+                goTopBtn.classList.remove('dn');
+            } else {
+                goTopBtn.style.display = 'none';
+                goTopBtn.classList.add('dn');
+            }
         });
-    </script>
+
+        goTopAnchor.addEventListener('click', function(event) {
+            event.preventDefault(); // 阻止默认行为
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+</script>
+
 
     <!-- 代码高亮 -->
     <?php $this->header('wlw=&xmlrpc=&rss2=&atom=&rss1=&template=&pingback=&generator'); ?>

@@ -25,12 +25,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             let newContent = `
-            <div data-aos="fade-up" data-aos-anchor-placement="center-bottom">
                 <div role="alert" class="alert-box ${type}">
                     <i class="${iconClass}"></i>
                     <p class="text-xs font-semibold">${content}</p>
                 </div>
-            </div>
         `;
 
             element.outerHTML = newContent;

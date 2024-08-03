@@ -83,6 +83,20 @@ blockquote p:last-child {
 	margin-bottom: 0
 }
 
+/* 美化 hr 样式 */
+hr {
+    position: relative;
+    width: calc(100% - 4px);
+    border: 1px dashed var(--themecolor);
+    background: #fff;
+}
+ 
+hr {
+    box-sizing: content-box;
+    height: 0;
+    overflow: visible;
+}
+ 
 button,
 input,
 textarea {
@@ -226,6 +240,7 @@ h3 {
 	line-height: 34px
 }
 
+.comment-title,
 .h4,
 .h5,
 .h6,
@@ -292,6 +307,7 @@ small {
 		line-height: 36px
 	}
 
+	.comment-title,
 	.h4,
 	h4 {
 		font-size: 1.375rem;
@@ -569,6 +585,7 @@ ul {
 .nav-item {
 	display: inline-block;
 	margin-right: 8px;
+	margin: 3px;
 	margin-left: 8px
 }
 
@@ -1496,6 +1513,7 @@ pre {
 }
 
 .post--cover .post-body .post-wrapper>p:first-child,
+.comment-title,
 h1,
 h2,
 h3,
@@ -1506,6 +1524,11 @@ h6 {
 	font-weight: 400;
 	color: #333
 }
+
+.comment-title{
+	font-weight: 800;
+}
+
 
 body {
 	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
@@ -1545,7 +1568,7 @@ strong {
 }
 
 .meta {
-	color: #c2c2c2;
+	color: #767676;
 	text-transform: uppercase;
 	letter-spacing: 2px
 }
@@ -1602,11 +1625,11 @@ strong {
 
 .nav-item-alt,
 .nav-item-alt:hover {
-	color: #a5b1b6
+	color: #6F6F6F
 }
 
 .nav--pager a {
-	color: #5c6a70
+	color: #6F6F6F
 }
 
 body {
@@ -1615,7 +1638,7 @@ body {
 
 .header-about,
 .header-form {
-	color: #5c6a70
+	color: #6F6F6F
 }
 
 .header-title {
@@ -2003,9 +2026,6 @@ textarea.ci {
 .medium-zoom-image--opened {
 	z-index: 999;
 }
-
-
-
 
 /*TOC*/
 .directory-tree {
