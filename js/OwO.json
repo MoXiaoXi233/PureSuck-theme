@@ -2,118 +2,118 @@
     "颜文字": {
         "type": "emoticon",
         "container": [
-                {
-                    "icon": "OωO",
-                    "text": "Author: DIYgod"
-                },
-                {
-                    "icon": "|´・ω・)ノ",
-                    "text": "Hi"
-                },
-                {
-                    "icon": "ヾ(≧∇≦*)ゝ",
-                    "text": "开心"
-                },
-                {
-                    "icon": "(☆ω☆)",
-                    "text": "星星眼"
-                },
-                {
-                    "icon": "（╯‵□′）╯︵┴─┴",
-                    "text": "掀桌"
-                },
-                {
-                    "icon": "￣﹃￣",
-                    "text": "流口水"
-                },
-                {
-                    "icon": "(/ω＼)",
-                    "text": "捂脸"
-                },
-                {
-                    "icon": "∠( ᐛ 」∠)＿",
-                    "text": "给跪"
-                },
-                {
-                    "icon": "(๑•̀ㅁ•́ฅ)",
-                    "text": "Hi"
-                },
-                {
-                    "icon": "→_→",
-                    "text": "斜眼"
-                },
-                {
-                    "icon": "୧(๑•̀⌄•́๑)૭",
-                    "text": "加油"
-                },
-                {
-                    "icon": "٩(ˊᗜˋ*)و",
-                    "text": "有木有WiFi"
-                },
-                {
-                    "icon": "(ノ°ο°)ノ",
-                    "text": "前方高能预警"
-                },
-                {
-                    "icon": "(´இ皿இ｀)",
-                    "text": "我从未见过如此厚颜无耻之人"
-                },
-                {
-                    "icon": "⌇●﹏●⌇",
-                    "text": "吓死宝宝惹"
-                },
-                {
-                    "icon": "(ฅ´ω`ฅ)",
-                    "text": "已阅留爪"
-                },
-                {
-                    "icon": "(╯°A°)╯︵○○○",
-                    "text": "去吧大师球"
-                },
-                {
-                    "icon": "φ(￣∇￣o)",
-                    "text": "太萌惹"
-                },
-                {
-                    "icon": "ヾ(´･ ･｀｡)ノ\"",
-                    "text": "咦咦咦"
-                },
-                {
-                    "icon": "( ง ᵒ̌皿ᵒ̌)ง⁼³₌₃",
-                    "text": "气呼呼"
-                },
-                {
-                    "icon": "(ó﹏ò｡)",
-                    "text": "我受到了惊吓"
-                },
-                {
-                    "icon": "Σ(っ °Д °;)っ",
-                    "text": "什么鬼"
-                },
-                {
-                    "icon": "( ,,´･ω･)ﾉ\"(´っω･｀｡)",
-                    "text": "摸摸头"
-                },
-                {
-                    "icon": "╮(╯▽╰)╭ ",
-                    "text": "无奈"
-                },
-                {
-                    "icon": "o(*////▽////*)q ",
-                    "text": "脸红"
-                },
-                {
-                    "icon": "＞﹏＜",
-                    "text": ""
-                },
-                {
-                    "icon": "( ๑´•ω•) \"(ㆆᴗㆆ)",
-                    "text": ""
-                },
-                {
-                    "icon": "(｡•ˇ‸ˇ•｡)",
-                    "text": ""
-                }
+            {
+                "icon": "OωO",
+                "text": "Author: DIYgod"
+            },
+            {
+                "icon": "|´・ω・)ノ",
+                "text": "Hi"
+            },
+            {
+                "icon": "ヾ(≧∇≦*)ゝ",
+                "text": "开心"
+            },
+            {
+                "icon": "(☆ω☆)",
+                "text": "星星眼"
+            },
+            {
+                "icon": "（╯‵□′）╯︵┴─┴",
+                "text": "掀桌"
+            },
+            {
+                "icon": "￣﹃￣",
+                "text": "流口水"
+            },
+            {
+                "icon": "(/ω＼)",
+                "text": "捂脸"
+            },
+            {
+                "icon": "∠( ᐛ 」∠)＿",
+                "text": "给跪"
+            },
+            {
+                "icon": "(๑•̀ㅁ•́ฅ)",
+                "text": "Hi"
+            },
+            {
+                "icon": "→_→",
+                "text": "斜眼"
+            },
+            {
+                "icon": "୧(๑•̀⌄•́๑)૭",
+                "text": "加油"
+            },
+            {
+                "icon": "٩(ˊᗜˋ*)و",
+                "text": "有木有WiFi"
+            },
+            {
+                "icon": "(ノ°ο°)ノ",
+                "text": "前方高能预警"
+            },
+            {
+                "icon": "(´இ皿இ｀)",
+                "text": "我从未见过如此厚颜无耻之人"
+            },
+            {
+                "icon": "⌇●﹏●⌇",
+                "text": "吓死宝宝惹"
+            },
+            {
+                "icon": "(ฅ´ω`ฅ)",
+                "text": "已阅留爪"
+            },
+            {
+                "icon": "(╯°A°)╯︵○○○",
+                "text": "去吧大师球"
+            },
+            {
+                "icon": "φ(￣∇￣o)",
+                "text": "太萌惹"
+            },
+            {
+                "icon": "ヾ(´･ ･｀｡)ノ\"",
+                "text": "咦咦咦"
+            },
+            {
+                "icon": "( ง ᵒ̌皿ᵒ̌)ง⁼³₌₃",
+                "text": "气呼呼"
+            },
+            {
+                "icon": "(ó﹏ò｡)",
+                "text": "我受到了惊吓"
+            },
+            {
+                "icon": "Σ(っ °Д °;)っ",
+                "text": "什么鬼"
+            },
+            {
+                "icon": "( ,,´･ω･)ﾉ\"(´っω･｀｡)",
+                "text": "摸摸头"
+            },
+            {
+                "icon": "╮(╯▽╰)╭ ",
+                "text": "无奈"
+            },
+            {
+                "icon": "o(*////▽////*)q ",
+                "text": "脸红"
+            },
+            {
+                "icon": "＞﹏＜",
+                "text": ""
+            },
+            {
+                "icon": "( ๑´•ω•) \"(ㆆᴗㆆ)",
+                "text": ""
+            },
+            {
+                "icon": "(｡•ˇ‸ˇ•｡)",
+                "text": ""
+            }
         ]
     },
     "Emoji": {
@@ -152,7 +152,7 @@
                 "text": ""
             },
             {
-                "icon": "😘 ",
+                "icon": "😘",
                 "text": ""
             },
             {
@@ -176,7 +176,7 @@
                 "text": ""
             },
             {
-                "icon": "😳 ",
+                "icon": "😳",
                 "text": ""
             },
             {
@@ -266,12 +266,156 @@
             {
                 "icon": "😣",
                 "text": ""
+            },
+            {
+                "icon": "⭐️",
+                "text": ""
+            },
+            {
+                "icon": "👿",
+                "text": ""
+            },
+            {
+                "icon": "😈",
+                "text": ""
+            },
+            {
+                "icon": "💬",
+                "text": ""
+            },
+            {
+                "icon": "😶",
+                "text": ""
+            },
+            {
+                "icon": "😇",
+                "text": ""
+            },
+            {
+                "icon": "👽",
+                "text": ""
+            },
+            {
+                "icon": "💛",
+                "text": ""
+            },
+            {
+                "icon": "💙",
+                "text": ""
+            },
+            {
+                "icon": "💜",
+                "text": ""
+            },
+            {
+                "icon": "❤️",
+                "text": ""
+            },
+            {
+                "icon": "💚",
+                "text": ""
+            },
+            {
+                "icon": "💔",
+                "text": ""
+            },
+            {
+                "icon": "💓",
+                "text": ""
+            },
+            {
+                "icon": "💗",
+                "text": ""
+            },
+            {
+                "icon": "💕",
+                "text": ""
+            },
+            {
+                "icon": "💞",
+                "text": ""
+            },
+            {
+                "icon": "💘",
+                "text": ""
+            },
+            {
+                "icon": "💖",
+                "text": ""
+            },
+            {
+                "icon": "✨",
+                "text": ""
+            },
+            {
+                "icon": "⭐️",
+                "text": ""
+            },
+            {
+                "icon": "🌟",
+                "text": ""
+            },
+            {
+                "icon": "💫",
+                "text": ""
+            },
+            {
+                "icon": "💥",
+                "text": ""
+            },
+            {
+                "icon": "💥",
+                "text": ""
+            },
+            {
+                "icon": "💢",
+                "text": ""
+            },
+            {
+                "icon": "❗️",
+                "text": ""
+            },
+            {
+                "icon": "❓",
+                "text": ""
+            },
+            {
+                "icon": "❕",
+                "text": ""
+            },
+            {
+                "icon": "❔",
+                "text": ""
+            },
+            {
+                "icon": "💤",
+                "text": ""
+            },
+            {
+                "icon": "💨",
+                "text": ""
+            },
+            {
+                "icon": "💦",
+                "text": ""
+            },
+            {
+                "icon": "🎶",
+                "text": ""
+            },
+            {
+                "icon": "🎵",
+                "text": ""
+            },
+            {
+                "icon": "🔥",
+                "text": ""
             }
         ]
     },
     "MoXiify": {
-    "type": "image",
-    "container": [
+        "type": "image",
+        "container": [
             {
                 "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Wink.gif\" style=\"width: 48px;\" loading=\"lazy\">",
                 "text": "Wink"
@@ -291,7 +435,7 @@
             {
                 "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Sleep.gif\" style=\"width: 48px;\" loading=\"lazy\">",
                 "text": "犯困"
-            },                                    
+            },
             {
                 "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Silent.gif\" style=\"width: 48px;\" loading=\"lazy\">",
                 "text": "无语"
@@ -477,57 +621,6 @@
                 "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/鼓掌.gif\" style=\"width: 32px;\" loading=\"lazy\">",
                 "text": "鼓掌"
             }
-        ]
-    },
-    "百度贴吧": {
-        "type": "image",
-        "container": [
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_02.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_04.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_05.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_10.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_11.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_13.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_14.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_17.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_23.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_28.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_30.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_31.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_33.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_34.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_36.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_37.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_38.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_39.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_40.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_41.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_42.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_43.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_44.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_45.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_46.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_47.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_55.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_56.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_57.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_58.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_63.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_64.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_65.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_66.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_68.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_69.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_70.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_71.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_72.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_76.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_80.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_81.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_83.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_84.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_85.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"},
-            {"icon": "<img src=\"/usr/themes/PureSuck/images/owo/tieba/tieba_emotion_86.png\" style=\"width: 32px;\" loading=\"lazy\">", "text": "text"}
         ]
     }
 }

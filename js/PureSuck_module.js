@@ -8,16 +8,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let iconClass;
             switch (type) {
-                case 'green':
+                case 'GREEN':
                     iconClass = 'icon-ok-circle';
                     break;
-                case 'blue':
+                case 'BLUE':
                     iconClass = 'icon-info-circled';
                     break;
-                case 'yellow':
+                case 'YELLOW':
                     iconClass = 'icon-attention';
                     break;
-                case 'red':
+                case 'RED':
                     iconClass = 'icon-cancel-circle';
                     break;
                 default:
@@ -48,19 +48,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let iconClass;
             switch (type) {
-                case 'green':
+                case 'GREEN':
                     iconClass = 'icon-ok-circle';
                     break;
-                case 'blue':
+                case 'BLUE':
                     iconClass = 'icon-info-circled';
                     break;
-                case 'yellow':
+                case 'YELLOW':
                     iconClass = 'icon-attention';
                     break;
-                case 'red':
+                case 'RED':
                     iconClass = 'icon-cancel-circle';
                     break;
-                case 'pink':
+                case 'PINK':
                     iconClass = 'icon-heart-circled';
                     break;
                 default:

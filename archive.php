@@ -71,5 +71,11 @@
     </div>
 </nav>
 
+<div class="nav main-lastinfo">
+    <span class="nav-item-alt">
+        Theme PureSuck
+    </span>
+</div>
+
 <?php $this->need('sidebar.php'); ?>
 <?php $this->need('footer.php'); ?>
