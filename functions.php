@@ -97,7 +97,49 @@ function themeConfig($form)
         '1', _t('是否显示标签模块'));
     $form->addInput($showTag);
 
+    // 主题配色
+    $colors = array(
+        'pink' => _t('素粉'),
+        'green' => _t('淡绿'),
+        'blue' => _t('墨蓝'),
+        'yellow' => _t('落黄')
+    );
+    $defaultColor = 'pink';  // 默认配色
+    $colorSelect = new Typecho_Widget_Helper_Form_Element_Radio('colorScheme', $colors, $defaultColor, _t('配色方案'), _t('选择一个配色方案，默认为素粉'));
+    $form->addInput($colorSelect);
 }
+
+// 主题配色
+function getColorScheme() {
+    $colorScheme = Typecho_Widget::widget('Widget_Options')->colorScheme;
+    return $colorScheme;
+}
+
+function generateDynamicCSS() {
+    // 获取颜色方案
+    $colorScheme = getColorScheme();
+    
+    // 定义颜色映射数组
+    $colorMap = [
+        'pink' => ['theme' => '#ea868f', 'hover' => '#d1606e'],  // 粉色
+        'green' => ['theme' => '#48c774', 'hover' => '#3aa65b'], // 绿色
+        'blue' => ['theme' => '#3273dc', 'hover' => '#275bb5'],  // 蓝色
+        'yellow' => ['theme' => '#feb272', 'hover' => '#e89b5a'] // 黄色
+    ];
+
+    // 设置默认颜色
+    $defaultColor = ['theme' => '#ea868f', 'hover' => '#d1606e'];
+    
+    // 根据颜色方案设置主题颜色和悬停颜色
+    $colors = isset($colorMap[$colorScheme]) ? $colorMap[$colorScheme] : $defaultColor;
+    $themeColor = $colors['theme'];
+    $themeHoverColor = $colors['hover'];
+
+    // 输出动态CSS
+    echo '<style>:root { --themecolor: ' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '; --themehovercolor: ' . htmlspecialchars($themeHoverColor, ENT_QUOTES, 'UTF-8') . '; }</style>';
+    
+}
+
 
 //文章TOC树函数
 // 提取标题

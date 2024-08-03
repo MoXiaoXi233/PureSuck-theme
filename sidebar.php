@@ -7,7 +7,7 @@
         <div class="toc-section">
             <header class="section-header">
                 <span class="icon-article"></span>
-                <span class="title">TOC</span>
+                <span class="title">文章目录</span>
             </header>
             <section class="section-body">
                 <?php echo $toc; ?>
@@ -21,7 +21,7 @@
     <div class="category-section">
         <header class="section-header">
             <span class="icon-emo-wink"></span>
-            <span class="title">CATEGORIES</span>
+            <span class="title">分类</span>
         </header>
         <section class="section-body">
             <div class="category-cloud">
@@ -43,7 +43,7 @@
 <div class="tag-section">
     <header class="section-header">
         <span class="icon-hashtag"></span>
-        <span class="title">TAGS</span>
+        <span class="title">标签</span>
     </header>
     <section class="section-body">
         <div class="tag-cloud">

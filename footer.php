@@ -1,6 +1,8 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
     <?php $this->footer(); ?>
 
+<link href="<?php echo $this->options->themeUrl('css/PureSuck_Module.css'); ?>" rel="stylesheet">
+
 <!-- AOS -->
 <script>
   AOS.init();
@@ -54,9 +56,9 @@
         });
     </script>
 
-    <!-- JS引入 -->
-    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_module.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
+<!-- JS引入 -->
+<script defer src="<?php $this->options->themeUrl('/js/PureSuck_module.js'); ?>"></script>
+<script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
   
 
 <!-- TOC目录JS-->
@@ -172,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function () {
     <?php if ($this->options->footerScript): ?>
         <?php echo $this->options->footerScript; ?>
     <?php endif; ?>
-    <link href="<?php echo $this->options->themeUrl('css/gotop.css'); ?>" rel="stylesheet">
 
 </body>
 </html>

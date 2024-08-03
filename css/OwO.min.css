@@ -121,16 +121,16 @@
   border-radius: 0 0 0 3px;
 }
 .OwO .OwO-body .OwO-bar .OwO-packages li:hover {
-  background: #eee;
+  background: var(--themehovercolor);
 }
 .OwO .OwO-body .OwO-bar .OwO-packages .OwO-package-active {
-  background: #eee;
+  background: var(--themehovercolor);
   transition: 0.3s;
     content: "";
     left: 0;
     right: 0;
     bottom: 0;
-    background: #ff99b8;
+    background: var(--themecolor);
     height: 3px;
     pointer-events: none;
 }

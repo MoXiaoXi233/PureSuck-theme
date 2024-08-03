@@ -1,107 +1,59 @@
-.info-window-box {
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    margin: 20px 0; 
-    transition: all 0.3s ease-in-out;
-    transform: scale(1);
+.dn { display: none; }
+
+.go-top {
+    z-index: 1000; 
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: var(--themecolor);
+    color: #fff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, opacity 0.3s;
 }
 
-.info-window-box:hover {
-    transform: scale(1.05);
+.go-top:hover {
+    background-color: var(--themehovercolor);
 }
 
-.info-window-header {
-    color: white;
-    padding: 10px 20px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.info-window-content {
-    padding: 20px;
-}
-
-.info-window-content p {
-    margin: 10px 0;
-}
-
-.info-window-content a {
-    color: #007bff;
+.go-top a {
+    color: #fff;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
-.info-window-content a:hover {
-    text-decoration: underline;
+.go-top .fas {
+    font-size: 20px;
 }
 
-/* 红色版本 */
-.info-window-box.red {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
+/* 短代码模块 */
 
-.info-window-header.red {
-    background-color: #dc3545;
-}
-
-/* 黄色版本 */
-.info-window-box.yellow {
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-}
-
-.info-window-header.yellow {
-    background-color: #ffc107;
-}
-
-/* 绿色版本 */
-.info-window-box.green {
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-}
-
-.info-window-header.green {
-    background-color: #28a745;
-}
-
-/* 蓝色版本 */
-.info-window-box.blue {
-    background-color: #d1ecf1;
-    border: 1px solid #bee5eb;
-}
-
-.info-window-header.blue {
-    background-color: #007bff;
-}
-
-/* 粉色版本 */
-.info-window-box.pink {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
-
-.info-window-header.pink {
-    background-color: #e83e8c;
-}
-
-
-
+/* ALERT */
 .text-xs.font-semibold {
     margin-top: 0 !important;
     margin-bottom: 0px !important;
 }
 
 .alert-box {
-    border-radius: 10px;
+    border-radius: 0.6rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    margin: 20px 0 !important; 
+    margin: 20px 0 !important;
     margin-top: 0 !important;
     display: flex;
     align-items: center;
     padding: 10px 20px;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.15s ease-out;
     transform: scale(1);
     color: white;
     font-weight: bold;
@@ -117,112 +69,125 @@
     line-height: 1;
 }
 
-/* 绿色版本 */
 .alert-box.green {
-    background-color: #28a745;
+    background-color: #48c774;
 }
 
-.text-green-600 { color: #1e7e34; }
-
-/* 蓝色版本 */
 .alert-box.blue {
-    background-color: #007bff;
+    background-color: #3273dc;
 }
 
-.text-blue-600 { color: #0056b3; }
-
-/* 黄色版本 */
 .alert-box.yellow {
-    background-color: #ffc107;
+    background-color: #feb272;
 }
 
-.text-yellow-600 { color: #e0a800; }
-
-/* 红色版本 */
 .alert-box.red {
     background-color: #dc3545;
 }
 
-.text-red-600 { color: #bd2130; }
-
-/* 粉色版本 */
 .alert-box.pink {
-    background-color: #e83e8c;
+    background-color: #ea868f;
 }
 
-.text-pink-600 { color: #c2226d; }
-
-
-.info-card-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em;
-    margin-bottom: 1em;
-}
-.info-card {
-    display: flex;
-    align-items: center;
-    padding: 1em;
-    background: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-decoration: none;
-    color: inherit;
-    box-sizing: border-box;
-}
-.info-card img {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    margin-right: 1em;
-}
-.info-card .info-text {
+/* WINDOW */
+.notifications-container {
+    width: auto;
+    height: auto;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+    margin: 20px 0 !important;
 }
-.info-card .info-title {
-    font-size: 1.2em;
+
+.flex {
+    display: flex;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+.window {
+    padding: 1rem;
+    border-radius: 0.75rem;
+}
+
+.window.blue {
+    background-color: #dbeafe;
+}
+
+.window.green {
+    background-color: #f0fdf4;
+}
+
+.window.yellow {
+    background-color: #fef3c7;
+}
+
+.window.red {
+    background-color: #fee2e2;
+}
+
+.window.pink {
+    background-color: #ffdde7;
+}
+
+.window-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.window.blue .window-icon,
+.window.blue .window-prompt-heading {
+    color: #2563eb;
+}
+
+.window.green .window-icon,
+.window.green .window-prompt-heading {
+    color: #166534;
+}
+
+.window.yellow .window-icon,
+.window.yellow .window-prompt-heading {
+    color: #d97706;
+}
+
+.window.red .window-icon,
+.window.red .window-prompt-heading {
+    color: #b91c1c;
+}
+
+.window.pink .window-icon,
+.window.pink .window-prompt-heading {
+    color: #be185d;
+}
+
+.window-prompt-wrap {
+    margin-left: 0.75rem;
+}
+
+.window-prompt-heading {
     font-weight: bold;
 }
-.info-card .info-desc {
-    font-size: 0.9em;
-    color: #555;
+
+.window.blue .window-prompt-prompt {
+    color: #3b82f6;
 }
 
-/* 预设样式 */
-.info-card.style-1 {
-    background: #e3f2fd;
-    border-left: 5px solid #2196f3;
-}
-.info-card.style-2 {
-    background: #f3e5f5;
-    border-left: 5px solid #9c27b0;
-}
-.info-card.style-3 {
-    background: #e8f5e9;
-    border-left: 5px solid #4caf50;
-}
-.info-card.style-4 {
-    background: #fff3e0;
-    border-left: 5px solid #ff9800;
+.window.green .window-prompt-prompt {
+    color: #15803d;
 }
 
-/* 卡片宽度 */
-.info-card.one-per-row {
-    flex: 1 1 100%;
-}
-.info-card.two-per-row {
-    flex: 1 1 calc(50% - 1em);
-}
-.info-card.three-per-row {
-    flex: 1 1 calc(33.333% - 1em);
+.window.yellow .window-prompt-prompt {
+    color: #b45309;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .info-card.one-per-row,
-    .info-card.two-per-row,
-    .info-card.three-per-row {
-        flex: 1 1 100%;
-    }
+.window.red .window-prompt-prompt {
+    color: #991b1b;
+}
+
+.window.pink .window-prompt-prompt {
+    color: #db2777;
 }

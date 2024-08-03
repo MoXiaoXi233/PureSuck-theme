@@ -8,7 +8,7 @@
 <li id="li-<?php $comments->theId();?>" class="<?php echo $cl;?>">
 	<div id="<?php $comments->theId(); ?>">
 		<?php $a = 'https://gravatar.loli.net/avatar/' . md5(strtolower($comments->mail)) . '?s=80&r=X&d=mm';?>
-		<img class="avatarcc" src="<?php echo $a ?>" alt="<?php echo $comments->author; ?>" />
+		<img class="avatarcc" src="<?php echo $a ?>" loading="lazy" alt="<?php echo $comments->author; ?>" />
 		<div class="cp">
 <?php $comments->content(); ?>
 			<div class="cm">
