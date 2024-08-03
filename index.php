@@ -1,8 +1,9 @@
 <?php
 /**
- * A cute theme for MoXiify
+ * 一个干净流畅的主题，可在作者页查看获得更多关于此皮肤的信息
  * 
  * @package PureSuck
+ * @author MoXiify
  * @version 1.0.9
  * @link https://www.moxiify.cn
  */
@@ -22,7 +23,7 @@ $this->need('header.php');
             <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
-                    <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.webp'); ?>"  loading="lazy" alt="作者头像" class="avatar-item avatar-img">
+                    <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>"  loading="lazy" alt="作者头像" class="avatar-item avatar-img">
                     <span class="avatar-item">
                             <?php $this->author(); ?>
                         </span>

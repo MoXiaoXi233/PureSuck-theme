@@ -3,7 +3,7 @@
 
 <div class="wrapper">
 
-    <?php 
+    <?php
     $fields = unserialize($this->___fields());
     $hasImg = isset($fields['img']);
     ?>
@@ -12,7 +12,7 @@
             <header class="post-item post-header <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
-                    <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.webp'); ?>" alt="作者头像" class="avatar-item avatar-img">
+                    <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
                         <span class="avatar-item">
                             <?php $this->author(); ?>
                         </span>
@@ -22,9 +22,9 @@
 
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
-            <figure class="post-media <?= $this->is('page') ? 'single' : ''; ?>">
-                <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy" width="2000" height="800">
-            </figure>
+                <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
+                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy" alt="头图" width="2000" height="800">
+                </figure>
             <?php endif; ?>
 
             <section class="post-item post-body">
@@ -70,12 +70,14 @@
             <footer class="post-item post-footer">
                 <div class="wrapper post-wrapper">
                     <div class="meta post-meta">
-                        <a itemprop="datePublished" href="<?php $this->permalink() ?>" class="icon-ui icon-ui-date meta-item meta-date">
+                        <a itemprop="datePublished" href="<?php $this->permalink() ?>"
+                            class="icon-ui icon-ui-date meta-item meta-date">
                             <span class="meta-count">
                                 <?php $this->date(); ?>
                             </span>
                         </a>
-                        <a href="<?php $this->permalink() ?>#comments" class="icon-ui icon-ui-comment meta-item meta-comment">
+                        <a href="<?php $this->permalink() ?>#comments"
+                            class="icon-ui icon-ui-comment meta-item meta-comment">
                             <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
                         </a>
                     </div>
@@ -95,7 +97,7 @@
 <nav class="nav main-pager" role="navigation" aria-label="Pagination" data-js="pager">
     <div class="nav main-lastinfo">
         <span class="nav-item-alt">
-            Theme PureSuck
+            Theme PureSuck 
         </span>
     </div>
 </nav>

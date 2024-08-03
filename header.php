@@ -24,7 +24,7 @@
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
 
     <!-- ICON Setting -->
-    <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.webp'; ?>" type="image/x-icon">
+    <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
 </head>
 <body>
     <div class="wrapper">

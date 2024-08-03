@@ -13,7 +13,7 @@
                 <header class="post-item post-header <?= $hasImg ? 'no-bg' : ''; ?>">
                     <div class="wrapper post-wrapper">
                         <a href="<?php $this->author->permalink(); ?>" class="avatar post-author">
-                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.webp'); ?>" loading="lazy" alt="作者头像" class="avatar-item avatar-img">
+                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" loading="lazy" alt="作者头像" class="avatar-item avatar-img">
                         <span class="avatar-item">
                                 <?php $this->author(); ?>
                             </span>
