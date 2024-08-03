@@ -18,7 +18,7 @@ $this->need('header.php');
             <header class="post-item post-header <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
-                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" loading="lazy" alt="头像" class="avatar-item avatar-img">
+                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.webp'); ?>" loading="lazy" alt="头像" class="avatar-item avatar-img">
                         <span class="avatar-item">
                             <?php $this->author(); ?>
                         </span>

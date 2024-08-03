@@ -1,7 +1,7 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
     <?php $this->footer(); ?>
 
-<link href="<?php echo $this->options->themeUrl('css/PureSuck_Module.css'); ?>" rel="stylesheet">
+<link href="<?php echo $this->options->themeUrl('css/PureSuck_module.css'); ?>" rel="stylesheet">
 
 <!-- AOS -->
 <script>
