@@ -69,6 +69,16 @@ function themeConfig($form)
     );
     $form->addInput($titleIndex);
 
+    // 网页底部信息
+    $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'footerInfo',
+        null,
+        null,
+        _t('网页底部信息'),
+        _t('填写网页底部的自定义信息，可以包含HTML内容，用<br>换行')
+    );
+    $form->addInput($footerInfo);
+
     // Footer script标签
     $footerScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerScript',
@@ -140,109 +150,35 @@ function generateDynamicCSS() {
     
 }
 
+// 正文处理
+function process_post_content($content) {
+    $dom = new DOMDocument();
+    @$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    $headers = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
-//文章TOC树函数
-// 提取标题
-function extractHeadings($content) {
-    $pattern = '/<h([1-6])[^>]*>(.*?)<\/h\1>/i';
-    preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
-    $headings = [];
-    foreach ($matches as $index => $match) {
-        $headings[] = [
-            'level' => (int)$match[1],
-            'text' => strip_tags($match[2]),
-            'count' => $index + 1
-        ];
-    }
-    return $headings;
-}
-
-// 生成树形列表
-function generateTreeList($list, $depth = 6) {
-    if (count($list) <= 0 || $depth <= 1) {
-        return $list;
-    }
-
-    for ($i = count($list) - 1; $i >= 0; $i--) {
-        $item = $list[$i];
-        if ($item['level'] == $depth) {
-            $parentIndex = $i - 1;
-            while ($parentIndex >= 0) {
-                $parent = &$list[$parentIndex];
-                if ($parent['level'] < $depth) {
-                    break;
-                }
-                $parentIndex--;
-            }
-
-            if ($parentIndex < 0) {
-                break;
-            }
-
-            if (!isset($parent['children']) || !is_array($parent['children'])) {
-                $parent['children'] = [];
-            }
-
-            array_unshift($parent['children'], $item);
-            array_splice($list, $i, 1);
+    // 添加 ID 到所有标题
+    foreach ($headers as $header) {
+        $elements = $dom->getElementsByTagName($header);
+        foreach ($elements as $index => $element) {
+            $text = preg_replace('/\W+/', '-', strtolower(trim($element->textContent)));
+            $text = substr($text, 0, 50); // 限制 ID 长度，避免过长
+            $id = 'heading-' . $header . '-' . $index . '-' . $text;
+            $element->setAttribute('id', $id);
         }
     }
 
-    $list = array_values($list);
-    return generateTreeList($list, $depth - 1);
-}
-
-function generateTreeTemplate($arr, $depth, $currentDepth = 1, $isChildren = false) {
-    if (count($arr) <= 0) {
-        return ''; // 没有目录时返回空字符串
-    }
-    if ($currentDepth > $depth) {
-        return '';
-    }
-    $output = !$isChildren ? '<ul class="directory-tree">' : '';
-    foreach ($arr as $item) {
-        $output .= '<li><a href="#heading-' . $item['count'] . '" title="' . $item['text'] . '">' . $item['text'] . '</a>';
-        if (!empty($item['children']) && $currentDepth < $depth) {
-            $output .= '<ul>';
-            $output .= generateTreeTemplate($item['children'], $depth, $currentDepth + 1, true);
-            $output .= '</ul>';
+    // 继续处理 <img> 标签
+    $images = $dom->getElementsByTagName('img');
+    foreach ($images as $img) {
+        if (!$img->hasAttribute('loading')) {
+            $img->setAttribute('loading', 'lazy');
         }
-        $output .= '</li>';
+        if (!$img->hasAttribute('data-zoomable')) {
+            $img->setAttribute('data-zoomable', 'true');
+        }
     }
-    $output .= !$isChildren ? '</ul>' : '';
-    return $output;
-}
 
-// 为标题添加ID
-function addHeadingIds($content) {
-    $pattern = '/<h([1-6])[^>]*>(.*?)<\/h\1>/i';
-    $count = 0;
-    $content = preg_replace_callback($pattern, function($matches) use (&$count) {
-        $count++;
-        return '<h' . $matches[1] . ' id="heading-' . $count . '">' . $matches[2] . '</h' . $matches[1] . '>';
-    }, $content);
-    return $content;
-}
-
-function getJJDirectoryTree($content, $maxDirectory = 3) {
-    $headings = extractHeadings($content);
-    if (empty($headings)) {
-        return ''; // 没有标题时返回空字符串
-    }
-    $treeList = generateTreeList($headings);
-    return generateTreeTemplate($treeList, $maxDirectory);
-}
-
-// 在Typecho的适当钩子中调用这些函数
-Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = function($content, $widget, $lastResult) {
-    return addHeadingIds($content);
-};
-Typecho_Plugin::factory('Widget_Abstract_Contents')->excerptEx = function($content, $widget, $lastResult) {
-    return addHeadingIds($content);
-};
-
-function outputDirectoryTree($content) {
-    echo getJJDirectoryTree($content);
+    return $dom->saveHTML();
 }
 
 ?>

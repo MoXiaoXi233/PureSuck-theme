@@ -244,3 +244,93 @@
     color: #fff;
     border-color: var(--themecolor);
 }
+
+
+
+  #app {
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    padding-top: 70px;
+  }
+
+  .container {
+    width: 50%;
+  }
+
+  .toc {
+    right: 2%;
+    top: 80px;
+    min-width: 300px;
+  }
+
+  .dir {
+    position: relative;
+    padding-bottom: 8px;
+    box-sizing: border-box;
+  }
+
+  #toc {
+    margin: 0;
+    padding-left: 15px;
+    box-sizing: border-box;
+  }
+
+  .sider {
+    width: 2px;
+    height: 100%;
+    background: #eee;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+    margin: auto;
+    bottom: 0;
+  }
+
+  .siderbar {
+    display: flex;
+    width: 100%;
+    height: 20px;
+    line-height: 2;
+    background: var(--themecolor);
+    transition: all 0.1s;
+  }
+
+  .toc-a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .toc-a:hover {
+    color: var(--themehovercolor);
+  }
+  
+  .toc-a.li-active {
+    color: var(--themehovercolor);
+  }
+  
+  .li-1 .toc-a {
+    padding-left: 0px;
+  }
+  
+  .li-2 .toc-a {
+    padding-left: 8px;
+  }
+  
+  .li-3 .toc-a {
+    padding-left: 16px;
+  }
+  
+  .li-4 .toc-a {
+    padding-left: 24px;
+  }
+  
+  .li-5 .toc-a {
+    padding-left: 32px;
+  }
+  
+  .li-6 .toc-a {
+    padding-left: 40px;
+  }

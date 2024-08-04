@@ -93,8 +93,12 @@
 <nav class="nav main-pager" role="navigation" aria-label="Pagination" data-js="pager">
     <div class="nav main-lastinfo">
         <span class="nav-item-alt">
-            Theme PureSuck 
-        </span>
+        <?php
+$options = Typecho_Widget::widget('Widget_Options');
+if (!empty($options->footerInfo)) {
+    echo $options->footerInfo;
+}
+?>        </span>
     </div>
 </nav>
 

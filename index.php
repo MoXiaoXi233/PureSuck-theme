@@ -1,10 +1,11 @@
 <?php
 /**
- * 一个干净流畅的主题，可在作者页查看获得更多关于此皮肤的信息
+ * 干净，纯洁，淡雅朴素。
+ * It's PureSuck For You.
  * 
  * @package PureSuck
  * @author MoXiify
- * @version 1.0.9
+ * @version 1.1.0
  * @link https://www.moxiify.cn
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -86,7 +87,12 @@ $this->need('header.php');
 
 <div class="nav main-lastinfo">
     <span class="nav-item-alt">
-        Theme PureSuck
+    <?php
+$options = Typecho_Widget::widget('Widget_Options');
+if (!empty($options->footerInfo)) {
+    echo $options->footerInfo;
+}
+?>
     </span>
 </div>
 

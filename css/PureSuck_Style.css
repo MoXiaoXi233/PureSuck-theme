@@ -1907,16 +1907,17 @@ textarea.ci {
 	content: "";
 	display: block;
 	background: var(--themecolor);
-	opacity: .25;
+	opacity: .45;
+	position: relative;
 	pointer-events: none;
 	border-radius: 15px;
-	left: -2px;
-	bottom: 0
+	bottom: 15px;
 }
 
 /* 确保 .right-sidebar 的样式 */
 .right-sidebar {
 	top: 0;
+	overflow-y: auto;
 	padding: 50px;
 	position: fixed;
 	width: 370px;
@@ -2021,71 +2022,9 @@ textarea.ci {
 	margin-bottom: 10px;
 }
 
-
 .medium-zoom-overlay,
 .medium-zoom-image--opened {
 	z-index: 999;
-}
-
-/*TOC*/
-.directory-tree {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-	max-height: 240px;
-	overflow-y: auto;
-	line-height: 1.5;
-	opacity: .5;
-	font-size: 14px;
-
-}
-
-.directory-tree::-webkit-scrollbar {
-	width: 0px;
-	/* Remove scrollbar space */
-	background: transparent;
-	/* Optional: Just to be sure */
-}
-
-.directory-tree li {
-	margin: 5px 0;
-	position: relative;
-}
-
-.directory-tree li a {
-	text-decoration: none;
-	color: #181a1a;
-	padding-left: 10px;
-	display: block;
-	position: relative;
-}
-
-/* 指示器样式 */
-.directory-tree li a::before {
-	content: '';
-	width: 3px;
-	height: 100%;
-	background: var(--themecolor);
-	position: absolute;
-	left: 0;
-	top: 0;
-	display: none;
-}
-
-.directory-tree li a.active::before {
-	display: block;
-}
-
-.directory-tree ul {
-	padding-left: 20px;
-}
-
-
-.directory-tree a.active {
-	color: black;
-	font-weight: bold;
-	font-size: 16px;
-	transform: translateX(5px);
 }
 
 /* fontello */

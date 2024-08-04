@@ -27,14 +27,14 @@
                 </figure>
             <?php endif; ?>
 
-            <section class="post-item post-body">
+            <section class="post-item post-body" id="post-content">
                 <div class="wrapper post-wrapper">
                     <h2 class="post-title">
                         <a href="<?php $this->permalink() ?>" title="<?php $this->title() ?>">
                             <?php $this->title() ?>
                         </a>
                     </h2>
-                    <div class="wrapper post-wrapper">
+                    <div class="inner-post-wrapper">
                     <div class="meta post-meta">
                         <a itemprop="datePublished" href="<?php $this->permalink() ?>"
                             class="icon-ui icon-ui-date meta-item meta-date">
@@ -52,29 +52,9 @@
                     ob_start();
                     $this->content();
                     $content = ob_get_clean();
-
-                    // 使用正则表达式查找所有 img 标签并添加新属性
-                    $pattern = '/<img(.*?)>/i';
-                    $replacement = '<img\$1 loading="lazy" data-zoomable>';
-                    $modifiedContent = preg_replace_callback($pattern, function ($matches) {
-                        // 获取 img 标签内容
-                        $imgTag = $matches[0];
-
-                        // 添加 loading="lazy" 属性
-                        if (strpos($imgTag, 'loading=') === false) {
-                        $imgTag = str_replace('<img', '<img loading="lazy" width="3000" height="2000"', $imgTag);
-                        }
-
-                        // 添加 data-zoomable 属性
-                        if (strpos($imgTag, 'data-zoomable') === false) {
-                            $imgTag = str_replace('<img', '<img data-zoomable', $imgTag);
-                        }
-
-                        return $imgTag;
-                    }, $content);
-
-                    // 输出修改后的内容
-                    echo $modifiedContent;
+                    
+                    // 使用新的函数处理内容
+                    echo process_post_content($this->content);
                     ?>
                     
                 </div>
@@ -93,8 +73,12 @@
 <nav class="nav main-pager" role="navigation" aria-label="Pagination" data-js="pager">
     <div class="nav main-lastinfo">
         <span class="nav-item-alt">
-            Theme PureSuck
-        </span>
+        <?php
+$options = Typecho_Widget::widget('Widget_Options');
+if (!empty($options->footerInfo)) {
+    echo $options->footerInfo;
+}
+?>        </span>
     </div>
 </nav>
 
