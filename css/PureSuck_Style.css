@@ -42,6 +42,7 @@ img {
 	height: auto;
 	max-width: 100%;
 	vertical-align: middle;
+	border-radius: 0.75rem;
 	font-style: italic;
 	box-shadow: 0 0 6px #00000008;
 }
@@ -2044,6 +2045,7 @@ textarea.ci {
 	width: 100%;
 	object-fit: cover;
 	max-height: 490px;
+	border-radius: 0px;
 }
 
 .post-media.single img {
