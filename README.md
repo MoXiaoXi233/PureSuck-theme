@@ -4,30 +4,30 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 ![Static Badge](https://img.shields.io/badge/RELEASE-1.1.0-blue)
 ![Static Badge](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Static Badge](https://img.shields.io/badge/AUTHOR-MoXiify-pink)  
-由于是第一次正经意义上的做一个项目，加上本人属于极度的小白，作为学习的帮手，全程高度依赖 ChatGPT 4o，本次开发差不多用时10天，遇到问题欢迎反馈解决。
+由于是第一次正经意义上的做一个项目，加上本人属于极度的小白，作为学习的帮手，全程高度依赖 ChatGPT 4o，本次开发差不多用时10天，遇到问题欢迎反馈解决。  
 感谢你的使用！
 ## 外观
-可以前往[希记](note.moxiify.cn)查看演示效果
-主题本身有四种强调色可以选择，同时内置几种多彩的小组件（会不断补充，欢迎issues）
-![整体样式](https://s2.loli.net/2024/08/05/NZItCKfVaFMxXHA.png)
+可以前往[希记](note.moxiify.cn)查看演示效果  
+主题本身有四种强调色可以选择，同时内置几种多彩的小组件（会不断补充，欢迎issues）  
+![整体样式](https://s2.loli.net/2024/08/05/NZItCKfVaFMxXHA.png)  
 ![细节样式](https://s2.loli.net/2024/08/05/1JWB6G3gqlEV7pR.png)
 ##特性
-代码高亮 
-细微动效设计
-**界面简约干净**
-有一定自定义空间
-**阅读体验良好**
-TOC目录树
-头图功能
-**流畅！**
-内置几个小组件
-~~作者人比较好，愿意陪你瞎扯~~
-更多细节欢迎自行体验~
+代码高亮   
+细微动效设计  
+**界面简约干净**  
+有一定自定义空间  
+**阅读体验良好**  
+TOC目录树  
+头图功能  
+**流畅！**  
+内置几个小组件  
+~~作者人比较好，愿意陪你瞎扯~~  
+更多细节欢迎自行体验~  
 ### 安装与设置
-在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。（文件夹名应该为PureSuck）
+在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。（文件夹名应该为PureSuck）  
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述
 ### 功能与组件
-设置大图时需要在自定义字段中新建一个img，随后在内容输入图片的链接，效果正如本文那样啦~
+设置大图时需要在自定义字段中新建一个img，随后在内容输入图片的链接，效果正如本文那样啦~  
 初始有三种组件，引用条，彩色信息窗和友链卡片，使用格式如下
 #### 引用条
 ```
@@ -54,5 +54,5 @@ TOC目录树
 [OWO.JS](https://github.com/DIYgod/OwO)  
 [HighLight.JS](https://github.com/highlightjs/highlight.js)
 ## License
-使用 MIT 协议开源，欢迎更多人参与/二次开发！
+使用 MIT 协议开源，欢迎更多人参与/二次开发！  
 感谢，每一个使用本主题的朋友们！
