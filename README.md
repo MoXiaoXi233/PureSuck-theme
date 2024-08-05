@@ -50,9 +50,9 @@ TOC目录树
 ```
 不可选择颜色，默认跟着主题强调色走的（在主题设置里切换），描述信息如果要换行请用`<br>`标签
 ## 引用库
-[4](https://github.com/michalsnik/aos)
-[medium-zoom](https://github.com/francoischalifour/medium-zoom)
-[OWO.JS](https://github.com/DIYgod/OwO))
+[4](https://github.com/michalsnik/aos)  
+[medium-zoom](https://github.com/francoischalifour/medium-zoom)  
+[OWO.JS](https://github.com/DIYgod/OwO)  
 [HighLight.JS](https://github.com/highlightjs/highlight.js)
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！
