@@ -11,7 +11,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 主题本身有四种强调色可以选择，同时内置几种多彩的小组件（会不断补充，欢迎issues）  
 ![整体样式](https://s2.loli.net/2024/08/05/NZItCKfVaFMxXHA.png)  
 ![细节样式](https://s2.loli.net/2024/08/05/1JWB6G3gqlEV7pR.png)
-##特性
+## 特性
 代码高亮   
 细微动效设计  
 **界面简约干净**  
