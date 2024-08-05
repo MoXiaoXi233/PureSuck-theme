@@ -7,7 +7,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 由于是第一次正经意义上的做一个项目，加上本人属于极度的小白，作为学习的帮手，全程高度依赖 ChatGPT 4o，本次开发差不多用时10天，遇到问题欢迎反馈解决。  
 感谢你的使用！
 ## 外观
-可以前往[希记](note.moxiify.cn)查看演示效果  
+可以前往[希记](https://note.moxiify.cn)查看演示效果  
 主题本身有四种强调色可以选择，同时内置几种多彩的小组件（会不断补充，欢迎issues）  
 ![整体样式](https://s2.loli.net/2024/08/05/NZItCKfVaFMxXHA.png)  
 ![细节样式](https://s2.loli.net/2024/08/05/1JWB6G3gqlEV7pR.png)
