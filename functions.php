@@ -45,7 +45,7 @@ function themeConfig($form)
         null,
         null,
         _t('左侧自定义区域'),
-        _t('支持自定义html，支持fontawesome，将在网站左侧显示')
+        _t('支持自定义html，将在网站左侧显示')
     );
     $form->addInput($leftSideCustomCode);
 
