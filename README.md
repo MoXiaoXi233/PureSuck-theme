@@ -1,10 +1,9 @@
 ![Banner](https://s2.loli.net/2024/08/05/M4FTuyI2b7aU3Ag.png)
 #PureSuck-Theme
-PureSuck，干净，纯洁，淡雅朴素的typecho主题。
+PureSuck，干净，纯洁，淡雅朴素的typecho主题。  
 ![Static Badge](https://img.shields.io/badge/RELEASE-1.1.0-blue)
 ![Static Badge](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Static Badge](https://img.shields.io/badge/AUTHOR-MoXiify-pink)  
-
 由于是第一次正经意义上的做一个项目，加上本人属于极度的小白，作为学习的帮手，全程高度依赖 ChatGPT 4o，本次开发差不多用时10天，遇到问题欢迎反馈解决。
 感谢你的使用！
 ## 外观
