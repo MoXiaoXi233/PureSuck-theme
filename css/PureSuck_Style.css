@@ -42,8 +42,9 @@ img {
 	height: auto;
 	max-width: 100%;
 	vertical-align: middle;
-	border: 0;
-	font-style: italic
+	border-radius: 0.75rem;
+	font-style: italic;
+	box-shadow: 0 0 6px #00000008;
 }
 
 object {
@@ -234,10 +235,22 @@ h2 {
 	line-height: 36px
 }
 
+h2::before {
+	content: "";
+	display: block;
+	width: 8px;
+	height: 8px;
+	background-color: var(--themecolor);
+	opacity: .65;
+	position: relative;
+	border-radius: 50%;
+	top: 30px;
+}
+
 .h3,
 h3 {
 	font-size: 1.375rem;
-	line-height: 34px
+	line-height: 30px
 }
 
 .comment-title,
@@ -252,7 +265,15 @@ h6 {
 }
 
 h3::before {
-	content: "#";
+	content: "";
+	display: block;
+	width: 8px;
+	height: 8px;
+	background-color: var(--themecolor);
+	opacity: .55;
+	position: relative;
+	border-radius: 50%;
+	top: 28px;
 }
 
 .p,
@@ -301,10 +322,21 @@ small {
 		line-height: 40px
 	}
 
+	h2::before {
+		width: 10px;
+		height: 10px;
+		top:35px;
+	}
+
 	.h3,
 	h3 {
 		font-size: 1.5rem;
 		line-height: 36px
+	}
+
+	h3::before {
+		width: 9px;
+		height: 9px;
 	}
 
 	.comment-title,
@@ -330,6 +362,19 @@ small {
 		font-size: 2rem;
 		line-height: 44px
 	}
+
+	h2::before {
+		width: 12px;
+		height: 12px;
+		top:40px;
+	}
+
+	h3::before {
+		width: 10px;
+		height: 10px;
+		top:34px
+	}
+
 }
 
 @media (min-width:1503px) {
@@ -1507,7 +1552,7 @@ li:before {
 }
 
 pre {
-	border-radius: 0.3rem;
+	border-radius: 0.75rem;
 	color: #fff;
 	background-color: #2b2b2b
 }
@@ -1707,7 +1752,6 @@ body {
 .post-inner {
 	border-radius: 0.75rem;
 	box-shadow: 0 0 6px #00000008;
-	-webkit-box-shadow: 0 0 6px #00000008
 }
 
 .post-item {
@@ -1907,7 +1951,7 @@ textarea.ci {
 	content: "";
 	display: block;
 	background: var(--themecolor);
-	opacity: .45;
+	opacity: .55;
 	position: relative;
 	pointer-events: none;
 	border-radius: 15px;

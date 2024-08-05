@@ -42,11 +42,11 @@ $this->need('header.php');
             <!-- 文章作者 -->
             <section class="post-item post-body">
                 <div class="wrapper post-wrapper">
-                    <h2 class="post-title">
+                    <h1 class="post-title">
                         <a href="<?php $this->permalink() ?>" title="<?php $this->title() ?>">
                             <?php $this->title() ?>
                         </a>
-                    </h2>
+                    </h1>
                     <!-- 摘要 -->
                     <p class="post-excerpt">
                         <?php $this->excerpt(200, ''); ?>

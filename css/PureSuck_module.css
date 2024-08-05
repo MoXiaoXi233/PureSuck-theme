@@ -334,3 +334,117 @@
   .li-6 .toc-a {
     padding-left: 40px;
   }
+
+
+
+
+  .friendsboard-list {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    margin-top: 1em;
+    width: calc(100% + 15px);
+    margin-left: -15px;
+}
+
+.friendsboard-list, .friendsboard-list * {
+    box-sizing: border-box;
+}
+
+.friendsboard-item {
+    position: relative;
+    cursor: pointer;
+    box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
+    transition: ease all 0.3s;
+    overflow: hidden;
+    background: #f8fafc;
+    border-radius: 8px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    border: none!important;
+    display: block;
+    margin-left: 15px;
+    margin-bottom: 25px;
+    width: calc(33.3333% - 15px);
+    padding: 20px;
+}
+
+.friendsboard-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
+}
+
+.friends-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.friends-card-username {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.friends-card-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--themecolor);
+    border-radius: 50%;
+    opacity: .45;
+    position: absolute;
+    left: -3px;
+    top: 18px;
+}
+
+.friends-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.friends-card-text {
+    display: flex;
+    font-size: 0.85rem;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+    
+}
+
+.friends-card-text p {
+    font-size: 0.85rem;
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.friends-card-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    transition: visibility 0s, opacity 0.5s linear;
+}
+
+.friends-card-avatar.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* media query for responsive design */
+@media screen and (max-width: 767.5px) {
+    .friendsboard-item {
+        width: calc(50% - 15px);
+    }
+}
+@media screen and (max-width: 450px) {
+    .friendsboard-item {
+        width: calc(100% - 15px);
+    }
+}

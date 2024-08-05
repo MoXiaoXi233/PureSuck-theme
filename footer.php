@@ -56,10 +56,6 @@
             hljs.highlightAll();
         });
     </script>
-
-<!-- JS引入 -->
-<script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
-<script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
   
 <!-- TOC -->
 <?php if ($this->is('post') || $this->is('page')): ?>
@@ -145,8 +141,9 @@ const removeClass = (elements) => {
 </script>
 <?php endif; ?> 
 
-
-
+<!-- JS引入 -->
+<script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
+<script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
 
 <!-- Medium Zoom -->
 <script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>

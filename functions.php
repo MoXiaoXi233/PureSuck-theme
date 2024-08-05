@@ -75,7 +75,7 @@ function themeConfig($form)
         null,
         null,
         _t('网页底部信息'),
-        _t('填写网页底部的自定义信息，可以包含HTML内容，用<br>换行')
+        _t('填写网页底部的自定义信息，可以包含HTML内容，用<br>')
     );
     $form->addInput($footerInfo);
 
@@ -148,37 +148,6 @@ function generateDynamicCSS() {
     // 输出动态CSS
     echo '<style>:root { --themecolor: ' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '; --themehovercolor: ' . htmlspecialchars($themeHoverColor, ENT_QUOTES, 'UTF-8') . '; }</style>';
     
-}
-
-// 正文处理
-function process_post_content($content) {
-    $dom = new DOMDocument();
-    @$dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-    $headers = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-
-    // 添加 ID 到所有标题
-    foreach ($headers as $header) {
-        $elements = $dom->getElementsByTagName($header);
-        foreach ($elements as $index => $element) {
-            $text = preg_replace('/\W+/', '-', strtolower(trim($element->textContent)));
-            $text = substr($text, 0, 50); // 限制 ID 长度，避免过长
-            $id = 'heading-' . $header . '-' . $index . '-' . $text;
-            $element->setAttribute('id', $id);
-        }
-    }
-
-    // 继续处理 <img> 标签
-    $images = $dom->getElementsByTagName('img');
-    foreach ($images as $img) {
-        if (!$img->hasAttribute('loading')) {
-            $img->setAttribute('loading', 'lazy');
-        }
-        if (!$img->hasAttribute('data-zoomable')) {
-            $img->setAttribute('data-zoomable', 'true');
-        }
-    }
-
-    return $dom->saveHTML();
 }
 
 ?>
