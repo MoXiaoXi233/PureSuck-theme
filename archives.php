@@ -1,5 +1,12 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
-<?php $this->need('header.php'); ?>
+<?php
+/**
+ * 归档页面
+ *
+ * @package custom
+ */
+$this->need('header.php'); 
+?>
 
 <div class="wrapper">
 
