@@ -49,6 +49,25 @@ TOC目录树
 <div FRIEND-NAME="好友名字" ICO="头像链接" URL="跳转地址" >好友的描述信息</div>
 ```
 不可选择颜色，默认跟着主题强调色走的（在主题设置里切换），描述信息如果要换行请用`<br>`标签
+#### Tabs选项组
+```
+<div tabs>
+<div tab-title="我的博客信息">这是我的博客信息内容。</div>
+<div tab-title="交流群">这是交流群内容。</div>
+<div tab-title="申请友链">这是申请友链内容。</div>
+<div tab-title="关于我们">这是关于我们的内容。</div>
+</div>
+```
+按道理来说可以嵌套，简单测试了一下没什么问题
+#### 时间线
+```
+<div id="timeline">
+<div timeline-event date="2023-01-01" title="事件1">这是事件1的描述。</div>
+<div timeline-event date="2023-02-01" title="事件2">这是事件2的描述。</div>
+<div timeline-event date="2023-03-01" title="事件3">这是事件3的描述。</div>
+</div>
+```
+在div中添加子event一直加下去就行，应该没什么大问题
 ## 引用库
 [aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  

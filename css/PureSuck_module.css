@@ -492,7 +492,6 @@
     align-items: flex-start;
     margin-bottom: 20px;
     position: relative;
-    min-height: 100px; 
 }
 
 .timeline-dot {
