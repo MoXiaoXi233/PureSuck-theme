@@ -13,7 +13,7 @@ function themeConfig($form)
         'logoUrl',
         null,
         null,
-        _t('网页 ICON 地址'),
+        _t('favicon.ico 地址'),
         _t('填写ico格式图片 URL 地址, 在网站标题前加上一个 icon')
     );
     $form->addInput($logoUrl);
@@ -149,6 +149,7 @@ function generateDynamicCSS() {
     echo '<style>:root { --themecolor: ' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '; --themehovercolor: ' . htmlspecialchars($themeHoverColor, ENT_QUOTES, 'UTF-8') . '; }</style>';
     
 }
+
 
 ?>
 

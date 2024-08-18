@@ -95,7 +95,6 @@
     height: auto;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    display: flex;
     flex-direction: column;
     gap: 1rem;
     margin: 20px 0 !important;
@@ -110,7 +109,7 @@
 }
 
 .window {
-    padding: 1rem;
+    padding: 20px 0px 0px 10px;
     border-radius: 0.75rem;
 }
 
@@ -134,34 +133,40 @@
     background-color: #ffdde7;
 }
 
-.window-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-}
 
-.window.blue .window-icon,
+.window.blue,
 .window.blue .window-prompt-heading {
     color: #2563eb;
+    font-size: 17px;
+    margin-bottom: 14px;
 }
 
-.window.green .window-icon,
+.window.green,
 .window.green .window-prompt-heading {
     color: #166534;
+    font-size: 17px;
+    margin-bottom: 14px;
 }
 
-.window.yellow .window-icon,
+.window.yellow,
 .window.yellow .window-prompt-heading {
     color: #d97706;
+    font-size: 17px;
+    margin-bottom: 14px;
 }
 
-.window.red .window-icon,
+.window.red,
 .window.red .window-prompt-heading {
     color: #b91c1c;
+    font-size: 17px;
+    margin-bottom: 14px;
 }
 
-.window.pink .window-icon,
+.window.pink,
 .window.pink .window-prompt-heading {
     color: #be185d;
+    font-size: 17px;
+    margin-bottom: 14px;
 }
 
 .window-prompt-wrap {
@@ -172,24 +177,9 @@
     font-weight: bold;
 }
 
-.window.blue .window-prompt-prompt {
-    color: #3b82f6;
-}
-
-.window.green .window-prompt-prompt {
-    color: #15803d;
-}
-
-.window.yellow .window-prompt-prompt {
-    color: #b45309;
-}
-
-.window.red .window-prompt-prompt {
-    color: #991b1b;
-}
-
-.window.pink .window-prompt-prompt {
-    color: #db2777;
+.window-prompt-prompt {
+    color: #333;
+    font-size: 14px;
 }
 
 
@@ -391,7 +381,7 @@
 .friends-card-dot {
     width: 10px;
     height: 10px;
-    background-color: var(--themecolor);
+	background-image: linear-gradient(var(--themecolor), transparent);
     border-radius: 50%;
     opacity: .45;
     position: absolute;
@@ -447,4 +437,169 @@
     .friendsboard-item {
         width: calc(100% - 15px);
     }
+}
+
+
+/* 折叠面板的 CSS 样式 */
+.collapsible-panel {
+    margin-bottom: 20px;
+    border: 1px solid #f7f7f7;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.collapsible-header {
+    background-color: #f7f7f7;
+    cursor: pointer;
+    padding: 16px;
+    text-align: left;
+    outline: none;
+    border: none;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.collapsible-header .icon {
+    transition: transform 0.3s;
+}
+
+.collapsible-header.active .icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+.collapsible-details {
+    padding: 16px;
+    background-color: white;
+}
+
+/* 时间线的 CSS 样式 */
+#timeline {
+    margin: 50px auto;
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 100px; 
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--themecolor);
+    border-radius: 50%;
+    position: absolute;
+    left: 25px;
+    top: 0;
+}
+
+.timeline-content {
+    margin-left: 50px;
+    position: relative;
+    flex-grow: 1;
+}
+
+.timeline-date {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.timeline-title {
+    font-size: 18px;
+    margin: 0 0 10px;
+    color: #000;
+}
+
+.timeline-description {
+    font-size: 14px;
+    margin: 0;
+    color: #666;
+}
+
+#timeline::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    background-color: var(--themecolor);
+    top: 0;
+    bottom: 0;
+    left: 30px;
+}
+
+.timeline-dot::before {
+    content: '\e810';
+    font-family: 'fontello'; 
+    position: absolute;
+    left: -20px;
+    top: -8px;
+    color: var(--themehovercolor);
+}
+
+
+/* tabs的 CSS 样式 */
+.tabs {
+    width: 100%;
+    background-color: #f7f7f7;
+    margin: 50px auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.tab-header {
+    display: flex;
+    border-bottom: 2px solid #f7f7f7;
+}
+
+.tab-link {
+    padding: 10px 20px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.3s;
+}
+
+.tab-link.active {
+    color: #333;
+    background-color: #f7f7f7;
+    position: relative;
+}
+
+.tab-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    width: 80%; /* 或者设置为固定宽度 */
+    margin: 0 auto; /* 自动左右边距 */
+    height: 2px;
+    background-color: var(--themecolor);
+}
+
+.tab-content {
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 0 0 5px 5px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
 }
