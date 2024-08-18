@@ -26,6 +26,7 @@ TOC目录树
 ### 安装与设置
 在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。（文件夹名应该为PureSuck）  
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述
+如果需要支持评论区发图片，需要在 Typecho 后台->设置->评论->允许使用的标签添加```<img src="" style="" loading="lazy">```
 ### 功能与组件
 设置大图时需要在自定义字段中新建一个img，随后在内容输入图片的链接，效果正如本文那样啦~  
 初始有三种组件，引用条，彩色信息窗和友链卡片，使用格式如下
@@ -40,7 +41,7 @@ TOC目录树
 五种颜色可选，在 ALERT-TYPE 中填写，效果图可以看上面合集，普通的灰色样式用自带的blockquote即可
 #### 彩色信息窗
 ```
-<div WINDOW-TYPE="red" TITLE:"测试测试">墨希墨希，123456，QWERTY，！@#￥%……这是一段比较长的文本，因为这是一个比较长的窗口，所以我要测试。墨希墨希，123456，QWERTY，！@#￥%……这是一段比较长的文本，因为这是一个比较长的窗口，所以我要测试。</div>
+<div WINDOW-TYPE="red" TITLE="测试测试">墨希墨希，123456，QWERTY，！@#￥%……这是一段比较长的文本，因为这是一个比较长的窗口，所以我要测试。墨希墨希，123456，QWERTY，！@#￥%……这是一段比较长的文本，因为这是一个比较长的窗口，所以我要测试。</div>
 ```
 同样五色可选，WINDOW1-TYPE 处填写五种颜色之一，在 TIILE 处填写标题，注意内部如果要换行请用`<br>`标签
 #### 友链卡片
@@ -49,7 +50,7 @@ TOC目录树
 ```
 不可选择颜色，默认跟着主题强调色走的（在主题设置里切换），描述信息如果要换行请用`<br>`标签
 ## 引用库
-[4](https://github.com/michalsnik/aos)  
+[aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
 [OWO.JS](https://github.com/DIYgod/OwO)  
 [HighLight.JS](https://github.com/highlightjs/highlight.js)
