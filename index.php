@@ -5,7 +5,7 @@
  * 
  * @package PureSuck
  * @author MoXiify
- * @version 1.1.1
+ * @version 1.1.2
  * @link https://www.moxiify.cn
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;

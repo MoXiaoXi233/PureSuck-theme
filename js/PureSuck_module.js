@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function () {
     function parseAlerts() {
         let elements = document.querySelectorAll('[alert-type]');
@@ -64,11 +65,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function parseFriendCards() {
         const container = document.body; // 或者使用更具体的容器选择器
-    
+
         // 步骤1：识别和分组
         function identifyGroups(node, groups = [], currentGroup = null) {
             while (node) {
-                if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('friend-name')) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('FRIEND-NAME')) {
                     if (!currentGroup) {
                         currentGroup = [];
                         groups.push(currentGroup);
@@ -96,9 +97,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     friendsBoardList.classList.add('friendsboard-list');
     
                     group.forEach(node => {
-                        const friendName = node.getAttribute('friend-name');
-                        const avatarUrl = node.getAttribute('ico');
-                        const url = node.getAttribute('url');
+                        const friendName = node.getAttribute('FRIEND-NAME');
+                        const avatarUrl = node.getAttribute('ICO');
+                        const url = node.getAttribute('URL');
     
                         const newContent = document.createElement('a');
                         newContent.href = url;
@@ -122,8 +123,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         friendsBoardList.appendChild(newContent);
                     });
     
-                    // 替换第一个节点为新的 friendsBoardList，并移除其余节点
-                    group[0].parentNode.replaceChild(friendsBoardList, group[0]);
+                    // 替换第一个节点的内容为新的 friendsBoardList，并保留原有的 DOM 结构
+                    group[0].innerHTML = '';
+                    group[0].appendChild(friendsBoardList);
+    
+                    // 移除其余节点
                     for (let i = 1; i < group.length; i++) {
                         group[i].parentNode.removeChild(group[i]);
                     }
@@ -136,10 +140,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function parseCollapsiblePanels() {
-        let elements = document.querySelectorAll('[COLLAPSIBLE-PANEL]');
+        let elements = document.querySelectorAll('[collapsible-panel]');
     
         elements.forEach(element => {
-            let title = element.getAttribute('TITLE');
+            let title = element.getAttribute('title');
             let content = element.innerHTML;
     
             let newContent = `
@@ -175,6 +179,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
     function parseTimeline() {
         const timelineEvents = document.querySelectorAll('[TIMELINE-EVENT]');
     
@@ -199,63 +204,132 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function createTabs() {
-        const tabsContainer = document.querySelector('[tabs]');
-        tabsContainer.removeAttribute('tabs'); // 移除 TABS 属性
-        tabsContainer.classList.add('tabs');
+    function parseTabs() {
+        const tabContainers = document.querySelectorAll('[tabs]');
     
-        const tabHeader = document.createElement('div');
-        tabHeader.classList.add('tab-header');
+        tabContainers.forEach((container, containerIndex) => {
+            const tabElements = Array.from(container.children);
+            const tabTitles = [];
+            const tabContents = [];
     
-        const tabContent = document.createElement('div');
-        tabContent.classList.add('tab-content');
+            // 获取 tab 标题和内容
+            tabElements.forEach((child, index) => {
+                const title = child.getAttribute('tab-title');
+                if (title) {
+                    tabTitles.push(title);
+                    tabContents.push(child);
+                }
+            });
     
-        const tabElements = tabsContainer.querySelectorAll('[tab-title]');
+            // 如果没有找到任何 tab 标题，就不需要创建 tabs
+            if (tabTitles.length === 0) return;
     
-        tabElements.forEach((tab, index) => {
-            const tabTitle = tab.getAttribute('tab-title');
-            const tabContentText = tab.innerHTML;
+            // 创建 tab 结构
+            const tabHeader = tabTitles.map((title, index) => `
+                <div class="tab-link ${index === 0 ? 'active' : ''}" data-tab="tab${containerIndex + 1}-${index + 1}" role="tab" aria-controls="tab${containerIndex + 1}-${index + 1}" tabindex="${index === 0 ? '0' : '-1'}">
+                    ${title}
+                </div>
+            `).join('');
     
-            const tabLink = document.createElement('div');
-            tabLink.classList.add('tab-link');
-            if (index === 0) tabLink.classList.add('active');
-            tabLink.setAttribute('data-tab', `tab${index + 1}`);
-            tabLink.textContent = tabTitle;
+            const tabContent = tabContents.map((content, index) => {
+                const tabPane = document.createElement('div');
+                tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
+                tabPane.id = `tab${containerIndex + 1}-${index + 1}`;
+                tabPane.setAttribute('role', 'tabpanel');
+                tabPane.setAttribute('aria-labelledby', `tab${containerIndex + 1}-${index + 1}`);
+                tabPane.appendChild(content);
+                return tabPane.outerHTML;
+            }).join('');
     
-            const tabPane = document.createElement('div');
-            tabPane.classList.add('tab-pane');
-            if (index === 0) tabPane.classList.add('active');
-            tabPane.id = `tab${index + 1}`;
-            tabPane.innerHTML = tabContentText;
+            const tabContainer = document.createElement('div');
+            tabContainer.className = 'tab-container';
+            tabContainer.innerHTML = `
+                <div class="tab-header">
+                    ${tabHeader}
+                    <div class="tab-indicator"></div>
+                </div>
+                <div class="tab-content">
+                    ${tabContent}
+                </div>
+            `;
     
-            tabHeader.appendChild(tabLink);
-            tabContent.appendChild(tabPane);
+            // 使用 DocumentFragment 替换原始的 tab 容器内容
+            const fragment = document.createDocumentFragment();
+            fragment.appendChild(tabContainer);
+            container.innerHTML = '';
+            container.appendChild(fragment);
     
-            // 移除原始的 TAB-TITLE 属性
-            tab.removeAttribute('tab-title');
-            // 移除原始的 div 元素
-            tab.remove();
-        });
+            // 设置初始的 tab-indicator 位置和宽度
+            const activeLink = tabContainer.querySelector('.tab-link.active');
+            const indicator = tabContainer.querySelector('.tab-indicator');
+            if (activeLink && indicator) {
+                indicator.style.width = `${activeLink.offsetWidth * 0.75}px`;
+                indicator.style.left = `${activeLink.offsetLeft + (activeLink.offsetWidth * 0.125)}px`;
+            }
     
-        tabsContainer.appendChild(tabHeader);
-        tabsContainer.appendChild(tabContent);
+            // 使用事件委托处理 Tab 切换效果
+            container.querySelector('.tab-header').addEventListener('click', function (event) {
+                if (event.target.classList.contains('tab-link')) {
+                    const tabLinks = this.querySelectorAll('.tab-link');
+                    const tabPanes = this.nextElementSibling.querySelectorAll('.tab-pane');
+                    const indicator = this.querySelector('.tab-indicator');
     
-        // 添加点击事件监听器
-        const tabLinks = document.querySelectorAll('.tab-link');
-        const tabPanes = document.querySelectorAll('.tab-pane');
+                    let currentIndex = Array.from(tabLinks).indexOf(event.target);
+                    let previousIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
     
-        tabLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                const target = this.getAttribute('data-tab');
+                    tabLinks.forEach(link => link.classList.remove('active'));
+                    tabPanes.forEach(pane => {
+                        pane.classList.remove('active');
+                        pane.removeAttribute('data-aos'); // 移除AOS属性
+                        pane.classList.remove('aos-animate'); // 移除AOS动画类
+                    });
     
-                tabLinks.forEach(link => link.classList.remove('active'));
-                tabPanes.forEach(pane => pane.classList.remove('active'));
+                    event.target.classList.add('active');
+                    const activePane = document.getElementById(event.target.getAttribute('data-tab'));
+                    activePane.classList.add('active');
     
-                this.classList.add('active');
-                document.getElementById(target).classList.add('active');
+                    // 根据Tab切换方向设置AOS动画效果
+                    if (currentIndex > previousIndex) {
+                        activePane.setAttribute('data-aos', 'fade-left'); // 从右到左
+                    } else {
+                        activePane.setAttribute('data-aos', 'fade-right'); // 从左到右
+                    }
+    
+                    // 更新tab-indicator的位置和宽度
+                    indicator.style.width = `${event.target.offsetWidth * 0.75}px`;
+                    indicator.style.left = `${event.target.offsetLeft + (event.target.offsetWidth * 0.125)}px`;
+    
+                    // 手动触发AOS动画
+                    setTimeout(() => {
+                        activePane.classList.add('aos-animate');
+                    }, 0);
+    
+                    // 更新 tab 的 tabindex 属性
+                    tabLinks.forEach(link => link.setAttribute('tabindex', '-1'));
+                    event.target.setAttribute('tabindex', '0');
+                    event.target.focus();
+                }
+            });
+    
+            // 添加键盘导航支持
+            container.querySelectorAll('.tab-link').forEach(link => {
+                link.addEventListener('keydown', function (event) {
+                    const tabLinks = Array.from(this.parentElement.querySelectorAll('.tab-link'));
+                    const currentIndex = tabLinks.indexOf(this);
+                    let newIndex = currentIndex;
+    
+                    if (event.key === 'ArrowRight') {
+                        newIndex = (currentIndex + 1) % tabLinks.length;
+                    } else if (event.key === 'ArrowLeft') {
+                        newIndex = (currentIndex - 1 + tabLinks.length) % tabLinks.length;
+                    }
+    
+                    tabLinks[newIndex].click();
+                });
             });
         });
     }
+    
 
     // 调用所有函数
     parseAlerts();
@@ -263,5 +337,6 @@ document.addEventListener('DOMContentLoaded', function () {
     parseFriendCards();
     parseCollapsiblePanels();
     parseTimeline();
-    createTabs();
+    parseTabs();
+    
 });

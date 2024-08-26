@@ -49,7 +49,6 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     margin: 20px 0 !important;
-    margin-top: 0 !important;
     display: flex;
     align-items: center;
     padding: 10px 20px;
@@ -97,7 +96,6 @@
     line-height: 1.25rem;
     flex-direction: column;
     gap: 1rem;
-    margin: 20px 0 !important;
 }
 
 .flex {
@@ -482,9 +480,10 @@
 
 /* 时间线的 CSS 样式 */
 #timeline {
-    margin: 50px auto;
     position: relative;
     padding: 20px 0;
+    margin: 20px 0 !important;
+
 }
 
 .timeline-item {
@@ -552,16 +551,19 @@
 /* tabs的 CSS 样式 */
 .tabs {
     width: 100%;
-    background-color: #f7f7f7;
+    background-color: #fff;
     margin: 50px auto;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border-radius: 0.75rem;
     overflow: hidden;
+    font-family: Arial, sans-serif;
+    margin: 20px 0 !important;
 }
 
 .tab-header {
     display: flex;
-    border-bottom: 2px solid #f7f7f7;
+    position: relative;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .tab-link {
@@ -569,30 +571,25 @@
     cursor: pointer;
     color: #888;
     transition: color 0.3s;
+    position: relative;
 }
 
 .tab-link.active {
     color: #333;
-    background-color: #f7f7f7;
-    position: relative;
+    background-color: #fff;
 }
 
-.tab-link.active::after {
-    content: '';
+.tab-indicator {
     position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    width: 80%; /* 或者设置为固定宽度 */
-    margin: 0 auto; /* 自动左右边距 */
+    bottom: 0;
     height: 2px;
     background-color: var(--themecolor);
+    transition: left 0.3s ease, width 0.3s ease;
 }
 
 .tab-content {
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 0 0 5px 5px;
+    padding: 20px 20px 0px 20px;
+    background-color: #fff;
 }
 
 .tab-pane {
