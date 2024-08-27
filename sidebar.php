@@ -8,7 +8,7 @@
                 <span class="title">搜索</span>
             </header>
             <section class="section-body">
-                <form method="get" action="http://localhost/" class="search-container">
+                <form method="get" action="<?php $this->options->siteUrl(); ?>" class="search-container">
                     <input type="text" name="s" class="search-input" placeholder="输入关键字搜索">
                     <button type="submit" class="search-button">
                         <span class="icon-search"></span>
