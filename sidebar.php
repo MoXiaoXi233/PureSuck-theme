@@ -8,9 +8,11 @@
                 <span class="title">搜索</span>
             </header>
             <section class="section-body">
-                <form method="get" action="<?php $this->options->siteUrl(); ?>">
-                    <input type="text" name="s" class="search-input" placeholder="<?php _e('输入关键字搜索'); ?>" />
-                    <button type="submit" class="search-button"><?php _e('搜索'); ?></button>
+                <form method="get" action="http://localhost/" class="search-container">
+                    <input type="text" name="s" class="search-input" placeholder="输入关键字搜索">
+                    <button type="submit" class="search-button">
+                        <span class="icon-search"></span>
+                    </button>
                 </form>
             </section>
         </div>
