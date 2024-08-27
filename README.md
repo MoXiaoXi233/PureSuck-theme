@@ -32,42 +32,47 @@ TOC目录树
 初始有三种组件，引用条，彩色信息窗和友链卡片，使用格式如下
 #### 引用条
 ```
-<div ALERT-TYPE="red">墨希墨希，123456，QWERTY，！@#￥%……</div>
-<div ALERT-TYPE="yellow">墨希墨希，123456，QWERTY，！@#￥%……</div>
-<div ALERT-TYPE="blue">墨希墨希，123456，QWERTY，！@#￥%…….</div>
-<div ALERT-TYPE="green">墨希墨希，123456，QWERTY，！@#￥%……</div>
-<div ALERT-TYPE="pink">墨希墨希，123456，QWERTY，！@#￥%……</div>
+[alert type="red"]这是一个红色警告。[/alert]
+[alert type="yellow"]这是一个黄色警告。[/alert]
+[alert type="blue"]这是一个蓝色警告。[/alert]
+[alert type="green"]这是一个绿色警告。[/alert]
+[alert type="pink"]这是一个粉色警告。[/alert]
 ```
-五种颜色可选，在 ALERT-TYPE 中填写，效果图可以看上面合集，普通的灰色样式用自带的blockquote即可
+五种颜色可选，在 type 中填写，效果图可以看上面合集，普通的灰色样式用自带的 blockquote 即可
 #### 彩色信息窗
 ```
-<div WINDOW-TYPE="red" TITLE="测试测试">墨希墨希，123456，QWERTY，！@#￥%……这是一段比较长的文本，因为这是一个比较长的窗口，所以我要测试。墨希墨希，123456，QWERTY，！@#￥%……这是一段比较长的文本，因为这是一个比较长的窗口，所以我要测试。</div>
+[window type="red" title="信息窗口"]这是一个信息窗口。[/window]
+[window type="yellow" title="警告窗口"]这是一个信息窗口。<br>这是一个信息窗口的第二行。[/window]
 ```
-同样五色可选，WINDOW1-TYPE 处填写五种颜色之一，在 TIILE 处填写标题，注意内部如果要换行请用`<br>`标签
+同样五色可选，type 处填写五种颜色之一，在 title 处填写标题，注意内部如果要换行请用`<br>`标签
 #### 友链卡片
 ```
-<div FRIEND-NAME="好友名字" ICO="头像链接" URL="跳转地址" >好友的描述信息</div>
+[friend-card name="好友" ico="avatar.jpg" url="http://example.com"]这是好友的描述。[/friend-card]
 ```
-不可选择颜色，默认跟着主题强调色走的（在主题设置里切换），描述信息如果要换行请用`<br>`标签
+不可选择颜色，默认跟着主题强调色走的（在主题设置里切换），描述信息如果要换行请用`<br>`标签，描述信息尽量简短避免影响样式
+#### 折叠内容
+```
+[collapsible-panel title="折叠面板标题"]这是面板的内容。[/collapsible-panel]
+```
+没有颜色选，灰色，用来折叠比较长的内容
 #### Tabs选项组
 ```
-<div tabs>
-<div tab-title="我的博客信息">这是我的博客信息内容。</div>
-<div tab-title="交流群">这是交流群内容。</div>
-<div tab-title="申请友链">这是申请友链内容。</div>
-<div tab-title="关于我们">这是关于我们的内容。</div>
-</div>
+[tabs]
+[tab title="我的博客信息"]这是我的博客信息内容。[/tab]
+[tab title="交流群"]这是交流群内容。[/tab]
+[tab title="申请友链"]这有其他内容。[/tab]
+[tab title="关于我们"]这是关于我们的内容。[/tab]
+[/tabs]
 ```
-按道理来说可以嵌套，简单测试了一下没什么问题
+按道理来说可以简单嵌套，简单测试了一下没什么问题
 #### 时间线
 ```
-<div id="timeline">
-<div timeline-event date="2023-01-01" title="事件1">这是事件1的描述。</div>
-<div timeline-event date="2023-02-01" title="事件2">这是事件2的描述。</div>
-<div timeline-event date="2023-03-01" title="事件3">这是事件3的描述。</div>
-</div>
+[timeline]
+[timeline-event date="2023-01-01" title="Event 1"]Description of Event 1.[/timeline-event]
+[timeline-event date="2023-02-01" title="Event 2"]Description of Event 2.[/timeline-event]
+[/timeline]
 ```
-在div中添加子event一直加下去就行，应该没什么大问题
+在[timeline]中添加子[timeline-event]一直加下去就行，应该没什么大问题
 ## 引用库
 [aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  

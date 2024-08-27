@@ -68,15 +68,14 @@
       window.addEventListener("load", () => tocList());
 
       const tocList = () => {
+        const tocSection = document.getElementById("toc-section");
         const toc = document.querySelector(".toc");
         const postWrapper = document.querySelector(".inner-post-wrapper");
         if (!postWrapper) {
-          console.error("Post wrapper not found.");
           return;
         }
         const elements = postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6");
         if (!elements.length) {
-          console.log("No headers found in the post wrapper.");
           return;
         }
 
@@ -125,6 +124,11 @@
             }
           });
         });
+
+        // 如果有标题元素，显示TOC部分
+        if (tocSection) {
+          tocSection.style.display = "block";
+        }
       };
 
       const getElementTop = (element) => {

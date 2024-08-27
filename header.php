@@ -20,9 +20,7 @@
     <?php generateDynamicCSS(); ?>
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
-
-    <script src="https://unpkg.com/@barba/core"></script>
-
+    
     <!-- AOS -->
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
 
