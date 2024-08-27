@@ -366,7 +366,6 @@
 .friends-card-header {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
     position: relative;
 }
 
@@ -384,7 +383,7 @@
     opacity: .45;
     position: absolute;
     left: -3px;
-    top: 18px;
+    top: 20px;
 }
 
 .friends-card-body {

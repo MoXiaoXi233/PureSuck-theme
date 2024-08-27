@@ -1,8 +1,10 @@
 <?php
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
-function themeFields($layout) {
-    $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('描述'), _t('简单一句话描述'));$description->input->setAttribute('class', 'text w-100');
+function themeFields($layout)
+{
+    $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('描述'), _t('简单一句话描述'));
+    $description->input->setAttribute('class', 'text w-100');
     $layout->addItem($description);
 }
 
@@ -89,22 +91,40 @@ function themeConfig($form)
     );
     $form->addInput($footerScript);
 
+    // 搜索功能显示选项
+    $showSearch = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showSearch',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否显示搜索功能')
+    );
+    $form->addInput($showSearch);
+
     // TOC 模块显示选项
-    $showTOC = new Typecho_Widget_Helper_Form_Element_Radio('showTOC', 
-        array('1' => _t('显示'), '0' => _t('隐藏')), 
-        '1', _t('是否显示目录树'));
+    $showTOC = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showTOC',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否显示目录树')
+    );
     $form->addInput($showTOC);
 
     // 分类模块显示选项
-    $showCategory = new Typecho_Widget_Helper_Form_Element_Radio('showCategory', 
-        array('1' => _t('显示'), '0' => _t('隐藏')), 
-        '1', _t('是否显示分类模块'));
+    $showCategory = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showCategory',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否显示分类模块')
+    );
     $form->addInput($showCategory);
 
     // 标签模块显示选项
-    $showTag = new Typecho_Widget_Helper_Form_Element_Radio('showTag', 
-        array('1' => _t('显示'), '0' => _t('隐藏')), 
-        '1', _t('是否显示标签模块'));
+    $showTag = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showTag',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否显示标签模块')
+    );
     $form->addInput($showTag);
 
     // 主题配色
@@ -120,15 +140,17 @@ function themeConfig($form)
 }
 
 // 主题配色
-function getColorScheme() {
+function getColorScheme()
+{
     $colorScheme = Typecho_Widget::widget('Widget_Options')->colorScheme;
     return $colorScheme;
 }
 
-function generateDynamicCSS() {
+function generateDynamicCSS()
+{
     // 获取颜色方案
     $colorScheme = getColorScheme();
-    
+
     // 定义颜色映射数组
     $colorMap = [
         'pink' => ['theme' => '#ea868f', 'hover' => '#DB2777'],  // 粉色
@@ -139,7 +161,7 @@ function generateDynamicCSS() {
 
     // 设置默认颜色
     $defaultColor = ['theme' => '#ea868f', 'hover' => '#d1606e'];
-    
+
     // 根据颜色方案设置主题颜色和悬停颜色
     $colors = isset($colorMap[$colorScheme]) ? $colorMap[$colorScheme] : $defaultColor;
     $themeColor = $colors['theme'];
@@ -147,9 +169,4 @@ function generateDynamicCSS() {
 
     // 输出动态CSS
     echo '<style>:root { --themecolor: ' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '; --themehovercolor: ' . htmlspecialchars($themeHoverColor, ENT_QUOTES, 'UTF-8') . '; }</style>';
-    
 }
-
-
-?>
-

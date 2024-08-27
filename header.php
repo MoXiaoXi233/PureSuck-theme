@@ -1,6 +1,7 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
 <!DOCTYPE HTML>
 <html lang="zh-CN">
+
 <head>
     <meta charset="<?= $this->options->charset(); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -20,12 +21,15 @@
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
 
+    <script src="https://unpkg.com/@barba/core"></script>
+
     <!-- AOS -->
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
 
     <!-- ICON Setting -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
 </head>
+
 <body>
     <div class="wrapper">
         <header class="header" data-js="header">
@@ -51,7 +55,7 @@
                     <br>
                     <a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #5c6a70;">Theme PureSuck</a>
                 </div>
-				<br>
+                <br>
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
                         <a href="<?= $this->options->siteUrl(); ?>" title="首页">
@@ -61,12 +65,12 @@
 
                     <!--循环显示页面-->
                     <?php $this->widget('Widget_Contents_Page_List')->to($pages); ?>
-                    <?php while($pages->next()): ?>
-                    <span class="nav-item<?= $this->is('page', $pages->slug) ? ' nav-item-current' : ''; ?>">
-                        <a href="<?= $pages->permalink(); ?>" title="<?= $pages->title(); ?>">
-                            <span><?= $pages->title(); ?></span>
-                        </a>
-                    </span>
+                    <?php while ($pages->next()): ?>
+                        <span class="nav-item<?= $this->is('page', $pages->slug) ? ' nav-item-current' : ''; ?>">
+                            <a href="<?= $pages->permalink(); ?>" title="<?= $pages->title(); ?>">
+                                <span><?= $pages->title(); ?></span>
+                            </a>
+                        </span>
                     <?php endwhile; ?>
                     <!--结束显示页面-->
                 </nav>

@@ -42,9 +42,7 @@ img {
 	height: auto;
 	max-width: 100%;
 	vertical-align: middle;
-	border-radius: 0.75rem;
-	font-style: italic;
-	box-shadow: 0 0 6px #00000008;
+
 }
 
 object {
@@ -194,13 +192,6 @@ ul {
 	padding-left: 0
 }
 
-ol ol,
-ol ul,
-ul ol,
-ul ul {
-	padding-left: 24px
-}
-
 pre {
 	padding: 12px 16px
 }
@@ -279,7 +270,7 @@ h3::before {
 .p,
 body {
 	font-size: 1rem;
-	line-height: 1.8
+	line-height: 1.85
 }
 
 .header-about,
@@ -384,10 +375,6 @@ small {
 		font-size: 17px
 	}
 
-	.p,
-	body {
-		line-height: 28px
-	}
 
 
 }
@@ -551,7 +538,6 @@ ul {
 	position: relative;
 	float: left;
 	width: 100%;
-	padding-left: 20px
 }
 
 .post-body ul li:before {
@@ -564,27 +550,72 @@ ul {
 	text-align: left
 }
 
+/* 重置计数器 */
 .list--count,
 .post-body ol {
-	counter-reset: section
+    counter-reset: section;
 }
 
+/* 第一层列表项样式 */
 .list--count .list-item,
-.post-body ol li {
-	position: relative;
-	padding-left: 20px
+.post-body ol {
+    position: relative;
+    padding-left: 20px;
 }
 
 .list--count .list-item:before,
-.post-body ol li:before {
-	position: absolute;
-	left: 0;
-	width: 16px;
-	counter-increment: section;
-	content: counter(section) '.';
-	font-family: inherit;
-	font-size: 1em
+.post-body ol > li:before {
+    position: absolute;
+    left: 0;
+    width: 16px;
+    counter-increment: section;
+    content: counter(section) '.';
+    font-family: inherit;
+    font-size: 1em;
 }
+
+/* 第二层嵌套列表的样式 */
+.post-body ol > li > ul {
+    counter-reset: subsection;
+    list-style-type: none; /* 移除默认样式 */
+    margin-left: 20px; /* 调整嵌套列表的缩进 */
+}
+
+.post-body ol > li > ul > li {
+    counter-increment: subsection;
+    position: relative;
+}
+
+.post-body ol > li > ul > li:before {
+    content: counter(subsection, lower-roman) '. ';
+    position: absolute;
+    left: -20px; /* 调整嵌套列表编号的位置 */
+    width: 16px;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+/* 第三层嵌套列表的样式 */
+.post-body ol > li > ul > li > ul {
+    counter-reset: subsubsection;
+    list-style-type: none; /* 移除默认样式 */
+    margin-left: 20px; /* 调整嵌套列表的缩进 */
+}
+
+.post-body ol > li > ul > li > ul > li {
+    counter-increment: subsubsection;
+    position: relative;
+}
+
+.post-body ol > li > ul > li > ul > li:before {
+    content: counter(subsubsection, lower-alpha) '. ';
+    position: absolute;
+    left: -20px; /* 调整嵌套列表编号的位置 */
+    width: 16px;
+    font-family: inherit;
+    font-size: 1em;
+}
+
 
 .meta {
 	display: table;
@@ -1547,12 +1578,16 @@ ul {
 	color: #333
 }
 
+ol p{
+	margin-bottom: 0px
+}
+
 li:before {
 	color: #858585
 }
 
 pre {
-	border-radius: 0.75rem;
+	border-radius: 0.5rem;
 	color: #fff;
 	background-color: #2b2b2b
 }
@@ -1754,7 +1789,7 @@ body {
 	box-shadow: 0 0 6px #00000008;
 }
 
-.post-item {
+.post-item{
 	background-color: #fff
 }
 
@@ -1970,7 +2005,8 @@ textarea.ci {
 /* 分类和标签模块样式 */
 .category-section,
 .tag-section,
-.toc-section {
+.toc-section,
+.search-section {
 	margin-bottom: 20px;
 }
 
@@ -1980,7 +2016,6 @@ textarea.ci {
 	font-size: 1.2rem;
 	font-weight: bold;
 	color: #333;
-	margin-bottom: 16px;
 }
 
 .section-header .icon {
@@ -2075,12 +2110,12 @@ textarea.ci {
 /* fontello */
 @font-face {
 	font-family: 'fontello';
-	src: url('../fonts/fontello.eot?1544444');
-	src: url('../fonts/fontello.eot?1544444#iefix') format('embedded-opentype'),
-		 url('../fonts/fontello.woff2?1544444') format('woff2'),
-		 url('../fonts/fontello.woff?1544444') format('woff'),
-		 url('../fonts/fontello.ttf?1544444') format('truetype'),
-		 url('../fonts/fontello.svg?1544444#fontello') format('svg');
+	src: url('../fonts/fontello.eot?40206488');
+	src: url('../fonts/fontello.eot?40206488#iefix') format('embedded-opentype'),
+		 url('../fonts/fontello.woff2?40206488') format('woff2'),
+		 url('../fonts/fontello.woff?40206488') format('woff'),
+		 url('../fonts/fontello.ttf?40206488') format('truetype'),
+		 url('../fonts/fontello.svg?40206488#fontello') format('svg');
 	font-weight: normal;
 	font-style: normal;
   }
@@ -2090,7 +2125,7 @@ textarea.ci {
   @media screen and (-webkit-min-device-pixel-ratio:0) {
 	@font-face {
 	  font-family: 'fontello';
-	  src: url('../font/fontello.svg?1544444#fontello') format('svg');
+	  src: url('../font/fontello.svg?40206488#fontello') format('svg');
 	}
   }
   */
@@ -2133,6 +2168,7 @@ textarea.ci {
   .icon-chat:before { content: '\e802'; } /* '' */
   .icon-article:before { content: '\e803'; } /* '' */
   .icon-record-outline:before { content: '\e804'; } /* '' */
+  .icon-search:before { content: '\e805'; } /* '' */
   .icon-emo-surprised:before { content: '\e806'; } /* '' */
   .icon-emo-tongue:before { content: '\e807'; } /* '' */
   .icon-emo-coffee:before { content: '\e808'; } /* '' */
@@ -2141,11 +2177,18 @@ textarea.ci {
   .icon-attention:before { content: '\e80b'; } /* '' */
   .icon-minus-circle:before { content: '\e80c'; } /* '' */
   .icon-clock:before { content: '\e80d'; } /* '' */
+  .icon-flash:before { content: '\e80e'; } /* '' */
   .icon-up-open:before { content: '\e80f'; } /* '' */
   .icon-down-open:before { content: '\e810'; } /* '' */
+  .icon-check:before { content: '\e811'; } /* '' */
+  .icon-attach-outline:before { content: '\e812'; } /* '' */
+  .icon-cog:before { content: '\e813'; } /* '' */
+  .icon-wrench:before { content: '\e814'; } /* '' */
+  .icon-lightbulb:before { content: '\e815'; } /* '' */
   .icon-info-circled:before { content: '\f085'; } /* '' */
   .icon-github-circled:before { content: '\f09b'; } /* '' */
-  .icon-hashtag:before { content: '\f292'; } /* '' */  
+  .icon-hashtag:before { content: '\f292'; } /* '' */
+  
 
 /** 归档 **/
 .archive-container {
@@ -2161,7 +2204,6 @@ textarea.ci {
 
 .archive-title {
     font-size: 1.5rem; /* 标题字体大小 */
-    margin: 0;
 }
 
 .archive-posts {
