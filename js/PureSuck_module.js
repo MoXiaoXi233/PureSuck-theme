@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 处理 img 标签
         const images = document.querySelectorAll('img');
         images.forEach(img => {
+            if (img.closest('.post-media')) return; // 跳过 post-media 内的 img
             if (!img.hasAttribute('loading')) {
                 img.setAttribute('loading', 'lazy');
             }
@@ -11,12 +12,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 img.setAttribute('data-zoomable', 'true');
             }
         });
-
+    
         // 处理标题标签
         const headers = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
         headers.forEach(header => {
             const elements = document.querySelectorAll(header);
             elements.forEach((element, index) => {
+                if (element.closest('.post-media')) return; // 跳过 post-media 内的标题
                 const headerText = element.textContent;
                 let text = headerText.trim().toLowerCase().replace(/\W+/g, '-');
                 text = text.substring(0, 50); // 限制 ID 长度，避免过长

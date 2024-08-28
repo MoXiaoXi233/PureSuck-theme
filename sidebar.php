@@ -10,7 +10,7 @@
             <section class="section-body">
                 <form method="get" action="<?php $this->options->siteUrl(); ?>" class="search-container">
                     <input type="text" name="s" class="search-input" placeholder="输入关键字搜索">
-                    <button type="submit" class="search-button">
+                    <button type="submit" class="search-button" aria-label="搜索">
                         <span class="icon-search"></span>
                     </button>
                 </form>

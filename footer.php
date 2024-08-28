@@ -113,12 +113,14 @@
               const anchor = document.querySelector(`#link-${element.id}`);
               anchor.classList.add("li-active");
 
-              let sidebarTop = index * 30 + 5;
-              if (index === 0) {
-                sidebarTop -= 0; //调试用
-              } else if (index === elements.length - 1) {
-                sidebarTop += 0; //调试用
-              }
+              const tocItems = document.querySelectorAll(".toc li");
+              let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
+              sidebarTop -= toc.getBoundingClientRect().top + window.scrollY; // 调整到 TOC 的相对位置
+
+              // 动态计算偏移量
+              const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
+              const offset = fontSize / 2; // 字体大小的一半
+              sidebarTop += offset - 2;
 
               document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
             }

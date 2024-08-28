@@ -6,7 +6,7 @@
  * 
  * @package PureSuck
  * @author MoXiify
- * @version 1.1.2
+ * @version 1.1.3
  * @link https://www.moxiify.cn
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -25,7 +25,7 @@ $this->need('header.php');
                 <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                     <div class="wrapper post-wrapper">
                         <div class="avatar post-author">
-                            <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" loading="lazy" alt="作者头像" class="avatar-item avatar-img">
+                            <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
                             <span class="avatar-item">
                                 <?php $this->author(); ?>
                             </span>
@@ -36,7 +36,7 @@ $this->need('header.php');
                 <!-- 大图样式 -->
                 <?php if ($hasImg): ?>
                     <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                        <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy" width="2000" height="800">
+                        <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
                     </figure>
                 <?php endif; ?>
 

@@ -722,17 +722,9 @@ body>.wrapper {
 
 @media (min-width:1183px) {
 	body>.wrapper {
-		max-width: 1328px;
-		padding-right: 80px;
-		padding-left: 80px
-	}
-}
-
-@media (min-width:1503px) {
-	body>.wrapper {
-		max-width: 1851px;
-		padding-right: 480px;
-		padding-left: 135px;
+		max-width: 1666px;
+		padding-left: 35px;
+        padding-right: 385px;
 	}
 }
 
@@ -947,12 +939,12 @@ body>.wrapper {
 @media (min-width:1183px) {
 	.main {
 		padding-top: 50px;
-		padding-bottom: 80px;
-		padding-left: 305px
+		padding-bottom: 112px;
+		padding-left: 295px
 	}
 
 	.main-pager {
-		padding-top: 80px
+		padding-top: 112px
 	}
 }
 
@@ -1171,7 +1163,7 @@ body>.wrapper {
 	}
 
 	.post-wrapper {
-		max-width: 640px
+		max-width: 800px
 	}
 
 	.post--link .post-body .post-wrapper>p:first-of-type,
@@ -1198,10 +1190,6 @@ body>.wrapper {
 
 	.post-body {
 		margin-top: -56px
-	}
-
-	.post-wrapper {
-		max-width: 800px
 	}
 
 	.post--link .post-body .post-wrapper>p:first-of-type,
@@ -1997,9 +1985,9 @@ textarea.ci {
 .right-sidebar {
 	top: 0;
 	overflow-y: auto;
-	padding: 50px;
+	padding: 50px 50px 50px 56px;
 	position: fixed;
-	width: 370px;
+	width: 344px;
 }
 
 /* 分类和标签模块样式 */
@@ -2051,13 +2039,13 @@ textarea.ci {
 	background-color: #f0f0f0;
 }
 
-@media screen and (max-width: 1503px) {
+@media screen and (max-width: 1183px) {
 	.right-sidebar {
 		display: none;
 	}
 }
 
-@media (min-width: 1503px) {
+@media (min-width: 1183px) {
 	.right-sidebar {
 		display: inline;
 	}

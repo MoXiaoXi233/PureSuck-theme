@@ -23,7 +23,7 @@
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" loading="lazy" alt="头图" width="2000" height="800">
+                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
                 </figure>
             <?php endif; ?>
 
