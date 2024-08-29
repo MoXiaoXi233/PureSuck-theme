@@ -235,17 +235,17 @@
     border-color: var(--themecolor);
 }
 
-
-
-#app {
-    display: flex;
-    justify-content: center;
-    box-sizing: border-box;
-    padding-top: 70px;
+/** TOC 目录**/
+.toc-section {
+    max-height: 380px; /* 设置最大高度 */
+    overflow-y: auto; /* 允许垂直滚动 */
+    overflow-x: hidden; /* 隐藏水平滚动条 */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
 }
 
-.container {
-    width: 50%;
+.toc-section::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .toc {
@@ -326,7 +326,7 @@
 }
 
 
-
+/**友链卡片**/
 
 .friendsboard-list {
     display: flex;
@@ -438,7 +438,7 @@
 }
 
 
-/* 折叠面板的 CSS 样式 */
+/* 折叠面板 */
 .collapsible-panel {
     margin-bottom: 20px;
     border: 1px solid #f7f7f7;
@@ -478,7 +478,7 @@
     background-color: white;
 }
 
-/* 时间线的 CSS 样式 */
+/* 时间线 */
 #timeline {
     position: relative;
     padding: 20px 0;
@@ -548,7 +548,7 @@
 }
 
 
-/* tabs的 CSS 样式 */
+/* tabs */
 .tabs {
     width: 100%;
     background-color: #fff;

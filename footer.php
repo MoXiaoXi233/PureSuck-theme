@@ -123,6 +123,13 @@
               sidebarTop += offset - 2;
 
               document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
+
+              // 确保高亮部分在 toc-section 中心位置
+              anchor.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "nearest" // 保持水平滚动位置不变
+              });
             }
           });
         });
