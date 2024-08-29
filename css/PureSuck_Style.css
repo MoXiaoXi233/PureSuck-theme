@@ -522,21 +522,18 @@ ul {
 .list,
 .post-body ol,
 .post-body ul {
-	float: left;
 	width: 100%;
 	list-style: none
 }
 
 .list-item,
 .post-body li {
-	float: left;
 	width: 100%;
 	clear: both
 }
 
 .post-body ul li {
 	position: relative;
-	float: left;
 	width: 100%;
 }
 
@@ -1985,6 +1982,7 @@ textarea.ci {
 .right-sidebar {
 	top: 0;
 	overflow-y: auto;
+    overflow-x: hidden;
 	padding: 50px 50px 50px 56px;
 	position: fixed;
 	width: 344px;
