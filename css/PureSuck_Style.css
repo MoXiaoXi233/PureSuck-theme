@@ -1894,14 +1894,34 @@ body {
 	padding-left: 64px
 }
 
-.tbox {
-	padding: 0 0 0 18px
+.tbox-container {
+    display: flex;
+	flex-wrap: wrap;
+	position: relative;
+    cursor: pointer;
+	gap:20px
 }
+
+.tbox-container .tbox {
+	flex:1;
+}
+
+@media (max-width: 767.5px) {
+    .tbox {
+        flex: 1 1 100%;
+    }
+}
+
+.comment-box {
+	align-items: center;
+    border: 1px solid #e0e0e0;
+    padding: 16px;
+    border-radius: 5px;
+  }
 
 .ci {
 	overflow: auto;
 	margin: 10px 0;
-	margin-left: -18px;
 	padding: 5px 15px;
 	width: 100%;
 	border: 1px solid #ccc;
@@ -1912,8 +1932,22 @@ body {
 
 textarea.ci {
 	resize: none;
-	padding: 15px 15px;
-	min-height: 200px
+    margin-left: 0px;
+    height: 100%;
+    padding: 15px 15px;
+    min-height: 200px;
+}
+
+.CtBoxBar {
+    display: flex;
+    justify-content: space-between; /* 左右对齐 */
+    align-items: center; /* 垂直居中对齐 */
+}
+
+.left-bar {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    gap: 10px; /* 设置左边子项之间的间隔 */
 }
 
 .submit {

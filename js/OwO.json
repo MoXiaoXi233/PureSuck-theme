@@ -416,7 +416,7 @@
     },
     "MoXiify": {
         "type": "image",
-        "width": "32px",
+        "width": "48px",
         "container": [
             {
                 "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Wink.gif",

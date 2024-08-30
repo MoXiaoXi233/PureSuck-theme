@@ -44,8 +44,8 @@ function threadedComments($comments, $options)
             ?>
             <img class="avatarcc" src="<?php echo $avatarUrl; ?>" loading="lazy" alt="评论头像" />
             <div class="cp">
-            <?php echo parseOwOcodes($comments->content); ?>
-            <div class="cm">
+                <?php echo parseOwOcodes($comments->content); ?>
+                <div class="cm">
                     <span class="ca"><?php echo $author; ?></span>
                     <?php if ($isAdmin): ?>
                         <span class="badge">博主</span>
@@ -96,20 +96,31 @@ function threadedComments($comments, $options)
                     <?php else : ?>
                         <div class="ainfo">
                         <?php endif; ?>
-                        <div class="tbox">
-                            <input type="text" name="author" id="author" class="ci" placeholder="您的昵称" value="<?php $this->remember('author'); ?>" required>
-                            <input type="email" name="mail" id="mail" class="ci" placeholder="邮箱地址" value="<?php $this->remember('mail'); ?>" <?php if ($this->options->commentsRequireMail): ?> required
-                                <?php endif; ?>>
-                            <input type="url" name="url" id="url" class="ci" placeholder="您的网站（选填）" value="<?php $this->remember('url'); ?>" <?php if ($this->options->commentsRequireURL): ?> required
-                                <?php endif; ?>>
+                        <div class="tbox-container">
+                            <div class="tbox">
+                                <input type="text" name="author" id="author" class="ci" placeholder="您的昵称" value="" required="">
+                            </div>
+                            <div class="tbox">
+                                <input type="email" name="mail" id="mail" class="ci" placeholder="邮箱地址" value="" required="">
+                            </div>
+                            <div class="tbox">
+                                <input type="url" name="url" id="url" class="ci" placeholder="您的网站（选填）" value="">
+                            </div>
                         </div>
                         </div>
                     <?php endif; ?>
-                    <div class="OwO"></div>
                     <div class="tbox">
                         <textarea name="text" id="textarea" class="ci OwO-textarea" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text', false); ?></textarea>
+                        <div class="CtBoxBar">
+                            <div class="left-bar">
+                                <div class="OwO-bar">
+                                    <ul class="OwO"></ul>
+                                </div>
+                                <!-- 未来可以在这里添加更多内容 -->
+                            </div>
+                            <button type="submit" class="submit" id="submit">提交评论</button>
+                        </div>
                     </div>
-                    <button type="submit" class="submit" id="submit">提交评论</button>
         </form>
     </div>
 </div>
@@ -124,7 +135,7 @@ function threadedComments($comments, $options)
             container: document.getElementsByClassName('OwO')[0],
             target: document.getElementsByClassName('OwO-textarea')[0],
             api: '/usr/themes/PureSuck/js/OwO.json',
-            position: 'down',
+            position: 'up',
             width: '100%',
             maxHeight: '260px'
         });
@@ -139,4 +150,3 @@ function threadedComments($comments, $options)
         }
     });
 </script>
-

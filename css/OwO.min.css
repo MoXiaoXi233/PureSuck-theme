@@ -1,5 +1,4 @@
 .OwO {
-  position: relative;
   user-select: none;
 }
 .OwO:hover .OwO-logo {
@@ -15,12 +14,12 @@
 }
 .OwO.OwO-up .OwO-body {
   top: inherit;
-  bottom: 21px;
   border-radius: 4px 4px 4px 0;
 }
 .OwO.OwO-up .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
   border-radius: 0;
 }
+
 .OwO.OwO-up.OwO-open .OwO-logo {
   border: 1px solid #ddd;
   border-radius: 0 0 4px 4px;
@@ -54,7 +53,6 @@
   background: #fff;
   border: 1px solid #ddd;
   z-index: 1;
-  top: 26px;
   border-radius: 0 4px 4px 4px;
 }
 .OwO .OwO-body .OwO-items {
