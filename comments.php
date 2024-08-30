@@ -30,7 +30,7 @@ function threadedComments($comments, $options)
 {
     $cl = $comments->levels > 0 ? 'c_c' : 'c_p';
     $isAdmin = $comments->authorId == 1; // 判断评论者是否是站长
-    $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external">' . $comments->author . '</a>' : $comments->author;
+    $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external nofollow">' . $comments->author . '</a>' : $comments->author;
 ?>
     <li id="li-<?php $comments->theId(); ?>" class="<?php echo $cl; ?>">
         <div id="<?php $comments->theId(); ?>">
@@ -44,8 +44,8 @@ function threadedComments($comments, $options)
             ?>
             <img class="avatarcc" src="<?php echo $avatarUrl; ?>" loading="lazy" alt="评论头像" />
             <div class="cp">
-                <?php $comments->content(); ?>
-                <div class="cm">
+            <?php echo parseOwOcodes($comments->content); ?>
+            <div class="cm">
                     <span class="ca"><?php echo $author; ?></span>
                     <?php if ($isAdmin): ?>
                         <span class="badge">博主</span>
@@ -139,3 +139,4 @@ function threadedComments($comments, $options)
         }
     });
 </script>
+

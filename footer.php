@@ -128,7 +128,7 @@
               anchor.scrollIntoView({
                 behavior: "smooth",
                 block: "center",
-                inline: "nearest" // 保持水平滚动位置不变
+                inline: "nearest" 
               });
             }
           });

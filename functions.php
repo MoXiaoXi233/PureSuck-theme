@@ -7,6 +7,38 @@ function themeFields($layout)
     $description->input->setAttribute('class', 'text w-100');
     $layout->addItem($description);
 }
+function parseOwOcodes($content) {
+    // 读取 JSON 文件
+    $jsonFile = __DIR__ . '/js/OwO.json';
+    if (!file_exists($jsonFile)) {
+        return htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+    }
+
+    $jsonContent = file_get_contents($jsonFile);
+    $shortcodes = json_decode($jsonContent, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+    }
+
+    // 遍历 JSON 文件中的所有表情包类型
+    foreach ($shortcodes as $key => $package) {
+        if (isset($package['type']) && $package['type'] === 'image' && isset($package['container'])) {
+            foreach ($package['container'] as $data) {
+                $shortcode = htmlspecialchars($data['input'], ENT_QUOTES, 'UTF-8');
+                $imgTag = sprintf(
+                    '<img src="%s" width="%s" loading="lazy" alt="%s">',
+                    htmlspecialchars($data['icon'], ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars($package['width'], ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars($data['text'], ENT_QUOTES, 'UTF-8')
+                );
+                $content = str_replace($shortcode, $imgTag, $content);
+            }
+        }
+    }
+
+    return $content;
+}
 
 function themeConfig($form)
 {

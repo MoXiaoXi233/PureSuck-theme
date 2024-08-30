@@ -284,7 +284,7 @@
     height: 20px;
     line-height: 2;
     background: var(--themecolor);
-    transition: all 0.1s;
+    transition: transform 0.1s ease;
 }
 
 .toc-a {

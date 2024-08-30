@@ -1,6 +1,7 @@
 {
     "颜文字": {
         "type": "emoticon",
+        "width": "auto",
         "container": [
             {
                 "icon": "OωO",
@@ -415,211 +416,163 @@
     },
     "MoXiify": {
         "type": "image",
+        "width": "32px",
         "container": [
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Wink.gif\" style=\"width: 48px;\" loading=\"lazy\">",
-                "text": "Wink"
+                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Wink.gif",
+                "text": "Wink",
+                "input": ":#(MoXiify_Wink)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Why.gif\" style=\"width: 48px;\" loading=\"lazy\">",
-                "text": "疑问"
+                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Why.gif",
+                "text": "疑问",
+                "input": ":#(MoXiify_Why)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_SpeechLess.gif\" style=\"width: 48px;\" loading=\"lazy\">",
-                "text": "沉默"
+                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_SpeechLess.gif",
+                "text": "沉默",
+                "input": ":#(MoXiify_SpeechLess)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Smile.gif\" style=\"width: 48px;\" loading=\"lazy\">",
-                "text": "微笑"
+                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Smile.gif",
+                "text": "微笑",
+                "input": ":#(MoXiify_Smile)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Sleep.gif\" style=\"width: 48px;\" loading=\"lazy\">",
-                "text": "犯困"
+                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Sleep.gif",
+                "text": "犯困",
+                "input": ":#(MoXiify_Sleep)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/moxi/MoXi_Silent.gif\" style=\"width: 48px;\" loading=\"lazy\">",
-                "text": "无语"
+                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Silent.gif",
+                "text": "无语",
+                "input": ":#(MoXiify_Silent)"
             }
         ]
     },
     "BiliBili": {
         "type": "image",
+        "width": "32px",
         "container": [
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/doge.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "doge"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/doge.gif",
+                "text": "doge",
+                "input": ":$(BiliBili_doge)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/亲亲.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "亲亲"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/亲亲.gif",
+                "text": "亲亲",
+                "input": ":$(BiliBili_亲亲)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/偷笑.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "偷笑"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/偷笑.gif",
+                "text": "偷笑",
+                "input": ":$(BiliBili_偷笑)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/再见.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "再见"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/再见.gif",
+                "text": "再见",
+                "input": ":$(BiliBili_再见)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/发怒.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "发怒"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/发怒.gif",
+                "text": "发怒",
+                "input": ":$(BiliBili_发怒)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/发财.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "发财"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/发财.gif",
+                "text": "发财",
+                "input": ":$(BiliBili_发财)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/可爱.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "可爱"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/可爱.gif",
+                "text": "可爱",
+                "input": ":$(BiliBili_可爱)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/吐血.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "吐血"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/吐血.gif",
+                "text": "吐血",
+                "input": ":$(BiliBili_吐血)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/呆.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "呆"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/呆.gif",
+                "text": "呆",
+                "input": ":$(BiliBili_呆)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/呕吐.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "呕吐"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/呕吐.gif",
+                "text": "呕吐",
+                "input": ":$(BiliBili_呕吐)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/困.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "困"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/困.gif",
+                "text": "困",
+                "input": ":$(BiliBili_困)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/坏笑.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "坏笑"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/坏笑.gif",
+                "text": "坏笑",
+                "input": ":$(BiliBili_坏笑)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/大佬.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "大佬"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/大佬.gif",
+                "text": "大佬",
+                "input": ":$(BiliBili_大佬)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/大哭.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "大哭"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/大哭.gif",
+                "text": "大哭",
+                "input": ":$(BiliBili_大哭)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/委屈.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "委屈"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/委屈.gif",
+                "text": "委屈",
+                "input": ":$(BiliBili_委屈)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/害羞.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "害羞"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/害羞.gif",
+                "text": "害羞",
+                "input": ":$(BiliBili_害羞)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/尴尬.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "尴尬"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/尴尬.gif",
+                "text": "尴尬",
+                "input": ":$(BiliBili_尴尬)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/微笑.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "微笑"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/微笑.gif",
+                "text": "微笑",
+                "input": ":$(BiliBili_微笑)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/思考.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "思考"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/思考.gif",
+                "text": "思考",
+                "input": ":$(BiliBili_思考)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/惊吓.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "惊吓"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/惊吓.gif",
+                "text": "惊吓",
+                "input": ":$(BiliBili_惊吓)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/打脸.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "打脸"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/打脸.gif",
+                "text": "打脸",
+                "input": ":$(BiliBili_打脸)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/抓狂.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "抓狂"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/抓狂.gif",
+                "text": "抓狂",
+                "input": ":$(BiliBili_抓狂)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/抠鼻子.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "抠鼻子"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/抠鼻子.gif",
+                "text": "抠鼻子",
+                "input": ":$(BiliBili_抠鼻子)"
             },
             {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/斜眼笑.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "斜眼笑"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/无奈.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "无奈"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/晕.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "晕"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/流汗.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "流汗"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/流鼻血.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "流鼻血"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/点赞.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "点赞"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/生气.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "生气"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/生病.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "生病"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/疑问.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "疑问"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/白眼.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "白眼"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/睡着.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "睡着"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/笑哭.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "笑哭"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/腼腆.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "腼腆"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/色.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "色"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/调皮.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "调皮"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/鄙视.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "鄙视"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/闭嘴.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "闭嘴"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/难过.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "难过"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/馋.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "馋"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/黑人问号.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "黑人问号"
-            },
-            {
-                "icon": "<img src=\"/usr/themes/PureSuck/images/owo/bilibili/鼓掌.gif\" style=\"width: 32px;\" loading=\"lazy\">",
-                "text": "鼓掌"
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili/斜眼笑.gif",
+                "text": "斜眼笑",
+                "input": ":$(BiliBili_斜眼笑)"
             }
         ]
     }
