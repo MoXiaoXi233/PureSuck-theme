@@ -575,5 +575,86 @@
                 "input": ":$(BiliBili_斜眼笑)"
             }
         ]
+    },
+    "2233娘": {
+        "type": "image",
+        "width": "48px",
+        "container": [
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/1.png",
+                "text": "bilibili2233-1",
+                "input": ":#(bilibili2233-1)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/10.png",
+                "text": "bilibili2233-2",
+                "input": ":#(bilibili2233-2)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/11.png",
+                "text": "bilibili2233-3",
+                "input": ":#(bilibili2233-3)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/12.png",
+                "text": "bilibili2233-4",
+                "input": ":#(bilibili2233-4)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/13.png",
+                "text": "bilibili2233-5",
+                "input": ":#(bilibili2233-5)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/14.png",
+                "text": "bilibili2233-6",
+                "input": ":#(bilibili2233-6)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/15.png",
+                "text": "bilibili2233-7",
+                "input": ":#(bilibili2233-7)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/2.png",
+                "text": "bilibili2233-8",
+                "input": ":#(bilibili2233-8)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/3.png",
+                "text": "bilibili2233-9",
+                "input": ":#(bilibili2233-9)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/4.png",
+                "text": "bilibili2233-10",
+                "input": ":#(bilibili2233-10)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/5.png",
+                "text": "bilibili2233-11",
+                "input": ":#(bilibili2233-11)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/6.png",
+                "text": "bilibili2233-12",
+                "input": ":#(bilibili2233-12)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/7.png",
+                "text": "bilibili2233-13",
+                "input": ":#(bilibili2233-13)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/8.png",
+                "text": "bilibili2233-14",
+                "input": ":#(bilibili2233-14)"
+            },
+            {
+                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/9.png",
+                "text": "bilibili2233-15",
+                "input": ":#(bilibili2233-15)"
+            }
+        ]
     }
 }

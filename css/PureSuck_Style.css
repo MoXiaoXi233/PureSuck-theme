@@ -1907,7 +1907,11 @@ body {
 }
 
 @media (max-width: 767.5px) {
-    .tbox {
+	.tbox-container {
+	gap: 0
+    }
+	
+    .tbox-container .tbox {
         flex: 1 1 100%;
     }
 }

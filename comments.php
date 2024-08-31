@@ -90,7 +90,7 @@ function threadedComments($comments, $options)
             <?php else: ?>
                 <?php if ($this->remember('author', true) != "" && $this->remember('mail', true) != "") : ?>
                     <span>欢迎
-                        <?php $this->remember('author'); ?> 回来~ | <small style="cursor: pointer;" onclick="tg_c('ainfo','hinfo');">修改资料</small>
+                    <?php $this->remember('author'); ?> 回来~<?php /* |<small style="cursor: pointer;" onclick="tg_c('ainfo','hinfo');">修改资料</small> */ ?>
                     </span>
                     <div id="ainfo" class="ainfo hinfo">
                     <?php else : ?>

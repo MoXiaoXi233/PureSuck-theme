@@ -14,10 +14,15 @@
 }
 .OwO.OwO-up .OwO-body {
   top: inherit;
+  transform: translateY(-113%); /* 向上移动自身的高度 */
   border-radius: 4px 4px 4px 0;
 }
 .OwO.OwO-up .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
   border-radius: 0;
+}
+
+.OwO-package-active {
+  color: var(--themecolor);
 }
 
 .OwO.OwO-up.OwO-open .OwO-logo {
@@ -53,6 +58,7 @@
   background: #fff;
   border: 1px solid #ddd;
   z-index: 1;
+  top: 26px;
   border-radius: 0 4px 4px 4px;
 }
 .OwO .OwO-body .OwO-items {
@@ -120,9 +126,7 @@
 .OwO .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
   border-radius: 0 0 0 3px;
 }
-.OwO .OwO-body .OwO-bar .OwO-packages li:hover {
-  background: var(--themehovercolor);
-}
+
 .OwO .OwO-body .OwO-bar .OwO-packages .OwO-package-active {
   background: var(--themehovercolor);
   transition: 0.3s;
