@@ -108,6 +108,30 @@ textarea {
 	vertical-align: top
 }
 
+table {
+    width: 100%;
+    border-collapse: collapse;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+	overflow: hidden; 
+	text-align: left;
+	border-radius: 0.35rem;
+	margin: 1.25rem 0;
+}
+table thead {
+    background-color: #f7f7f7;
+}
+table th,table td {
+    color: #666;
+    padding: 0.4rem 1.25rem;
+	border-bottom: 1px solid #eeeeee; /* 只添加下边框 */
+}
+table tr {
+    transition: background-color .3s;
+}
+table tr:hover {
+    background-color: #f8f8f8;
+}
+
 .icon:empty:before {
 	margin-right: 0
 }
@@ -2072,7 +2096,7 @@ textarea.ci {
 
 .category-cloud .category:hover,
 .tag-cloud .tag:hover {
-	background-color: #f0f0f0;
+	background-color: #f8f8f8;
 }
 
 @media screen and (max-width: 1183px) {
