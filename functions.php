@@ -7,6 +7,7 @@ function themeFields($layout)
     $description->input->setAttribute('class', 'text w-100');
     $layout->addItem($description);
 }
+
 function parseOwOcodes($content) {
     // 读取 JSON 文件
     $jsonFile = __DIR__ . '/js/OwO.json';
@@ -26,9 +27,10 @@ function parseOwOcodes($content) {
         if (isset($package['type']) && $package['type'] === 'image' && isset($package['container'])) {
             foreach ($package['container'] as $data) {
                 $shortcode = htmlspecialchars($data['input'], ENT_QUOTES, 'UTF-8');
+                $imgUrl = Typecho_Common::url(htmlspecialchars($data['icon'], ENT_QUOTES, 'UTF-8'), Helper::options()->siteUrl);
                 $imgTag = sprintf(
                     '<img src="%s" width="%s" loading="lazy" alt="%s">',
-                    htmlspecialchars($data['icon'], ENT_QUOTES, 'UTF-8'),
+                    $imgUrl,
                     htmlspecialchars($package['width'], ENT_QUOTES, 'UTF-8'),
                     htmlspecialchars($data['text'], ENT_QUOTES, 'UTF-8')
                 );
