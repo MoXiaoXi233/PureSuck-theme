@@ -1,6 +1,6 @@
 ![Banner](https://s2.loli.net/2024/08/05/M4FTuyI2b7aU3Ag.png)
 # PureSuck-Theme
-![Static Badge](https://img.shields.io/badge/RELEASE-1.1.0-blue)
+![Static Badge](https://img.shields.io/badge/RELEASE-1.1.4-blue)
 ![Static Badge](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Static Badge](https://img.shields.io/badge/AUTHOR-MoXiify-pink)  
 PureSuck，干净，纯洁，淡雅朴素的typecho主题。  
