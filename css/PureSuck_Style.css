@@ -683,11 +683,14 @@ ul {
 	display: inline-block;
 	margin-right: 8px;
 	margin: 3px;
-	margin-left: 8px
+	margin-left: 8px;
+	border-radius: 0.4rem;
 }
 
 .nav-item a {
-	display: block
+	display: block;
+	padding: 0.25rem 0.15rem;
+	width: 100%;
 }
 
 .nav-text {
@@ -743,9 +746,9 @@ body>.wrapper {
 
 @media (min-width:1183px) {
 	body>.wrapper {
-		max-width: 1666px;
+		max-width: 1700px;
 		padding-left: 35px;
-        padding-right: 385px;
+        padding-right: 365px;
 	}
 }
 
@@ -865,24 +868,12 @@ body>.wrapper {
 		justify-content: center;
 	}
 
-	.header-credit .nav-item,
-	.header-nav .nav-item,
-	.header-title {
-		width: auto
-	}
+
 
 	.header-nav .nav-item:first-child {
 		position: relative
 	}
 
-	.header-nav .nav-item:first-child:after {
-		content: '';
-		position: absolute;
-		top: -24px;
-		left: 0;
-		right: 0;
-		border-top: 1px solid #c7ced1;
-	}
 
 	.header-credit {
 		display: block;
@@ -900,7 +891,7 @@ body>.wrapper {
 		padding-right: 50px;
 		padding-bottom: 50px;
 		margin-right: -344px;
-		margin-left: -35px;
+		margin-left: -30px;
 	}
 
 
@@ -961,7 +952,7 @@ body>.wrapper {
 	.main {
 		padding-top: 50px;
 		padding-bottom: 112px;
-		padding-left: 295px
+		padding-left: 345px
 	}
 
 	.main-pager {
@@ -973,7 +964,7 @@ body>.wrapper {
 	.main {
 		padding-top: 50px;
 		padding-bottom: 112px;
-		padding-left: 295px
+		padding-left: 315px
 	}
 
 	.main-pager {
@@ -1184,7 +1175,7 @@ body>.wrapper {
 	}
 
 	.post-wrapper {
-		max-width: 800px
+		max-width: 848px
 	}
 
 	.post--link .post-body .post-wrapper>p:first-of-type,
@@ -1693,29 +1684,16 @@ strong {
 
 .nav-item-current,
 .nav-item:hover {
-	color: #374043
-}
-
-.nav-item:before {
-	content: "";
-	display: block;
-	position: absolute;
-	height: 1px;
-	background: #000;
-	width: 0;
-	left: 0;
-	bottom: 0;
-	transition: width 0.4s;
-}
-
-.nav-item:hover:before {
-	width: 100%;
+	background: #e4e6e7;
+	color: #374043;
+	transition: background-color 0.3s, color 0.3s;
 }
 
 .nav-item-alt,
 .nav-item-alt:hover {
 	color: #6F6F6F
 }
+
 
 .nav--pager a {
 	color: #6F6F6F
@@ -1732,10 +1710,6 @@ body {
 
 .header-title {
 	margin-top: 12px;
-}
-
-.header-nav {
-	border-top: 1px solid #c7ced1
 }
 
 .header-form .form-input {
@@ -1788,9 +1762,6 @@ body {
 		border-top: 0
 	}
 
-	.header-nav .nav-item:first-child:before {
-		border-top: 1px solid #c7ced1
-	}
 }
 
 .post-inner {
@@ -2045,7 +2016,7 @@ textarea.ci {
 	top: 0;
 	overflow-y: auto;
     overflow-x: hidden;
-	padding: 50px 50px 50px 56px;
+	padding: 50px 50px 50px 50px;
 	position: fixed;
 	width: 344px;
 }

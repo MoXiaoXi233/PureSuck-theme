@@ -110,7 +110,7 @@
 
 .window {
     padding: 20px 0px 0px 10px;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
 }
 
 .window.blue {
@@ -170,7 +170,8 @@
 }
 
 .window-prompt-wrap {
-    margin-left: 0.75rem;
+    margin: 0 0.75rem;
+
 }
 
 .window-prompt-heading {

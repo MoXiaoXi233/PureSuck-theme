@@ -53,7 +53,7 @@
                     <br>
                     <a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #5c6a70;">Theme PureSuck</a>
                 </div>
-                <br>
+
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
                         <a href="<?= $this->options->siteUrl(); ?>" title="首页">
