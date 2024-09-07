@@ -75,7 +75,9 @@ pre>code:hover {
 	padding: 0;
 	background: inherit;
 	color: inherit;
-	border-radius: 0
+	border-radius: 0;
+	border:0;
+	margin:0;
 }
 
 blockquote p:last-child {
@@ -184,7 +186,7 @@ code {
 	display: inline-block;
 	top: -1px;
 	padding-right: 8px;
-	padding-left: 8px
+	padding-left: 8px;
 }
 
 .form {
@@ -289,6 +291,17 @@ h3::before {
 	position: relative;
 	border-radius: 50%;
 	top: 28px;
+}
+
+h4::before {
+	content: "";
+	display: block;
+	width: 2px;
+	height: 18px;
+	background-image: linear-gradient(var(--themecolor), transparent);
+	opacity: .55;
+	position: absolute;
+	border-radius: 2px;
 }
 
 .p,
@@ -1139,7 +1152,7 @@ body>.wrapper {
 	.post-item {
 		float: left;
 		width: 100%;
-		padding: 45px 45px 50px 45px;
+		padding: 45px 45px 45px 45px;
 	}
 
 	.post-body {
@@ -1207,7 +1220,6 @@ body>.wrapper {
 	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -10px;
-		margin-bottom: 46px
 	}
 
 	.post-more {
@@ -1568,9 +1580,11 @@ blockquote {
 }
 
 code {
-	border-radius: 2px;
+	border-radius: 0.4rem;
 	color: #292929;
-	background-color: #f5f5f5
+	background-color: #f5f5f5;
+	border:.05rem solid #c7ced1;
+	margin:0 5px
 }
 
 ol,
@@ -2091,7 +2105,6 @@ textarea.ci {
 	width: 100%;
 	margin: 0;
 	margin-top: -10px;
-	max-height: 350px;
 	overflow: hidden;
 }
 

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 处理 img 标签
         const images = document.querySelectorAll('img');
         images.forEach(img => {
-            if (img.closest('.post-media')) return; // 跳过 post-media 内的 img
+            if (img.closest('.post-media') || img.closest('header')) return; // 跳过 post-media 和 header 内的 img
             if (!img.hasAttribute('loading')) {
                 img.setAttribute('loading', 'lazy');
             }
