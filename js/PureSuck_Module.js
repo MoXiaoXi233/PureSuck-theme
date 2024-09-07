@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function parseShortcodes() {
         // 获取包含短代码的特定容器
-        let elements = document.querySelectorAll('.inner-post-wrapper');
+        let elements = document.querySelectorAll('.inner-post-wrapper , .header');
         
         elements.forEach(element => {
             // 获取元素的内容
