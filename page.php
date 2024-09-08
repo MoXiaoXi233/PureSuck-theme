@@ -56,6 +56,7 @@
                         ?>
 
                     </div>
+                </div>
             </section>
 
             <section class="post-item post-comments">

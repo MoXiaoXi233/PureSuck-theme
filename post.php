@@ -54,7 +54,31 @@
                         $content = ob_get_clean();
                         echo $content;
                         ?>
+
+                        <!-- 判断并显示版权信息 -->
+                        <?php if ($this->options->showCopyright == '1'): ?>
+                            <div class="license-info-card">
+                                <div class="license-info-title"><?php $this->title(); ?></div>
+                                <a class="license-info-link" href="<?php $this->permalink(); ?>"><?php $this->permalink(); ?></a>
+                                <div class="license-info-meta">
+                                    <div>
+                                        <span>本文作者</span>
+                                        <span><?php $this->author(); ?></span>
+                                    </div>
+                                    <div>
+                                        <span>发布时间</span>
+                                        <span><?php $this->date('Y-m-d'); ?></span>
+                                    </div>
+                                    <div>
+                                        <span>许可协议</span>
+                                        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>
+                                    </div>
+                                </div>
+                                <span class="cc-icon">&#xe819;</span> <!-- 使用自定义图标字体 -->
+                            </div>
+                        <?php endif; ?>
                     </div>
+                </div>
             </section>
 
             <section class="post-item post-comments">

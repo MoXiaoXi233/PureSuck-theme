@@ -8,7 +8,8 @@ function themeFields($layout)
     $layout->addItem($description);
 }
 
-function parseOwOcodes($content) {
+function parseOwOcodes($content)
+{
     // 读取 JSON 文件
     $jsonFile = __DIR__ . '/js/OwO.json';
     if (!file_exists($jsonFile)) {
@@ -160,6 +161,15 @@ function themeConfig($form)
         _t('是否显示标签模块')
     );
     $form->addInput($showTag);
+
+    // 文章页显示版权信息选项
+    $showCopyright = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showCopyright',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否在文章页显示版权信息')
+    );
+    $form->addInput($showCopyright);
 
     // 主题配色
     $colors = array(
