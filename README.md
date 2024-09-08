@@ -4,7 +4,8 @@
 ![Static Badge](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Static Badge](https://img.shields.io/badge/AUTHOR-MoXiify-pink)  
 PureSuck，干净，纯洁，淡雅朴素的typecho主题。  
-由于是第一次正经意义上的做一个项目，加上本人属于极度的小白，作为学习的帮手，全程高度依赖 ChatGPT 4o，本次开发差不多用时10天，遇到问题欢迎反馈解决。  
+由于是第一次正经意义上的做一个项目，遇到问题欢迎反馈解决。  
+另外主题样式和基调还在不断迭代中，可能会遇到版本更新后样式发生变化的情况  
 感谢你的使用！
 ## 外观
 可以前往[希记](https://note.moxiify.cn)查看最新版演示效果  
