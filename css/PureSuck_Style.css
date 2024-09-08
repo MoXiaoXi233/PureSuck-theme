@@ -1559,6 +1559,32 @@ a:hover {
 	color: var(--themehovercolor);
 }
 
+.inner-post-wrapper > a {
+    border-radius: 0.35rem;
+	position: relative;
+	display: inline-block;
+	text-decoration: none;
+}
+
+.inner-post-wrapper > a::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: var(--themecolor); /* 背景颜色和透明度 */
+	border-radius: 5px; /* 圆角 */
+	transform: scale(0.9);
+	transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
+	opacity: 0;
+}
+
+.inner-post-wrapper > a:hover::before {
+	transform: scale(1.1); /* 增大背景图像 */
+	opacity: 0.25; /* 显示背景图像 */
+}
+
 .inner-post-wrapper > a::after {
 	content: '\e812'; 
 	font-family: fontello;
@@ -1621,7 +1647,7 @@ h6 {
 body {
 	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
 	font-weight: 400;
-	color: #5c5c5c
+	color: #444
 }
 
 b,
