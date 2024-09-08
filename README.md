@@ -35,7 +35,8 @@ TOC目录树
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
 ### 功能与组件
 设置大图时需要在自定义字段中新建一个img，随后在内容输入图片的链接，效果正如本文那样啦~  
-初始有三种组件，引用条，彩色信息窗和友链卡片，使用格式如下
+归档页面：后台新建一个页面，右边选择归档即可
+初始有三种组件，引用条，彩色信息窗和友链卡片，使用格式如下  
 #### 引用条
 ```
 [alert type="red"]这是一个红色警告。[/alert]
