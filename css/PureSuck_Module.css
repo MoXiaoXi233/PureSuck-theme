@@ -44,11 +44,12 @@
 .text-xs.font-semibold {
     margin-top: 0 !important;
     margin-bottom: 0px !important;
+    margin-left: 5px;
 }
 
 .alert-box {
     border-radius: 0.6rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 6px #00000008;
     overflow: hidden;
     margin: 20px 0 !important;
     display: flex;
@@ -184,56 +185,84 @@
 }
 
 
-/* comments*/
-.comment-sorting {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
+/* 确保 .right-sidebar 的样式 */
+.right-sidebar {
+	top: 0;
+	overflow-y: auto;
+    overflow-x: hidden;
+	padding: 50px 50px 50px 50px;
+	position: fixed;
+	width: 344px;
 }
 
-.sort-button {
-    cursor: pointer;
-    margin-left: 10px;
-    color: #666;
+/* 分类和标签模块样式 */
+.category-section,
+.tag-section,
+.toc-section,
+.search-section {
+	margin-bottom: 20px;
 }
 
-.sort-button.active {
-    color: #007bff;
-    font-weight: bold;
-    border-bottom: 2px solid #007bff;
+.section-header {
+	display: flex;
+	align-items: center;
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #333;
 }
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
+.section-header .icon {
+	font-size: 1.5rem;
+	margin-right: 8px;
 }
 
-.pagination li {
-    margin: 0 5px;
+.section-body {
+	padding: 10px 0;
 }
 
-.pagination li a {
-    display: block;
-    padding: 8px 12px;
-    text-decoration: none;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s;
+.category-cloud,
+.tag-cloud {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
 }
 
-.pagination li a:hover {
-    background-color: #f0f0f0;
-    color: #333;
+.category-cloud .category,
+.tag-cloud .tag {
+	display: inline-block;
+	padding: 2px 12px;
+	color: #333;
+	border-radius: 0.4rem;
+	text-decoration: none;
+	font-size: 0.9em;
+	background: #ffffff;
+	color: #374043;
+	transition: background-color 0.3s, color 0.3s;
+	border: 1px solid #ddd; /* 边框 */
+    box-shadow: 0 0 6px #00000008;
 }
 
-.pagination .active a {
-    background-color: var(--themecolor);
-    color: #fff;
-    border-color: var(--themecolor);
+.category-cloud .category:hover,
+.tag-cloud .tag:hover {
+	background-color: #f8f8f8;
+}
+.category-cloud .category:active,
+.tag-cloud .tag:active {
+    background-color: #e0e0e0;
+	transform: scale(0.95); /* 点击时的缩小效果 */
+}
+
+
+@media screen and (max-width: 1183px) {
+	.right-sidebar {
+		display: none;
+	}
+}
+
+@media (min-width: 1183px) {
+	.right-sidebar {
+		display: inline;
+	}
 }
 
 /** TOC 目录**/
@@ -252,7 +281,6 @@
 .toc {
     right: 2%;
     top: 80px;
-    min-width: 300px;
 }
 
 .dir {
@@ -264,7 +292,33 @@
 #toc {
     margin: 0;
     padding-left: 15px;
+    width: 100%;
     box-sizing: border-box;
+}
+
+#toc .li {
+    border: 1px solid #f6f6f6; /* 边框 */
+    border-radius: 5px; /* 圆角 */
+    transition: background-color 0.3s, transform 0.3s; /* 添加过渡效果 */
+}
+
+#toc .li:hover {
+    border: 1px solid #ddd; /* 边框 */
+    background-color: #f0f0f0; /* 悬停时的背景颜色 */
+}
+
+#toc .li:active {
+    background-color: #e0e0e0; /* 点击时的背景颜色 */
+    transform: scale(0.95); /* 点击时的缩小效果 */
+}
+
+#toc .toc-a {
+    text-decoration: none; /* 去掉链接下划线 */
+    display: block; /* 使链接填充整个列表项 */
+}
+
+.toc-a.li-active {
+    color: var(--themehovercolor);
 }
 
 .sider {
@@ -292,14 +346,6 @@
     color: #333;
     text-decoration: none;
     font-size: 14px;
-}
-
-.toc-a:hover {
-    color: var(--themehovercolor);
-}
-
-.toc-a.li-active {
-    color: var(--themehovercolor);
 }
 
 .li-1 .toc-a {
@@ -350,7 +396,7 @@
     transition: ease all 0.3s;
     overflow: hidden;
     background: #f8fafc;
-    border-radius: 8px;
+    border-radius: 0.45rem;
     display: flex;
     flex-flow: column nowrap;
     justify-content: flex-start;
@@ -550,17 +596,6 @@
 
 
 /* tabs */
-.tabs {
-    width: 100%;
-    background-color: #fff;
-    margin: 50px auto;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    margin: 20px 0 !important;
-}
-
 .tab-header {
     display: flex;
     position: relative;
@@ -606,8 +641,9 @@
     display: flex;
     align-items: center;
     background-color: #fff;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0.65rem;
+    border: 1px solid #ddd; /* 边框 */
+    box-shadow: 0 0 6px #00000008;
 }
 
 .search-input {

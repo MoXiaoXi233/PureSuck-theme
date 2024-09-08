@@ -120,7 +120,7 @@
               // 动态计算偏移量
               const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
               const offset = fontSize / 2; // 字体大小的一半
-              sidebarTop += offset - 2;
+              sidebarTop += offset - 3;
 
               document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
 

@@ -45,7 +45,7 @@
   box-sizing: border-box;
   z-index: 2;
   line-height: 0px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 6px #00000008;
 }
 .OwO .OwO-logo:hover span {
   display: inline-block;
