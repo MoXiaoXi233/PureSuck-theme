@@ -57,6 +57,7 @@
   <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      // 初始化 highlight.js
       hljs.highlightAll();
     });
   </script>
@@ -128,7 +129,7 @@
               anchor.scrollIntoView({
                 behavior: "smooth",
                 block: "center",
-                inline: "nearest" 
+                inline: "nearest"
               });
             }
           });
