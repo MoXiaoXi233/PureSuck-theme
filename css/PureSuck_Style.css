@@ -724,8 +724,8 @@ body>.wrapper {
 @media (min-width:386px) {
 	body>.wrapper {
 		max-width: 548px;
-		padding-right: 14px;
-		padding-left: 14px
+		padding-right: 16px;
+		padding-left: 16px
 	}
 }
 
@@ -1565,9 +1565,9 @@ a:hover {
     border-radius: 0.35rem;
 	position: relative;
 	display: inline-block;
+	overflow-wrap: break-word;
 	text-decoration: none;
-	padding: 0 5px; 
-	margin-left: -5px;
+	max-width: 100%;
 }
 
 .inner-post-wrapper > a::before,
@@ -1589,8 +1589,8 @@ a:hover {
 .inner-post-wrapper > a:hover::before,
 .inner-post-wrapper > p > a:hover::before,
 .license-info-card a:hover::before {
-	transform: scale(1); /* 增大背景图像 */
-	opacity: 0.25; /* 显示背景图像 */
+	transform: scale(1.05, 1.0);
+	opacity: 0.25; 
 }
 
 .inner-post-wrapper > a::after,
@@ -1598,7 +1598,7 @@ a:hover {
 .license-info-card a::after {
 	content: '\e812'; 
 	font-family: fontello;
-	color: currentColor; /* 使用主元素的颜色 */
+	color: currentColor; 
 	font-size: 0.8em; 
 	margin-left: 5px; 
 }
@@ -2171,7 +2171,6 @@ textarea.ci {
 	display: flex;
 	justify-content: flex-start;
 	align-items: flex-start;
-	font-size: 0.9em;
 	color: #8b949e;
 	gap: 25px;
 }
@@ -2198,6 +2197,31 @@ textarea.ci {
 
 .license-info-card * {
 	z-index: 1; 
+}
+
+/* 小尺寸设备样式 */
+@media (max-width: 579px) {
+    .license-info-card {
+        padding: 15px;
+        border-radius: 0.5rem;
+		font-size: 0.85rem;
+    }
+
+    .license-info-title {
+        font-size: 1.2em;
+    }
+
+    .license-info-meta {
+        gap: 10px;
+    }
+
+	.license-info-meta div span {
+		margin-bottom: 0;
+	}
+
+    .cc-icon {
+        right: 20px; 
+    }
 }
 
 /** Medium-zoom 图片 **/
