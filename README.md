@@ -9,7 +9,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 感谢你的使用！
 ## 外观
 可以前往[希记](https://note.moxiify.cn)查看最新版演示效果  
-主题本身有四种强调色可以选择，同时内置几种多彩的小组件（会不断补充，欢迎issues）  
+主题本身有四种强调色可以选择，同时内置几种多彩的小组件（欢迎issues提交建议）  
 ![整体样式](https://s2.loli.net/2024/08/05/NZItCKfVaFMxXHA.png)  
 ![细节样式](https://s2.loli.net/2024/08/05/1JWB6G3gqlEV7pR.png)
 ## TODO
@@ -18,6 +18,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 - [ ] 评论区界面重做
 - [ ] 优化代码，修复 BUG
 - [ ] 统一设计语言:(
+- [ ] PJAX！
 ## 特性
 代码高亮   
 细微动效设计  
