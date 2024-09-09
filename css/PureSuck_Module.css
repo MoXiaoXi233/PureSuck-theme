@@ -98,6 +98,7 @@
     line-height: 1.25rem;
     flex-direction: column;
     gap: 1rem;
+    box-shadow: 0 0 6px #00000008;
 }
 
 .flex {

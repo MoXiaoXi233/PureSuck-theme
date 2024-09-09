@@ -724,8 +724,8 @@ body>.wrapper {
 @media (min-width:386px) {
 	body>.wrapper {
 		max-width: 548px;
-		padding-right: 24px;
-		padding-left: 24px
+		padding-right: 14px;
+		padding-left: 14px
 	}
 }
 
@@ -1633,7 +1633,8 @@ li:before {
 pre {
 	border-radius: 0.5rem;
 	color: #fff;
-	background-color: #2b2b2b
+	background-color: #2b2b2b;
+	box-shadow: 0 0 6px #00000008;
 }
 
 .post--cover .post-body .post-wrapper>p:first-child,
