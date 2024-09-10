@@ -1,28 +1,26 @@
 document.addEventListener('DOMContentLoaded', function () {
-    
+
     function enhanceContent() {
-        // 处理 img 标签
         const images = document.querySelectorAll('img');
         images.forEach(img => {
-            if (img.closest('.post-media') || img.closest('header')) return; // 跳过 post-media 和 header 内的 img
+            const isInPostMediaOrHeader = img.closest('.post-media') || img.closest('header');
+            if (isInPostMediaOrHeader) return;
             if (!img.hasAttribute('loading')) {
                 img.setAttribute('loading', 'lazy');
             }
             if (!img.hasAttribute('data-zoomable')) {
-                img.setAttribute('data-zoomable', 'true');
+                img.dataset.zoomable = 'true';
             }
         });
-    
-        // 处理标题标签
+
         const headers = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
         headers.forEach(header => {
             const elements = document.querySelectorAll(header);
             elements.forEach((element, index) => {
-                if (element.closest('.post-media')) return; // 跳过 post-media 内的标题
-                const headerText = element.textContent;
-                let text = headerText.trim().toLowerCase().replace(/\W+/g, '-');
-                text = text.substring(0, 50); // 限制 ID 长度，避免过长
-                const id = `heading-${header}-${index + 1}-${text}`;
+                if (element.closest('.post-media')) return;
+                let headerText = element.textContent.trim().toLowerCase().replace(/\W+/g, '-');
+                headerText = headerText.substring(0, 50);
+                const id = `heading-${header}-${index + 1}-${headerText}`;
                 if (!element.hasAttribute('id')) {
                     element.setAttribute('id', id);
                 }
@@ -30,75 +28,196 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function handleGoTopButton() {
+        const goTopBtn = document.getElementById('go-top');
+        const goTopAnchor = document.querySelector('#go-top .go');
+
+        let ticking = false;
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                window.requestAnimationFrame(function () {
+                    const st = document.documentElement.scrollTop || document.body.scrollTop;
+                    if (st > 0) {
+                        if (document.getElementById('main-container')) {
+                            const w = window.innerWidth;
+                            const mw = document.getElementById('main-container').offsetWidth;
+                            if ((w - mw) / 2 > 70) {
+                                goTopBtn.style.left = 'unset';
+                                goTopBtn.style.right = `calc((100% - ${mw}px) / 2 - 80px)`;
+                            } else {
+                                goTopBtn.style.left = 'unset';
+                                goTopBtn.style.right = '10px';
+                            }
+                        }
+                        goTopBtn.style.display = 'block';
+                    } else {
+                        goTopBtn.style.display = 'none';
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        goTopAnchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    function generateTOC() {
+        const tocSection = document.getElementById("toc-section");
+        const toc = document.querySelector(".toc");
+        const postWrapper = document.querySelector(".inner-post-wrapper");
+        if (!postWrapper) return;
+
+        const elements = postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        if (!elements.length) return;
+
+        let str = `<div class="dir">\n<ul id="toc">`;
+        elements.forEach(v => {
+            str += `<li class="li li-${v.tagName[1]}"><a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a></li>\n`;
+        });
+        str += `</ul>\n<div class="sider"><span class="siderbar"></span></div>\n</div>`;
+
+        toc.insertAdjacentHTML("beforeend", str);
+
+        elements.forEach(v => {
+            const btn = document.querySelector(`#link-${v.id}`);
+            btn.addEventListener("click", event => {
+                event.preventDefault();
+                const targetTop = getElementTop(v);
+                window.scrollTo({
+                    top: targetTop,
+                    behavior: "smooth"
+                });
+                history.pushState(null, null, `#${v.id}`);
+            });
+        });
+
+        let ticking = false;
+        window.addEventListener("scroll", () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentPosition = window.scrollY;
+                    elements.forEach((element, index) => {
+                        const targetTop = getElementTop(element);
+                        const nextElement = elements[index + 1];
+                        const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
+
+                        if (currentPosition >= targetTop && currentPosition < nextTargetTop) {
+                            removeClass(elements);
+                            const anchor = document.querySelector(`#link-${element.id}`);
+                            anchor.classList.add("li-active");
+
+                            const tocItems = document.querySelectorAll(".toc li");
+                            let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
+                            sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
+
+                            const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
+                            const offset = fontSize / 2;
+                            sidebarTop += offset - 3;
+
+                            document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
+
+                            anchor.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                                inline: "nearest"
+                            });
+                        }
+                    });
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        if (tocSection) {
+            tocSection.style.display = "block";
+        }
+    }
+
+    function getElementTop(element) {
+        let actualTop = element.offsetTop;
+        let current = element.offsetParent;
+
+        while (current !== null) {
+            actualTop += current.offsetTop;
+            current = current.offsetParent;
+        }
+
+        return actualTop;
+    }
+
+    function removeClass(elements) {
+        elements.forEach(v => {
+            const anchor = document.querySelector(`#link-${v.id}`);
+            anchor.classList.remove("li-active");
+        });
+    }
+
     function parseShortcodes() {
-        // 获取包含短代码的特定容器
-        let elements = document.querySelectorAll('.inner-post-wrapper , .header');
-        
+        const elements = document.querySelectorAll('.inner-post-wrapper, .header');
+
         elements.forEach(element => {
-            // 获取元素的内容
             let content = element.innerHTML;
-    
-            // 移除每个短代码后面的 <br> 标签
+
             content = content.replace(/\[\/(alert|window|friend-card|collapsible-panel|timeline|tabs)\](<br\s*\/?>)?/g, '[/$1]');
             content = content.replace(/\[\/timeline-event\](<br\s*\/?>)?/g, '[/timeline-event]');
             content = content.replace(/\[\/tab\](<br\s*\/?>)?/g, '[/tab]');
-    
-            // 使用正则表达式匹配 [alert] 短代码
-            let alertRegex = /\[alert type="([^"]*)"\](.*?)\[\/alert\]/g;
+
+            const alertRegex = /\[alert type="([^"]*)"\](.*?)\[\/alert\]/g;
             content = content.replace(alertRegex, (match, type, text) => {
-                return `<div ALERT-TYPE="${type}">${text}</div>`;
+                return `<div alert-type="${type}">${text}</div>`;
             });
-    
-            // 使用正则表达式匹配 [window] 短代码
-            let windowRegex = /\[window type="([^"]*)" title="([^"]*)"\](.*?)\[\/window\]/g;
+
+            const windowRegex = /\[window type="([^"]*)" title="([^"]*)"\](.*?)\[\/window\]/g;
             content = content.replace(windowRegex, (match, type, title, text) => {
-                return `<div WINDOW-TYPE="${type}" TITLE="${title}">${text}</div>`;
+                return `<div window-type="${type}" title="${title}">${text}</div>`;
             });
-    
-            // 使用正则表达式匹配 [friend-card] 短代码
-            let friendCardRegex = /\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/g;
+
+            const friendCardRegex = /\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/g;
             content = content.replace(friendCardRegex, (match, name, ico, url, description) => {
-                return `<div FRIEND-NAME="${name}" ICO="${ico}" URL="${url}">${description}</div>`;
+                return `<div friend-name="${name}" ico="${ico}" url="${url}">${description}</div>`;
             });
-    
-            // 使用正则表达式匹配 [collapsible-panel] 短代码
-            let collapsiblePanelRegex = /\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/g;
+
+            const collapsiblePanelRegex = /\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/g;
             content = content.replace(collapsiblePanelRegex, (match, title, text) => {
                 return `<div collapsible-panel title="${title}">${text}</div>`;
             });
-    
-            // 使用正则表达式匹配 [timeline] 短代码
-            let timelineRegex = /\[timeline\](.*?)\[\/timeline\]/gs;
+
+            const timelineRegex = /\[timeline\](.*?)\[\/timeline\]/gs;
             content = content.replace(timelineRegex, (match, innerContent) => {
-                // 使用正则表达式匹配 [timeline-event] 短代码
-                let timelineEventRegex = /\[timeline-event date="([^"]*)" title="([^"]*)"\](.*?)\[\/timeline-event\]/gs;
+                const timelineEventRegex = /\[timeline-event date="([^"]*)" title="([^"]*)"\](.*?)\[\/timeline-event\]/gs;
                 let eventsContent = innerContent.replace(timelineEventRegex, (eventMatch, date, title, eventText) => {
                     return `<div timeline-event date="${date}" title="${title}">${eventText}</div>`;
                 });
                 return `<div id="timeline">${eventsContent}</div>`;
             });
-    
-            // 使用正则表达式匹配 [tabs] 短代码
-            let tabsRegex = /\[tabs\](.*?)\[\/tabs\]/gs;
+
+            const tabsRegex = /\[tabs\](.*?)\[\/tabs\]/gs;
             content = content.replace(tabsRegex, (match, innerContent) => {
-                // 使用正则表达式匹配 [tab] 短代码
-                let tabRegex = /\[tab title="([^"]*)"\](.*?)\[\/tab\]/gs;
+                const tabRegex = /\[tab title="([^"]*)"\](.*?)\[\/tab\]/gs;
                 let tabsContent = innerContent.replace(tabRegex, (tabMatch, title, tabContent) => {
                     return `<div tab-title="${title}">${tabContent}</div>`;
                 });
                 return `<div tabs>${tabsContent}</div>`;
             });
-    
-            // 更新元素的内容
+
             element.innerHTML = content;
         });
-    } 
+    }
+
     function parseAlerts() {
-        let elements = document.querySelectorAll('[alert-type]');
+        const elements = document.querySelectorAll('[alert-type]');
 
         elements.forEach(element => {
-            let type = element.getAttribute('alert-type');
-            let content = element.innerHTML;
+            const type = element.getAttribute('alert-type');
+            const content = element.innerHTML;
 
             let iconClass;
             switch (type) {
@@ -118,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     iconClass = 'icon-info-circled';
             }
 
-            let newContent = `
+            const newContent = `
                 <div role="alert" class="alert-box ${type}">
                     <i class="${iconClass}"></i>
                     <p class="text-xs font-semibold">${content}</p>
@@ -130,14 +249,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function parseWindows() {
-        let elements = document.querySelectorAll('[window-type]');
+        const elements = document.querySelectorAll('[window-type]');
 
         elements.forEach(element => {
-            let type = element.getAttribute('window-type');
-            let title = element.getAttribute('title');
-            let content = element.innerHTML;
+            const type = element.getAttribute('window-type');
+            const title = element.getAttribute('title');
+            const content = element.innerHTML;
 
-            let newContent = `
+            const newContent = `
             <div class="notifications-container">
                 <div class="window ${type}">
                     <div class="flex">
@@ -161,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function identifyGroups(node, groups = [], currentGroup = null) {
             while (node) {
-                if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('FRIEND-NAME')) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('friend-name')) {
                     if (!currentGroup) {
                         currentGroup = [];
                         groups.push(currentGroup);
@@ -188,9 +307,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     friendsBoardList.classList.add('friendsboard-list');
 
                     group.forEach(node => {
-                        const friendName = node.getAttribute('FRIEND-NAME');
-                        const avatarUrl = node.getAttribute('ICO');
-                        const url = node.getAttribute('URL');
+                        const friendName = node.getAttribute('friend-name');
+                        const avatarUrl = node.getAttribute('ico');
+                        const url = node.getAttribute('url');
 
                         const newContent = document.createElement('a');
                         newContent.href = url;
@@ -229,13 +348,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function parseCollapsiblePanels() {
-        let elements = document.querySelectorAll('[collapsible-panel]');
+        const elements = document.querySelectorAll('[collapsible-panel]');
 
         elements.forEach(element => {
-            let title = element.getAttribute('title');
-            let content = element.innerHTML;
+            const title = element.getAttribute('title');
+            const content = element.innerHTML;
 
-            let newContent = `
+            const newContent = `
                 <div class="collapsible-panel">
                     <button class="collapsible-header">
                         ${title}
@@ -253,8 +372,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.collapsible-header').forEach(button => {
             button.addEventListener('click', function () {
                 this.classList.toggle('active');
-                let content = this.nextElementSibling;
-                let icon = this.querySelector('.icon');
+                const content = this.nextElementSibling;
+                const icon = this.querySelector('.icon');
                 if (content.style.maxHeight) {
                     content.style.maxHeight = null;
                     icon.classList.remove('icon-up-open');
@@ -269,11 +388,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function parseTimeline() {
-        const timelineEvents = document.querySelectorAll('[TIMELINE-EVENT]');
+        const timelineEvents = document.querySelectorAll('[timeline-event]');
 
         timelineEvents.forEach(event => {
-            const date = event.getAttribute('DATE');
-            const title = event.getAttribute('TITLE');
+            const date = event.getAttribute('date');
+            const title = event.getAttribute('title');
             const content = event.innerHTML;
 
             const timelineItem = document.createElement('div');
@@ -408,17 +527,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 调用短代码解析函数
     parseShortcodes();
-    // 调用内容增强函数
     enhanceContent();
-    // 调用其他解析函数
     parseAlerts();
     parseWindows();
     parseFriendCards();
     parseCollapsiblePanels();
     parseTimeline();
     parseTabs();
-    // 外部js调用
+    handleGoTopButton();
+    generateTOC();
     mediumZoom('[data-zoomable]');
+
 });

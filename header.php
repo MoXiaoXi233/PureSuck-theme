@@ -18,14 +18,23 @@
         <?= $this->options->title(); ?>
     </title>
     <?php generateDynamicCSS(); ?>
+
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
-    
+
     <!-- AOS -->
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
 
     <!-- ICON Setting -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
+    <!-- CSS引入 -->
+    <link href="<?php $this->options->themeUrl('/css/a11y-dark.min.css'); ?>" rel="stylesheet"">
+    <link href=" <?php echo $this->options->themeUrl('css/PureSuck_Module.css'); ?>" rel="stylesheet">
+    <!-- JS引入 -->
+    <script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
 </head>
 
 <body>

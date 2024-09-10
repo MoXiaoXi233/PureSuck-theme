@@ -27,7 +27,7 @@
                 </figure>
             <?php endif; ?>
 
-            <section class="post-item post-body" id="post-content">
+            <section class="post-item post-body">
                 <div class="wrapper post-wrapper">
                     <h1 class="post-title">
                         <a href="<?php $this->permalink() ?>" title="<?php $this->title() ?>">
