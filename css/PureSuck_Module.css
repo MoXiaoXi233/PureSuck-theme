@@ -239,7 +239,7 @@
 	background: #ffffff;
 	color: #374043;
 	transition: background-color 0.3s, color 0.3s;
-	border: 1px solid #ddd; /* 边框 */
+	border: 1px solid #ddd; 
     box-shadow: 0 0 6px #00000008;
 }
 
@@ -250,7 +250,7 @@
 .category-cloud .category:active,
 .tag-cloud .tag:active {
     background-color: #e0e0e0;
-	transform: scale(0.95); /* 点击时的缩小效果 */
+	transform: scale(0.95); 
 }
 
 
@@ -268,11 +268,11 @@
 
 /** TOC 目录**/
 .toc-section {
-    max-height: 380px; /* 设置最大高度 */
-    overflow-y: auto; /* 允许垂直滚动 */
-    overflow-x: hidden; /* 隐藏水平滚动条 */
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    max-height: 380px; 
+    overflow-y: auto; 
+    overflow-x: hidden; 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
 }
 
 .toc-section::-webkit-scrollbar {
@@ -298,24 +298,24 @@
 }
 
 #toc .li {
-    border: 1px solid #f6f6f6; /* 边框 */
-    border-radius: 5px; /* 圆角 */
-    transition: background-color 0.3s, transform 0.3s; /* 添加过渡效果 */
+    border: 1px solid #f6f6f6; 
+    border-radius: 5px; 
+    transition: background-color 0.3s, transform 0.3s; 
 }
 
 #toc .li:hover {
-    border: 1px solid #ddd; /* 边框 */
-    background-color: #f0f0f0; /* 悬停时的背景颜色 */
+    border: 1px solid #ddd; 
+    background-color: #f0f0f0; 
 }
 
 #toc .li:active {
-    background-color: #e0e0e0; /* 点击时的背景颜色 */
-    transform: scale(0.95); /* 点击时的缩小效果 */
+    background-color: #e0e0e0; 
+    transform: scale(0.95); 
 }
 
 #toc .toc-a {
-    text-decoration: none; /* 去掉链接下划线 */
-    display: block; /* 使链接填充整个列表项 */
+    text-decoration: none; 
+    display: block; 
 }
 
 .toc-a.li-active {
@@ -643,7 +643,7 @@
     align-items: center;
     background-color: #fff;
     border-radius: 0.65rem;
-    border: 1px solid #ddd; /* 边框 */
+    border: 1px solid #ddd; 
     box-shadow: 0 0 6px #00000008;
 }
 
