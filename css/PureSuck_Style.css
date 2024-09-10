@@ -756,8 +756,15 @@ body>.wrapper {
 @media (min-width:1183px) {
 	body>.wrapper {
 		max-width: 1700px;
+		padding-left: 0px;
+        padding-right: 328px;
+	}
+}
+
+@media (min-width: 1503px) {
+	body>.wrapper {
 		padding-left: 35px;
-        padding-right: 365px;
+		padding-right: 365px;
 	}
 }
 
