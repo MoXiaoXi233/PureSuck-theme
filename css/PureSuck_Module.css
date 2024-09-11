@@ -1,3 +1,6 @@
+/** 一些后期添加的模块样式 **/
+
+/** 回到顶部 **/
 .dn {
     display: none;
 }
@@ -48,7 +51,7 @@
 }
 
 .alert-box {
-    border-radius: 0.6rem;
+    border-radius: 0.7rem;
     box-shadow: 0 0 6px #00000008;
     overflow: hidden;
     margin: 20px 0 !important;
@@ -95,7 +98,7 @@
     border: 1px solid #be185d;
 }
 
-/* WINDOW */
+/* WINDOW 信息窗 */
 .notifications-container {
     width: auto;
     height: auto;
@@ -104,6 +107,7 @@
     flex-direction: column;
     gap: 1rem;
     box-shadow: 0 0 6px #00000008;
+    margin: 20px 0 !important;
 }
 
 .flex {
@@ -116,32 +120,32 @@
 
 .window {
     padding: 20px 0px 0px 10px;
-    border-radius: 0.5rem;
+    border-radius: 0.7rem;
 }
 
 .window.blue {
     background-color: #dbeafe;
-    border: 1px solid #2563eb; 
+    border: 1px solid #7f9cdc; 
 }
 
 .window.green {
     background-color: #f0fdf4;
-    border: 1px solid #166534; 
+    border: 1px solid #8ba394; 
 }
 
 .window.yellow {
     background-color: #fef3c7;
-    border: 1px solid #d97706;
+    border: 1px solid #ccb191;
 }
 
 .window.red {
     background-color: #fee2e2;
-    border: 1px solid #b91c1c;
+    border: 1px solid #be8585;
 }
 
 .window.pink {
     background-color: #ffdde7;
-    border: 1px solid #be185d;
+    border: 1px solid #c487a0;
 }
 
 
@@ -196,7 +200,7 @@
 }
 
 
-/* 确保 .right-sidebar 的样式 */
+/* 右侧边栏 */
 .right-sidebar {
 	top: 0;
 	overflow-y: auto;
@@ -206,7 +210,7 @@
 	width: 344px;
 }
 
-/* 分类和标签模块样式 */
+/* 分类和标签模块 */
 .category-section,
 .tag-section,
 .toc-section,
@@ -385,12 +389,10 @@
 
 
 /**友链卡片**/
-
 .friendsboard-list {
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
-    margin-top: 1em;
     width: calc(100% + 15px);
     margin-left: -15px;
 }
@@ -407,17 +409,16 @@
     transition: ease all 0.3s;
     overflow: hidden;
     background: #f8fafc;
-    border-radius: 0.45rem;
+    border-radius: 0.7rem;
     display: flex;
     flex-flow: column nowrap;
     justify-content: flex-start;
-    border: none !important;
     display: block;
     margin-left: 15px;
     margin-bottom: 25px;
     width: calc(33.3333% - 15px);
     padding: 20px;
-    
+    border: 1px solid #ddd;
 }
 
 .friendsboard-item:hover {
@@ -542,7 +543,6 @@
     position: relative;
     padding: 20px 0;
     margin: 20px 0 !important;
-
 }
 
 .timeline-item {
@@ -607,11 +607,26 @@
 }
 
 
-/* tabs */
+/* tabs 标签栏 */
 .tab-header {
     display: flex;
     position: relative;
     border-bottom: 1px solid #e0e0e0;
+    align-items: center; 
+    justify-content: flex-start; 
+}
+
+.tab-header::after {
+    content: "\e80e";
+    font-family: "fontello";
+    position: absolute;
+    right: 20px; 
+    bottom: 0; 
+    transform: translateY(50%); 
+    background-color: #fff; 
+    padding: 0 5px; 
+    font-size: 16px; 
+    color: var(--themecolor); 
 }
 
 .tab-link {
@@ -623,13 +638,13 @@
 }
 
 .tab-link.active {
-    color: #333;
+    color: var(--themecolor);
     background-color: #fff;
 }
 
 .tab-indicator {
     position: absolute;
-    bottom: 0;
+    bottom: -1px;
     height: 2px;
     background-color: var(--themecolor);
     transition: left 0.3s ease, width 0.3s ease;
@@ -648,7 +663,7 @@
     display: block;
 }
 
-/*sidebar 搜索*/
+/* 侧边栏 搜索*/
 .search-container {
     display: flex;
     align-items: center;

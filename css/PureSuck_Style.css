@@ -1606,7 +1606,7 @@ a:hover {
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):hover::before {
-    transform: scale(1.05, 1.0);
+    transform: scale(1.05, 1.1);
     opacity: 0.25;
 }
 
@@ -1653,6 +1653,7 @@ pre {
     overflow-x: hidden;
     max-height: 800px;
 	box-shadow: 0 0 6px #00000008;
+	border: 1px solid #ddd;
 }
 
 .post--cover .post-body .post-wrapper>p:first-child,
@@ -1677,7 +1678,6 @@ body {
 	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
 	font-weight: 400;
 	color: #444;
-	font-display: swap;
 }
 
 b,
