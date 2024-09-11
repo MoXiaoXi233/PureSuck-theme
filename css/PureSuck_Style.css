@@ -2075,12 +2075,11 @@ textarea.ci {
 }
 
 .pagination li a {
-    display: block;
     padding: 8px 12px;
     text-decoration: none;
     color: #333;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 0.45rem;
     transition: background-color 0.3s, color 0.3s;
 }
 
