@@ -11,7 +11,9 @@
 
 <!-- AOS -->
 <script>
-  AOS.init();
+  document.addEventListener('DOMContentLoaded', function() {
+    AOS.init();
+  });
 </script>
 
 <!-- 代码高亮 -->
