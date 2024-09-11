@@ -72,22 +72,27 @@
 
 .alert-box.green {
     background-color: #48c774;
+    border: 1px solid #166534; 
 }
 
 .alert-box.blue {
     background-color: #3273dc;
+    border: 1px solid #2563eb; 
 }
 
 .alert-box.yellow {
     background-color: #feb272;
+    border: 1px solid #d97706;
 }
 
 .alert-box.red {
     background-color: #dc3545;
+    border: 1px solid #b91c1c;
 }
 
 .alert-box.pink {
     background-color: #ea868f;
+    border: 1px solid #be185d;
 }
 
 /* WINDOW */
@@ -116,22 +121,27 @@
 
 .window.blue {
     background-color: #dbeafe;
+    border: 1px solid #2563eb; 
 }
 
 .window.green {
     background-color: #f0fdf4;
+    border: 1px solid #166534; 
 }
 
 .window.yellow {
     background-color: #fef3c7;
+    border: 1px solid #d97706;
 }
 
 .window.red {
     background-color: #fee2e2;
+    border: 1px solid #b91c1c;
 }
 
 .window.pink {
     background-color: #ffdde7;
+    border: 1px solid #be185d;
 }
 
 
@@ -407,6 +417,7 @@
     margin-bottom: 25px;
     width: calc(33.3333% - 15px);
     padding: 20px;
+    
 }
 
 .friendsboard-item:hover {
