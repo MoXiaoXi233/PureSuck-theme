@@ -966,7 +966,7 @@ body>.wrapper {
 	.main {
 		padding-top: 50px;
 		padding-bottom: 112px;
-		padding-left: 345px
+		padding-left: 325px
 	}
 
 	.main-pager {
@@ -1180,12 +1180,14 @@ body>.wrapper {
 }
 
 @media (min-width:1183px) {
-	.post {
-		margin-bottom: 82px
+	.post-body {
+		margin-top: -56px
 	}
 
-	.post-body {
-		margin-top: -40px
+	.post-item {
+		float: left;
+		width: 100%;
+		padding: 35px 45px 35px 45px;
 	}
 
 	.post-wrapper {
@@ -1209,18 +1211,24 @@ body>.wrapper {
 }
 
 @media (min-width:1503px) {
+	.post {
+		margin-bottom: 82px
+	}
+	
 	.post-item {
 		float: left;
 		width: 100%
 	}
 
-	.post-body {
-		margin-top: -56px
-	}
-
 	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -10px;
+	}
+
+	.post-item {
+		float: left;
+		width: 100%;
+		padding: 45px 45px 45px 45px;
 	}
 
 	.post-more {
