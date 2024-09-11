@@ -10,8 +10,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 ## 外观
 可以前往[希记](https://note.moxiify.cn)查看最新版演示效果  
 主题本身有四种强调色可以选择，同时内置几种多彩的小组件（欢迎issues提交建议）  
-![整体样式](https://s2.loli.net/2024/08/05/NZItCKfVaFMxXHA.png)  
-![细节样式](https://s2.loli.net/2024/08/05/1JWB6G3gqlEV7pR.png)
+![PureSuck](https://s2.loli.net/2024/09/12/D8pVAM5QkwJzdjO.png)
 ## TODO
 - [ ] 添加更多小组件  
 - [ ] 完善 CSS 样式
