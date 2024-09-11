@@ -203,7 +203,6 @@ document.addEventListener('DOMContentLoaded', function () {
             content = content.replace(tabsRegex, (match, innerContent) => {
                 const tabRegex = /\[tab title="([^"]*)"\](.*?)\[\/tab\]/gs;
                 let tabsContent = innerContent.replace(tabRegex, (tabMatch, title, tabContent) => {
-                    // 移除第一个 <br> 标签
                     tabContent = tabContent.replace(/^\s*<br\s*\/?>/, '');
                     return `<div tab-title="${title}">${tabContent}</div>`;
                 });

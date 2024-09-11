@@ -604,48 +604,72 @@ ul {
     font-size: 1em;
 }
 
-/* 第二层嵌套列表的样式 */
-.post-body ol > li > ul {
+/* 通用嵌套列表的样式 */
+.post-body ol ul {
+    list-style-type: none; 
+    margin-left: 20px; 
+    padding-left: 20px;
+}
+
+.post-body ol ul li {
+    position: relative;
+}
+
+.post-body ol ul li:before {
+    position: absolute;
+    left: -20px; 
+    width: 16px;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+/* 使用 :nth-child 选择器处理不同层级的计数器和样式 */
+.post-body ol ul li:nth-child(n) {
     counter-reset: subsection;
-    list-style-type: none; /* 移除默认样式 */
-    margin-left: 20px; /* 调整嵌套列表的缩进 */
-}
-
-.post-body ol > li > ul > li {
     counter-increment: subsection;
-    position: relative;
 }
 
-.post-body ol > li > ul > li:before {
+.post-body ol ul li:nth-child(n):before {
     content: counter(subsection, lower-roman) '. ';
-    position: absolute;
-    left: -20px; /* 调整嵌套列表编号的位置 */
-    width: 16px;
-    font-family: inherit;
-    font-size: 1em;
 }
 
-/* 第三层嵌套列表的样式 */
-.post-body ol > li > ul > li > ul {
+.post-body ol ul ul li:nth-child(n) {
     counter-reset: subsubsection;
-    list-style-type: none; /* 移除默认样式 */
-    margin-left: 20px; /* 调整嵌套列表的缩进 */
-}
-
-.post-body ol > li > ul > li > ul > li {
     counter-increment: subsubsection;
-    position: relative;
 }
 
-.post-body ol > li > ul > li > ul > li:before {
+.post-body ol ul ul li:nth-child(n):before {
     content: counter(subsubsection, lower-alpha) '. ';
-    position: absolute;
-    left: -20px; /* 调整嵌套列表编号的位置 */
-    width: 16px;
-    font-family: inherit;
-    font-size: 1em;
 }
 
+.post-body ol ul ul ul li:nth-child(n) {
+    counter-reset: subsubsubsection;
+    counter-increment: subsubsubsection;
+}
+
+.post-body ol ul ul ul li:nth-child(n):before {
+    content: counter(subsubsubsection, decimal) '. ';
+}
+
+/* 继续添加更多层级的样式 */
+.post-body ol ul ul ul ul li:nth-child(n) {
+    counter-reset: subsubsubsubsection;
+    counter-increment: subsubsubsubsection;
+}
+
+.post-body ol ul ul ul ul li:nth-child(n):before {
+    content: counter(subsubsubsubsection, lower-roman) '. ';
+}
+
+/* 递归嵌套的样式 */
+.post-body ol ul ul ul ul ul li:nth-child(n) {
+    counter-reset: subsubsubsubsubsection;
+    counter-increment: subsubsubsubsubsection;
+}
+
+.post-body ol ul ul ul ul ul li:nth-child(n):before {
+    content: counter(subsubsubsubsubsection, lower-alpha) '. ';
+}
 
 .meta {
 	display: table;
@@ -1744,7 +1768,7 @@ strong {
 	color: inherit;
 	position: relative;
 	display: inline-block;
-	border: 1px solid #f6f6F6F6; /* 边框 */
+	border: 1px solid #f6f6F6F6; 
 }
 
 .nav-item-current,
@@ -1752,11 +1776,11 @@ strong {
 	background: #e4e6e7;
 	color: #374043;
 	transition: background-color 0.3s, color 0.3s;
-	border: 1px solid #ddd; /* 边框 */
+	border: 1px solid #ddd; 
 }
 
 .nav-item:active {
-	transform: scale(0.95); /* 点击时的缩小效果 */
+	transform: scale(0.95); 
 }
 
 .nav-item-alt,
@@ -2009,14 +2033,14 @@ textarea.ci {
 
 .CtBoxBar {
     display: flex;
-    justify-content: space-between; /* 左右对齐 */
-    align-items: center; /* 垂直居中对齐 */
+    justify-content: space-between; 
+    align-items: center; 
 }
 
 .left-bar {
     display: flex;
-    align-items: center; /* 垂直居中对齐 */
-    gap: 10px; /* 设置左边子项之间的间隔 */
+    align-items: center; 
+    gap: 10px; 
 }
 
 /* comments*/
@@ -2336,8 +2360,8 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px white inset !important; /* 更改背景颜色 */
-    -webkit-text-fill-color: #000 !important; /* 更改文本颜色 */
+    -webkit-box-shadow: 0 0 0 30px white inset !important; 
+    -webkit-text-fill-color: #000 !important; 
 }
 
 /* 细滚动条 */
