@@ -144,7 +144,7 @@
 }
 
 .window.pink {
-    background-color: #ffdde7;
+    background-color: #ffdbe0;
     border: 1px solid #c487a0;
 }
 
@@ -179,7 +179,7 @@
 
 .window.pink,
 .window.pink .window-prompt-heading {
-    color: #be185d;
+    color: #DB2777;
     font-size: 17px;
     margin-bottom: 14px;
 }
