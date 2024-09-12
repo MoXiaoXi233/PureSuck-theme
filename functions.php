@@ -8,6 +8,11 @@ function themeFields($layout)
     $layout->addItem($description);
 }
 
+function themeInit($archive)
+{
+ Helper::options()->commentsAntiSpam = false; 
+}
+
 function parseOwOcodes($content)
 {
     // 读取 JSON 文件

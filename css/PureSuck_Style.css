@@ -552,123 +552,47 @@ ul {
 	margin-right: 1px
 }
 
-.list,
-.post-body ol,
+/* 列表样式 */
+.post-body ol, .post-body ul {
+    margin-left: 20px;
+}
+
+.post-body ol {
+    list-style-type: decimal;
+}
+
 .post-body ul {
-	width: 100%;
-	list-style: none
+    list-style-type: disc;
 }
 
-.list-item,
 .post-body li {
-	width: 100%;
-	clear: both
+    margin-bottom: 10px;
 }
 
-.post-body ul li {
-	position: relative;
-	width: 100%;
+.post-body li p {
+    margin-bottom: 5px;
 }
 
-.post-body ul li:before {
-	position: absolute;
-	top: 1px;
-	left: 0;
-	content: '';
-	font-family: Arial;
-	font-size: 1em;
-	text-align: left
-}
-
-/* 重置计数器 */
-.list--count,
-.post-body ol {
-    counter-reset: section;
-}
-
-/* 第一层列表项样式 */
-.list--count .list-item,
-.post-body ol {
-    position: relative;
+/* 嵌套列表样式 */
+.post-body ol ol, .post-body ul ul {
+    margin-left: 20px;
     padding-left: 20px;
 }
 
-.list--count .list-item:before,
-.post-body ol > li:before {
-    position: absolute;
-    left: 0;
-    width: 16px;
-    counter-increment: section;
-    content: counter(section) '.';
-    font-family: inherit;
-    font-size: 1em;
+.post-body ol ol {
+    list-style-type: lower-alpha;
 }
 
-/* 通用嵌套列表的样式 */
-.post-body ol ul {
-    list-style-type: none; 
-    margin-left: 20px; 
-    padding-left: 20px;
+.post-body ul ul {
+    list-style-type: circle;
 }
 
-.post-body ol ul li {
-    position: relative;
+.post-body ol ol ol {
+    list-style-type: lower-roman;
 }
 
-.post-body ol ul li:before {
-    position: absolute;
-    left: -20px; 
-    width: 16px;
-    font-family: inherit;
-    font-size: 1em;
-}
-
-/* 使用 :nth-child 选择器处理不同层级的计数器和样式 */
-.post-body ol ul li:nth-child(n) {
-    counter-reset: subsection;
-    counter-increment: subsection;
-}
-
-.post-body ol ul li:nth-child(n):before {
-    content: counter(subsection, lower-roman) '. ';
-}
-
-.post-body ol ul ul li:nth-child(n) {
-    counter-reset: subsubsection;
-    counter-increment: subsubsection;
-}
-
-.post-body ol ul ul li:nth-child(n):before {
-    content: counter(subsubsection, lower-alpha) '. ';
-}
-
-.post-body ol ul ul ul li:nth-child(n) {
-    counter-reset: subsubsubsection;
-    counter-increment: subsubsubsection;
-}
-
-.post-body ol ul ul ul li:nth-child(n):before {
-    content: counter(subsubsubsection, decimal) '. ';
-}
-
-/* 继续添加更多层级的样式 */
-.post-body ol ul ul ul ul li:nth-child(n) {
-    counter-reset: subsubsubsubsection;
-    counter-increment: subsubsubsubsection;
-}
-
-.post-body ol ul ul ul ul li:nth-child(n):before {
-    content: counter(subsubsubsubsection, lower-roman) '. ';
-}
-
-/* 递归嵌套的样式 */
-.post-body ol ul ul ul ul ul li:nth-child(n) {
-    counter-reset: subsubsubsubsubsection;
-    counter-increment: subsubsubsubsubsection;
-}
-
-.post-body ol ul ul ul ul ul li:nth-child(n):before {
-    content: counter(subsubsubsubsubsection, lower-alpha) '. ';
+.post-body ul ul ul {
+    list-style-type: square;
 }
 
 .meta {
