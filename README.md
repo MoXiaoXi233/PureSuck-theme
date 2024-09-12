@@ -32,6 +32,7 @@ TOC目录树
 ### 安装与设置
 在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。（文件夹名应该为PureSuck）  
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述
+**无法发评论请关掉评论区开启反垃圾保护！！！**
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
 ### 功能与组件
 设置大图时需要在自定义字段中新建一个img，随后在内容输入图片的链接，效果正如本文那样啦~  
