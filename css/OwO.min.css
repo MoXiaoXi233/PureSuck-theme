@@ -5,7 +5,7 @@
   color: #444;
 }
 .OwO.OwO-open .OwO-logo {
-  border-radius: 8px 8px 0 0;
+  border-radius: 0.45rem 0.45rem 0 0;
   border-bottom: none;
   color: #444;
 }
@@ -15,7 +15,7 @@
 .OwO.OwO-up .OwO-body {
   top: inherit;
   transform: translateY(-113%); /* 向上移动自身的高度 */
-  border-radius: 4px 4px 4px 0;
+  border-radius: 0.45rem 0.45rem 0.45rem 0;
 }
 .OwO.OwO-up .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
   border-radius: 0;
@@ -27,7 +27,7 @@
 
 .OwO.OwO-up.OwO-open .OwO-logo {
   border: 1px solid #ddd;
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 0.45rem 0.45rem;
   border-top: none;
 }
 .OwO .OwO-logo {
@@ -36,7 +36,7 @@
   color: #888;
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 0.45rem;
   font-size: 13px;
   padding: 15px 5px;
   margin: 5px 0px 0px 0px;
@@ -59,7 +59,7 @@
   border: 1px solid #ddd;
   z-index: 1;
   top: 26px;
-  border-radius: 0 4px 4px 4px;
+  border-radius: 0 0.45rem 0.45rem 0.45rem;
 }
 .OwO .OwO-body .OwO-items {
   user-select: none;
@@ -74,7 +74,7 @@
   list-style-type: none;
   background: #f7f7f7;
   padding: 5px 15px;
-  border-radius: 5px;
+  border-radius: 0.45rem;
   display: inline-block;
   font-size: 12px;
   line-height: 14px;
@@ -106,7 +106,7 @@
   height: 30px;
   border-top: 1px solid #ddd;
   background: #fff;
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 0.45rem 0.45rem;
   color: #444;
 }
 .OwO .OwO-body .OwO-bar .OwO-packages {
@@ -124,7 +124,7 @@
   margin-right: 3px;
 }
 .OwO .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
-  border-radius: 0 0 0 3px;
+  border-radius: 0 0 0 0.45rem;
 }
 
 .OwO .OwO-body .OwO-bar .OwO-packages .OwO-package-active {
