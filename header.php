@@ -6,6 +6,7 @@
     <meta charset="<?= $this->options->charset(); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="renderer" content="webkit">
+    <meta name="color-scheme" content="light dark">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="<?= empty($this->fields->description) || !$this->is('single') ? ($this->getDescription() ?: '') : $this->fields->description; ?>" />
     <title>
@@ -62,6 +63,7 @@
                     <br>
                     <a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #5c6a70;">Theme PureSuck</a>
                 </div>
+                <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
 
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
@@ -69,7 +71,6 @@
                             <span itemprop="name">首页</span>
                         </a>
                     </span>
-
                     <!--循环显示页面-->
                     <?php $this->widget('Widget_Contents_Page_List')->to($pages); ?>
                     <?php while ($pages->next()): ?>

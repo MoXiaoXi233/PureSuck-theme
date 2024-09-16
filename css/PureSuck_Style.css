@@ -1,3 +1,34 @@
+:root {
+    --background-color: #f6f6F6F6;
+	--pure-color: #ffffff;
+	--card-color: #ffffff;
+	--pure-gery-color:#f5f5f5;
+	--border-color: #ddd;
+	--line-color: #ebebeb;
+	--nav-color: #e4e6e7;
+	--nav-text-color:  #374043;
+    --text-color: #333;
+	--text2-color: #444;
+	--hover-color: #f8f8f8;
+    /* 其他颜色变量 */
+}
+
+[data-theme="dark"] {
+    --background-color: #18181b;
+	--pre-color: #202324;
+	--card-color: #1e1e20;
+	--pure-gery-color:#1e2021;
+	--border-color: #333739;
+	--line-color: #363a3c;
+	--nav-color: #262a2b;
+	--nav-text-color: #c1bcb4;
+    --text-color: #c1bcb4;
+	--text2-color: #bdb7af;
+	--hover-color: #262a2b;
+
+    /* 其他深色模式颜色变量 */
+}
+
 *,
 :after,
 :before {
@@ -19,7 +50,10 @@ html {
 
 
 body {
-	margin: 0
+	margin: 0;
+	background-color: var(--background-color);
+	color: var(--background-color);
+	transition: background-color 0.3s, color 0.3s;
 }
 
 h1 a,
@@ -87,7 +121,7 @@ hr {
     position: relative;
     width: calc(100% - 4px);
     border: 1px dashed var(--themecolor);
-    background: #fff;
+    background: var(--card-color);
 }
  
 hr {
@@ -105,7 +139,7 @@ textarea {
 }
 
 input	{
-    border: 1px solid #ddd; 
+    border: 1px solid var(--border-color); 
 	outline: none;
     font-size: 16px;
     padding: 10px 10px 10px 12px;
@@ -128,18 +162,18 @@ table {
 	margin: 1.25rem 0;
 }
 table thead {
-    background-color: #f7f7f7;
+    background-color: var(--pure-gery-color);
 }
 table th,table td {
     color: #666;
     padding: 0.4rem 1.25rem;
-	border-bottom: 1px solid #eeeeee; /* 只添加下边框 */
+	border-bottom: 1px solid var(--line-color); /* 只添加下边框 */
 }
 table tr {
     transition: background-color .3s;
 }
 table tr:hover {
-    background-color: #f8f8f8;
+    background-color: var(--hover-color);
 }
 
 .icon:empty:before {
@@ -1568,21 +1602,21 @@ a:hover {
 
 blockquote {
 	border-radius: 0.75rem;
-	color: #292929;
-	background-color: #f7f7f7;
+	color: var(--text-color);
+	background-color: var(--pure-gery-color);
 }
 
 code , kbd {
 	border-radius: 0.4rem;
-	color: #292929;
-	background-color: #f5f5f5;
+	color: var(--text-color);
+	background-color: var(--pure-gery-color);
 	border:.05rem solid #c7ced1;
 	margin:0 5px
 }
 
 ol,
 ul {
-	color: #333
+	color: var(--text-color)
 }
 
 ol p{
@@ -1601,7 +1635,7 @@ pre {
     overflow-x: hidden;
     max-height: 800px;
 	box-shadow: 0 0 6px #00000008;
-	border: 1px solid #ddd;
+	border: 1px solid var(--border-color);
 }
 
 .post--cover .post-body .post-wrapper>p:first-child,
@@ -1614,7 +1648,7 @@ h5,
 h6 {
 	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
 	font-weight: 400;
-	color: #333
+	color: var(--text-color)
 }
 
 .comment-title{
@@ -1625,7 +1659,7 @@ h6 {
 body {
 	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
 	font-weight: 400;
-	color: #444;
+	color: var(--text2-color);
 }
 
 b,
@@ -1635,7 +1669,7 @@ strong {
 
 .avatar,
 .avatar:before {
-	color: #333
+	color: var(--text-color)
 }
 
 .avatar {
@@ -1670,7 +1704,7 @@ strong {
 }
 
 .meta-item:before {
-	color: #d6d6d6
+	color: #969696
 }
 
 .meta-item:hover {
@@ -1679,11 +1713,11 @@ strong {
 
 .meta-item:hover .icon-ui:before,
 .meta-item:hover:before {
-	color: #adadad
+	color: #999
 }
 
 .nav {
-	color: #5c6a70;
+	color: var(--nav-text-color);
 	text-transform: uppercase;
 	letter-spacing: 2px
 }
@@ -1692,15 +1726,15 @@ strong {
 	color: inherit;
 	position: relative;
 	display: inline-block;
-	border: 1px solid #f6f6F6F6; 
+	border: 1px solid var(--background-color); 
 }
 
 .nav-item-current,
 .nav-item:hover {
-	background: #e4e6e7;
-	color: #374043;
+	background: var(--nav-color);
+	color: var(--nav-text-color);
 	transition: background-color 0.3s, color 0.3s;
-	border: 1px solid #ddd; 
+	border: 1px solid var(--border-color); 
 }
 
 .nav-item:active {
@@ -1715,10 +1749,6 @@ strong {
 
 .nav--pager a {
 	color: #6F6F6F
-}
-
-body {
-	background-color: #f6f6F6F6
 }
 
 .header-about,
@@ -1788,17 +1818,17 @@ body {
 }
 
 .post-item{
-	background-color: #fff
+	background-color: var(--card-color)
 }
 
 .post--link .post-title a:hover,
 .post-body p a:hover {
-	border-bottom-color: #333
+	border-bottom-color: var(--text-color)
 }
 
 .post-comments .post-wrapper:before,
 .post-footer .post-wrapper:before {
-	border-top: 1px solid #ebebeb
+	border-top: 1px solid var(--line-color)
 }
 
 .ie .post--cover .post-header {
@@ -1806,7 +1836,7 @@ body {
 }
 
 .post--cover .post-author {
-	color: #ebebeb
+	color: var(--line-color)
 }
 
 .post--cover .post-author:hover {
@@ -1834,7 +1864,7 @@ body {
 }
 
 .cf a {
-	color: #333
+	color: var(--text-color)
 }
 
 .comment-list {
@@ -1886,12 +1916,8 @@ body {
 .ca {
 	padding: .1rem .2rem;
 	border-radius: 2px;
-	background: #eee;
-	font-size: .766rem
-}
-
-.ca a:hover {
-	color: #222 !important
+	background: var(--background-color);
+	font-size: .75rem
 }
 
 .badge{
@@ -1941,7 +1967,7 @@ body {
 	margin: 10px 0;
 	padding: 5px 15px;
 	width: 100%;
-	border: 1px solid #ddd;
+	border: 1px solid var(--border-color);
 	border-radius: 0.65rem;
 	color: #555;
 	line-height: 1.7
@@ -2001,15 +2027,15 @@ textarea.ci {
 .pagination li a {
     padding: 8px 12px;
     text-decoration: none;
-    color: #333;
-    border: 1px solid #ddd;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     border-radius: 0.45rem;
     transition: background-color 0.3s, color 0.3s;
 }
 
 .pagination li a:hover {
     background-color: #f0f0f0;
-    color: #333;
+    color: var(--text-color);
 }
 
 .pagination .active a {
@@ -2032,7 +2058,7 @@ textarea.ci {
 }
 
 .submit:hover {
-	border-color: #ddd;
+	border-color: var(--border-color);
 	background: #ddd;
 	color: #000;
 	cursor: pointer
@@ -2133,11 +2159,11 @@ textarea.ci {
 /** LICENCE 卡片 **/
 .license-info-card {
 	padding: 20px 30px;
-	background-color: #f6f6F6F6; 
+	background-color: var(--background-color); 
 	box-shadow: 0 0 6px #00000008;
 	border-radius: 0.75rem ;
 	position: relative;
-	border: 1px solid #ddd;
+	border: 1px solid var(--border-color);
 	overflow: hidden; 
 }
 
@@ -2166,7 +2192,8 @@ textarea.ci {
 .cc-icon {
 	font-family: 'fontello';
 	font-size: 10em; 
-	color: rgba(0, 0, 0, 0.05);
+	opacity: .55;
+	color: var(--border-color);
 	position: absolute;
     right: 40px;
     top: 0;

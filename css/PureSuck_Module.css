@@ -195,7 +195,6 @@
 }
 
 .window-prompt-prompt {
-    color: #333;
     font-size: 14px;
 }
 
@@ -223,7 +222,7 @@
 	align-items: center;
 	font-size: 1.2rem;
 	font-weight: bold;
-	color: #333;
+	color: var(--text-color);
 }
 
 .section-header .icon {
@@ -246,24 +245,24 @@
 .tag-cloud .tag {
 	display: inline-block;
 	padding: 2px 12px;
-	color: #333;
+	color: var(--nav-text-color);
 	border-radius: 0.4rem;
 	text-decoration: none;
 	font-size: 0.9em;
-	background: #ffffff;
-	color: #374043;
+	background: var(--card-color);
+	color: var(--nav-text-color);
 	transition: background-color 0.3s, color 0.3s;
-	border: 1px solid #ddd; 
+	border: 1px solid var(--border-color); 
     box-shadow: 0 0 6px #00000008;
 }
 
 .category-cloud .category:hover,
 .tag-cloud .tag:hover {
-	background-color: #f8f8f8;
+	background-color: var(--hover-color);
 }
 .category-cloud .category:active,
 .tag-cloud .tag:active {
-    background-color: #e0e0e0;
+    background-color: var(--hover-color);
 	transform: scale(0.95); 
 }
 
@@ -312,18 +311,18 @@
 }
 
 #toc .li {
-    border: 1px solid #f6f6f6; 
+    border: 1px solid var(--background-color); 
     border-radius: 5px; 
     transition: background-color 0.3s, transform 0.3s; 
 }
 
 #toc .li:hover {
-    border: 1px solid #ddd; 
-    background-color: #f0f0f0; 
+    border: 1px solid var(--border-color); 
+    background-color: var(--nav-color); 
 }
 
 #toc .li:active {
-    background-color: #e0e0e0; 
+    background-color: var(background); 
     transform: scale(0.95); 
 }
 
@@ -339,7 +338,7 @@
 .sider {
     width: 2px;
     height: 100%;
-    background: #eee;
+    background: var(--line-color);
     position: absolute;
     left: 0;
     top: 0;
@@ -358,7 +357,7 @@
 }
 
 .toc-a {
-    color: #333;
+    color: var(--text-color);
     text-decoration: none;
     font-size: 14px;
 }
@@ -418,7 +417,7 @@
     margin-bottom: 25px;
     width: calc(33.3333% - 15px);
     padding: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
 }
 
 .friendsboard-item:hover {
@@ -578,20 +577,20 @@
 .timeline-date {
     font-weight: bold;
     font-size: 14px;
-    color: #333;
+    color: var(--text-color);
     margin-bottom: 5px;
 }
 
 .timeline-title {
     font-size: 18px;
     margin: 0 0 10px;
-    color: #000;
+    color: var(--text-color);
 }
 
 .timeline-description {
     font-size: 14px;
     margin: 0;
-    color: #666;
+    color: var(--text2-color);
 }
 
 #timeline::before {
@@ -618,7 +617,7 @@
 .tab-header {
     display: flex;
     position: relative;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--line-color);
     align-items: center; 
     justify-content: flex-start; 
 }
@@ -630,7 +629,7 @@
     right: 20px; 
     bottom: 0; 
     transform: translateY(50%); 
-    background-color: #fff; 
+    background-color: var(--card-color); 
     padding: 0 5px; 
     font-size: 16px; 
     color: var(--themecolor); 
@@ -646,7 +645,7 @@
 
 .tab-link.active {
     color: var(--themecolor);
-    background-color: #fff;
+    background-color: var(--card-color);
 }
 
 .tab-indicator {
@@ -659,7 +658,7 @@
 
 .tab-content {
     padding: 20px 0;
-    background-color: #fff;
+    background-color: var(--card-color);
 }
 
 .tab-pane {
@@ -674,19 +673,23 @@
 .search-container {
     display: flex;
     align-items: center;
-    background-color: #fff;
+    background-color: var(--card-color);
     border-radius: 0.65rem;
-    border: 1px solid #ddd; 
+    border: 1px solid var(--border-color); 
     box-shadow: 0 0 6px #00000008;
 }
 
 .search-input {
     border: none;
     outline: none;
+    background-color: var(--card-color);
     font-size: 16px;
     padding: 10px 10px 10px 12px;
     border-radius: 0.75rem;
     width: 225px;
+    color:var(--text-color);
+    background-color: var(--card-color);
+    box-shadow: none;
 }
 
 .search-button {
@@ -696,5 +699,6 @@
     padding: 10px 10px 10px 0px;
     display: flex;
     align-items: center;
+    color:var(--text-color);
     justify-content: center;
 }
