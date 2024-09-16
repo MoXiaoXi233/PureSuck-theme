@@ -117,7 +117,7 @@ function themeConfig($form)
         null,
         null,
         _t('网页底部信息'),
-        _t('填写网页底部的自定义信息，可以包含HTML内容，用<br>')
+        _t('填写网页底部的自定义信息，可以包含HTML内容，用br标签换行')
     );
     $form->addInput($footerInfo);
 
