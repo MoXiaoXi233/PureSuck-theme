@@ -6,7 +6,6 @@
     <meta charset="<?= $this->options->charset(); ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="renderer" content="webkit">
-    <meta name="color-scheme" content="light dark">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="<?= empty($this->fields->description) || !$this->is('single') ? ($this->getDescription() ?: '') : $this->fields->description; ?>" />
     <title>
@@ -22,6 +21,14 @@
 
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const initialTheme = savedTheme || systemTheme;
+            document.documentElement.setAttribute('data-theme', initialTheme);
+        })();
+    </script>
 
     <!-- AOS -->
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
@@ -36,6 +43,8 @@
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
+
+
 </head>
 
 <body>
@@ -63,8 +72,11 @@
                     <br>
                     <a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #5c6a70;">Theme PureSuck</a>
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-
+                <div class="theme-toggle-container">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span class="icon-lightbulb"></span>
+                    </button>
+                </div>
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
                         <a href="<?= $this->options->siteUrl(); ?>" title="首页">

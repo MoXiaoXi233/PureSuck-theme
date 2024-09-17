@@ -407,7 +407,7 @@
     box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
     transition: ease all 0.3s;
     overflow: hidden;
-    background: #f8fafc;
+    background: var(--card2-color);
     border-radius: 0.7rem;
     display: flex;
     flex-flow: column nowrap;
