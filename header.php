@@ -18,9 +18,6 @@
         <?= $this->options->title(); ?>
     </title>
     <?php generateDynamicCSS(); ?>
-
-    <!-- Style CSS -->
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
@@ -29,6 +26,42 @@
             document.documentElement.setAttribute('data-theme', initialTheme);
         })();
     </script>
+    <!-- Dark Mode -->
+    <script>
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateIcon(theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        function applyInitialTheme() {
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const savedTheme = localStorage.getItem('theme');
+            const initialTheme = savedTheme || systemTheme;
+            setTheme(initialTheme);
+        }
+
+        function updateIcon(theme) {
+            const iconElement = document.getElementById('theme-icon');
+            if (theme === 'light') {
+                iconElement.classList.remove('icon-moon-inv');
+                iconElement.classList.add('icon-sun-inv');
+            } else {
+                iconElement.classList.remove('icon-sun-inv');
+                iconElement.classList.add('icon-moon-inv');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', applyInitialTheme);
+    </script>
+    <!-- Style CSS -->
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
 
     <!-- AOS -->
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
@@ -67,16 +100,12 @@
                     <?= $this->options->leftSideCustomCode ?: ''; ?>
                 </div>
 
-                <div class="nav header-item header-credit" style="color: #5c6a70;">
+                <div class="nav header-item header-credit">
                     Powered by Typecho
                     <br>
-                    <a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #5c6a70;">Theme PureSuck</a>
+                    <a href="https://github.com/MoXiaoXi233/PureSuck-theme">Theme PureSuck</a>
                 </div>
-                <div class="theme-toggle-container">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <span class="icon-lightbulb"></span>
-                    </button>
-                </div>
+
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
                         <a href="<?= $this->options->siteUrl(); ?>" title="首页">
@@ -94,6 +123,12 @@
                     <?php endwhile; ?>
                     <!--结束显示页面-->
                 </nav>
+
+                <div class="theme-toggle-container">
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="日夜切换">
+                        <span id="theme-icon"></span>
+                    </button>
+                </div>
             </div>
         </header>
 

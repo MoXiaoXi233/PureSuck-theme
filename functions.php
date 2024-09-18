@@ -216,6 +216,29 @@ function generateDynamicCSS()
     $themeColor = $colors['theme'];
     $themeHoverColor = $colors['hover'];
 
+    // 深色模式颜色映射数组
+    $darkColorMap = [
+        'pink' => ['theme' => '#b45864', 'hover' => '#d72b6f'],
+        'green' => ['theme' => '#2e7c55', 'hover' => '#0f6933'],
+        'blue' => ['theme' => '#2855b0', 'hover' => '#1f55e6'],
+        'yellow' => ['theme' => '#bf763f', 'hover' => '#934109']
+    ];
+
+    // 根据颜色方案设置 dark 模式下的主题颜色和悬停颜色
+    $darkColors = isset($darkColorMap[$colorScheme]) ? $darkColorMap[$colorScheme] : $defaultColor;
+    $darkThemeColor = $darkColors['theme'];
+    $darkThemeHoverColor = $darkColors['hover'];
+
     // 输出动态CSS
-    echo '<style>:root { --themecolor: ' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . '; --themehovercolor: ' . htmlspecialchars($themeHoverColor, ENT_QUOTES, 'UTF-8') . '; }</style>';
+    echo '<style>
+        :root {
+            --themecolor: ' . htmlspecialchars($themeColor, ENT_QUOTES, 'UTF-8') . ';
+            --themehovercolor: ' . htmlspecialchars($themeHoverColor, ENT_QUOTES, 'UTF-8') . ';
+        }
+
+        [data-theme="dark"] {
+            --themecolor: ' . htmlspecialchars($darkThemeColor, ENT_QUOTES, 'UTF-8') . ';
+            --themehovercolor: ' . htmlspecialchars($darkThemeHoverColor, ENT_QUOTES, 'UTF-8') . ';
+        }
+    </style>';
 }

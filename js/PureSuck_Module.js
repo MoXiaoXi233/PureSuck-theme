@@ -509,22 +509,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     event.target.focus();
                 }
             });
-
-            container.querySelectorAll('.tab-link').forEach(link => {
-                link.addEventListener('keydown', function (event) {
-                    const tabLinks = Array.from(this.parentElement.querySelectorAll('.tab-link'));
-                    const currentIndex = tabLinks.indexOf(this);
-                    let newIndex = currentIndex;
-
-                    if (event.key === 'ArrowRight') {
-                        newIndex = (currentIndex + 1) % tabLinks.length;
-                    } else if (event.key === 'ArrowLeft') {
-                        newIndex = (currentIndex - 1 + tabLinks.length) % tabLinks.length;
-                    }
-
-                    tabLinks[newIndex].click();
-                });
-            });
         });
     }
 
