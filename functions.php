@@ -11,7 +11,7 @@ function themeFields($layout)
     $desc->input->setAttribute('class', 'text w-100');
     $layout->addItem($desc);
 
-    $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('描述'), _t('简单一句话描述，用于网站 Description，有利于 SEO 优化'));
+    $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('网页描述'), _t('简单一句话描述文章内容，用于网站 Description，有利于 SEO 优化，非必要'));
     $description->input->setAttribute('class', 'text w-100');
     $layout->addItem($description);
 }

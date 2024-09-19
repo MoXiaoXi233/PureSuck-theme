@@ -18,6 +18,8 @@
         <?= $this->options->title(); ?>
     </title>
     <?php generateDynamicCSS(); ?>
+    
+    <!-- Initial Theme Script -->
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme');
@@ -26,6 +28,7 @@
             document.documentElement.setAttribute('data-theme', initialTheme);
         })();
     </script>
+    
     <!-- Dark Mode -->
     <script>
         function setTheme(theme) {
@@ -35,16 +38,9 @@
         }
 
         function toggleTheme() {
-            const currentTheme = localStorage.getItem('theme') || 'light';
+            const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             setTheme(newTheme);
-        }
-
-        function applyInitialTheme() {
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const savedTheme = localStorage.getItem('theme');
-            const initialTheme = savedTheme || systemTheme;
-            setTheme(initialTheme);
         }
 
         function updateIcon(theme) {
@@ -58,8 +54,14 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', applyInitialTheme);
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const initialTheme = savedTheme || systemTheme;
+            setTheme(initialTheme);
+        });
     </script>
+    
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
 

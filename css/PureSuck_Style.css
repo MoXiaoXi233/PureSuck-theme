@@ -231,7 +231,8 @@ blockquote {
 	width: 100%;
 	padding: 16px;
 	margin-right: 0;
-	margin-left: 0
+	margin-left: 0;
+	font-size: 0.95rem
 }
 
 code , kbd {
@@ -686,6 +687,7 @@ ul {
 	margin: 3px;
 	margin-left: 8px;
 	border-radius: 0.4rem;
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .nav-item a {
@@ -1763,7 +1765,7 @@ strong {
 .nav-item:hover {
 	background: var(--nav-color);
 	color: var(--nav-text-color);
-	transition: background-color 0.3s, color 0.3s;
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 	border: 1px solid var(--border-color); 
 }
 
@@ -2188,6 +2190,7 @@ textarea.ci {
 }
 
 .theme-toggle {
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     width: 50px;
     height: 50px;
     background-color: var(--background-color); 
@@ -2195,14 +2198,14 @@ textarea.ci {
     border-radius: 10px;
     display: flex;
     align-items: center;
-	color: var(--text2-color);
+	color: var(--nav-text-color);
     justify-content: center;
     cursor: pointer;
 }
 
 #theme-icon {
     font-size: 24px;
-	color: var(--text2-color);
+	color: var(--nav-text-color);
 }
 
 /** Medium-zoom 图片 **/
