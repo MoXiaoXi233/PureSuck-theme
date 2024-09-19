@@ -17,8 +17,7 @@ $this->need('header.php');
 
     <?php while ($this->next()): ?>
         <?php
-        $fields = unserialize($this->___fields());
-        $hasImg = isset($fields['img']);
+        $hasImg = $this->fields->img ? true : false;
         ?>
         <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
             <div class="post-inner">
@@ -50,7 +49,11 @@ $this->need('header.php');
                         </h1>
                         <!-- 摘要 -->
                         <p class="post-excerpt">
-                            <?php $this->excerpt(200, ''); ?>
+                            <?php if ($this->fields->desc): ?>
+                                <?php echo $this->fields->desc; ?>
+                            <?php else: ?>
+                                <?php $this->excerpt(200, ''); ?>
+                            <?php endif; ?>
                         </p>
                     </div>
                 </section>

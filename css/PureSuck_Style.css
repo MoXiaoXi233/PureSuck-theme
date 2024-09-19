@@ -694,6 +694,10 @@ ul {
 	width: 100%;
 }
 
+.nav a {
+	color: var(--nav-text-color);
+}
+
 .nav-text {
 	clip: rect(0, 0, 0, 0);
 	display: inherit;
@@ -976,6 +980,22 @@ body>.wrapper {
 	.main-pager {
 		padding-top: 112px
 	}
+}
+
+
+.protected {
+	display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.protected input[type="password"], .protected input[type="submit"] {
+    padding: 10px;
+    margin: 5px 0;
+    width: 300px;
+    box-sizing: border-box; 
 }
 
 .post {
