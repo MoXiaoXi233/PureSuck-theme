@@ -1,4 +1,3 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
 <!DOCTYPE HTML>
 <html lang="zh-CN">
 
@@ -23,42 +22,64 @@
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const initialTheme = savedTheme || systemTheme;
+            const initialTheme = savedTheme === 'auto' || !savedTheme ? systemTheme : savedTheme;
             document.documentElement.setAttribute('data-theme', initialTheme);
         })();
     </script>
     <!-- Dark Mode -->
     <script>
         function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
+            if (theme === 'auto') {
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', systemTheme);
+                localStorage.setItem('theme', 'auto');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+            }
             updateIcon(theme);
         }
 
         function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            const currentTheme = localStorage.getItem('theme') || 'auto';
+            let newTheme;
+
+            if (currentTheme === 'light') {
+                newTheme = 'dark';
+            } else if (currentTheme === 'dark') {
+                newTheme = 'auto';
+            } else {
+                newTheme = 'light';
+            }
+
             setTheme(newTheme);
         }
 
         function updateIcon(theme) {
             const iconElement = document.getElementById('theme-icon');
             if (iconElement) {
+                iconElement.classList.remove('icon-sun-inv', 'icon-moon-inv', 'icon-auto');
                 if (theme === 'light') {
-                    iconElement.classList.remove('icon-moon-inv');
                     iconElement.classList.add('icon-sun-inv');
-                } else {
-                    iconElement.classList.remove('icon-sun-inv');
+                } else if (theme === 'dark') {
                     iconElement.classList.add('icon-moon-inv');
+                } else {
+                    iconElement.classList.add('icon-auto');
                 }
             }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme');
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const initialTheme = savedTheme || systemTheme;
-            setTheme(initialTheme);
+            const savedTheme = localStorage.getItem('theme') || 'auto';
+            setTheme(savedTheme);
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (localStorage.getItem('theme') === 'auto') {
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                updateIcon('auto');
+            }
         });
     </script>
     <!-- Style CSS -->
