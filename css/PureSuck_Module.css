@@ -532,7 +532,6 @@
 
 .friends-card-avatar {
     width: 70px;
-    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -676,6 +675,37 @@
 
 
 /* tabs 标签栏 */
+.tab-header-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.scroll-button {
+    display: none; 
+    background: var(--card-color);
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--themecolor);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    font-family: "fontello"; 
+}
+
+.scroll-button.left {
+    left: -5px;
+    transform: translateY(-50%) rotate(-90deg); 
+}
+
+.scroll-button.right {
+    right: -5px;
+    transform: translateY(-50%) rotate(90deg); 
+}
+
+
 .tab-header {
     display: flex;
     position: relative;
@@ -683,19 +713,9 @@
     align-items: center;
     justify-content: flex-start;
     font-size: 0.95rem;
-}
-
-.tab-header::after {
-    content: "\e80e";
-    font-family: "fontello";
-    position: absolute;
-    right: 20px;
-    bottom: 0;
-    transform: translateY(50%);
-    background-color: var(--card-color);
-    padding: 0 5px;
-    font-size: 16px;
-    color: var(--themecolor);
+    white-space: nowrap; 
+    flex-grow: 1;
+    overflow: hidden; 
 }
 
 .tab-link {
@@ -704,6 +724,7 @@
     color: var(--text2-color);
     transition: color 0.3s;
     position: relative;
+    flex-shrink: 0; /* 防止缩小 */
 }
 
 .tab-link.active {
@@ -730,6 +751,16 @@
 
 .tab-pane.active {
     display: block;
+}
+
+@media (max-width: 768px) {
+    .tab-header {
+        white-space: nowrap; 
+    }
+    
+    .tab-link {
+        flex-shrink: 0; 
+    }
 }
 
 /* 侧边栏 搜索*/

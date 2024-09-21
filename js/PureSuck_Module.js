@@ -430,13 +430,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (tabTitles.length === 0) return;
 
-            const tabHeader = tabTitles.map((title, index) => `
-                <div class="tab-link ${index === 0 ? 'active' : ''}" data-tab="tab${containerIndex + 1}-${index + 1}" role="tab" aria-controls="tab${containerIndex + 1}-${index + 1}" tabindex="${index === 0 ? '0' : '-1'}">
+            const tabHeaderHTML = tabTitles.map((title, index) => `
+                <div class="tab-link ${index === 0 ? 'active' : ''}" 
+                     data-tab="tab${containerIndex + 1}-${index + 1}" 
+                     role="tab" 
+                     aria-controls="tab${containerIndex + 1}-${index + 1}" 
+                     tabindex="${index === 0 ? '0' : '-1'}">
                     ${title}
                 </div>
             `).join('');
 
-            const tabContent = tabContents.map((content, index) => {
+            const tabContentHTML = tabContents.map((content, index) => {
                 const tabPane = document.createElement('div');
                 tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
                 tabPane.id = `tab${containerIndex + 1}-${index + 1}`;
@@ -449,12 +453,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const tabContainer = document.createElement('div');
             tabContainer.className = 'tab-container';
             tabContainer.innerHTML = `
-                <div class="tab-header">
-                    ${tabHeader}
-                    <div class="tab-indicator"></div>
+                <div class="tab-header-wrapper">
+                    <button class="scroll-button left" aria-label="向左"></button>
+                    <div class="tab-header">
+                        ${tabHeaderHTML}
+                        <div class="tab-indicator"></div>
+                    </div>
+                    <button class="scroll-button right" aria-label="向右"></button>
                 </div>
                 <div class="tab-content">
-                    ${tabContent}
+                    ${tabContentHTML}
                 </div>
             `;
 
@@ -471,10 +479,83 @@ document.addEventListener('DOMContentLoaded', function () {
                 indicator.style.left = `${activeLink.offsetLeft + (activeLink.offsetWidth * 0.125)}px`;
             }
 
+            const tabHeaderElement = tabContainer.querySelector('.tab-header');
+            const leftButton = tabContainer.querySelector('.scroll-button.left');
+            const rightButton = tabContainer.querySelector('.scroll-button.right');
+
+            // 检查是否需要显示滚动按钮
+            const checkScrollButtons = () => {
+                const totalWidth = Array.from(tabHeaderElement.children)
+                    .reduce((acc, child) => acc + child.offsetWidth, 0);
+                const containerWidth = tabHeaderElement.offsetWidth;
+
+                if (totalWidth <= containerWidth) {
+                    leftButton.style.display = 'none';
+                    rightButton.style.display = 'none';
+                } else {
+                    leftButton.style.display = 'block';
+                    rightButton.style.display = 'block';
+                }
+            };
+
+            checkScrollButtons();
+            window.addEventListener('resize', checkScrollButtons);
+
+            leftButton.addEventListener('click', () => {
+                tabHeaderElement.scrollBy({ left: -100, behavior: 'smooth' });
+            });
+
+            rightButton.addEventListener('click', () => {
+                tabHeaderElement.scrollBy({ left: 100, behavior: 'smooth' });
+            });
+
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            tabHeaderElement.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - tabHeaderElement.offsetLeft;
+                scrollLeft = tabHeaderElement.scrollLeft;
+            });
+
+            tabHeaderElement.addEventListener('mouseleave', () => {
+                isDown = false;
+            });
+
+            tabHeaderElement.addEventListener('mouseup', () => {
+                isDown = false;
+            });
+
+            tabHeaderElement.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - tabHeaderElement.offsetLeft;
+                const walk = (x - startX) * 2; //scroll-fast
+                tabHeaderElement.scrollLeft = scrollLeft - walk;
+            });
+
+            tabHeaderElement.addEventListener('touchstart', (e) => {
+                isDown = true;
+                startX = e.touches[0].pageX - tabHeaderElement.offsetLeft;
+                scrollLeft = tabHeaderElement.scrollLeft;
+            });
+
+            tabHeaderElement.addEventListener('touchend', () => {
+                isDown = false;
+            });
+
+            tabHeaderElement.addEventListener('touchmove', (e) => {
+                if (!isDown) return;
+                const x = e.touches[0].pageX - tabHeaderElement.offsetLeft;
+                const walk = (x - startX) * 2; //scroll-fast
+                tabHeaderElement.scrollLeft = scrollLeft - walk;
+            });
+
             container.querySelector('.tab-header').addEventListener('click', function (event) {
                 if (event.target.classList.contains('tab-link')) {
                     const tabLinks = this.querySelectorAll('.tab-link');
-                    const tabPanes = this.nextElementSibling.querySelectorAll('.tab-pane');
+                    const tabPanes = tabContainer.querySelectorAll('.tab-pane');
                     const indicator = this.querySelector('.tab-indicator');
 
                     let currentIndex = Array.from(tabLinks).indexOf(event.target);
@@ -504,9 +585,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         activePane.classList.add('aos-animate');
                     }, 0);
 
+                    if (typeof AOS !== 'undefined') {
+                        AOS.refresh(); // 重新初始化 AOS 动画
+                    }
+
                     tabLinks.forEach(link => link.setAttribute('tabindex', '-1'));
                     event.target.setAttribute('tabindex', '0');
                     event.target.focus();
+                }
+
+                // 使点击的标签出现在视野内
+                const tabHeaderRect = tabHeaderElement.getBoundingClientRect();
+                const targetRect = event.target.getBoundingClientRect();
+                if (targetRect.left < tabHeaderRect.left) {
+                    tabHeaderElement.scrollBy({ left: targetRect.left - tabHeaderRect.left, behavior: 'smooth' });
+                } else if (targetRect.right > tabHeaderRect.right) {
+                    tabHeaderElement.scrollBy({ left: targetRect.right - tabHeaderRect.right, behavior: 'smooth' });
                 }
             });
         });

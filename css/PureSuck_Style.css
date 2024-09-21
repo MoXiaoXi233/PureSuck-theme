@@ -611,7 +611,7 @@ ul {
 }
 
 .post-body li {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .post-body li p {
@@ -1864,7 +1864,7 @@ strong {
 .cp {
 	overflow: hidden;
 	padding: 1.5rem 0;
-	border-bottom: 1px dotted #e0e0e0
+	border-bottom: 1px dotted var(--line-color)
 }
 
 .cp p {
