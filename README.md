@@ -31,7 +31,7 @@ TOC目录树
 更多细节欢迎自行体验~  
 ### 安装与设置
 在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。（文件夹名应该为PureSuck）  
-主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述
+主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述  
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
 ### 功能与组件
 归档页面：后台新建一个页面，右边选择归档即可
