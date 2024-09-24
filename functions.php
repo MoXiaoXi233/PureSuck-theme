@@ -58,56 +58,89 @@ function parseOwOcodes($content)
 
 function themeConfig($form)
 {
+    # 主题信息及功能
+    $str1 = explode('/themes/', Helper::options()->themeUrl);
+    $str2 = explode('/', $str1[1]);
+    $name = $str2[0];
+    $db = Typecho_Db::get();
+    $sjdq = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name));
+    $ysj = $sjdq['value'];
+    if (isset($_POST['type'])) {
+        if ($_POST["type"] == "备份模板设置数据") {
+            if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'))) {
+                $update = $db->update('table.options')->rows(array('value' => $ysj))->where('name = ?', 'theme:' . $name . 'bf');
+                $updateRows = $db->query($update);
+                echo '<div class="tongzhi home">备份已更新，请等待自动刷新！如果等不到请点击';
+?>
+                <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
+                <script language="JavaScript">
+                    window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);
+                </script>
+                <?php
+            } else {
+                if ($ysj) {
+                    $insert = $db->insert('table.options')
+                        ->rows(array('name' => 'theme:' . $name . 'bf', 'user' => '0', 'value' => $ysj));
+                    $insertId = $db->query($insert);
+                    echo '<div class="tongzhi home">备份完成，请等待自动刷新！如果等不到请点击';
+                ?>
+                    <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
+                    <script language="JavaScript">
+                        window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);
+                    </script>
+                <?php
+                }
+            }
+        }
+        if ($_POST["type"] == "还原模板设置数据") {
+            if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'))) {
+                $sjdub = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'));
+                $bsj = $sjdub['value'];
+                $update = $db->update('table.options')->rows(array('value' => $bsj))->where('name = ?', 'theme:' . $name);
+                $updateRows = $db->query($update);
+                echo '<div class="tongzhi home">检测到模板备份数据，恢复完成，请等待自动刷新！如果等不到请点击';
+                ?>
+                <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
+                <script language="JavaScript">
+                    window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2000);
+                </script>
+            <?php
+            } else {
+                echo '<div class="tongzhi home">没有模板备份数据，恢复不了哦！</div>';
+            }
+        }
+        if ($_POST["type"] == "删除备份数据") {
+            if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'))) {
+                $delete = $db->delete('table.options')->where('name = ?', 'theme:' . $name . 'bf');
+                $deletedRows = $db->query($delete);
+                echo '<div class="tongzhi home">删除成功，请等待自动刷新，如果等不到请点击';
+            ?>
+                <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
+                <script language="JavaScript">
+                    window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);
+                </script>
+<?php
+            } else {
+                echo '<div class="tongzhi home">不用删了！备份不存在！！！</div>';
+            }
+        }
+    }
+    echo '
+    <h3>当前主题版本：<span style="color: #b45864;">1.1.9</span></h3>
+    <h4>主题开源页面及文档：<span style="color: #b45864;"><a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #3273dc; text-decoration: none;">PureSuck-theme</a></span></h4>
+    <h5>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</h5>
+    <form class="protected home" action="?' . $name . 'bf" method="post">
+    <input type="submit" name="type" class="btn btn-s" value="备份模板设置数据" />  <input type="submit" name="type" class="btn btn-s" value="还原模板设置数据" />  <input type="submit" name="type" class="btn btn-s" value="删除备份数据" /></form>';
+
     // 网页 icon URL 配置项
     $logoUrl = new \Typecho\Widget\Helper\Form\Element\Text(
         'logoUrl',
         null,
         null,
         _t('favicon.ico 地址'),
-        _t('填写ico格式图片 URL 地址, 在网站标题前加上一个 icon')
+        _t('填写ico格式图片 URL 地址, 在网站标题前加上一个图标')
     );
     $form->addInput($logoUrl);
-
-
-    // 左侧 LOGO URL 配置项
-    $logoIndex = new \Typecho\Widget\Helper\Form\Element\Text(
-        'logoIndex',
-        null,
-        null,
-        _t('左侧 LOGO 地址'),
-        _t('填写JPG/PNG/Webp等图片 URL 地址, 网站左侧头像的显示(512*512最佳)')
-    );
-    $form->addInput($logoIndex);
-
-    // 左侧描述
-    $customDescription = new \Typecho\Widget\Helper\Form\Element\Textarea(
-        'customDescription',
-        null,
-        null,
-        _t('左侧描述'),
-        _t('填写自定义描述内容，将在网站左侧显示')
-    );
-    $form->addInput($customDescription);
-
-    // 左侧自定义
-    $leftSideCustomCode = new \Typecho\Widget\Helper\Form\Element\Textarea(
-        'leftSideCustomCode',
-        null,
-        null,
-        _t('左侧自定义区域'),
-        _t('支持自定义html，将在网站左侧显示')
-    );
-    $form->addInput($leftSideCustomCode);
-
-    //作者头像
-    $authorAvatar = new \Typecho\Widget\Helper\Form\Element\Text(
-        'authorAvatar',
-        null,
-        null,
-        _t('作者头像地址'),
-        _t('填写JPG/PNG/Webp等图片 URL 地址, 用于显示文章作者头像')
-    );
-    $form->addInput($authorAvatar);
 
     // 网站标题配置项
     $titleIndex = new \Typecho\Widget\Helper\Form\Element\Text(
@@ -119,16 +152,46 @@ function themeConfig($form)
     );
     $form->addInput($titleIndex);
 
-    // 网页底部信息
-    $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
-        'footerInfo',
+    // 左侧 LOGO URL 配置项
+    $logoIndex = new \Typecho\Widget\Helper\Form\Element\Text(
+        'logoIndex',
         null,
         null,
-        _t('网页底部信息'),
-        _t('填写网页底部的自定义信息，可以包含HTML内容，用br标签换行')
+        _t('左侧 LOGO 地址'),
+        _t('填写 JPG/PNG/Webp 等图片 URL 地址, 网站左侧头像的显示 (512*512最佳) ')
     );
-    $form->addInput($footerInfo);
+    $form->addInput($logoIndex);
 
+    //作者头像
+    $authorAvatar = new \Typecho\Widget\Helper\Form\Element\Text(
+        'authorAvatar',
+        null,
+        null,
+        _t('作者头像地址'),
+        _t('填写 JPG/PNG/Webp 等图片 URL 地址, 用于显示文章作者头像')
+    );
+    $form->addInput($authorAvatar);
+    
+    // 左侧描述
+    $customDescription = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'customDescription',
+        null,
+        null,
+        _t('左侧个人描述'),
+        _t('填写自定义描述内容，最好简短，将在网站左侧站名下显示')
+    );
+    $form->addInput($customDescription);
+
+    // 左侧自定义
+    $leftSideCustomCode = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'leftSideCustomCode',
+        null,
+        null,
+        _t('左侧自定义区域'),
+        _t('支持自定义HTML，将在网站左侧显示')
+    );
+    $form->addInput($leftSideCustomCode);
+    
     // Footer script标签
     $footerScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerScript',
@@ -138,6 +201,16 @@ function themeConfig($form)
         _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签，不要填其他内容，否则会造成样式错误')
     );
     $form->addInput($footerScript);
+    
+    // 网页底部信息
+    $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'footerInfo',
+        null,
+        null,
+        _t('网页底部信息'),
+        _t('填写网页底部的自定义信息，可以包含HTML内容，用br标签换行')
+    );
+    $form->addInput($footerInfo);
 
     // 搜索功能显示选项
     $showSearch = new Typecho_Widget_Helper_Form_Element_Radio(
@@ -153,7 +226,7 @@ function themeConfig($form)
         'showTOC',
         array('1' => _t('显示'), '0' => _t('隐藏')),
         '1',
-        _t('是否显示目录树')
+        _t('是否显示 TOC 目录树')
     );
     $form->addInput($showTOC);
 
@@ -180,7 +253,7 @@ function themeConfig($form)
         'showCopyright',
         array('1' => _t('显示'), '0' => _t('隐藏')),
         '1',
-        _t('是否在文章页显示版权信息')
+        _t('是否在文章页尾显示版权信息')
     );
     $form->addInput($showCopyright);
 
@@ -192,8 +265,8 @@ function themeConfig($form)
             'ShowLineNumbers' => _t('显示代码行数'),
             'ShowCopyButton' => _t('显示复制按钮')
         ),
-        array('ShowLineNumbers', 'ShowCopyButton'), // 默认选中这两个选项
-        _t('代码块设置')
+        array('ShowLineNumbers', 'ShowCopyButton'), // 默认选中
+        _t('代码高亮个性化')
     );
     $form->addInput($codeBlockSettings->multiMode());
 

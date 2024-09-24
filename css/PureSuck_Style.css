@@ -520,7 +520,6 @@ ul {
 	margin-left: auto
 }
 
-.wrapper:after,
 .wrapper:before {
 	content: " ";
 	display: table
@@ -641,7 +640,8 @@ ul {
 }
 
 .meta {
-	display: table;
+	display: flex;
+	justify-content: space-between;
 	width: 100%
 }
 
@@ -650,8 +650,7 @@ ul {
 }
 
 .meta-item {
-	position: relative;
-	display: table-cell;
+	display: inline;
 	padding-right: 8px;
 	white-space: nowrap;
 	cursor: pointer
@@ -659,8 +658,6 @@ ul {
 
 .meta-date {
 	overflow: hidden;
-	width: 100%;
-	max-width: 0;
 	text-overflow: ellipsis
 }
 
@@ -1251,7 +1248,7 @@ body>.wrapper {
 
 	.post-comments .post-wrapper:before,
 	.post-footer .post-wrapper:before {
-		top: -56px
+		top: -48px
 	}
 }
 
@@ -1736,7 +1733,8 @@ strong {
 }
 
 .meta-item:before {
-	color: #969696
+	color: currentColor;
+	font-size: 18px;
 }
 
 .meta-item:hover {
