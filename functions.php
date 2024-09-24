@@ -18,7 +18,7 @@ function themeFields($layout)
 
 function themeInit($archive)
 {
- Helper::options()->commentsAntiSpam = false; 
+    Helper::options()->commentsAntiSpam = false;
 }
 
 function parseOwOcodes($content)
@@ -135,7 +135,7 @@ function themeConfig($form)
         null,
         null,
         _t('Script标签'),
-        _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签')
+        _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签，不要填其他内容，否则会造成样式错误')
     );
     $form->addInput($footerScript);
 
@@ -183,6 +183,19 @@ function themeConfig($form)
         _t('是否在文章页显示版权信息')
     );
     $form->addInput($showCopyright);
+
+
+    // 代码高亮设置
+    $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
+        'codeBlockSettings',
+        array(
+            'ShowLineNumbers' => _t('显示代码行数'),
+            'ShowCopyButton' => _t('显示复制按钮')
+        ),
+        array('ShowLineNumbers', 'ShowCopyButton'), // 默认选中这两个选项
+        _t('代码块设置')
+    );
+    $form->addInput($codeBlockSettings->multiMode());
 
     // 主题配色
     $colors = array(

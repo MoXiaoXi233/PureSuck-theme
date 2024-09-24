@@ -417,7 +417,7 @@
 }
 
 .toc-a {
-    color: var(--text-color);
+    color: var(--nav-text-color);
     text-decoration: none;
     font-size: 14px;
 }
