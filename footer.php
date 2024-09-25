@@ -17,7 +17,7 @@
   });
 </script>
 
-<!-- 代码高亮 -->
+<!-- Highlight -->
 <?php
 // 获取代码块设置
 $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings;
@@ -28,26 +28,9 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
     // 确保代码块高亮
     document.querySelectorAll('pre code').forEach((block) => {
       hljs.highlightElement(block);
-
-      <?php if (is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings)): ?>
-        addLineNumber(block);
-      <?php endif; ?>
-    });
-
-    <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
       addCopyButtons();
-    <?php endif; ?>
+    });
   });
-
-  // 添加行号函数
-  function addLineNumber(codeDom) {
-    codeDom.classList.add("code-block-extension-code-show-num");
-    const codeHtml = codeDom.innerHTML;
-    const lines = codeHtml.split("\n").map((line, index) => {
-      return `<span class="code-block-extension-code-line" data-line-num="${index + 1}">${line}</span>`;
-    }).join("\n");
-    codeDom.innerHTML = lines;
-  }
 
   // 添加复制按钮函数
   function addCopyButtons() {
@@ -69,7 +52,7 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
     });
   }
 
-  window.handleButtonClick = function handleButtonClick(event) {
+  window.handleButtonClick = async function handleButtonClick(event) {
     event.stopPropagation();
     event.preventDefault();
 
@@ -77,25 +60,45 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
     const codeBlock = button.parentElement.querySelector('code');
 
     // 获取代码文本
-    let code;
-    if (codeBlock.querySelectorAll('.code-block-extension-code-line').length > 0) {
-      const codeLines = codeBlock.querySelectorAll('.code-block-extension-code-line');
-      code = Array.from(codeLines)
-        .map(line => line.textContent)
-        .join('\n');
-    } else {
-      code = codeBlock.textContent;
-    }
+    const code = codeBlock.textContent;
 
-    navigator.clipboard.writeText(code).then(() => {
-      button.innerText = 'Copied!';
-      setTimeout(() => {
-        button.innerText = 'Copy';
-      }, 2000);
-    }).catch(err => {
+    // 保存当前滚动位置
+    const scrollY = window.scrollY;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(code);
+        button.innerText = 'Copied!';
+      } else {
+        // 使用 document.execCommand() 作为后备
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        textArea.style.position = 'fixed';  // 避免滚动到页面底部
+        textArea.style.top = '0';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          button.innerText = 'Copied!';
+        } catch (err) {
+          console.error('复制文本失败:', err);
+          alert('复制文本失败，请重试。');
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (err) {
       console.error('复制文本失败:', err);
       alert('复制文本失败，请重试。');
-    });
+    }
+
+    // 恢复滚动位置
+    window.scrollTo(0, scrollY);
+
+    setTimeout(() => {
+      button.innerText = 'Copy';
+    }, 2000);
   }
 </script>
 
