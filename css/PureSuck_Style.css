@@ -2000,7 +2000,6 @@ textarea.ci {
 
 .pagination .active a {
     background-color: var(--card-color);
-    color: #fff;
     border-color: var(--themecolor);
 }
 
