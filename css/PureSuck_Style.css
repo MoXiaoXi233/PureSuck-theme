@@ -132,13 +132,13 @@ blockquote p:last-child {
 hr {
     position: relative;
     width: calc(100% - 4px);
-    border: 1px dashed var(--themecolor);
-    background: var(--card-color);
+	height: .125rem;
+    border: none;
+    background: var(--card-color) repeating-linear-gradient(-45deg, var(--themecolor), var(--themecolor) 0.25rem, transparent 0.25rem, transparent 0.5rem);
 }
  
 hr {
     box-sizing: content-box;
-    height: 0;
     overflow: visible;
 }
  
@@ -508,7 +508,9 @@ ul {
 	ol,
 	p,
 	pre,
-	ul {
+	ul,
+	hr
+	{
 		margin-bottom: 24px
 	}
 }
