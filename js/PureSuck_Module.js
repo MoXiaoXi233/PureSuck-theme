@@ -616,6 +616,8 @@ document.addEventListener('DOMContentLoaded', function () {
     parseTabs();
     handleGoTopButton();
     generateTOC();
-    mediumZoom('[data-zoomable]');
 
+    mediumZoom('[data-zoomable]', {
+        background: 'var(--card-color)'
+      });
 });
