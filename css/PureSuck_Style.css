@@ -1621,13 +1621,13 @@ a:hover {
     height: 100%;
     background-color: var(--themecolor);
     border-radius: 0.4rem;
-    transform: scale(0.85);
+    transform: scale(0.8);
     transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
     opacity: 0;
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):hover::before {
-    transform: scale(1.05, 1.1);
+    transform: scale(1.05, 0.88);
     opacity: 0.25;
 }
 
