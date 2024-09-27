@@ -111,7 +111,7 @@
                 <p itemprop="description" class="header-item header-about">
                     <?= $this->options->customDescription ?: 'ワクワク'; ?>
                 </p>
-                <div class="left-side-custom-code">
+                <div class="nav header-item left-side-custom-code">
                     <?= $this->options->leftSideCustomCode ?: ''; ?>
                 </div>
                 <div class="nav header-item header-credit">
