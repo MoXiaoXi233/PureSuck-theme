@@ -10,30 +10,28 @@ $this->need('header.php');
 
 <div class="wrapper">
 
-    <?php
-    $fields = unserialize($this->___fields());
-    $hasImg = isset($fields['img']);
-    ?>
-    <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
-        <div class="post-inner">
-            <header class="post-item post-header <?= $hasImg ? 'no-bg' : ''; ?>">
-                <div class="wrapper post-wrapper">
-                    <div class="avatar post-author">
-                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
-                        <span class="avatar-item">
-                            <?php $this->author(); ?>
-                        </span>
-                    </div>
-                    <h1 class="post-title"><?php $this->title(); ?></h1> <!-- 显示归档页面的标题 -->
-                </div>
-            </header>
+<?php
+            $hasImg = $this->fields->img ? true : false;
+            ?>
+            <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+                <div class="post-inner">
+                    <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
+                        <div class="wrapper post-wrapper">
+                            <div class="avatar post-author">
+                                <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
+                                <span class="avatar-item">
+                                    <?php $this->author(); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </header>
 
-            <!-- 大图样式 -->
-            <?php if ($hasImg): ?>
-                <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
-                </figure>
-            <?php endif; ?>
+                    <!-- 大图样式 -->
+                    <?php if ($hasImg): ?>
+                        <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
+                            <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                        </figure>
+                    <?php endif; ?>
 
             <section class="post-item post-body">
                 <div class="wrapper post-wrapper">
