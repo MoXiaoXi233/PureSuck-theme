@@ -74,16 +74,35 @@
             </section>
         </div>
         <script>
+            const sections = ['.right-sidebar'];
+            sections.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    element.style.position = 'absolute';
+                });
+            });
+            
             document.addEventListener('DOMContentLoaded', function() {
-                const sections = ['.right-sidebar'];
-                sections.forEach(selector => {
-                    const elements = document.querySelectorAll(selector);
-                    elements.forEach(element => {
-                        element.style.position = 'absolute';
-                    });
+                var tocSection = document.getElementById('toc-section');
+                var tocOffsetTop = tocSection.offsetTop;
+                var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
+
+                // 获取TOC上面的所有内容的高度
+                var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
+                var tocAboveHeight = 0;
+                tocAboveElements.forEach(function(element) {
+                    tocAboveHeight += element.offsetHeight;
+                });
+
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset >= tocAboveHeight + buffer) {
+                        tocSection.classList.add('sticky');
+                    } else {
+                        tocSection.classList.remove('sticky');
+                    }
                 });
             });
         </script>
     <?php endif; ?>
-    
+
 </div>

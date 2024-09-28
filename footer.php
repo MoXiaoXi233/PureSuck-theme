@@ -1,9 +1,7 @@
 <?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
 <?php $this->footer(); ?>
 
-
 <!-- 回到顶端 -->
-
 <body>
   <div class="go-top dn" id="go-top" style="display: none;">
     <a href="#" class="go icon-up-open" aria-label="返回顶部"></a>
@@ -100,29 +98,6 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
       button.innerText = 'Copy';
     }, 2000);
   }
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var tocSection = document.getElementById('toc-section');
-    var tocOffsetTop = tocSection.offsetTop;
-    var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
-
-    // 获取TOC上面的所有内容的高度
-    var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
-    var tocAboveHeight = 0;
-    tocAboveElements.forEach(function(element) {
-      tocAboveHeight += element.offsetHeight;
-    });
-
-    window.addEventListener('scroll', function() {
-      if (window.pageYOffset >= tocAboveHeight + buffer) {
-        tocSection.classList.add('sticky');
-      } else {
-        tocSection.classList.remove('sticky');
-      }
-    });
-  });
 </script>
 
 <!-- 后台script标签 -->
