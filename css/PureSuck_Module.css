@@ -263,7 +263,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 50px 50px 50px 50px;
-    position: absolute;
+    position: fixed;
     width: 344px;
 }
 

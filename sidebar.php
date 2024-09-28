@@ -1,5 +1,7 @@
 <div class="right-sidebar">
+<?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
 
+    <?php endif; ?>
     <!-- 搜索功能 -->
     <?php if ($this->options->showSearch == '1'): ?>
         <div class="search-section">
@@ -74,14 +76,6 @@
             </section>
         </div>
         <script>
-            const sections = ['.right-sidebar'];
-            sections.forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(element => {
-                    element.style.position = 'absolute';
-                });
-            });
-            
             document.addEventListener('DOMContentLoaded', function() {
                 var tocSection = document.getElementById('toc-section');
                 var tocOffsetTop = tocSection.offsetTop;
