@@ -58,7 +58,7 @@
                         <?php if ($this->options->showCopyright == '1'): ?>
                             <div class="license-info-card">
                                 <div class="license-info-title"><?php $this->title(); ?></div>
-                                <a class="license-info-link" href="<?php $this->permalink(); ?>"><?php $this->permalink(); ?></a>
+                                <a class="license-info-link" href="#"><?php $this->permalink(); ?></a>
                                 <div class="license-info-meta">
                                     <div>
                                         <span>本文作者</span>

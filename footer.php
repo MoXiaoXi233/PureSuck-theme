@@ -73,7 +73,7 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
         // 使用 document.execCommand() 作为后备
         const textArea = document.createElement('textarea');
         textArea.value = code;
-        textArea.style.position = 'fixed';  // 避免滚动到页面底部
+        textArea.style.position = 'fixed'; // 避免滚动到页面底部
         textArea.style.top = '0';
         textArea.style.left = '-9999px';
         document.body.appendChild(textArea);
@@ -100,6 +100,29 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
       button.innerText = 'Copy';
     }, 2000);
   }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tocSection = document.getElementById('toc-section');
+    var tocOffsetTop = tocSection.offsetTop;
+    var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
+
+    // 获取TOC上面的所有内容的高度
+    var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
+    var tocAboveHeight = 0;
+    tocAboveElements.forEach(function(element) {
+      tocAboveHeight += element.offsetHeight;
+    });
+
+    window.addEventListener('scroll', function() {
+      if (window.pageYOffset >= tocAboveHeight + buffer) {
+        tocSection.classList.add('sticky');
+      } else {
+        tocSection.classList.remove('sticky');
+      }
+    });
+  });
 </script>
 
 <!-- 后台script标签 -->

@@ -18,19 +18,6 @@
         </div>
     <?php endif; ?>
 
-    <!-- TOC -->
-    <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
-        <div class="toc-section" id="toc-section" style="display: none;">
-            <header class="section-header">
-                <span class="icon-article"></span>
-                <span class="title">文章目录</span>
-            </header>
-            <section class="section-body">
-                <div class="toc"></div>
-            </section>
-        </div>
-    <?php endif; ?>
-
     <!-- 分类模块 -->
     <?php if ($this->options->showCategory == '1'): ?>
         <div class="category-section">
@@ -75,4 +62,16 @@
         </div>
     <?php endif; ?>
 
+    <!-- TOC -->
+    <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
+        <div class="toc-section" id="toc-section" style="display: none;">
+            <header class="section-header">
+                <span class="icon-article"></span>
+                <span class="title">文章目录</span>
+            </header>
+            <section class="section-body">
+                <div class="toc"></div>
+            </section>
+        </div>
+    <?php endif; ?>
 </div>

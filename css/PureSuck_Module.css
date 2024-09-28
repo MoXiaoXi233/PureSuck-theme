@@ -263,7 +263,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 50px 50px 50px 50px;
-    position: fixed;
+    position: absolute;
     width: 344px;
 }
 
@@ -273,6 +273,7 @@
 .toc-section,
 .search-section {
     margin-bottom: 20px;
+    position: relative
 }
 
 .section-header {
@@ -340,11 +341,18 @@
 
 /** TOC 目录**/
 .toc-section {
-    max-height: 380px;
     overflow-y: auto;
     overflow-x: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    
+}
+
+.toc-section.sticky {
+    position: fixed;
+    padding: 35px 100px 50px 0px;
+    width: 344px;
+    top: 0;
 }
 
 .toc-section::-webkit-scrollbar {
