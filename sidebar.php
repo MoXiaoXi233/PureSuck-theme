@@ -73,5 +73,17 @@
                 <div class="toc"></div>
             </section>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const sections = ['.right-sidebar'];
+                sections.forEach(selector => {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(element => {
+                        element.style.position = 'absolute';
+                    });
+                });
+            });
+        </script>
     <?php endif; ?>
+    
 </div>
