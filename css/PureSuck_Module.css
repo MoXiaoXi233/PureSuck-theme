@@ -790,7 +790,6 @@
     border-radius: 0.75rem;
     width: 225px;
     color: var(--text-color);
-    background-color: var(--card-color);
     box-shadow: none;
 }
 
