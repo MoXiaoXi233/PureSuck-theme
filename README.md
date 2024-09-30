@@ -12,10 +12,9 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 主题本身有四种强调色可以选择，同时内置几种多彩的小组件（欢迎issues提交建议）  
 ![PureSuck](https://s2.loli.net/2024/09/12/D8pVAM5QkwJzdjO.png)
 ## TODO
-- [ ] 完善代码高亮以及其他组件  
-- [ ] 完善 CSS 样式
+- [ ] 完善各类组件  
+- [ ] 完善颜色规范
 - [ ] 精简代码，优化性能
-- [ ] 修复逻辑 BUG
 - [ ] 统一设计语言
 ## 特性
 代码高亮   
@@ -30,7 +29,8 @@ TOC目录树
 ~~作者人比较好，愿意陪你瞎扯~~  
 更多细节欢迎自行体验~  
 ### 安装与设置
-在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。（文件夹名应该为PureSuck）  
+在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。
+请确保主题文件夹名应该为PureSuck，否则会造成样式或者功能缺失！
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述  
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
 ### 功能与组件
