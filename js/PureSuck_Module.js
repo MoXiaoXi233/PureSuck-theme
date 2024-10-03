@@ -73,18 +73,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const toc = document.querySelector(".toc");
         const postWrapper = document.querySelector(".inner-post-wrapper");
         if (!postWrapper) return;
-    
+
         const elements = postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6");
         if (!elements.length) return;
-    
+
         let str = `<div class="dir">\n<ul id="toc">`;
         elements.forEach(v => {
             str += `<li class="li li-${v.tagName[1]}"><a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a></li>\n`;
         });
         str += `</ul>\n<div class="sider"><span class="siderbar"></span></div>\n</div>`;
-    
+
         toc.insertAdjacentHTML("beforeend", str);
-    
+
         elements.forEach(v => {
             const btn = document.querySelector(`#link-${v.id}`);
             btn.addEventListener("click", event => {
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 history.pushState(null, null, `#${v.id}`);
             });
         });
-    
+
         let ticking = false;
         window.addEventListener("scroll", () => {
             if (!ticking) {
@@ -107,20 +107,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         const targetTop = getElementTop(element);
                         const nextElement = elements[index + 1];
                         const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
-    
+
                         if (currentPosition >= targetTop && currentPosition < nextTargetTop) {
                             removeClass(elements);
                             const anchor = document.querySelector(`#link-${element.id}`);
                             anchor.classList.add("li-active");
-    
+
                             const tocItems = document.querySelectorAll(".toc li");
                             let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
                             sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
-    
+
                             const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
                             const offset = fontSize / 2;
                             sidebarTop += offset - 3;
-    
+
                             document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
                         }
                     });
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ticking = true;
             }
         });
-    
+
         if (tocSection) {
             tocSection.style.display = "block";
             const rightSidebar = document.querySelector(".right-sidebar");
@@ -139,19 +139,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
-    
+
     function getElementTop(element) {
         let actualTop = element.offsetTop;
         let current = element.offsetParent;
-    
+
         while (current !== null) {
             actualTop += current.offsetTop;
             current = current.offsetParent;
         }
-    
+
         return actualTop;
     }
-    
+
     function removeClass(elements) {
         elements.forEach(v => {
             const anchor = document.querySelector(`#link-${v.id}`);
@@ -185,7 +185,11 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             const collapsiblePanelRegex = /\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/g;
+            
             content = content.replace(collapsiblePanelRegex, (match, title, text) => {
+                if (text.startsWith('<br')) {
+                    text = text.replace(/^<br\s*\/?>/, '');
+                }
                 return `<div collapsible-panel title="${title}">${text}</div>`;
             });
 
@@ -354,17 +358,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const title = element.getAttribute('title');
             const content = element.innerHTML;
 
-            const newContent = `
-                <div class="collapsible-panel">
-                    <button class="collapsible-header">
-                        ${title}
-                        <span class="icon icon-down-open"></span>
-                    </button>
-                    <div class="collapsible-content">
-                        <div class="collapsible-details">${content}</div>
-                    </div>
-                </div>
-            `;
+            const newContent = `<div class="collapsible-panel">
+            <button class="collapsible-header">
+                ${title}
+                <span class="icon icon-down-open"></span>
+            </button>
+            <div class="collapsible-content">
+                <div class="collapsible-details">${content}</div>
+            </div>
+        </div>`;
 
             element.outerHTML = newContent;
         });
@@ -618,5 +620,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
     mediumZoom('[data-zoomable]', {
         background: 'var(--card-color)'
-      });
+    });
 });
