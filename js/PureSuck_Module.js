@@ -176,6 +176,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const windowRegex = /\[window type="([^"]*)" title="([^"]*)"\](.*?)\[\/window\]/g;
             content = content.replace(windowRegex, (match, type, title, text) => {
+                if (text.startsWith('<br')) {
+                    text = text.replace(/^<br\s*\/?>/, '');
+                }
                 return `<div window-type="${type}" title="${title}">${text}</div>`;
             });
 
