@@ -72,21 +72,27 @@
         const tocSection = document.getElementById("toc-section");
         const toc = document.querySelector(".toc");
         const postWrapper = document.querySelector(".inner-post-wrapper");
-        if (!postWrapper) return;
-
+    
+        // 检查是否存在必要的元素
+        if (!toc || !postWrapper) return;
+    
         const elements = postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6");
         if (!elements.length) return;
-
+    
         let str = `<div class="dir">\n<ul id="toc">`;
-        elements.forEach(v => {
+        elements.forEach((v, index) => {
+            if (!v.id) {
+                v.id = `heading-${index}`; // 如果没有 ID，则分配一个唯一的 ID
+            }
             str += `<li class="li li-${v.tagName[1]}"><a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a></li>\n`;
         });
         str += `</ul>\n<div class="sider"><span class="siderbar"></span></div>\n</div>`;
-
+    
         toc.insertAdjacentHTML("beforeend", str);
-
+    
         elements.forEach(v => {
             const btn = document.querySelector(`#link-${v.id}`);
+            if (!btn) return; // 如果按钮不存在，跳过该元素
             btn.addEventListener("click", event => {
                 event.preventDefault();
                 const targetTop = getElementTop(v);
@@ -97,7 +103,7 @@
                 history.pushState(null, null, `#${v.id}`);
             });
         });
-
+    
         let ticking = false;
         window.addEventListener("scroll", () => {
             if (!ticking) {
@@ -107,21 +113,23 @@
                         const targetTop = getElementTop(element);
                         const nextElement = elements[index + 1];
                         const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
-
+    
                         if (currentPosition >= targetTop && currentPosition < nextTargetTop) {
                             removeClass(elements);
                             const anchor = document.querySelector(`#link-${element.id}`);
-                            anchor.classList.add("li-active");
-
-                            const tocItems = document.querySelectorAll(".toc li");
-                            let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
-                            sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
-
-                            const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
-                            const offset = fontSize / 2;
-                            sidebarTop += offset - 3;
-
-                            document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
+                            if (anchor) {
+                                anchor.classList.add("li-active");
+    
+                                const tocItems = document.querySelectorAll(".toc li");
+                                let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
+                                sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
+    
+                                const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
+                                const offset = fontSize / 2;
+                                sidebarTop += offset - 3;
+    
+                                document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
+                            }
                         }
                     });
                     ticking = false;
@@ -129,7 +137,7 @@
                 ticking = true;
             }
         });
-
+    
         if (tocSection) {
             tocSection.style.display = "block";
             const rightSidebar = document.querySelector(".right-sidebar");
@@ -139,28 +147,31 @@
             }
         }
     }
-
+    
     function getElementTop(element) {
         let actualTop = element.offsetTop;
         let current = element.offsetParent;
-
+    
         while (current !== null) {
             actualTop += current.offsetTop;
             current = current.offsetParent;
         }
-
+    
         return actualTop;
     }
-
+    
     function removeClass(elements) {
         elements.forEach(v => {
             const anchor = document.querySelector(`#link-${v.id}`);
-            anchor.classList.remove("li-active");
+            if (anchor) { // 检查 anchor 是否存在
+                anchor.classList.remove("li-active");
+            }
         });
     }
+    
 
     function parseShortcodes() {
-        const elements = document.querySelectorAll('.inner-post-wrapper, .header');
+        const elements = document.querySelectorAll('.inner-post-wrapper');
 
         elements.forEach(element => {
             let content = element.innerHTML;
