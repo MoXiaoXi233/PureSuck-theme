@@ -2,6 +2,7 @@
 <?php $this->footer(); ?>
 
 <!-- 回到顶端 -->
+
 <body>
   <div class="go-top dn" id="go-top" style="display: none;">
     <a href="#" class="go icon-up-open" aria-label="返回顶部"></a>
@@ -26,9 +27,24 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
     // 确保代码块高亮
     document.querySelectorAll('pre code').forEach((block) => {
       hljs.highlightElement(block);
-      addCopyButtons();
+      <?php if (is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings)): ?>
+        addLineNumber(block);
+      <?php endif; ?>
     });
+    <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
+      addCopyButtons();
+    <?php endif; ?>
   });
+
+  // 添加行号函数
+  function addLineNumber(codeDom) {
+    codeDom.classList.add("code-block-extension-code-show-num");
+    const codeHtml = codeDom.innerHTML;
+    const lines = codeHtml.split("\n").map((line, index) => {
+      return `<span class="code-block-extension-code-line" data-line-num="${index + 1}">${line}</span>`;
+    }).join("\n");
+    codeDom.innerHTML = lines;
+  }
 
   // 添加复制按钮函数
   function addCopyButtons() {
@@ -105,4 +121,5 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
   <?php echo $this->options->footerScript; ?>
 <?php endif; ?>
 </body>
+
 </html>
