@@ -84,7 +84,8 @@ TOC目录树
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
 [OWO.JS](https://github.com/DIYgod/OwO)  
 [HighLight.JS](https://github.com/highlightjs/highlight.js)  
-[Pjax](https://github.com/MoOx/pjax)
+[Pjax](https://github.com/MoOx/pjax)  
+[Pace](https://github.com/CodeByZach/pace)
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！  
 感谢，每一个使用本主题的朋友们！

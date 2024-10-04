@@ -215,23 +215,29 @@ function themeConfig($form)
     // Pjax
     // https://github.com/MoOx/pjax
 
-    $enablepjax = new Typecho_Widget_Helper_Form_Element_Select(
+    $enablepjax = new Typecho_Widget_Helper_Form_Element_Radio(
         'enablepjax',
-        array(
-        '1' => '启用',
-        '0' => '关闭'
-    ), '1', _t('是否启用 Pjax 加载'), _t('是否启用 Pjax 加载'));
-    $layout->addItem($enablepjax);  // 注册
+        array('1' => _t('启用'), '0' => _t('关闭')),
+        '1',
+        _t('是否启用 Pjax 加载')
+    );
+    $form->addInput($enablepjax);
 
-    echo `如果你启用了 PJax，你可能需要稍微配置一下代码使它正常运行。<br />
-    所有被 <pjax></pjax> 标签包裹的所有元素将被pjax重载。<br />
-    所有含有 data-pjax 标记的 script 标签将被pjax重载。<br />
-    <ul >
-    <li>事件：<code>pjax:send</code>在 Pjax 请求开始后触发。</font></li>
-    <li>事件：<code>pjax:complete</code>在 Pjax 请求完成后触发。</font></li>
-    <li>事件：<code>pjax:success</code>在 Pjax 请求成功后触发。</font></li>
-    <li>事件：<code>pjax:error</code>在 Pjax 请求失败后触发。</li>
-    </ul>`
+    // $enablepjax = new Typecho_Widget_Helper_Form_Element_Select('enablepjax', array(
+    //     '1' => '启用',
+    //     '0' => '关闭'
+    // ), '1', _t('是否启用 Pjax 加载'), _t('是否启用 Pjax 加载'));
+    // $layout->addItem($enablepjax);  // 注册
+
+    // echo `如果你启用了 PJax，你可能需要稍微配置一下代码使它正常运行。<br />
+    // 所有被 <pjax></pjax> 标签包裹的所有元素将被pjax重载。<br />
+    // 所有含有 data-pjax 标记的 script 标签将被pjax重载。<br />
+    // <ul >
+    // <li>事件：<code>pjax:send</code>在 Pjax 请求开始后触发。</font></li>
+    // <li>事件：<code>pjax:complete</code>在 Pjax 请求完成后触发。</font></li>
+    // <li>事件：<code>pjax:success</code>在 Pjax 请求成功后触发。</font></li>
+    // <li>事件：<code>pjax:error</code>在 Pjax 请求失败后触发。</li>
+    // </ul>`;
 
     // 搜索功能显示选项
     $showSearch = new Typecho_Widget_Helper_Form_Element_Radio(
