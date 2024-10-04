@@ -215,7 +215,9 @@ function themeConfig($form)
     // Pjax
     // https://github.com/MoOx/pjax
 
-    $enablepjax = new Typecho_Widget_Helper_Form_Element_Select('articleCopyright', array(
+    $enablepjax = new Typecho_Widget_Helper_Form_Element_Select(
+        'enablepjax',
+        array(
         '1' => '启用',
         '0' => '关闭'
     ), '1', _t('是否启用 Pjax 加载'), _t('是否启用 Pjax 加载'));
