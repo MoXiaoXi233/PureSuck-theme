@@ -83,7 +83,7 @@ TOC目录树
 [aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
 [OWO.JS](https://github.com/DIYgod/OwO)  
-[HighLight.JS](https://github.com/highlightjs/highlight.js)
+[HighLight.JS](https://github.com/highlightjs/highlight.js)  
 [Pjax](https://github.com/MoOx/pjax)
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！  
