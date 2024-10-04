@@ -104,3 +104,5 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
 <?php if ($this->options->footerScript): ?>
   <?php echo $this->options->footerScript; ?>
 <?php endif; ?>
+</body>
+</html>

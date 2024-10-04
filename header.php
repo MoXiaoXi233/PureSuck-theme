@@ -96,6 +96,55 @@
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
+    <!-- Pjax -->
+    <?php if ($this->options->enablepjax == '1'): ?>
+            <script defer src="<?php $this->options->themeUrl('/js/pjax.min.js'); ?>"></script>
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                var pjax = new Pjax({
+                    history: true,
+                    scrollRestoration: true,
+                    timeout: 5000,
+                    elements: "a[href], form[action]",
+                    selectors: [
+                        "pjax",
+                        "script[data-pjax]",
+                        "title",
+                        ".nav.header-item.header-nav",
+                        ".main"
+                    ]
+                    })
+                })
+
+                // Pjax 加载超时时跳转，不然它不给你跳转的！！！
+                document.addEventListener('pjax:error', function (e) {
+                    console.error(e);
+                    console.log('pjax error: \n' + JSON.stringify(e));
+                    window.location.href = e.triggerElement.href;
+                });
+                // Pjax 适配短代码的
+                document.addEventListener("pjax:success", function(event) {
+                parseShortcodes();
+                enhanceContent();
+                parseAlerts();
+                parseWindows();
+                parseFriendCards();
+                parseCollapsiblePanels();
+                parseTimeline();
+                parseTabs();
+                handleGoTopButton();
+                generateTOC();
+                mediumZoom('[data-zoomable]', {
+                    background: 'var(--card-color)'
+                });
+                });                
+            </script>
+  <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>
+  <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/pace-theme-default.min.css'); ?>">
+        <?php else: ?>
+            <!-- 是不是 Pjax 有 bug，哈哈哈 -->
+             <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 -->
+    <?php endif; ?>
 </head>
 
 <body>

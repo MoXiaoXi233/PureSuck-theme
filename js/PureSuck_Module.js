@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+
 
     function enhanceContent() {
         const images = document.querySelectorAll('img');
@@ -609,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
+document.addEventListener('DOMContentLoaded', function () {
     parseShortcodes();
     enhanceContent();
     parseAlerts();
