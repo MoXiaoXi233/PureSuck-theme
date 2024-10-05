@@ -114,7 +114,13 @@
                         ".main",
                         
                     ]
-                })
+                });
+                // 评论提交状态
+                document.getElementById("submit").addEventListener("click", function(){
+                    if(document.getElementById("textarea").value !== "") {
+                        document.getElementById("submit").innerHTML = "提交中~";
+                    }
+                    });
             })
 
 
@@ -134,19 +140,7 @@
                 }
 
                 // 短代码及模块部分
-                parseShortcodes();
-                enhanceContent();
-                parseAlerts();
-                parseWindows();
-                parseFriendCards();
-                parseCollapsiblePanels();
-                parseTimeline();
-                parseTabs();
-                handleGoTopButton();
-                generateTOC();
-                mediumZoom('[data-zoomable]', {
-                    background: 'var(--card-color)'
-                });
+                runShortcodes();
 
                 // AOS 动画
                 AOS.init();
@@ -172,9 +166,9 @@
         <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>
         <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/pace-theme-default.min.css'); ?>">
     <?php else: ?>
-        <!-- 是不是 Pjax 有 bug，哈哈哈 -->
+        <!-- 是不是 Pjax 有 bug，哈哈哈 --kissablecho -->
         <!-- 没错我差点死在自己留的鬼判定了--MoXi -->
-        <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 -->
+        <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 --kissablecho -->
     <?php endif; ?>
 </head>
 
