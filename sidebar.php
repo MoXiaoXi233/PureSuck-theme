@@ -1,5 +1,5 @@
 <div class="right-sidebar">
-<?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
+    <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
 
     <?php endif; ?>
     <!-- 搜索功能 -->
@@ -76,8 +76,10 @@
             </section>
         </div>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            function initializeStickyTOC() {
                 var tocSection = document.getElementById('toc-section');
+                if (!tocSection) return; // 如果没有找到 tocSection，直接返回
+
                 var tocOffsetTop = tocSection.offsetTop;
                 var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
 
@@ -88,13 +90,18 @@
                     tocAboveHeight += element.offsetHeight;
                 });
 
-                window.addEventListener('scroll', function() {
+                window.addEventListener('scroll', function onScroll() {
                     if (window.pageYOffset >= tocAboveHeight + buffer) {
                         tocSection.classList.add('sticky');
                     } else {
                         tocSection.classList.remove('sticky');
                     }
                 });
+            }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeStickyTOC();
             });
         </script>
     <?php endif; ?>

@@ -429,12 +429,12 @@
 
     function parseTabs() {
         const tabContainers = document.querySelectorAll('[tabs]');
-
+    
         tabContainers.forEach((container, containerIndex) => {
             const tabElements = Array.from(container.children);
             const tabTitles = [];
             const tabContents = [];
-
+    
             tabElements.forEach((child, index) => {
                 const title = child.getAttribute('tab-title');
                 if (title) {
@@ -442,9 +442,9 @@
                     tabContents.push(child.cloneNode(true));
                 }
             });
-
+    
             if (tabTitles.length === 0) return;
-
+    
             const tabHeaderHTML = tabTitles.map((title, index) => `
                 <div class="tab-link ${index === 0 ? 'active' : ''}" 
                      data-tab="tab${containerIndex + 1}-${index + 1}" 
@@ -454,7 +454,7 @@
                     ${title}
                 </div>
             `).join('');
-
+    
             const tabContentHTML = tabContents.map((content, index) => {
                 const tabPane = document.createElement('div');
                 tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
@@ -464,13 +464,13 @@
                 tabPane.appendChild(content);
                 return tabPane.outerHTML;
             }).join('');
-
+    
             const tabContainer = document.createElement('div');
             tabContainer.className = 'tab-container';
             tabContainer.innerHTML = `
                 <div class="tab-header-wrapper">
                     <button class="scroll-button left" aria-label="向左"></button>
-                    <div class="tab-header">
+                    <div class="tab-header" role="tablist">
                         ${tabHeaderHTML}
                         <div class="tab-indicator"></div>
                     </div>
@@ -480,30 +480,30 @@
                     ${tabContentHTML}
                 </div>
             `;
-
+    
             const fragment = document.createDocumentFragment();
             fragment.appendChild(tabContainer);
-
+    
             container.innerHTML = '';
             container.appendChild(fragment);
-
+    
             const activeLink = tabContainer.querySelector('.tab-link.active');
             const indicator = tabContainer.querySelector('.tab-indicator');
             if (activeLink && indicator) {
                 indicator.style.width = `${activeLink.offsetWidth * 0.75}px`;
                 indicator.style.left = `${activeLink.offsetLeft + (activeLink.offsetWidth * 0.125)}px`;
             }
-
+    
             const tabHeaderElement = tabContainer.querySelector('.tab-header');
             const leftButton = tabContainer.querySelector('.scroll-button.left');
             const rightButton = tabContainer.querySelector('.scroll-button.right');
-
+    
             // 检查是否需要显示滚动按钮
             const checkScrollButtons = () => {
                 const totalWidth = Array.from(tabHeaderElement.children)
                     .reduce((acc, child) => acc + child.offsetWidth, 0);
                 const containerWidth = tabHeaderElement.offsetWidth;
-
+    
                 if (totalWidth <= containerWidth) {
                     leftButton.style.display = 'none';
                     rightButton.style.display = 'none';
@@ -512,36 +512,36 @@
                     rightButton.style.display = 'block';
                 }
             };
-
+    
             checkScrollButtons();
             window.addEventListener('resize', checkScrollButtons);
-
+    
             leftButton.addEventListener('click', () => {
                 tabHeaderElement.scrollBy({ left: -100, behavior: 'smooth' });
             });
-
+    
             rightButton.addEventListener('click', () => {
                 tabHeaderElement.scrollBy({ left: 100, behavior: 'smooth' });
             });
-
+    
             let isDown = false;
             let startX;
             let scrollLeft;
-
+    
             tabHeaderElement.addEventListener('mousedown', (e) => {
                 isDown = true;
                 startX = e.pageX - tabHeaderElement.offsetLeft;
                 scrollLeft = tabHeaderElement.scrollLeft;
             });
-
+    
             tabHeaderElement.addEventListener('mouseleave', () => {
                 isDown = false;
             });
-
+    
             tabHeaderElement.addEventListener('mouseup', () => {
                 isDown = false;
             });
-
+    
             tabHeaderElement.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
@@ -549,66 +549,66 @@
                 const walk = (x - startX) * 2; //scroll-fast
                 tabHeaderElement.scrollLeft = scrollLeft - walk;
             });
-
+    
             tabHeaderElement.addEventListener('touchstart', (e) => {
                 isDown = true;
                 startX = e.touches[0].pageX - tabHeaderElement.offsetLeft;
                 scrollLeft = tabHeaderElement.scrollLeft;
-            });
-
+            }, { passive: true }); // 标记为被动监听器
+    
             tabHeaderElement.addEventListener('touchend', () => {
                 isDown = false;
             });
-
+    
             tabHeaderElement.addEventListener('touchmove', (e) => {
                 if (!isDown) return;
                 const x = e.touches[0].pageX - tabHeaderElement.offsetLeft;
                 const walk = (x - startX) * 2; //scroll-fast
                 tabHeaderElement.scrollLeft = scrollLeft - walk;
-            });
-
+            }, { passive: true }); // 标记为被动监听器
+    
             container.querySelector('.tab-header').addEventListener('click', function (event) {
                 if (event.target.classList.contains('tab-link')) {
                     const tabLinks = this.querySelectorAll('.tab-link');
                     const tabPanes = tabContainer.querySelectorAll('.tab-pane');
                     const indicator = this.querySelector('.tab-indicator');
-
+    
                     let currentIndex = Array.from(tabLinks).indexOf(event.target);
                     let previousIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
-
+    
                     tabLinks.forEach(link => link.classList.remove('active'));
                     tabPanes.forEach(pane => {
                         pane.classList.remove('active');
                         pane.removeAttribute('data-aos');
                         pane.classList.remove('aos-animate');
                     });
-
+    
                     event.target.classList.add('active');
                     const activePane = document.getElementById(event.target.getAttribute('data-tab'));
                     activePane.classList.add('active');
-
+    
                     if (currentIndex > previousIndex) {
                         activePane.setAttribute('data-aos', 'fade-left');
                     } else {
                         activePane.setAttribute('data-aos', 'fade-right');
                     }
-
+    
                     indicator.style.width = `${event.target.offsetWidth * 0.75}px`;
                     indicator.style.left = `${event.target.offsetLeft + (event.target.offsetWidth * 0.125)}px`;
-
+    
                     setTimeout(() => {
                         activePane.classList.add('aos-animate');
                     }, 0);
-
+    
                     if (typeof AOS !== 'undefined') {
                         AOS.refresh(); // 重新初始化 AOS 动画
                     }
-
+    
                     tabLinks.forEach(link => link.setAttribute('tabindex', '-1'));
                     event.target.setAttribute('tabindex', '0');
                     event.target.focus();
                 }
-
+    
                 // 使点击的标签出现在视野内
                 const tabHeaderRect = tabHeaderElement.getBoundingClientRect();
                 const targetRect = event.target.getBoundingClientRect();
@@ -620,6 +620,8 @@
             });
         });
     }
+    
+    
 document.addEventListener('DOMContentLoaded', function () {
     parseShortcodes();
     enhanceContent();

@@ -98,9 +98,9 @@
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <!-- Pjax -->
     <?php if ($this->options->enablepjax == '1'): ?>
-            <script defer src="<?php $this->options->themeUrl('/js/pjax.min.js'); ?>"></script>
-            <script type="text/javascript">
-                document.addEventListener('DOMContentLoaded', function () {
+        <script defer src="<?php $this->options->themeUrl('/js/pjax.min.js'); ?>"></script>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
                 var pjax = new Pjax({
                     history: true,
                     scrollRestoration: true,
@@ -111,19 +111,29 @@
                         "script[data-pjax]",
                         "title",
                         ".nav.header-item.header-nav",
-                        ".main"
+                        ".main",
+                        
                     ]
-                    })
                 })
+            })
 
-                // Pjax 加载超时时跳转，不然它不给你跳转的！！！
-                document.addEventListener('pjax:error', function (e) {
-                    console.error(e);
-                    console.log('pjax error: \n' + JSON.stringify(e));
-                    window.location.href = e.triggerElement.href;
-                });
-                // Pjax 适配短代码的
-                document.addEventListener("pjax:success", function(event) {
+
+            
+            // Pjax 加载超时时跳转，不然它不给你跳转的！！！
+            document.addEventListener('pjax:error', function(e) {
+                console.error(e);
+                console.log('pjax error: \n' + JSON.stringify(e));
+                window.location.href = e.triggerElement.href;
+            });
+
+            // Pjax 完成后 JS 重载
+            document.addEventListener("pjax:success", function(event) {
+                // 评论区部分重载
+                if (document.querySelector('.OwO-textarea')) {
+                    initializeCommentsOwO();
+                }
+
+                // 短代码及模块部分
                 parseShortcodes();
                 enhanceContent();
                 parseAlerts();
@@ -137,13 +147,34 @@
                 mediumZoom('[data-zoomable]', {
                     background: 'var(--card-color)'
                 });
-                });                
-            </script>
-  <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>
-  <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/pace-theme-default.min.css'); ?>">
-        <?php else: ?>
-            <!-- 是不是 Pjax 有 bug，哈哈哈 -->
-             <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 -->
+
+                // AOS 动画
+                AOS.init();
+
+                // 确保代码块高亮
+                <?php $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings; ?>
+
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                    <?php if (is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings)): ?>
+                        addLineNumber(block);
+                    <?php endif; ?>
+                });
+                <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
+                    addCopyButtons();
+                <?php endif; ?>
+
+                // TOC吸附
+                initializeStickyTOC();
+                
+            });
+        </script>
+        <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>
+        <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/pace-theme-default.min.css'); ?>">
+    <?php else: ?>
+        <!-- 是不是 Pjax 有 bug，哈哈哈 -->
+        <!-- 没错我差点死在自己留的鬼判定了--MoXi -->
+        <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 -->
     <?php endif; ?>
 </head>
 

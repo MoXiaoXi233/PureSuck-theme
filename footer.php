@@ -23,7 +23,6 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
 ?>
 <script>
   document.addEventListener('DOMContentLoaded', (event) => {
-
     // 确保代码块高亮
     document.querySelectorAll('pre code').forEach((block) => {
       hljs.highlightElement(block);
