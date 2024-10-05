@@ -995,6 +995,7 @@ body>.wrapper {
 .protected input[type="password"], .protected input[type="submit"] {
     padding: 10px;
     margin: 5px 0;
+	background: var(--card-color);
     width: 300px;
     box-sizing: border-box; 
 }
