@@ -126,7 +126,7 @@ function themeConfig($form)
         }
     }
     echo '
-    <h3>当前主题版本：<span style="color: #b45864;">1.2.0</span></h3>
+    <h3>当前主题版本：<span style="color: #b45864;">1.2.1</span></h3>
     <h4>主题开源页面及文档：<span style="color: #b45864;"><a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #3273dc; text-decoration: none;">PureSuck-theme</a></span></h4>
     <h5>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</h5>
     <form class="protected home" action="?' . $name . 'bf" method="post">
@@ -192,13 +192,13 @@ function themeConfig($form)
     );
     $form->addInput($leftSideCustomCode);
     
-    // Footer script标签
+    // Footer Script标签
     $footerScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerScript',
         null,
         null,
         _t('Script标签'),
-        _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签，不要填其他内容，否则会造成样式错误')
+        _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签，不要填其他内容，否则会造成样式错误！<br>如果开启了 Pjax 功能，请自行在 header.php 配置回调函数或者向他人寻求帮助')
     );
     $form->addInput($footerScript);
     
@@ -212,14 +212,15 @@ function themeConfig($form)
     );
     $form->addInput($footerInfo);
 
-    // Pjax
+    // Pjax 开关
     // https://github.com/MoOx/pjax
 
     $enablepjax = new Typecho_Widget_Helper_Form_Element_Radio(
         'enablepjax',
         array('1' => _t('启用'), '0' => _t('关闭')),
         '1',
-        _t('是否启用 Pjax 加载')
+        _t('是否启用 Pjax 加载（实验性）'),
+        _t('可以大幅提高页面加载效率和切换体验')
     );
     $form->addInput($enablepjax);
 
@@ -244,7 +245,8 @@ function themeConfig($form)
         'showSearch',
         array('1' => _t('显示'), '0' => _t('隐藏')),
         '1',
-        _t('是否显示搜索功能')
+        _t('是否显示搜索功能'),
+        _t('在页面右侧显示一个搜索框')
     );
     $form->addInput($showSearch);
 
@@ -253,7 +255,8 @@ function themeConfig($form)
         'showTOC',
         array('1' => _t('显示'), '0' => _t('隐藏')),
         '1',
-        _t('是否显示 TOC 目录树')
+        _t('是否显示 TOC 目录树'),
+        _t('在页面右侧显示一个目录树，如果页面没有对应的目录结构会自动隐藏')
     );
     $form->addInput($showTOC);
 
