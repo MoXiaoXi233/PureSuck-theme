@@ -621,8 +621,7 @@
         });
     }
     
-    
-document.addEventListener('DOMContentLoaded', function () {
+function runShortcodes(){
     parseShortcodes();
     enhanceContent();
     parseAlerts();
@@ -637,4 +636,8 @@ document.addEventListener('DOMContentLoaded', function () {
     mediumZoom('[data-zoomable]', {
         background: 'var(--card-color)'
     });
+}
+    
+document.addEventListener('DOMContentLoaded', function () {
+    runShortcodes()
 });
