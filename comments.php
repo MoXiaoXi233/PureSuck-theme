@@ -115,7 +115,7 @@
                             <div class="CtBoxBar">
                                 <div class="left-bar">
                                     <div class="OwO-bar">
-                                        <ul class="OwO"></ul>
+                                        <div class="OwO"></div>
                                     </div>
                                     <!-- 未来可以在这里添加更多内容 -->
                                 </div>
@@ -130,7 +130,7 @@
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/OwO.min.css'); ?>">
     <script src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeCommentsOwO() {
             var OwO_demo = new OwO({
                 logo: 'OωO表情',
                 container: document.getElementsByClassName('OwO')[0],
@@ -141,15 +141,15 @@
                 maxHeight: '260px'
             });
 
-            // Check if the owoButton element exists before adding the event listener
             var owoButton = document.getElementById('owo-button');
             if (owoButton) {
                 owoButton.addEventListener('click', function(event) {
-                    // 打开 OwO 表情选择器
                     OwO_demo.toggle();
                 });
             }
-        });
+        }
+
+        initializeCommentsOwO()
     </script>
 <?php else: ?>
     <div>
