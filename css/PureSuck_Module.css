@@ -523,13 +523,7 @@
     position: relative;
 }
 
-.friends-card-text {
-    display: flex;
-    font-size: 0.85rem;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
+.friends-card-text,
 .friends-card-text p {
     font-size: 0.85rem;
     margin: 0;
@@ -558,7 +552,7 @@
 }
 
 /* media query for responsive design */
-@media screen and (max-width: 767.5px) {
+@media screen and (max-width: 1303px) {
     .friendsboard-item {
         width: calc(50% - 15px);
     }
