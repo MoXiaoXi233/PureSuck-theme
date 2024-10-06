@@ -1873,7 +1873,8 @@ strong {
 .cp {
 	overflow: hidden;
 	padding: 1.5rem 0;
-	border-bottom: 1px dotted var(--line-color)
+	border-bottom: 1px dotted var(--line-color);
+	word-wrap: break-word;
 }
 
 .cp p {
