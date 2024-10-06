@@ -117,10 +117,16 @@
                 });
 
                 // 评论提交状态
-                document.getElementById("submit").addEventListener("click", function() {
-                    var textarea = document.getElementById("textarea");
+                var submitButton = document.getElementById("submit");
+                var textarea = document.getElementById("textarea");
+
+                // 检查是否存在对应的元素
+                if (!submitButton || !textarea) {
+                    return; // 如果不存在，退出函数
+                }
+
+                submitButton.addEventListener("click", function() {
                     if (textarea.value !== "") {
-                        var submitButton = document.getElementById("submit");
                         submitButton.innerHTML = "提交中~";
                     }
                 });
