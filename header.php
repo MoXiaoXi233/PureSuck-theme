@@ -105,7 +105,7 @@
                     history: true,
                     scrollRestoration: true,
                     timeout: 5000,
-                    elements: "a[href], form[action]",
+                    elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([onclick="return false;"]):not([onclick="return!1"]):not([target="_blank"]):not([target="view_window"]):not([href$=".xml"]):not([class="friendsboard-item"]):not(.cr)',
                     selectors: [
                         "pjax",
                         "script[data-pjax]",
@@ -121,6 +121,20 @@
                         document.getElementById("submit").innerHTML = "提交中~";
                     }
                     });
+                // 停止点击目录树时的 Pace 进度条（实际只能一闪而过）
+                function bindEvents() {
+                    const links = document.querySelectorAll('#toc-section a');
+                    links.forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            // 停止 Pace 加载
+                            Pace.stop();
+                        });
+                    });
+                }
+                document.addEventListener("pjax:success", function() {bindEvents()});
+                bindEvents();
+                // Pjax 发送时开始加载 Pace 进度条
+                document.addEventListener("pjax:send", function() {Pace.restart()});
             })
 
 
