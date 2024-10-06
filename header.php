@@ -105,40 +105,27 @@
                     history: true,
                     scrollRestoration: true,
                     timeout: 5000,
-                    elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([onclick="return false;"]):not([onclick="return!1"]):not([target="_blank"]):not([target="view_window"]):not([href$=".xml"]):not([class="friendsboard-item"]):not(.cr)',
+                    elements: 'a[href^="<?php Helper::options()->siteUrl() ?>"]:not(a[target="_blank"], a[no-pjax]), form[action]',
                     selectors: [
                         "pjax",
                         "script[data-pjax]",
                         "title",
                         ".nav.header-item.header-nav",
-                        ".main",
-                        
+                        ".main"
                     ]
                 });
+
                 // 评论提交状态
-                document.getElementById("submit").addEventListener("click", function(){
-                    if(document.getElementById("textarea").value !== "") {
-                        document.getElementById("submit").innerHTML = "提交中~";
+                document.getElementById("submit").addEventListener("click", function() {
+                    var textarea = document.getElementById("textarea");
+                    if (textarea.value !== "") {
+                        var submitButton = document.getElementById("submit");
+                        submitButton.innerHTML = "提交中~";
                     }
-                    });
-                // 停止点击目录树时的 Pace 进度条（实际只能一闪而过）
-                function bindEvents() {
-                    const links = document.querySelectorAll('#toc-section a');
-                    links.forEach(link => {
-                        link.addEventListener('click', function(e) {
-                            // 停止 Pace 加载
-                            Pace.stop();
-                        });
-                    });
-                }
-                document.addEventListener("pjax:success", function() {bindEvents()});
-                bindEvents();
-                // Pjax 发送时开始加载 Pace 进度条
-                document.addEventListener("pjax:send", function() {Pace.restart()});
-            })
+                });
+                
+            });
 
-
-            
             // Pjax 加载超时时跳转，不然它不给你跳转的！！！
             document.addEventListener('pjax:error', function(e) {
                 console.error(e);
@@ -161,7 +148,6 @@
 
                 // 确保代码块高亮
                 <?php $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings; ?>
-
                 document.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);
                     <?php if (is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings)): ?>
@@ -174,7 +160,7 @@
 
                 // TOC吸附
                 initializeStickyTOC();
-                
+
             });
         </script>
         <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>
