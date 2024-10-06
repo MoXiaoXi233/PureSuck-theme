@@ -104,8 +104,9 @@
                 var pjax = new Pjax({
                     history: true,
                     scrollRestoration: true,
-                    timeout: 5000,
-                    elements: 'a[href^="<?php Helper::options()->siteUrl() ?>"]:not(a[target="_blank"], a[no-pjax]), form[action]',
+                    cacheBust: false,
+                    timeout: 6500,
+                    elements: 'a[href^="<?php Helper::options()->siteUrl() ?>"]:not(a[target="_blank"], a[no-pjax] ), form[action]',
                     selectors: [
                         "pjax",
                         "script[data-pjax]",
@@ -123,7 +124,7 @@
                         submitButton.innerHTML = "提交中~";
                     }
                 });
-                
+
             });
 
             // Pjax 加载超时时跳转，不然它不给你跳转的！！！
@@ -135,11 +136,14 @@
 
             // Pjax 完成后 JS 重载
             document.addEventListener("pjax:success", function(event) {
+
                 // 评论区部分重载
                 if (document.querySelector('.OwO-textarea')) {
                     initializeCommentsOwO();
                 }
 
+                // TOC吸附
+                initializeStickyTOC();
                 // 短代码及模块部分
                 runShortcodes();
 
@@ -157,9 +161,6 @@
                 <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
                     addCopyButtons();
                 <?php endif; ?>
-
-                // TOC吸附
-                initializeStickyTOC();
 
             });
         </script>

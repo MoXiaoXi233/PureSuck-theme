@@ -341,7 +341,7 @@
 
 /** TOC 目录**/
 .toc-section {
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;

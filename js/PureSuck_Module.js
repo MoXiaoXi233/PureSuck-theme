@@ -1,4 +1,5 @@
-
+/** 这个JS包含了各种需要处理的的内容 **/
+/** 图片懒加载，图片放大处理；回到顶部按钮，TOC目录，短代码以及内部卡片功能解析都在这里 **/
 
 function enhanceContent() {
     const images = document.querySelectorAll('img');
@@ -84,13 +85,13 @@ function generateTOC() {
         if (!v.id) {
             v.id = `heading-${index}`; // 如果没有 ID，则分配一个唯一的 ID
         }
-        str += `<li class="li li-${v.tagName[1]}"><a href="#${v.id}" id="link-${v.id}" class="toc-a" no-pjax>${v.textContent}</a></li>\n`;
+        str += `<li class="li li-${v.tagName[1]}"><a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a></li>\n`;
     });
     str += `</ul>\n<div class="sider"><span class="siderbar"></span></div>\n</div>`;
 
-    toc.insertAdjacentHTML("beforeend", str);
+    toc.innerHTML = str;
 
-    // 平滑滚动和阻止默认跳转
+    // 平滑滚动
     elements.forEach(v => {
         const btn = document.querySelector(`#link-${v.id}`);
         if (!btn) return; // 如果按钮不存在，跳过该元素
@@ -101,58 +102,14 @@ function generateTOC() {
                 top: targetTop,
                 behavior: "smooth" // 平滑滚动到目标位置
             });
+            setTimeout(() => {
+                window.location.hash = v.id; // 更新URL
+            }, 300); // 延迟更新URL以确保平滑滚动完成
         });
     });
 
     // 滚动时处理高亮逻辑
-    let ticking = false;
-    window.addEventListener("scroll", () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const currentPosition = window.scrollY;
-                elements.forEach((element, index) => {
-                    const targetTop = getElementTop(element);
-                    const nextElement = elements[index + 1];
-                    const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
-
-                    if (currentPosition >= targetTop && currentPosition < nextTargetTop) {
-                        removeClass(elements);
-                        const anchor = document.querySelector(`#link-${element.id}`);
-                        if (anchor) {
-                            anchor.classList.add("li-active");
-
-                            const tocItems = document.querySelectorAll(".toc li");
-                            let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
-                            sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
-
-                            const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
-                            const offset = fontSize / 2;
-                            sidebarTop += offset - 3;
-
-                            document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
-                        }
-                    }
-                });
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-
-    // 页面刷新后恢复正确的高亮
-    window.addEventListener("load", () => {
-        const currentHash = window.location.hash;
-        if (currentHash) {
-            const targetElement = document.querySelector(currentHash);
-            if (targetElement) {
-                const targetTop = getElementTop(targetElement);
-                window.scrollTo({
-                    top: targetTop,
-                    behavior: "auto" // 直接滚动到目标
-                });
-            }
-        }
-    });
+    handleScroll(elements);
 
     if (tocSection) {
         tocSection.style.display = "block";
@@ -162,6 +119,9 @@ function generateTOC() {
             rightSidebar.style.top = "0";
         }
     }
+
+    // 手动触发一次滚动事件，确保页面加载时高亮逻辑正确执行
+    window.dispatchEvent(new Event('scroll'));
 }
 
 // 获取元素的绝对位置
@@ -183,6 +143,55 @@ function removeClass(elements) {
         const anchor = document.querySelector(`#link-${v.id}`);
         if (anchor) { // 检查 anchor 是否存在
             anchor.classList.remove("li-active");
+        }
+    });
+}
+
+// 处理滚动事件
+function handleScroll(elements) {
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const currentPosition = window.scrollY;
+                let activeElement = null;
+
+                elements.forEach((element, index) => {
+                    const targetTop = getElementTop(element);
+                    const nextElement = elements[index + 1];
+                    const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
+
+                    if (currentPosition >= targetTop && currentPosition < nextTargetTop) {
+                        activeElement = element;
+                    }
+                });
+
+                if (!activeElement && elements.length > 0) {
+                    activeElement = elements[0]; // 默认高亮第一个元素
+                }
+
+                if (activeElement) {
+                    removeClass(elements);
+                    const anchor = document.querySelector(`#link-${activeElement.id}`);
+                    if (anchor) {
+                        anchor.classList.add("li-active");
+
+                        const tocItems = document.querySelectorAll(".toc li");
+                        const index = Array.from(elements).indexOf(activeElement);
+                        let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
+                        sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
+
+                        const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
+                        const offset = fontSize / 2;
+                        sidebarTop += offset - 3;
+
+                        document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
+                    }
+                }
+
+                ticking = false;
+            });
+            ticking = true;
         }
     });
 }
@@ -639,6 +648,7 @@ function parseTabs() {
 }
 
 function runShortcodes() {
+    history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
     parseShortcodes();
     enhanceContent();
     parseAlerts();
