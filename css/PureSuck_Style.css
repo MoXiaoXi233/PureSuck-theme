@@ -305,6 +305,7 @@ h2 {
 
 h2::before {
 	content: "";
+	right: 3px;
 	display: block;
 	width: 8px;
 	height: 8px;
@@ -334,6 +335,7 @@ h6 {
 
 h3::before {
 	content: "";
+	right: 3px;
 	display: block;
 	width: 8px;
 	height: 8px;
@@ -341,7 +343,7 @@ h3::before {
 	opacity: .55;
 	position: relative;
 	border-radius: 50%;
-	top: 28px;
+	top: 30px;
 }
 
 
