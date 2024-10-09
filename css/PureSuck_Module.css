@@ -628,7 +628,7 @@
     border-radius: 50%;
     position: absolute;
     left: 25px;
-    top: 0;
+    top: 5px;
 }
 
 .timeline-content {
