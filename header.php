@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="renderer" content="webkit">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="<?= empty($this->fields->description) || !$this->is('single') ? ($this->getDescription() ?: '') : $this->fields->description; ?>" />
+    <?php $this->header(); ?>
     <title>
         <?php $this->archiveTitle([
             'category' => _t('分类 %s 下的文章'),
