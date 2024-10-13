@@ -73,7 +73,7 @@
                                         <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>
                                     </div>
                                 </div>
-                                <span class="cc-icon">&#xe819;</span> <!-- 使用自定义图标字体 -->
+                                <span class="cc-icon"></span>
                             </div>
                         <?php endif; ?>
                     </div>

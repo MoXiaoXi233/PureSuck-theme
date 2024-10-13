@@ -2142,16 +2142,17 @@ textarea.ci {
 	margin-bottom: 5px;
 }
 
-.cc-icon {
-	font-family: 'fontello';
-	font-size: 10em; 
+.cc-icon::before {
+	content: '\e819'; 
+	font-family: 'fontello'; 
+	font-size: 10em;
 	opacity: .55;
 	color: var(--border-color);
 	position: absolute;
-    right: 40px;
-    top: 0;
-	pointer-events: none; 
-	z-index: 0; 
+	right: 40px;
+	top: 0;
+	pointer-events: none;
+	z-index: 0;
 }
 
 .license-info-card * {
@@ -2178,7 +2179,7 @@ textarea.ci {
 		margin-bottom: 0;
 	}
 
-    .cc-icon {
+    .cc-icon::before {
         right: 20px; 
     }
 }
