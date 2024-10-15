@@ -171,7 +171,7 @@ function themeConfig($form)
         _t('填写 JPG/PNG/Webp 等图片 URL 地址, 用于显示文章作者头像')
     );
     $form->addInput($authorAvatar);
-    
+
     // 左侧描述
     $customDescription = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'customDescription',
@@ -191,7 +191,7 @@ function themeConfig($form)
         _t('支持自定义HTML，将在网站左侧显示')
     );
     $form->addInput($leftSideCustomCode);
-    
+
     // Footer Script标签
     $footerScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerScript',
@@ -201,7 +201,7 @@ function themeConfig($form)
         _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，需要包含&lt;script&gt;标签，不要填其他内容，否则会造成样式错误！<br>如果开启了 Pjax 功能，请自行在 header.php 配置回调函数或者向他人寻求帮助')
     );
     $form->addInput($footerScript);
-    
+
     // 网页底部信息
     $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerInfo',
@@ -239,6 +239,20 @@ function themeConfig($form)
     // <li>事件：<code>pjax:success</code>在 Pjax 请求成功后触发。</font></li>
     // <li>事件：<code>pjax:error</code>在 Pjax 请求失败后触发。</li>
     // </ul>`;
+
+    //主题样式细调
+    // 标题粗下划线
+    $postTitleAfter = new Typecho_Widget_Helper_Form_Element_Radio(
+        'postTitleAfter',
+        array(
+            'show' => _t('显示'),
+            'hide' => _t('隐藏')
+        ),
+        'show',
+        _t('是否显示主标题下的装饰线条'),
+        _t('选择是否显示主标题下的装饰线条的装饰线条，带有触摸反馈')
+    );
+    $form->addInput($postTitleAfter);
 
     // 搜索功能显示选项
     $showSearch = new Typecho_Widget_Helper_Form_Element_Radio(

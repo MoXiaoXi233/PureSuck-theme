@@ -84,6 +84,14 @@
     </script>
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
+    <!-- 主题样式微调 -->
+    <?php if ($this->options->postTitleAfter == 'hide'): ?>
+        <style>
+            .post-title::after {
+                display: none!important;
+            }
+        </style>
+    <?php endif; ?>
     <!-- AOS -->
     <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
     <!-- ICON Setting -->
