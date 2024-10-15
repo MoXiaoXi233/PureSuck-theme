@@ -1145,7 +1145,7 @@ body>.wrapper {
 	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -8px;
-		margin-bottom: 24px
+		margin-bottom: 4px
 	}
 
 	[data-js~=share]:before {
@@ -1179,7 +1179,7 @@ body>.wrapper {
 
 	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
-		margin-bottom: 40px
+		margin-bottom: 6px
 	}
 
 	.post-more {
@@ -1222,7 +1222,7 @@ body>.wrapper {
 	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -10px;
-		margin-bottom: 20px
+		margin-bottom: 10px
 	}
 
 	.post-more {
