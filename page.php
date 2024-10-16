@@ -47,10 +47,9 @@
                             </a>
                         </div>
                         <?php
-                        // 获取内容
-                        ob_start();
-                        $this->content();
-                        $content = ob_get_clean();
+                        // 短代码解析，交给 function.php
+                        $content = $this->content;
+                        $content = parseShortcodes($content);
                         echo $content;
                         ?>
 

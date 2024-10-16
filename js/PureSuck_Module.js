@@ -196,66 +196,6 @@ function handleScroll(elements) {
     });
 }
 
-function parseShortcodes() {
-    const elements = document.querySelectorAll('.inner-post-wrapper');
-
-    elements.forEach(element => {
-        let content = element.innerHTML;
-
-        content = content.replace(/\[\/(alert|window|friend-card|collapsible-panel|timeline|tabs)\](<br\s*\/?>)?/g, '[/$1]');
-        content = content.replace(/\[\/timeline-event\](<br\s*\/?>)?/g, '[/timeline-event]');
-        content = content.replace(/\[\/tab\](<br\s*\/?>)?/g, '[/tab]');
-
-        const alertRegex = /\[alert type="([^"]*)"\](.*?)\[\/alert\]/g;
-        content = content.replace(alertRegex, (match, type, text) => {
-            return `<div alert-type="${type}">${text}</div>`;
-        });
-
-        const windowRegex = /\[window type="([^"]*)" title="([^"]*)"\](.*?)\[\/window\]/g;
-        content = content.replace(windowRegex, (match, type, title, text) => {
-            if (text.startsWith('<br')) {
-                text = text.replace(/^<br\s*\/?>/, '');
-            }
-            return `<div window-type="${type}" title="${title}">${text}</div>`;
-        });
-
-        const friendCardRegex = /\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/g;
-        content = content.replace(friendCardRegex, (match, name, ico, url, description) => {
-            return `<div friend-name="${name}" ico="${ico}" url="${url}">${description}</div>`;
-        });
-
-        const collapsiblePanelRegex = /\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/g;
-
-        content = content.replace(collapsiblePanelRegex, (match, title, text) => {
-            if (text.startsWith('<br')) {
-                text = text.replace(/^<br\s*\/?>/, '');
-            }
-            return `<div collapsible-panel title="${title}">${text}</div>`;
-        });
-
-        const timelineRegex = /\[timeline\](.*?)\[\/timeline\]/gs;
-        content = content.replace(timelineRegex, (match, innerContent) => {
-            const timelineEventRegex = /\[timeline-event date="([^"]*)" title="([^"]*)"\](.*?)\[\/timeline-event\]/gs;
-            let eventsContent = innerContent.replace(timelineEventRegex, (eventMatch, date, title, eventText) => {
-                return `<div timeline-event date="${date}" title="${title}">${eventText}</div>`;
-            });
-            return `<div id="timeline">${eventsContent}</div>`;
-        });
-
-        const tabsRegex = /\[tabs\](.*?)\[\/tabs\]/gs;
-        content = content.replace(tabsRegex, (match, innerContent) => {
-            const tabRegex = /\[tab title="([^"]*)"\](.*?)\[\/tab\]/gs;
-            let tabsContent = innerContent.replace(tabRegex, (tabMatch, title, tabContent) => {
-                tabContent = tabContent.replace(/^\s*<br\s*\/?>/, '');
-                return `<div tab-title="${title}">${tabContent}</div>`;
-            });
-            return `<div tabs>${tabsContent}</div>`;
-        });
-
-        element.innerHTML = content;
-    });
-}
-
 function parseAlerts() {
     const elements = document.querySelectorAll('[alert-type]');
 
@@ -649,7 +589,6 @@ function parseTabs() {
 
 function runShortcodes() {
     history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
-    parseShortcodes();
     enhanceContent();
     parseAlerts();
     parseWindows();

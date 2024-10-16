@@ -88,7 +88,7 @@
     <?php if ($this->options->postTitleAfter == 'hide'): ?>
         <style>
             .post-title::after {
-                display: none!important;
+                display: none !important;
             }
         </style>
     <?php endif; ?>

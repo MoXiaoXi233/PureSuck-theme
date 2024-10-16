@@ -380,3 +380,67 @@ function generateDynamicCSS()
         }
     </style>';
 }
+
+function parseShortcodes($content)
+{
+    // 替换短代码结束标签后的 <br> 标签
+    $content = preg_replace('/\[\/(alert|window|friend-card|collapsible-panel|timeline|tabs)\](<br\s*\/?>)?/i', '[/$1]', $content);
+    $content = preg_replace('/\[\/timeline-event\](<br\s*\/?>)?/i', '[/timeline-event]', $content);
+    $content = preg_replace('/\[\/tab\](<br\s*\/?>)?/i', '[/tab]', $content);
+
+    // 处理 [alert] 短代码
+    $content = preg_replace_callback('/\[alert type="([^"]*)"\](.*?)\[\/alert\]/s', function ($matches) {
+        $type = $matches[1];
+        $text = $matches[2];
+        return "<div alert-type=\"$type\">$text</div>";
+    }, $content);
+
+    // 处理 [window] 短代码
+    $content = preg_replace_callback('/\[window type="([^"]*)" title="([^"]*)"\](.*?)\[\/window\]/s', function ($matches) {
+        $type = $matches[1];
+        $title = $matches[2];
+        $text = preg_replace('/^<br\s*\/?>/', '', $matches[3]);
+        return "<div window-type=\"$type\" title=\"$title\">$text</div>";
+    }, $content);
+
+    // 处理 [friend-card] 短代码
+    $content = preg_replace_callback('/\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/s', function ($matches) {
+        $name = $matches[1];
+        $ico = $matches[2];
+        $url = $matches[3];
+        $description = $matches[4];
+        return "<div friend-name=\"$name\" ico=\"$ico\" url=\"$url\">$description</div>";
+    }, $content);
+
+    // 处理 [collapsible-panel] 短代码
+    $content = preg_replace_callback('/\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/s', function ($matches) {
+        $title = $matches[1];
+        $text = preg_replace('/^<br\s*\/?>/', '', $matches[2]);
+        return "<div collapsible-panel title=\"$title\">$text</div>";
+    }, $content);
+
+    // 处理 [timeline] 短代码
+    $content = preg_replace_callback('/\[timeline\](.*?)\[\/timeline\]/s', function ($matches) {
+        $innerContent = $matches[1];
+        $innerContent = preg_replace_callback('/\[timeline-event date="([^"]*)" title="([^"]*)"\](.*?)\[\/timeline-event\]/s', function ($eventMatches) {
+            $date = $eventMatches[1];
+            $title = $eventMatches[2];
+            $eventText = $eventMatches[3];
+            return "<div timeline-event date=\"$date\" title=\"$title\">$eventText</div>";
+        }, $innerContent);
+        return "<div id=\"timeline\">$innerContent</div>";
+    }, $content);
+
+    // 处理 [tabs] 短代码
+    $content = preg_replace_callback('/\[tabs\](.*?)\[\/tabs\]/s', function ($matches) {
+        $innerContent = $matches[1];
+        $innerContent = preg_replace_callback('/\[tab title="([^"]*)"\](.*?)\[\/tab\]/s', function ($tabMatches) {
+            $title = $tabMatches[1];
+            $tabContent = preg_replace('/^\s*<br\s*\/?>/', '', $tabMatches[2]);
+            return "<div tab-title=\"$title\">$tabContent</div>";
+        }, $innerContent);
+        return "<div tabs>$innerContent</div>";
+    }, $content);
+
+    return $content;
+}
