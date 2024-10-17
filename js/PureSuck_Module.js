@@ -3,15 +3,27 @@
 
 function enhanceContent() {
     const images = document.querySelectorAll('img');
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                const isInPostMediaOrHeader = img.closest('.post-media') || img.closest('header');
+                if (isInPostMediaOrHeader) return;
+                if (!img.hasAttribute('data-zoomable')) {
+                    img.dataset.zoomable = 'true';
+                }
+                observer.unobserve(img); // Stop observing the image once it's in the viewport
+            } else {
+                const img = entry.target;
+                if (!img.hasAttribute('loading')) {
+                    img.setAttribute('loading', 'lazy');
+                }
+            }
+        });
+    });
+
     images.forEach(img => {
-        const isInPostMediaOrHeader = img.closest('.post-media') || img.closest('header');
-        if (isInPostMediaOrHeader) return;
-        if (!img.hasAttribute('loading')) {
-            img.setAttribute('loading', 'lazy');
-        }
-        if (!img.hasAttribute('data-zoomable')) {
-            img.dataset.zoomable = 'true';
-        }
+        observer.observe(img);
     });
 
     const headers = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
@@ -590,11 +602,8 @@ function parseTabs() {
 function runShortcodes() {
     history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
     enhanceContent();
-    parseAlerts();
-    parseWindows();
     parseFriendCards();
     parseCollapsiblePanels();
-    parseTimeline();
     parseTabs();
     handleGoTopButton();
     generateTOC();

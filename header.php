@@ -93,7 +93,7 @@
         </style>
     <?php endif; ?>
     <!-- AOS -->
-    <script src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
     <!-- ICON Setting -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
     <!-- CSS引入 -->
