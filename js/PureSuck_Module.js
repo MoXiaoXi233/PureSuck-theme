@@ -208,69 +208,6 @@ function handleScroll(elements) {
     });
 }
 
-function parseAlerts() {
-    const elements = document.querySelectorAll('[alert-type]');
-
-    elements.forEach(element => {
-        const type = element.getAttribute('alert-type');
-        const content = element.innerHTML;
-
-        let iconClass;
-        switch (type) {
-            case 'green':
-                iconClass = 'icon-ok-circle';
-                break;
-            case 'blue':
-                iconClass = 'icon-info-circled';
-                break;
-            case 'yellow':
-                iconClass = 'icon-attention';
-                break;
-            case 'red':
-                iconClass = 'icon-cancel-circle';
-                break;
-            default:
-                iconClass = 'icon-info-circled';
-        }
-
-        const newContent = `
-                <div role="alert" class="alert-box ${type}">
-                    <i class="${iconClass}"></i>
-                    <p class="text-xs font-semibold">${content}</p>
-                </div>
-            `;
-
-        element.outerHTML = newContent;
-    });
-}
-
-function parseWindows() {
-    const elements = document.querySelectorAll('[window-type]');
-
-    elements.forEach(element => {
-        const type = element.getAttribute('window-type');
-        const title = element.getAttribute('title');
-        const content = element.innerHTML;
-
-        const newContent = `
-            <div class="notifications-container">
-                <div class="window ${type}">
-                    <div class="flex">
-                        <div class="window-prompt-wrap">
-                            <p class="window-prompt-heading">${title}</p>
-                            <div class="window-prompt-prompt">
-                                <p>${content}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            `;
-
-        element.outerHTML = newContent;
-    });
-}
-
 function parseFriendCards() {
     const container = document.body;
 
@@ -378,30 +315,6 @@ function parseCollapsiblePanels() {
                 icon.classList.add('icon-up-open');
             }
         });
-    });
-}
-
-function parseTimeline() {
-    const timelineEvents = document.querySelectorAll('[timeline-event]');
-
-    timelineEvents.forEach(event => {
-        const date = event.getAttribute('date');
-        const title = event.getAttribute('title');
-        const content = event.innerHTML;
-
-        const timelineItem = document.createElement('div');
-        timelineItem.classList.add('timeline-item');
-
-        timelineItem.innerHTML = `
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-date">${date}</div>
-                    <p class="timeline-title">${title}</p>
-                    <p class="timeline-description">${content}</p>
-                </div>
-            `;
-
-        event.replaceWith(timelineItem);
     });
 }
 

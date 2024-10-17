@@ -481,28 +481,6 @@ function parse_windows($content) {
     return $content;
 }
 
-// 解析好友卡片
-function parse_friend_cards($content) {
-    $content = preg_replace_callback('/<div friend-name="(.*?)" ico="(.*?)" url="(.*?)">(.*?)<\/div>/', function ($matches) {
-        $friendName = $matches[1];
-        $avatarUrl = $matches[2];
-        $url = $matches[3];
-        $innerContent = $matches[4];
-        return '<a href="' . $url . '" class="friendsboard-item" target="_blank"><div class="friends-card-header"><span class="friends-card-username">' . $friendName . '</span><span class="friends-card-dot"></span></div><div class="friends-card-body"><div class="friends-card-text">' . $innerContent . '</div><div class="friends-card-avatar-container"><img src="' . $avatarUrl . '" alt="Avatar" class="friends-card-avatar"></div></div></a>';
-    }, $content);
-    return $content;
-}
-
-// 解析可折叠面板
-function parse_collapsible_panels($content) {
-    $content = preg_replace_callback('/<div collapsible-panel title="(.*?)">(.*?)<\/div>/', function ($matches) {
-        $title = $matches[1];
-        $innerContent = $matches[2];
-        return '<div class="collapsible-panel"><button class="collapsible-header">' . $title . '<span class="icon icon-down-open"></span></button><div class="collapsible-content"><div class="collapsible-details">' . $innerContent . '</div></div></div>';
-    }, $content);
-    return $content;
-}
-
 // 解析时间轴
 function parse_timeline($content) {
     $content = preg_replace_callback('/<div timeline-event date="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
@@ -513,30 +491,6 @@ function parse_timeline($content) {
     }, $content);
     return $content;
 }
-
-// 解析标签页
-function parse_tabs($content) {
-    $content = preg_replace_callback('/<div tabs>(.*?)<\/div>/s', function ($matches) {
-        $tabsContent = $matches[1];
-        $tabTitles = [];
-        $tabContents = [];
-        preg_match_all('/<div tab-title="(.*?)">(.*?)<\/div>/s', $tabsContent, $tabMatches, PREG_SET_ORDER);
-        foreach ($tabMatches as $index => $tabMatch) {
-            $tabTitles[] = $tabMatch[1];
-            $tabContents[] = $tabMatch[2];
-        }
-        if (count($tabTitles) === 0) return $matches[0];
-        $tabHeaderHTML = '';
-        $tabContentHTML = '';
-        foreach ($tabTitles as $index => $title) {
-            $tabHeaderHTML .= '<div class="tab-link ' . ($index === 0 ? 'active' : '') . '" data-tab="tab' . ($index + 1) . '" role="tab" aria-controls="tab' . ($index + 1) . '" tabindex="' . ($index === 0 ? '0' : '-1') . '">' . $title . '</div>';
-            $tabContentHTML .= '<div class="tab-pane ' . ($index === 0 ? 'active' : '') . '" id="tab' . ($index + 1) . '" role="tabpanel" aria-labelledby="tab' . ($index + 1) . '">' . $tabContents[$index] . '</div>';
-        }
-        return '<div class="tab-container"><div class="tab-header-wrapper"><button class="scroll-button left" aria-label="向左"></button><div class="tab-header" role="tablist">' . $tabHeaderHTML . '<div class="tab-indicator"></div></div><button class="scroll-button right" aria-label="向右"></button></div><div class="tab-content">' . $tabContentHTML . '</div></div>';
-    }, $content);
-    return $content;
-}
-
 // 运行所有解析函数
 function parseShortcodes($content) {
     $content = parse_Shortcodes($content);
