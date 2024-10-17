@@ -650,6 +650,15 @@
     color: var(--text-color);
 }
 
+.timeline-title a {
+    transition: color 0.3s ease;
+    color: var(--text-color);
+}
+
+.timeline-title a:hover {
+    color: var(--themehovercolor); 
+}
+
 .timeline-description {
     font-size: 14px;
     margin: 0;
