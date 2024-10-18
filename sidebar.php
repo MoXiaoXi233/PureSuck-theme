@@ -1,7 +1,5 @@
 <div class="right-sidebar">
-    <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
 
-    <?php endif; ?>
     <!-- 搜索功能 -->
     <?php if ($this->options->showSearch == '1'): ?>
         <div class="search-section">
@@ -65,7 +63,8 @@
     <?php endif; ?>
 
     <!-- TOC -->
-    <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page'))): ?>
+    <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page') || $this->is('archives'))): ?>
+
         <div class="toc-section" id="toc-section" style="display: none;">
             <header class="section-header">
                 <span class="icon-article"></span>
@@ -75,6 +74,7 @@
                 <div class="toc"></div>
             </section>
         </div>
+
         <script>
             function initializeStickyTOC() {
                 var tocSection = document.getElementById('toc-section');

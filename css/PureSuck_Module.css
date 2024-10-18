@@ -610,14 +610,14 @@
 /* 时间线 */
 #timeline {
     position: relative;
-    padding: 20px 0;
+    padding: 15px 0;
     margin: 20px 0 !important;
 }
 
 .timeline-item {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 20px;
+    margin: 10px 0px 10px 0;
     position: relative;
 }
 
@@ -806,3 +806,4 @@
     color: var(--text-color);
     justify-content: center;
 }
+

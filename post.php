@@ -54,7 +54,7 @@
                         ?>
 
                         <!-- 判断并显示版权信息 -->
-                        <?php if ($this->options->showCopyright == '1'): ?>
+                        <?php if (!$this->hidden && $this->options->showCopyright == '1'): ?>
                             <div class="license-info-card">
                                 <div class="license-info-title"><?php $this->title(); ?></div>
                                 <a class="license-info-link" href="#"><?php $this->permalink(); ?></a>

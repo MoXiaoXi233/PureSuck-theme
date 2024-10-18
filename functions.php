@@ -448,8 +448,7 @@ function parse_Shortcodes($content)
 }
 
 // 解析警告框
-function parse_alerts($content)
-{
+function parse_alerts($content) {
     $content = preg_replace_callback('/<div alert-type="(.*?)">(.*?)<\/div>/', function ($matches) {
         $type = $matches[1];
         $innerContent = $matches[2];
@@ -474,8 +473,7 @@ function parse_alerts($content)
 }
 
 // 解析窗口元素
-function parse_windows($content)
-{
+function parse_windows($content) {
     $content = preg_replace_callback('/<div window-type="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $type = $matches[1];
         $title = $matches[2];
@@ -486,8 +484,7 @@ function parse_windows($content)
 }
 
 // 解析时间轴
-function parse_timeline($content)
-{
+function parse_timeline($content) {
     $content = preg_replace_callback('/<div timeline-event date="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $date = $matches[1];
         $title = $matches[2];
@@ -497,8 +494,7 @@ function parse_timeline($content)
     return $content;
 }
 // 运行所有解析函数
-function parseShortcodes($content)
-{
+function parseShortcodes($content) {
     $content = parse_Shortcodes($content);
     $content = parse_alerts($content);
     $content = parse_windows($content);

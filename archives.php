@@ -40,37 +40,44 @@ $this->need('header.php');
                             <?php $this->title() ?>
                         </a>
                     </h1>
-                    <?php
-                    // 获取所有文章
-                    $this->widget('Widget_Contents_Post_Recent', 'pageSize=100')->to($posts);
-                    $archives = [];
+                    <div class="inner-post-wrapper">
 
-                    // 按年份和月份分组文章
-                    while ($posts->next()) {
-                        $date = $posts->date; // 获取文章日期
-                        $year = $date->format('Y'); // 获取年份
-                        $monthDay = $date->format('m-d'); // 获取月份和日期
-                        $archives[$year][$monthDay][] = clone $posts; // 将文章添加到对应的年份和月份
-                    }
+                        <div class="meta post-meta">
+                            这里会归档一切文章
+                        </div>
 
-                    // 输出归档
-                    foreach ($archives as $year => $items) {
-                        echo '<h2 class="timeline-year">' . $year . '</h2>'; // 输出年份
-                        echo '<div id="timeline">'; // 开始时间线
-                        foreach ($items as $monthDay => $posts) {
-                            foreach ($posts as $item) {
-                                echo '<div class="timeline-item">';
-                                echo '<div class="timeline-dot"></div>';
-                                echo '<div class="timeline-content">';
-                                echo '<div class="timeline-date">' . $monthDay . '</div>'; // 只显示月和日
-                                echo '<h3 class="timeline-title"><a href="' . $item->permalink . '">' . $item->title . '</a></h3>';
-                                echo '</div>'; // timeline-content
-                                echo '</div>'; // timeline-item
-                            }
+                        <?php
+                        // 获取所有文章
+                        $this->widget('Widget_Contents_Post_Recent', 'pageSize=100')->to($posts);
+                        $archives = [];
+
+                        // 按年份和月份分组文章
+                        while ($posts->next()) {
+                            $date = $posts->date; // 获取文章日期
+                            $year = $date->format('Y'); // 获取年份
+                            $monthDay = $date->format('m-d'); // 获取月份和日期
+                            $archives[$year][$monthDay][] = clone $posts; // 将文章添加到对应的年份和月份
                         }
-                        echo '</div>'; // 结束时间线
-                    }
-                    ?>
+
+                        // 输出归档
+                        foreach ($archives as $year => $items) {
+                            echo '<h2 class="timeline-year">' . $year . '</h2>'; // 输出年份
+                            echo '<div id="timeline">'; // 开始时间线
+                            foreach ($items as $monthDay => $posts) {
+                                foreach ($posts as $item) {
+                                    echo '<div class="timeline-item">';
+                                    echo '<div class="timeline-dot"></div>';
+                                    echo '<div class="timeline-content">';
+                                    echo '<div class="timeline-date">' . $monthDay . '</div>'; // 只显示月和日
+                                    echo '<div class="timeline-title"><a href="' . $item->permalink . '">' . $item->title . '</a></div>';
+                                    echo '</div>'; // timeline-content
+                                    echo '</div>'; // timeline-item
+                                }
+                            }
+                            echo '</div>'; // 结束时间线
+                        }
+                        ?>
+                    </div>
                 </div>
             </section>
 

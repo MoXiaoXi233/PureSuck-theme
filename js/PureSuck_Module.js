@@ -1,5 +1,5 @@
 /** 这个JS包含了各种需要处理的的内容 **/
-/** 图片懒加载，图片放大处理；回到顶部按钮，TOC目录，短代码以及内部卡片功能解析都在这里 **/
+/** 图片懒加载，图片放大处理；回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
 function enhanceContent() {
     const images = document.querySelectorAll('img');
@@ -24,20 +24,6 @@ function enhanceContent() {
 
     images.forEach(img => {
         observer.observe(img);
-    });
-
-    const headers = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-    headers.forEach(header => {
-        const elements = document.querySelectorAll(header);
-        elements.forEach((element, index) => {
-            if (element.closest('.post-media')) return;
-            let headerText = element.textContent.trim().toLowerCase().replace(/\W+/g, '-');
-            headerText = headerText.substring(0, 50);
-            const id = `heading-${header}-${index + 1}-${headerText}`;
-            if (!element.hasAttribute('id')) {
-                element.setAttribute('id', id);
-            }
-        });
     });
 }
 
