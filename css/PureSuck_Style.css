@@ -2076,20 +2076,16 @@ textarea.ci {
 .post-title::after {
     content: "";
     display: block;
-    background: var(--themecolor);
-    opacity: .55;
     position: absolute;
     pointer-events: none;
     border-radius: 0.45rem;
-    bottom: 5px; 
-    left: 0;
-    width: 58px; 
-    height: 11px; 
-    transition: width 0.3s ease; 
+	background: var(--themecolor);
+	opacity: .55;
+    transition: width 0.3s ease;
 }
 
 .post-title:hover::after {
-    width: 100%; /* 悬停时宽度为100% */
+    width: 100%; 
 }
 
 .no-bg {

@@ -245,12 +245,14 @@ function themeConfig($form)
     $postTitleAfter = new Typecho_Widget_Helper_Form_Element_Radio(
         'postTitleAfter',
         array(
-            'show' => _t('显示'),
-            'hide' => _t('隐藏')
+            'off' => _t('关'),
+            'boldLine' => _t('粗线条'),
+            'wavyLine' => _t('波浪线条'),
+            // 'handDrawn' => _t('手绘风')
         ),
-        'show',
-        _t('是否显示主标题下的装饰线条'),
-        _t('选择是否显示主标题下的装饰线条的装饰线条，带有触摸反馈')
+        'off',
+        _t('主标题下的装饰线条样式'),
+        _t('选择主标题下的装饰线条样式，带有触摸反馈')
     );
     $form->addInput($postTitleAfter);
 
@@ -446,7 +448,8 @@ function parse_Shortcodes($content)
 }
 
 // 解析警告框
-function parse_alerts($content) {
+function parse_alerts($content)
+{
     $content = preg_replace_callback('/<div alert-type="(.*?)">(.*?)<\/div>/', function ($matches) {
         $type = $matches[1];
         $innerContent = $matches[2];
@@ -471,7 +474,8 @@ function parse_alerts($content) {
 }
 
 // 解析窗口元素
-function parse_windows($content) {
+function parse_windows($content)
+{
     $content = preg_replace_callback('/<div window-type="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $type = $matches[1];
         $title = $matches[2];
@@ -482,7 +486,8 @@ function parse_windows($content) {
 }
 
 // 解析时间轴
-function parse_timeline($content) {
+function parse_timeline($content)
+{
     $content = preg_replace_callback('/<div timeline-event date="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $date = $matches[1];
         $title = $matches[2];
@@ -492,7 +497,8 @@ function parse_timeline($content) {
     return $content;
 }
 // 运行所有解析函数
-function parseShortcodes($content) {
+function parseShortcodes($content)
+{
     $content = parse_Shortcodes($content);
     $content = parse_alerts($content);
     $content = parse_windows($content);
