@@ -126,7 +126,7 @@ function themeConfig($form)
         }
     }
     echo '
-    <h3>当前主题版本：<span style="color: #b45864;">1.2.1</span></h3>
+    <h3>当前主题版本：<span style="color: #b45864;">1.2.2</span></h3>
     <h4>主题开源页面及文档：<span style="color: #b45864;"><a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #3273dc; text-decoration: none;">PureSuck-theme</a></span></h4>
     <h5>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</h5>
     <form class="protected home" action="?' . $name . 'bf" method="post">
@@ -381,6 +381,35 @@ function generateDynamicCSS()
             --themehovercolor: ' . htmlspecialchars($darkThemeHoverColor, ENT_QUOTES, 'UTF-8') . ';
         }
     </style>';
+}
+
+function allOfCharacters() {
+    $chars = 0;
+    $db = Typecho_Db::get();
+    $select = $db ->select('text')->from('table.contents');
+    $rows = $db->fetchAll($select);
+    foreach ($rows as $row) { $chars += mb_strlen(trim($row['text']), 'UTF-8'); }
+    $unit = '';
+    if($chars >= 10000)     { $chars /= 10000; $unit = 'w'; } 
+    else if($chars >= 1000) { $chars /= 1000;  $unit = 'k'; }
+    $out = sprintf('%.2lf %s',$chars, $unit);
+    return $out;
+}
+
+function getTotalPostsCount() {
+    // 获取 Typecho 的数据库对象
+    $db = Typecho_Db::get();
+
+    // 查询文章总数
+    $select = $db->select('COUNT(*) AS count')->from('table.contents')->where('type = ?', 'post');
+    $result = $db->fetchObject($select);
+
+    // 检查查询结果是否为空
+    if ($result) {
+        return $result->count;
+    } else {
+        return 0; // 如果没有结果，返回 0
+    }
 }
 
 function parse_Shortcodes($content)

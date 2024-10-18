@@ -43,7 +43,8 @@ $this->need('header.php');
                     <div class="inner-post-wrapper">
 
                         <div class="meta post-meta">
-                            这里会归档一切文章
+                            这里会归档一切文章<br>
+                            共创作了 <?php echo  getTotalPostsCount() ; ?> 篇文章，合 <?php  echo allOfCharacters(); ?> 字
                         </div>
 
                         <?php
