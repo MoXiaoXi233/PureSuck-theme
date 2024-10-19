@@ -204,7 +204,7 @@
         <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
                 <span class="el-avatar el-avatar--circle">
-                    <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="512" height="512">
+                    <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="120" height="120">
                 </span>
                 <div class="header-title">
                     <?= $this->options->titleIndex(); ?>

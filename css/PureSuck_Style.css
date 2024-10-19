@@ -1785,10 +1785,6 @@ strong {
 	transform: scale(0.95); 
 }
 
-.header-title {
-	margin-top: 12px;
-}
-
 .nav-item a,
 .nav-item:hover a {
 	color: inherit
@@ -2060,8 +2056,7 @@ textarea.ci {
 	justify-content: center;
 	overflow: hidden;
 	text-align: center;
-	width: 120px;
-	margin-top: -18px
+	width: 120px
 }
 
 .wrapper {
