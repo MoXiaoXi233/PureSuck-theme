@@ -244,17 +244,19 @@
     margin: 0 0.75rem;
 }
 
+.window-prompt-wrap a {
+    color: inherit;
+}
+
 .window-prompt-heading {
     font-weight: bold;
     text-align: left;
 }
 
-.window-prompt-prompt {
+.window-prompt-prompt,
+.window-prompt-prompt * {
     font-size: 0.85rem;
-}
-
-.window-prompt-wrap a {
-    color: inherit;
+    color:inherit;
 }
 
 /* 右侧边栏 */
