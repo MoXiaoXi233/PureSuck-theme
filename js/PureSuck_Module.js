@@ -506,12 +506,14 @@ function runShortcodes() {
     parseTabs();
     handleGoTopButton();
     generateTOC();
-
-    mediumZoom('[data-zoomable]', {
-        background: 'var(--card-color)'
-    });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     runShortcodes()
 });
+
+window.onload = function () {
+    mediumZoom('[data-zoomable]', {
+        background: 'var(--card-color)'
+    });
+};
