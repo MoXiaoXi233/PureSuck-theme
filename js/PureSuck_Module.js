@@ -1,31 +1,7 @@
 /** 这个JS包含了各种需要处理的的内容 **/
 /** 图片懒加载，图片放大处理；回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
-function enhanceContent() {
-    const images = document.querySelectorAll('img');
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                const isInPostMediaOrHeader = img.closest('.post-media') || img.closest('header');
-                if (isInPostMediaOrHeader) return;
-                if (!img.hasAttribute('data-zoomable')) {
-                    img.dataset.zoomable = 'true';
-                }
-                observer.unobserve(img); // Stop observing the image once it's in the viewport
-            } else {
-                const img = entry.target;
-                if (!img.hasAttribute('loading')) {
-                    img.setAttribute('loading', 'lazy');
-                }
-            }
-        });
-    });
 
-    images.forEach(img => {
-        observer.observe(img);
-    });
-}
 
 function handleGoTopButton() {
     const goTopBtn = document.getElementById('go-top');
@@ -498,22 +474,41 @@ function parseTabs() {
     });
 }
 
+function initializeStickyTOC() {
+    var tocSection = document.getElementById('toc-section');
+    if (!tocSection) return; // 如果没有找到 tocSection，直接返回
+
+    var tocOffsetTop = tocSection.offsetTop;
+    var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
+
+    // 获取TOC上面的所有内容的高度
+    var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
+    var tocAboveHeight = 0;
+    tocAboveElements.forEach(function (element) {
+        tocAboveHeight += element.offsetHeight;
+    });
+
+    window.addEventListener('scroll', function onScroll() {
+        if (window.pageYOffset >= tocAboveHeight + buffer) {
+            tocSection.classList.add('sticky');
+        } else {
+            tocSection.classList.remove('sticky');
+        }
+    });
+}
+
 function runShortcodes() {
     history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
-    enhanceContent();
     parseFriendCards();
     parseCollapsiblePanels();
     parseTabs();
     handleGoTopButton();
     generateTOC();
+    mediumZoom('[data-zoomable]', {
+        background: 'var(--card-color)'
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     runShortcodes()
 });
-
-window.onload = function () {
-    mediumZoom('[data-zoomable]', {
-        background: 'var(--card-color)'
-    });
-};

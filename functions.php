@@ -383,20 +383,29 @@ function generateDynamicCSS()
     </style>';
 }
 
-function allOfCharacters() {
+function allOfCharacters()
+{
     $chars = 0;
     $db = Typecho_Db::get();
-    $select = $db ->select('text')->from('table.contents');
+    $select = $db->select('text')->from('table.contents');
     $rows = $db->fetchAll($select);
-    foreach ($rows as $row) { $chars += mb_strlen(trim($row['text']), 'UTF-8'); }
+    foreach ($rows as $row) {
+        $chars += mb_strlen(trim($row['text']), 'UTF-8');
+    }
     $unit = '';
-    if($chars >= 10000)     { $chars /= 10000; $unit = 'w'; } 
-    else if($chars >= 1000) { $chars /= 1000;  $unit = 'k'; }
-    $out = sprintf('%.2lf %s',$chars, $unit);
+    if ($chars >= 10000) {
+        $chars /= 10000;
+        $unit = 'w';
+    } else if ($chars >= 1000) {
+        $chars /= 1000;
+        $unit = 'k';
+    }
+    $out = sprintf('%.2lf %s', $chars, $unit);
     return $out;
 }
 
-function getTotalPostsCount() {
+function getTotalPostsCount()
+{
     // 获取 Typecho 的数据库对象
     $db = Typecho_Db::get();
 
@@ -411,6 +420,44 @@ function getTotalPostsCount() {
         return 0; // 如果没有结果，返回 0
     }
 }
+
+function add_zoomable_to_images($content)
+{
+    // 排除的元素
+    $exclude_elements = array(
+        '.no-zoom',  // 排除带有 no-zoom 类的元素
+        '#no-zoom',  // 排除带有 id 为 special-image 的元素
+        // 可以在这里添加更多的排除规则
+    );
+
+    // 正则匹配所有图片
+    $content = preg_replace_callback('/<img[^>]+>/', function ($matches) use ($exclude_elements) {
+        $img = $matches[0];
+
+        // 检查是否在排除列表中
+        $should_exclude = false;
+        foreach ($exclude_elements as $exclude) {
+            if (strpos($img, $exclude) !== false) {
+                $should_exclude = true;
+                break;
+            }
+        }
+
+        // 如果不在排除列表中，添加 data-zoomable 属性
+        if (!$should_exclude) {
+            if (strpos($img, 'data-zoomable') === false) {
+                $img = preg_replace('/<img/', '<img data-zoomable', $img);
+            }
+        }
+
+        return $img;
+    }, $content);
+
+    return $content;
+}
+
+// 在页面内容输出前调用该函数
+Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = 'add_zoomable_to_images';
 
 function parse_Shortcodes($content)
 {
@@ -477,7 +524,8 @@ function parse_Shortcodes($content)
 }
 
 // 解析警告框
-function parse_alerts($content) {
+function parse_alerts($content)
+{
     $content = preg_replace_callback('/<div alert-type="(.*?)">(.*?)<\/div>/', function ($matches) {
         $type = $matches[1];
         $innerContent = $matches[2];
@@ -502,7 +550,8 @@ function parse_alerts($content) {
 }
 
 // 解析窗口元素
-function parse_windows($content) {
+function parse_windows($content)
+{
     $content = preg_replace_callback('/<div window-type="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $type = $matches[1];
         $title = $matches[2];
@@ -513,7 +562,8 @@ function parse_windows($content) {
 }
 
 // 解析时间轴
-function parse_timeline($content) {
+function parse_timeline($content)
+{
     $content = preg_replace_callback('/<div timeline-event date="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $date = $matches[1];
         $title = $matches[2];
@@ -523,7 +573,8 @@ function parse_timeline($content) {
     return $content;
 }
 // 运行所有解析函数
-function parseShortcodes($content) {
+function parseShortcodes($content)
+{
     $content = parse_Shortcodes($content);
     $content = parse_alerts($content);
     $content = parse_windows($content);
