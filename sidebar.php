@@ -76,30 +76,6 @@
         </div>
 
         <script>
-            function initializeStickyTOC() {
-                var tocSection = document.getElementById('toc-section');
-                if (!tocSection) return; // 如果没有找到 tocSection，直接返回
-
-                var tocOffsetTop = tocSection.offsetTop;
-                var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
-
-                // 获取TOC上面的所有内容的高度
-                var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
-                var tocAboveHeight = 0;
-                tocAboveElements.forEach(function(element) {
-                    tocAboveHeight += element.offsetHeight;
-                });
-
-                window.addEventListener('scroll', function onScroll() {
-                    if (window.pageYOffset >= tocAboveHeight + buffer) {
-                        tocSection.classList.add('sticky');
-                    } else {
-                        tocSection.classList.remove('sticky');
-                    }
-                });
-            }
-        </script>
-        <script>
             document.addEventListener('DOMContentLoaded', function() {
                 initializeStickyTOC();
             });

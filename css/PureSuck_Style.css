@@ -2,7 +2,7 @@
     --background-color: #f6f6F6F6;
 	--pure-color: #ffffff;
 	--card-color: #ffffff;
-	--card2-color: #f8fafc;
+    --card2-color: #fbfbfb;
 	--pure-gery-color:#f5f5f5;
 	--border-color: #ddd;
 	--line-color: #ebebeb;
@@ -28,14 +28,14 @@
     --text-color: #c1bcb4;
 	--text2-color: #bdb7af;
 	--hover-color: #262a2b;
-
+	/* Dark 颜色变量 */
 
 	img {
 		filter: brightness(0.8); 
 	}
 
 	#ZaiJPG {
-		filter: invert(1) hue-rotate(180deg);
+        filter: invert(100%);
 	}
     /* Dark 颜色变量 */
 }
@@ -1091,7 +1091,6 @@ body>.wrapper {
 	}
 
 	.post-item {
-		float: left;
 		width: 100%;
 		padding: 24px
 	}
@@ -1129,7 +1128,6 @@ body>.wrapper {
 	}
 
 	.post-item {
-		float: left;
 		width: 100%;
 		padding: 32px
 	}
@@ -1168,7 +1166,6 @@ body>.wrapper {
 	}
 
 	.post-item {
-		float: left;
 		width: 100%;
 		padding: 45px 45px 45px 45px;
 	}
@@ -1210,7 +1207,6 @@ body>.wrapper {
 	}
 
 	.post-item {
-		float: left;
 		width: 100%;
 		padding: 35px 45px 35px 45px;
 	}
@@ -1241,7 +1237,6 @@ body>.wrapper {
 	}
 	
 	.post-item {
-		float: left;
 		width: 100%
 	}
 
@@ -1251,7 +1246,6 @@ body>.wrapper {
 	}
 
 	.post-item {
-		float: left;
 		width: 100%;
 		padding: 45px 45px 45px 45px;
 	}
