@@ -46,10 +46,19 @@
 
             if (currentTheme === 'light') {
                 newTheme = 'dark';
+                MoxToast({
+                    message: "已切换至深色模式"
+                });
             } else if (currentTheme === 'dark') {
                 newTheme = 'auto';
+                MoxToast({
+                    message: "模式将跟随系统 ㆆᴗㆆ"
+                });
             } else {
                 newTheme = 'light';
+                MoxToast({
+                    message: "已切换至浅色模式"
+                });
             }
 
             setTheme(newTheme);
@@ -111,11 +120,13 @@
     <!-- CSS引入 -->
     <link href="<?php $this->options->themeUrl('/css/a11y-dark.min.css'); ?>" rel="stylesheet">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
+    <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
     <script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
     <!-- Pjax -->
     <?php if ($this->options->enablepjax == '1'): ?>
         <script defer src="<?php $this->options->themeUrl('/js/pjax.min.js'); ?>"></script>

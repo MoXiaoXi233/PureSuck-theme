@@ -1,0 +1,115 @@
+  #toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--card2-color);
+    color: var(--text-color);
+    text-align: center;
+    border-radius: 0.75rem;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    bottom: 45px;
+    font-size: 17px;
+}
+
+#toast.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s;
+    animation: fadein 0.5s;
+}
+
+#toast.hide {
+    -webkit-animation: fadeout 0.5s;
+    animation: fadeout 0.5s;
+}
+
+#toast.bottom {
+    bottom: 45px;
+}
+
+#toast.top {
+    top: 45px;
+}
+
+@-webkit-keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {opacity: 1;}
+    to {opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {opacity: 1;}
+    to {opacity: 0;}
+}
+
+#toast.bottom.show {
+    -webkit-animation: fadein-bottom 0.5s;
+    animation: fadein-bottom 0.5s;
+}
+
+#toast.bottom.hide {
+    -webkit-animation: fadeout-bottom 0.5s;
+    animation: fadeout-bottom 0.5s;
+}
+
+#toast.top.show {
+    -webkit-animation: fadein-top 0.5s;
+    animation: fadein-top 0.5s;
+}
+
+#toast.top.hide {
+    -webkit-animation: fadeout-top 0.5s;
+    animation: fadeout-top 0.5s;
+}
+
+@-webkit-keyframes fadein-bottom {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 45px; opacity: 1;}
+}
+
+@keyframes fadein-bottom {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 45px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout-bottom {
+    from {bottom: 45px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout-bottom {
+    from {bottom: 45px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+@-webkit-keyframes fadein-top {
+    from {top: 0; opacity: 0;}
+    to {top: 45px; opacity: 1;}
+}
+
+@keyframes fadein-top {
+    from {top: 0; opacity: 0;}
+    to {top: 45px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout-top {
+    from {top: 45px; opacity: 1;}
+    to {top: 0; opacity: 0;}
+}
+
+@keyframes fadeout-top {
+    from {top: 45px; opacity: 1;}
+    to {top: 0; opacity: 0;}
+}
