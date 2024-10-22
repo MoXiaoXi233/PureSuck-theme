@@ -120,6 +120,7 @@
     <!-- CSS引入 -->
     <link href="<?php $this->options->themeUrl('/css/a11y-dark.min.css'); ?>" rel="stylesheet">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
+    <link href="<?php $this->options->themeUrl('/css/aos.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
     <script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
