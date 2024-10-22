@@ -8,22 +8,28 @@ function handleGoTopButton() {
     const goTopAnchor = document.querySelector('#go-top .go');
 
     let ticking = false;
+
+    function updateButtonPosition() {
+        const mainContainer = document.getElementById('main-container');
+        if (!mainContainer) return; // 检查 mainContainer 是否存在
+
+        const w = window.innerWidth;
+        const mw = mainContainer.offsetWidth;
+        if ((w - mw) / 2 > 70) {
+            goTopBtn.style.left = 'unset';
+            goTopBtn.style.right = `calc((100% - ${mw}px) / 2 - 80px)`;
+        } else {
+            goTopBtn.style.left = 'unset';
+            goTopBtn.style.right = '10px';
+        }
+    }
+
     window.addEventListener('scroll', function () {
         if (!ticking) {
             window.requestAnimationFrame(function () {
                 const st = document.documentElement.scrollTop || document.body.scrollTop;
                 if (st > 0) {
-                    if (document.getElementById('main-container')) {
-                        const w = window.innerWidth;
-                        const mw = document.getElementById('main-container').offsetWidth;
-                        if ((w - mw) / 2 > 70) {
-                            goTopBtn.style.left = 'unset';
-                            goTopBtn.style.right = `calc((100% - ${mw}px) / 2 - 80px)`;
-                        } else {
-                            goTopBtn.style.left = 'unset';
-                            goTopBtn.style.right = '10px';
-                        }
-                    }
+                    updateButtonPosition();
                     goTopBtn.style.display = 'block';
                 } else {
                     goTopBtn.style.display = 'none';
@@ -33,6 +39,8 @@ function handleGoTopButton() {
             ticking = true;
         }
     });
+
+    window.addEventListener('resize', updateButtonPosition);
 
     goTopAnchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -48,41 +56,50 @@ function generateTOC() {
     const toc = document.querySelector(".toc");
     const postWrapper = document.querySelector(".inner-post-wrapper");
 
-    // 检查是否存在必要的元素
     if (!toc || !postWrapper) return;
 
     const elements = postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6");
     if (!elements.length) return;
 
-    let str = `<div class="dir">\n<ul id="toc">`;
+    const fragment = document.createDocumentFragment();
+    const ul = document.createElement('ul');
+    ul.id = 'toc';
+
     elements.forEach((v, index) => {
         if (!v.id) {
-            v.id = `heading-${index}`; // 如果没有 ID，则分配一个唯一的 ID
+            v.id = `heading-${index}`;
         }
-        str += `<li class="li li-${v.tagName[1]}"><a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a></li>\n`;
-    });
-    str += `</ul>\n<div class="sider"><span class="siderbar"></span></div>\n</div>`;
-
-    toc.innerHTML = str;
-
-    // 平滑滚动
-    elements.forEach(v => {
-        const btn = document.querySelector(`#link-${v.id}`);
-        if (!btn) return; // 如果按钮不存在，跳过该元素
-        btn.addEventListener("click", event => {
-            event.preventDefault(); // 阻止默认锚点跳转行为
-            const targetTop = getElementTop(v);
-            window.scrollTo({
-                top: targetTop,
-                behavior: "smooth" // 平滑滚动到目标位置
-            });
-            setTimeout(() => {
-                window.location.hash = v.id; // 更新URL
-            }, 300); // 延迟更新URL以确保平滑滚动完成
-        });
+        const li = document.createElement('li');
+        li.className = `li li-${v.tagName[1]}`;
+        li.innerHTML = `<a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a>`;
+        ul.appendChild(li);
     });
 
-    // 滚动时处理高亮逻辑
+    const dirDiv = document.createElement('div');
+    dirDiv.className = 'dir';
+    dirDiv.appendChild(ul);
+    dirDiv.innerHTML += `<div class="sider"><span class="siderbar"></span></div>`;
+    fragment.appendChild(dirDiv);
+    toc.appendChild(fragment);
+
+    toc.addEventListener("click", event => {
+        if (event.target.matches('.toc-a')) {
+            event.preventDefault();
+            const targetId = event.target.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                const targetTop = getElementTop(targetElement);
+                window.scrollTo({
+                    top: targetTop,
+                    behavior: "smooth"
+                });
+                setTimeout(() => {
+                    window.location.hash = targetId;
+                }, 300);
+            }
+        }
+    });
+
     handleScroll(elements);
 
     if (tocSection) {
@@ -94,34 +111,28 @@ function generateTOC() {
         }
     }
 
-    // 手动触发一次滚动事件，确保页面加载时高亮逻辑正确执行
     window.dispatchEvent(new Event('scroll'));
 }
 
-// 获取元素的绝对位置
 function getElementTop(element) {
     let actualTop = element.offsetTop;
     let current = element.offsetParent;
-
     while (current !== null) {
         actualTop += current.offsetTop;
         current = current.offsetParent;
     }
-
     return actualTop;
 }
 
-// 移除所有高亮的类
 function removeClass(elements) {
     elements.forEach(v => {
         const anchor = document.querySelector(`#link-${v.id}`);
-        if (anchor) { // 检查 anchor 是否存在
+        if (anchor) {
             anchor.classList.remove("li-active");
         }
     });
 }
 
-// 处理滚动事件
 function handleScroll(elements) {
     let ticking = false;
     window.addEventListener("scroll", () => {
@@ -141,7 +152,7 @@ function handleScroll(elements) {
                 });
 
                 if (!activeElement && elements.length > 0) {
-                    activeElement = elements[0]; // 默认高亮第一个元素
+                    activeElement = elements[0];
                 }
 
                 if (activeElement) {
@@ -172,8 +183,12 @@ function handleScroll(elements) {
 
 function parseFriendCards() {
     const container = document.body;
+    const fragment = document.createDocumentFragment();
 
-    function identifyGroups(node, groups = [], currentGroup = null) {
+    function identifyGroups(node) {
+        const groups = [];
+        let currentGroup = null;
+
         while (node) {
             if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('friend-name')) {
                 if (!currentGroup) {
@@ -187,7 +202,7 @@ function parseFriendCards() {
             }
 
             if (node.firstChild) {
-                identifyGroups(node.firstChild, groups, currentGroup);
+                groups.push(...identifyGroups(node.firstChild));
             }
 
             node = node.nextSibling;
@@ -211,28 +226,29 @@ function parseFriendCards() {
                     newContent.classList.add('friendsboard-item');
                     newContent.target = "_blank";
                     newContent.innerHTML = `
-                            <div class="friends-card-header">
-                                <span class="friends-card-username">${friendName}</span>
-                                <span class="friends-card-dot"></span>
+                        <div class="friends-card-header">
+                            <span class="friends-card-username">${friendName}</span>
+                            <span class="friends-card-dot"></span>
+                        </div>
+                        <div class="friends-card-body">
+                            <div class="friends-card-text">
+                                ${node.innerHTML}
                             </div>
-                            <div class="friends-card-body">
-                                <div class="friends-card-text">
-                                    ${node.innerHTML}
-                                </div>
-                                <div class="friends-card-avatar-container">
-                                    <img src="${avatarUrl}" alt="Avatar" class="friends-card-avatar">
-                                </div>
+                            <div class="friends-card-avatar-container">
+                                <img src="${avatarUrl}" alt="Avatar" class="friends-card-avatar">
                             </div>
-                        `;
+                        </div>
+                    `;
 
                     friendsBoardList.appendChild(newContent);
                 });
 
-                group[0].innerHTML = '';
-                group[0].appendChild(friendsBoardList);
+                const firstNode = group[0];
+                firstNode.innerHTML = '';
+                firstNode.appendChild(friendsBoardList);
 
                 for (let i = 1; i < group.length; i++) {
-                    group[i].parentNode.removeChild(group[i]);
+                    group[i].remove();
                 }
             }
         });
@@ -240,10 +256,15 @@ function parseFriendCards() {
 
     const groups = identifyGroups(container.firstChild);
     replaceGroups(groups);
+
+    container.appendChild(fragment);
 }
+
 
 function parseCollapsiblePanels() {
     const elements = document.querySelectorAll('[collapsible-panel]');
+    const fragment = document.createDocumentFragment();
+    const headers = [];
 
     elements.forEach(element => {
         const title = element.getAttribute('title');
@@ -254,27 +275,39 @@ function parseCollapsiblePanels() {
                 ${title}
                 <span class="icon icon-down-open"></span>
             </button>
-            <div class="collapsible-content">
+            <div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
                 <div class="collapsible-details">${content}</div>
             </div>
         </div>`;
 
-        element.outerHTML = newContent;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newContent;
+        const newPanel = tempDiv.firstChild;
+        fragment.appendChild(newPanel);
+        headers.push(newPanel.querySelector('.collapsible-header'));
     });
 
-    document.querySelectorAll('.collapsible-header').forEach(button => {
+    if (elements[0] && elements[0].parentNode) {
+        elements[0].parentNode.replaceChild(fragment, elements[0]);
+    }
+
+    headers.forEach(button => {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('.icon');
+
         button.addEventListener('click', function () {
             this.classList.toggle('active');
-            const content = this.nextElementSibling;
-            const icon = this.querySelector('.icon');
-            if (content.style.maxHeight) {
-                content.style.maxHeight = null;
-                icon.classList.remove('icon-up-open');
-                icon.classList.add('icon-down-open');
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
-                icon.classList.remove('icon-down-open');
-                icon.classList.add('icon-up-open');
+
+            if (content && content.style) {
+                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                    content.style.maxHeight = '0px';
+                    icon.classList.remove('icon-up-open');
+                    icon.classList.add('icon-down-open');
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.classList.remove('icon-down-open');
+                    icon.classList.add('icon-up-open');
+                }
             }
         });
     });
@@ -288,7 +321,7 @@ function parseTabs() {
         const tabTitles = [];
         const tabContents = [];
 
-        tabElements.forEach((child, index) => {
+        tabElements.forEach((child) => {
             const title = child.getAttribute('tab-title');
             if (title) {
                 tabTitles.push(title);
@@ -299,14 +332,14 @@ function parseTabs() {
         if (tabTitles.length === 0) return;
 
         const tabHeaderHTML = tabTitles.map((title, index) => `
-                <div class="tab-link ${index === 0 ? 'active' : ''}" 
-                     data-tab="tab${containerIndex + 1}-${index + 1}" 
-                     role="tab" 
-                     aria-controls="tab${containerIndex + 1}-${index + 1}" 
-                     tabindex="${index === 0 ? '0' : '-1'}">
-                    ${title}
-                </div>
-            `).join('');
+            <div class="tab-link ${index === 0 ? 'active' : ''}" 
+                 data-tab="tab${containerIndex + 1}-${index + 1}" 
+                 role="tab" 
+                 aria-controls="tab${containerIndex + 1}-${index + 1}" 
+                 tabindex="${index === 0 ? '0' : '-1'}">
+                ${title}
+            </div>
+        `).join('');
 
         const tabContentHTML = tabContents.map((content, index) => {
             const tabPane = document.createElement('div');
@@ -321,49 +354,41 @@ function parseTabs() {
         const tabContainer = document.createElement('div');
         tabContainer.className = 'tab-container';
         tabContainer.innerHTML = `
-                <div class="tab-header-wrapper">
-                    <button class="scroll-button left" aria-label="向左"></button>
-                    <div class="tab-header" role="tablist">
-                        ${tabHeaderHTML}
-                        <div class="tab-indicator"></div>
-                    </div>
-                    <button class="scroll-button right" aria-label="向右"></button>
+            <div class="tab-header-wrapper">
+                <button class="scroll-button left" aria-label="向左"></button>
+                <div class="tab-header" role="tablist">
+                    ${tabHeaderHTML}
+                    <div class="tab-indicator"></div>
                 </div>
-                <div class="tab-content">
-                    ${tabContentHTML}
-                </div>
-            `;
-
-        const fragment = document.createDocumentFragment();
-        fragment.appendChild(tabContainer);
+                <button class="scroll-button right" aria-label="向右"></button>
+            </div>
+            <div class="tab-content">
+                ${tabContentHTML}
+            </div>
+        `;
 
         container.innerHTML = '';
-        container.appendChild(fragment);
-
-        const activeLink = tabContainer.querySelector('.tab-link.active');
-        const indicator = tabContainer.querySelector('.tab-indicator');
-        if (activeLink && indicator) {
-            indicator.style.width = `${activeLink.offsetWidth * 0.75}px`;
-            indicator.style.left = `${activeLink.offsetLeft + (activeLink.offsetWidth * 0.125)}px`;
-        }
+        container.appendChild(tabContainer);
 
         const tabHeaderElement = tabContainer.querySelector('.tab-header');
+        const tabLinks = tabHeaderElement.querySelectorAll('.tab-link');
+        const tabPanes = tabContainer.querySelectorAll('.tab-pane');
+        const indicator = tabContainer.querySelector('.tab-indicator');
         const leftButton = tabContainer.querySelector('.scroll-button.left');
         const rightButton = tabContainer.querySelector('.scroll-button.right');
 
-        // 检查是否需要显示滚动按钮
+        const updateIndicator = (activeLink) => {
+            indicator.style.width = `${activeLink.offsetWidth * 0.75}px`;
+            indicator.style.left = `${activeLink.offsetLeft + (activeLink.offsetWidth * 0.125)}px`;
+        };
+
         const checkScrollButtons = () => {
             const totalWidth = Array.from(tabHeaderElement.children)
                 .reduce((acc, child) => acc + child.offsetWidth, 0);
             const containerWidth = tabHeaderElement.offsetWidth;
 
-            if (totalWidth <= containerWidth) {
-                leftButton.style.display = 'none';
-                rightButton.style.display = 'none';
-            } else {
-                leftButton.style.display = 'block';
-                rightButton.style.display = 'block';
-            }
+            leftButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
+            rightButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
         };
 
         checkScrollButtons();
@@ -399,7 +424,7 @@ function parseTabs() {
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX - tabHeaderElement.offsetLeft;
-            const walk = (x - startX) * 2; //scroll-fast
+            const walk = (x - startX) * 2;
             tabHeaderElement.scrollLeft = scrollLeft - walk;
         });
 
@@ -407,7 +432,7 @@ function parseTabs() {
             isDown = true;
             startX = e.touches[0].pageX - tabHeaderElement.offsetLeft;
             scrollLeft = tabHeaderElement.scrollLeft;
-        }, { passive: true }); // 标记为被动监听器
+        }, { passive: true });
 
         tabHeaderElement.addEventListener('touchend', () => {
             isDown = false;
@@ -416,18 +441,14 @@ function parseTabs() {
         tabHeaderElement.addEventListener('touchmove', (e) => {
             if (!isDown) return;
             const x = e.touches[0].pageX - tabHeaderElement.offsetLeft;
-            const walk = (x - startX) * 2; //scroll-fast
+            const walk = (x - startX) * 2;
             tabHeaderElement.scrollLeft = scrollLeft - walk;
-        }, { passive: true }); // 标记为被动监听器
+        }, { passive: true });
 
-        container.querySelector('.tab-header').addEventListener('click', function (event) {
+        tabHeaderElement.addEventListener('click', (event) => {
             if (event.target.classList.contains('tab-link')) {
-                const tabLinks = this.querySelectorAll('.tab-link');
-                const tabPanes = tabContainer.querySelectorAll('.tab-pane');
-                const indicator = this.querySelector('.tab-indicator');
-
-                let currentIndex = Array.from(tabLinks).indexOf(event.target);
-                let previousIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
+                const currentIndex = Array.from(tabLinks).indexOf(event.target);
+                const previousIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
 
                 tabLinks.forEach(link => link.classList.remove('active'));
                 tabPanes.forEach(pane => {
@@ -446,29 +467,27 @@ function parseTabs() {
                     activePane.setAttribute('data-aos', 'fade-right');
                 }
 
-                indicator.style.width = `${event.target.offsetWidth * 0.75}px`;
-                indicator.style.left = `${event.target.offsetLeft + (event.target.offsetWidth * 0.125)}px`;
+                updateIndicator(event.target);
 
                 setTimeout(() => {
                     activePane.classList.add('aos-animate');
                 }, 0);
 
                 if (typeof AOS !== 'undefined') {
-                    AOS.refresh(); // 重新初始化 AOS 动画
+                    AOS.refresh();
                 }
 
                 tabLinks.forEach(link => link.setAttribute('tabindex', '-1'));
                 event.target.setAttribute('tabindex', '0');
                 event.target.focus();
-            }
 
-            // 使点击的标签出现在视野内
-            const tabHeaderRect = tabHeaderElement.getBoundingClientRect();
-            const targetRect = event.target.getBoundingClientRect();
-            if (targetRect.left < tabHeaderRect.left) {
-                tabHeaderElement.scrollBy({ left: targetRect.left - tabHeaderRect.left, behavior: 'smooth' });
-            } else if (targetRect.right > tabHeaderRect.right) {
-                tabHeaderElement.scrollBy({ left: targetRect.right - tabHeaderRect.right, behavior: 'smooth' });
+                const tabHeaderRect = tabHeaderElement.getBoundingClientRect();
+                const targetRect = event.target.getBoundingClientRect();
+                if (targetRect.left < tabHeaderRect.left) {
+                    tabHeaderElement.scrollBy({ left: targetRect.left - tabHeaderRect.left, behavior: 'smooth' });
+                } else if (targetRect.right > tabHeaderRect.right) {
+                    tabHeaderElement.scrollBy({ left: targetRect.right - tabHeaderRect.right, behavior: 'smooth' });
+                }
             }
         });
     });
@@ -476,25 +495,29 @@ function parseTabs() {
 
 function initializeStickyTOC() {
     var tocSection = document.getElementById('toc-section');
-    if (!tocSection) return; // 如果没有找到 tocSection，直接返回
+    if (!tocSection) return;
 
-    var tocOffsetTop = tocSection.offsetTop;
-    var buffer = 50; // 当TOC离顶部还有50px时开始吸顶
-
-    // 获取TOC上面的所有内容的高度
+    var buffer = 50;
     var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
-    var tocAboveHeight = 0;
-    tocAboveElements.forEach(function (element) {
-        tocAboveHeight += element.offsetHeight;
-    });
+    var tocAboveHeight = Array.from(tocAboveElements).reduce((total, element) => total + element.offsetHeight, 0);
 
-    window.addEventListener('scroll', function onScroll() {
-        if (window.pageYOffset >= tocAboveHeight + buffer) {
-            tocSection.classList.add('sticky');
-        } else {
-            tocSection.classList.remove('sticky');
+    let ticking = false;
+
+    function onScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                if (window.scrollY >= tocAboveHeight + buffer) {
+                    tocSection.classList.add('sticky');
+                } else {
+                    tocSection.classList.remove('sticky');
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
-    });
+    }
+
+    window.addEventListener('scroll', onScroll);
 }
 
 function runShortcodes() {

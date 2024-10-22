@@ -124,9 +124,9 @@
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
     <script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
     <!-- Pjax -->
     <?php if ($this->options->enablepjax == '1'): ?>
@@ -175,11 +175,6 @@
             // Pjax 完成后 JS 重载
             document.addEventListener("pjax:success", function(event) {
 
-                // 评论区部分重载
-                if (document.querySelector('.OwO-textarea')) {
-                    initializeCommentsOwO();
-                }
-
                 // TOC吸附
                 initializeStickyTOC();
                 // 短代码及模块部分
@@ -199,6 +194,11 @@
                 <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
                     addCopyButtons();
                 <?php endif; ?>
+
+                // 评论区部分重载
+                if (document.querySelector('.OwO-textarea')) {
+                    initializeCommentsOwO();
+                }
 
             });
         </script>
