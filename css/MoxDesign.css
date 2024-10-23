@@ -1,4 +1,4 @@
-#toast {
+#mox-toast {
     visibility: hidden;
     min-width: 250px;
     background-color: var(--card2-color);
@@ -12,104 +12,264 @@
     left: 50%;
     transform: translate(-50%, -50%);
     bottom: 45px;
-    font-size: 17px;
+    font-size: 0.95rem;
+    box-shadow: 0 0 6px #00000008;
+    line-height: normal;
+    will-change: transform, opacity;
 }
 
-#toast.show {
+#mox-toast.show {
     visibility: visible;
-    -webkit-animation: fadein 0.5s;
     animation: fadein 0.5s;
 }
 
-#toast.hide {
-    -webkit-animation: fadeout 0.5s;
+#mox-toast.hide {
     animation: fadeout 0.5s;
 }
 
-#toast.bottom {
+#mox-toast.bottom {
     bottom: 45px;
 }
 
-#toast.top {
+#mox-toast.top {
     top: 45px;
 }
 
-@-webkit-keyframes fadein {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-
 @keyframes fadein {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
+    from {
+        opacity: 0;
+    }
 
-@-webkit-keyframes fadeout {
-    from {opacity: 1;}
-    to {opacity: 0;}
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes fadeout {
-    from {opacity: 1;}
-    to {opacity: 0;}
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
-#toast.bottom.show {
-    -webkit-animation: fadein-bottom 0.5s;
+#mox-toast.bottom.show {
     animation: fadein-bottom 0.5s;
 }
 
-#toast.bottom.hide {
-    -webkit-animation: fadeout-bottom 0.5s;
+#mox-toast.bottom.hide {
     animation: fadeout-bottom 0.5s;
 }
 
-#toast.top.show {
-    -webkit-animation: fadein-top 0.5s;
+#mox-toast.top.show {
     animation: fadein-top 0.5s;
 }
 
-#toast.top.hide {
-    -webkit-animation: fadeout-top 0.5s;
+#mox-toast.top.hide {
     animation: fadeout-top 0.5s;
 }
 
-@-webkit-keyframes fadein-bottom {
-    from {bottom: 0; opacity: 0;}
-    to {bottom: 45px; opacity: 1;}
-}
-
 @keyframes fadein-bottom {
-    from {bottom: 0; opacity: 0;}
-    to {bottom: 45px; opacity: 1;}
-}
+    from {
+        bottom: 0;
+        opacity: 0;
+    }
 
-@-webkit-keyframes fadeout-bottom {
-    from {bottom: 45px; opacity: 1;}
-    to {bottom: 0; opacity: 0;}
+    to {
+        bottom: 45px;
+        opacity: 1;
+    }
 }
 
 @keyframes fadeout-bottom {
-    from {bottom: 45px; opacity: 1;}
-    to {bottom: 0; opacity: 0;}
-}
+    from {
+        bottom: 45px;
+        opacity: 1;
+    }
 
-@-webkit-keyframes fadein-top {
-    from {top: 0; opacity: 0;}
-    to {top: 45px; opacity: 1;}
+    to {
+        bottom: 0;
+        opacity: 0;
+    }
 }
 
 @keyframes fadein-top {
-    from {top: 0; opacity: 0;}
-    to {top: 45px; opacity: 1;}
-}
+    from {
+        top: 0;
+        opacity: 0;
+    }
 
-@-webkit-keyframes fadeout-top {
-    from {top: 45px; opacity: 1;}
-    to {top: 0; opacity: 0;}
+    to {
+        top: 45px;
+        opacity: 1;
+    }
 }
 
 @keyframes fadeout-top {
-    from {top: 45px; opacity: 1;}
-    to {top: 0; opacity: 0;}
+    from {
+        top: 45px;
+        opacity: 1;
+    }
+
+    to {
+        top: 0;
+        opacity: 0;
+    }
+}
+
+#mox-notification {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--card2-color);
+    color: var(--text-color);
+    text-align: left;
+    border-radius: 0.75rem;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    position: fixed;
+    z-index: 1;
+    font-size: 0.95rem;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0 6px #00000008;
+    will-change: transform, opacity;
+}
+
+#mox-notification .icon {
+    margin-right: 12px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#mox-notification .content {
+    flex-grow: 1;
+}
+
+#mox-notification .title {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+#mox-notification .message {
+    font-size: 0.85rem;
+    color: var(--text2-color);
+}
+
+#mox-notification.show {
+    visibility: visible;
+    animation: fadein 0.8s;
+}
+
+#mox-notification.hide {
+    animation: fadeout 0.8s;
+}
+
+#mox-notification.top-left {
+    top: 45px;
+    left: 45px;
+}
+
+#mox-notification.top-right {
+    top: 45px;
+    right: 45px;
+}
+
+#mox-notification.bottom-left {
+    bottom: 45px;
+    left: 45px;
+}
+
+#mox-notification.bottom-right {
+    bottom: 45px;
+    right: 45px;
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slidein-right {
+    from {
+        right: -100%;
+        opacity: 0;
+    }
+
+    to {
+        right: 45px;
+        opacity: 1;
+    }
+}
+
+@keyframes slideout-right {
+    from {
+        right: 45px;
+        opacity: 1;
+    }
+
+    to {
+        right: -100%;
+        opacity: 0;
+    }
+}
+
+@keyframes slidein-left {
+    from {
+        left: -100%;
+        opacity: 0;
+    }
+
+    to {
+        left: 45px;
+        opacity: 1;
+    }
+}
+
+@keyframes slideout-left {
+    from {
+        left: 45px;
+        opacity: 1;
+    }
+
+    to {
+        left: -100%;
+        opacity: 0;
+    }
+}
+
+#mox-notification.bottom-right.show {
+    animation: slidein-right 0.8s;
+}
+
+#mox-notification.bottom-right.hide {
+    animation: slideout-right 0.8s;
+}
+
+#mox-notification.bottom-left.show {
+    animation: slidein-left 0.8s;
+}
+
+#mox-notification.bottom-left.hide {
+    animation: slideout-left 0.8s;
 }
