@@ -115,12 +115,9 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
   }
 </script>
 
+<!-- 后台script标签 -->
 <?php if ($this->options->footerScript): ?>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      <?php echo $this->options->footerScript; ?>
-    });
-  </script>
+  <?php echo $this->options->footerScript; ?>
 <?php endif; ?>
 </body>
 

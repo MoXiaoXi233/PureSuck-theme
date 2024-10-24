@@ -144,7 +144,8 @@
                         "script[data-pjax]",
                         "title",
                         ".nav.header-item.header-nav",
-                        ".main"
+                        ".main",
+                        ".right-sidebar"
                     ]
                 });
 
@@ -175,11 +176,12 @@
             // Pjax 完成后 JS 重载
             document.addEventListener("pjax:success", function(event) {
 
-                // TOC吸附
-                initializeStickyTOC();
                 // 短代码及模块部分
                 runShortcodes();
 
+                // TOC吸附
+                initializeStickyTOC();
+                
                 // AOS 动画
                 AOS.init();
 

@@ -1675,7 +1675,12 @@ pre {
 	border: 1px solid var(--border-color);
 }
 
-.post--cover .post-body .post-wrapper>p:first-child,
+.comment-title{
+	font-weight: 800;
+}
+
+body,
+.post--cover .post-body .post-wrapper > p:first-child,
 .comment-title,
 h1,
 h2,
@@ -1683,20 +1688,9 @@ h3,
 h4,
 h5,
 h6 {
-	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
-	font-weight: 400;
-	color: var(--text-color)
-}
-
-.comment-title{
-	font-weight: 800;
-}
-
-
-body {
-	font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
-	font-weight: 400;
-	color: var(--text-color);
+    font-family: "Open Sans", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
+    font-weight: 400;
+    color: var(--text-color);
 }
 
 b,

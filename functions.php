@@ -198,7 +198,7 @@ function themeConfig($form)
         null,
         null,
         _t('Script标签'),
-        _t('位于Footer，可以插统计站的代码，在这里填入JavaScript代码，不需要包含&lt;script&gt;标签，不要填其他内容，否则会造成样式错误！<br>如果开启了 Pjax 功能，请自行在 header.php 配置回调函数或者向他人寻求帮助')
+        _t('位于Footer，在这里填入JavaScript代码，需要包含&lt;script&gt;标签！，不要填除了脚本外的其他内容，否则会造成样式错误！<br>如果开启了 Pjax 功能，请自行在 header.php 配置回调函数或者尝试寻求帮助')
     );
     $form->addInput($footerScript);
 

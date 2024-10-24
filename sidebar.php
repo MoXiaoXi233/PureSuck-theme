@@ -64,7 +64,6 @@
 
     <!-- TOC -->
     <?php if ($this->options->showTOC == '1' && ($this->is('post') || $this->is('page') || $this->is('archives'))): ?>
-
         <div class="toc-section" id="toc-section" style="display: none;">
             <header class="section-header">
                 <span class="icon-article"></span>
@@ -74,7 +73,6 @@
                 <div class="toc"></div>
             </section>
         </div>
-
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 initializeStickyTOC();
