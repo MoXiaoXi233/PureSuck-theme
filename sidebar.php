@@ -1,4 +1,4 @@
-<div class="right-sidebar">
+<div class="right-sidebar" id="right-sidebar">
 
     <!-- 搜索功能 -->
     <?php if ($this->options->showSearch == '1'): ?>

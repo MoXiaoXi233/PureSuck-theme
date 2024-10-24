@@ -256,7 +256,7 @@
 .window-prompt-prompt,
 .window-prompt-prompt * {
     font-size: 0.85rem;
-    color:inherit;
+    color: inherit;
 }
 
 /* 右侧边栏 */
@@ -267,6 +267,7 @@
     padding: 40px 50px 50px 50px;
     position: fixed;
     width: 344px;
+    z-index: 1
 }
 
 /* 分类和标签模块 */
@@ -333,6 +334,11 @@
     .right-sidebar {
         display: none;
     }
+
+    .toc-section {
+        display: none;
+    }
+
 }
 
 @media (min-width: 1183px) {
@@ -347,7 +353,7 @@
     overflow-x: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    
+
 }
 
 .toc-section.sticky {
@@ -657,7 +663,7 @@
 }
 
 .timeline-title a:hover {
-    color: var(--themehovercolor); 
+    color: var(--themehovercolor);
 }
 
 .timeline-description {
@@ -694,7 +700,7 @@
 }
 
 .scroll-button {
-    display: none; 
+    display: none;
     background: var(--card-color);
     border: none;
     font-size: 1rem;
@@ -704,17 +710,17 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 1;
-    font-family: "fontello"; 
+    font-family: "fontello";
 }
 
 .scroll-button.left {
     left: -5px;
-    transform: translateY(-50%) rotate(-90deg); 
+    transform: translateY(-50%) rotate(-90deg);
 }
 
 .scroll-button.right {
     right: -5px;
-    transform: translateY(-50%) rotate(90deg); 
+    transform: translateY(-50%) rotate(90deg);
 }
 
 
@@ -725,9 +731,9 @@
     align-items: center;
     justify-content: flex-start;
     font-size: 0.95rem;
-    white-space: nowrap; 
+    white-space: nowrap;
     flex-grow: 1;
-    overflow: hidden; 
+    overflow: hidden;
 }
 
 .tab-link {
@@ -736,7 +742,8 @@
     color: var(--text2-color);
     transition: color 0.3s;
     position: relative;
-    flex-shrink: 0; /* 防止缩小 */
+    flex-shrink: 0;
+    /* 防止缩小 */
 }
 
 .tab-link.active {
@@ -767,11 +774,11 @@
 
 @media (max-width: 768px) {
     .tab-header {
-        white-space: nowrap; 
+        white-space: nowrap;
     }
-    
+
     .tab-link {
-        flex-shrink: 0; 
+        flex-shrink: 0;
     }
 }
 
@@ -807,4 +814,3 @@
     color: var(--text-color);
     justify-content: center;
 }
-

@@ -1,8 +1,6 @@
 /** 这个JS包含了各种需要处理的的内容 **/
 /** 回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
-
-
 function handleGoTopButton() {
     const goTopBtn = document.getElementById('go-top');
     const goTopAnchor = document.querySelector('#go-top .go');
@@ -313,6 +311,8 @@ function parseCollapsiblePanels() {
     });
 }
 
+document.addEventListener("DOMContentLoaded", parseTabs);
+
 function parseTabs() {
     const tabContainers = document.querySelectorAll('[tabs]');
 
@@ -355,12 +355,12 @@ function parseTabs() {
         tabContainer.className = 'tab-container';
         tabContainer.innerHTML = `
             <div class="tab-header-wrapper">
-                <button class="scroll-button left" aria-label="向左"></button>
+                <button class="scroll-button left" aria-label="向左">←</button>
                 <div class="tab-header" role="tablist">
                     ${tabHeaderHTML}
                     <div class="tab-indicator"></div>
                 </div>
-                <button class="scroll-button right" aria-label="向右"></button>
+                <button class="scroll-button right" aria-label="向右">→</button>
             </div>
             <div class="tab-content">
                 ${tabContentHTML}
@@ -490,8 +490,11 @@ function parseTabs() {
                 }
             }
         });
+
+        updateIndicator(tabLinks[0]);
     });
 }
+
 
 function initializeStickyTOC() {
     var tocSection = document.getElementById('toc-section');
