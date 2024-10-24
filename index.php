@@ -77,7 +77,6 @@ $this->need('header.php');
     <?php endwhile; ?>
 </div>
 
-
 <nav class="nav main-pager" data-js="pager">
     <span class="nav-item-alt">
         第 <?= $this->_currentPage > 1 ? $this->_currentPage : 1; ?> 页 / 共 <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
@@ -99,6 +98,6 @@ $this->need('header.php');
         ?>
     </span>
 </div>
-
+</main>
 <?php $this->need('sidebar.php'); ?>
 <?php $this->need('footer.php'); ?>
