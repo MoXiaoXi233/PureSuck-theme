@@ -520,6 +520,40 @@ function parse_Shortcodes($content)
         return "<div tabs>$innerContent</div>";
     }, $content);
 
+    // 处理 [bilibili-card] 短代码
+    $content = preg_replace_callback('/\[bilibili-card bvid="([^"]*)"\]/', function ($matches) {
+        $bvid = $matches[1];
+        $url = "//player.bilibili.com/player.html?bvid=$bvid&autoplay=0";
+        return "
+        <div class='bilibili-card'>
+            <iframe src='$url' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true'></iframe>
+        </div>
+    ";
+    }, $content);
+
+    // 图片底部文字注释结构
+    // 使用正则表达式匹配所有的图片标签
+    $pattern = '/<img.*?src=[\'"](.*?)[\'"].*?>/i';
+
+    // 使用 preg_replace_callback 来处理每个匹配到的图片标签
+    $content = preg_replace_callback($pattern, function($matches) {
+        // 获取图片的 alt 属性
+        $alt = '';
+        if (preg_match('/alt=[\'"](.*?)[\'"]/i', $matches[0], $alt_matches)) {
+            $alt = $alt_matches[1];
+        }
+
+        // 如果 alt 属性不为空，则添加注释
+        if (!empty($alt)) {
+            // 将图片标签替换为带有注释的图片标签
+            return '<figure>' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
+        }
+
+        // 如果没有 alt 属性，直接返回原图片标签
+        return $matches[0];
+    }, $content);
+
+    
     return $content;
 }
 
@@ -572,6 +606,7 @@ function parse_timeline($content)
     }, $content);
     return $content;
 }
+
 // 运行所有解析函数
 function parseShortcodes($content)
 {

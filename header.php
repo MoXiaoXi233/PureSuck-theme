@@ -101,7 +101,7 @@
                 bottom: <?php echo $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
                 left: <?php echo '0'; ?>;
                 <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?php echo '58px'; ?>;
-                height: <?php echo '11px'; ?>;
+                height: <?php echo '13px'; ?>;
                 <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?php echo '80px'; ?>;
                 height: <?php echo '12px'; ?>;
                 mask: <?php echo "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
@@ -181,7 +181,7 @@
 
                 // TOC吸附
                 initializeStickyTOC();
-                
+
                 // AOS 动画
                 AOS.init();
 

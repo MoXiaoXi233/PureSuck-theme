@@ -273,7 +273,7 @@ function parseCollapsiblePanels() {
                 ${title}
                 <span class="icon icon-down-open"></span>
             </button>
-            <div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+            <div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: all .4s cubic-bezier(0.345, 0.045, 0.345, 1);">
                 <div class="collapsible-details">${content}</div>
             </div>
         </div>`;
@@ -355,12 +355,12 @@ function parseTabs() {
         tabContainer.className = 'tab-container';
         tabContainer.innerHTML = `
             <div class="tab-header-wrapper">
-                <button class="scroll-button left" aria-label="向左">←</button>
+                <button class="scroll-button left" aria-label="向左"></button>
                 <div class="tab-header" role="tablist">
                     ${tabHeaderHTML}
                     <div class="tab-indicator"></div>
                 </div>
-                <button class="scroll-button right" aria-label="向右">→</button>
+                <button class="scroll-button right" aria-label="向右"></button>
             </div>
             <div class="tab-content">
                 ${tabContentHTML}
@@ -536,5 +536,5 @@ function runShortcodes() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    runShortcodes()
+    runShortcodes();
 });

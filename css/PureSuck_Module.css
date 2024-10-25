@@ -81,7 +81,7 @@
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s, opacity 0.3s;
+    transition: all .4s cubic-bezier(0.345, 0.045, 0.345, 1);
 }
 
 .go-top:hover {
@@ -118,7 +118,7 @@
     margin: 20px 0 !important;
     display: flex;
     padding: 10px 20px;
-    transition: all 0.15s ease-out;
+    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
     transform: scale(1);
     color: var(--pure-color);
     font-weight: bold;
@@ -813,4 +813,18 @@
     align-items: center;
     color: var(--text-color);
     justify-content: center;
+}
+
+.bilibili-card {
+    width: 100%;
+    margin: 0 auto;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.bilibili-card iframe {
+    width: 100%;
+    height: 450px; /* 根据需要调整高度 */
+    border: none;
 }
