@@ -140,7 +140,6 @@ blockquote p:last-child {
 	margin-bottom: 0
 }
 
-/* 美化 hr 样式 */
 hr {
 	position: relative;
 	width: calc(100% - 4px);
@@ -629,46 +628,55 @@ ul {
 
 /* 列表样式 */
 .post-body ol,
-.post-body ul {
+.post-body ul,
+.cp ol,
+.cp ul {
 	margin-left: 20px;
 }
 
-.post-body ol {
+.post-body ol,
+.cp ol {
 	list-style-type: decimal;
 }
 
-.post-body ul {
+.post-body ul,
+.cp ul {
 	list-style-type: disc;
 }
 
-.post-body li {
-	margin-bottom: 5px;
-}
-
-.post-body li p {
+.post-body li,
+.post-body li p,
+.cp li,
+.cp li p {
 	margin-bottom: 5px;
 }
 
 /* 嵌套列表样式 */
 .post-body ol ol,
-.post-body ul ul {
+.post-body ul ul,
+.cp ol ol,
+.cp ul ul {
 	margin-left: 20px;
 	padding-left: 20px;
 }
 
-.post-body ol ol {
+.post-body ol ol,
+.cp ol ol {
 	list-style-type: lower-alpha;
 }
 
-.post-body ul ul {
+.post-body ul ul,
+.cp ul ul {
 	list-style-type: circle;
 }
 
-.post-body ol ol ol {
+.post-body ol ol ol,
+.cp ol ol ol {
 	list-style-type: lower-roman;
 }
 
-.post-body ul ul ul {
+.post-body ul ul ul,
+.cp ul ul ul {
 	list-style-type: square;
 }
 
@@ -1860,6 +1868,7 @@ strong {
 	padding: 0
 }
 
+/** comment footer **/
 .cf {
 	margin: 0 0 3rem 0
 }
@@ -1887,6 +1896,7 @@ strong {
 	border-radius: 50%
 }
 
+/** comment post **/
 .cp {
 	overflow: hidden;
 	padding: 1.5rem 0;
