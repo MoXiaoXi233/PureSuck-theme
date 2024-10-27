@@ -66,7 +66,8 @@ html {
 body {
 	margin: 0;
 	background-color: var(--background-color);
-	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+	transition: all .3s ease;
+
 }
 
 h1 a,
@@ -197,7 +198,7 @@ table td {
 }
 
 table tr {
-	transition: background-color .3s;
+	transition: all .3s ease;
 }
 
 table tr:hover {
@@ -725,7 +726,7 @@ ul {
 	margin: 3px;
 	margin-left: 8px;
 	border-radius: 0.4rem;
-	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+	transition: all .3s ease;
 }
 
 .nav-item a {
@@ -1657,7 +1658,7 @@ a:hover {
 	background-color: var(--themecolor);
 	border-radius: 0.4rem;
 	transform: scale(0.8);
-	transition: transform 0.15s ease-in-out, opacity 0.15s ease-in-out;
+	transition: transform .2s ease-in-out, opacity .2s ease-in-out;
 	opacity: 0;
 }
 
@@ -1803,7 +1804,7 @@ strong {
 .nav-item:hover {
 	background: var(--nav-color);
 	color: var(--nav-text-color);
-	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+	transition: all .3s ease;
 	border: 1px solid var(--border-color);
 }
 
@@ -2029,7 +2030,7 @@ textarea.ci {
 	color: var(--text-color);
 	border: 1px solid var(--border-color);
 	border-radius: 0.45rem;
-	transition: background-color 0.3s, color 0.3s;
+	transition: all .3s ease;
 }
 
 .pagination li a:hover {
@@ -2104,7 +2105,7 @@ textarea.ci {
 	border-radius: 0.45rem;
 	background: linear-gradient(to right, var(--themecolor), rgb(255 255 255 / 0%));
 	opacity: .55;
-	transition: width 0.3s ease;
+    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
 }
 
 .post-title:hover::after {
@@ -2211,7 +2212,7 @@ textarea.ci {
 }
 
 .theme-toggle {
-	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+	transition: all .3s ease;
 	width: 50px;
 	height: 50px;
 	background-color: var(--background-color);
