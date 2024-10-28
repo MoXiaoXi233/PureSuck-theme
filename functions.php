@@ -224,6 +224,16 @@ function themeConfig($form)
     );
     $form->addInput($enablepjax);
 
+    // Pjax回调函数
+    $PjaxScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
+        'PjaxScript',
+        null,
+        null,
+        _t('Pjax回调函数'),
+        _t('在这里填入需要被 Pjax 回调的函数，例如：loadDPlayer(); 如果不知道这是什么，请忽略。')
+    );
+    $form->addInput($PjaxScript);
+
     // $enablepjax = new Typecho_Widget_Helper_Form_Element_Select('enablepjax', array(
     //     '1' => '启用',
     //     '0' => '关闭'
@@ -456,9 +466,6 @@ function add_zoomable_to_images($content)
     return $content;
 }
 
-// 在页面内容输出前调用该函数
-Typecho_Plugin::factory('Widget_Abstract_Contents')->contentEx = 'add_zoomable_to_images';
-
 function parse_Shortcodes($content)
 {
     // 替换短代码结束标签后的 <br> 标签
@@ -536,7 +543,7 @@ function parse_Shortcodes($content)
     $pattern = '/<img.*?src=[\'"](.*?)[\'"].*?>/i';
 
     // 使用 preg_replace_callback 来处理每个匹配到的图片标签
-    $content = preg_replace_callback($pattern, function($matches) {
+    $content = preg_replace_callback($pattern, function ($matches) {
         // 获取图片的 alt 属性
         $alt = '';
         if (preg_match('/alt=[\'"](.*?)[\'"]/i', $matches[0], $alt_matches)) {
@@ -553,7 +560,7 @@ function parse_Shortcodes($content)
         return $matches[0];
     }, $content);
 
-    
+
     return $content;
 }
 
@@ -607,12 +614,15 @@ function parse_timeline($content)
     return $content;
 }
 
-// 运行所有解析函数
+// 运行所有函数
 function parseShortcodes($content)
 {
     $content = parse_Shortcodes($content);
     $content = parse_alerts($content);
     $content = parse_windows($content);
     $content = parse_timeline($content);
+
+    $content = add_zoomable_to_images($content); # 图片放大
+
     return $content;
 }

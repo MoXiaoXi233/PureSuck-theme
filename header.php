@@ -197,6 +197,10 @@
                     addCopyButtons();
                 <?php endif; ?>
 
+                <?php if ($this->options->PjaxScript): ?>
+                    <?php echo $this->options->PjaxScript; ?>
+                <?php endif; ?>
+
                 // 评论区部分重载
                 if (document.querySelector('.OwO-textarea')) {
                     initializeCommentsOwO();
