@@ -63,13 +63,13 @@ function generateTOC() {
     const ul = document.createElement('ul');
     ul.id = 'toc';
 
-    elements.forEach((v, index) => {
-        if (!v.id) {
-            v.id = `heading-${index}`;
+    elements.forEach((element, index) => {
+        if (!element.id) {
+            element.id = `heading-${index}`;
         }
         const li = document.createElement('li');
-        li.className = `li li-${v.tagName[1]}`;
-        li.innerHTML = `<a href="#${v.id}" id="link-${v.id}" class="toc-a">${v.textContent}</a>`;
+        li.className = `li li-${element.tagName[1]}`;
+        li.innerHTML = `<a href="#${element.id}" id="link-${element.id}" class="toc-a">${element.textContent}</a>`;
         ul.appendChild(li);
     });
 
@@ -78,6 +78,8 @@ function generateTOC() {
     dirDiv.appendChild(ul);
     dirDiv.innerHTML += `<div class="sider"><span class="siderbar"></span></div>`;
     fragment.appendChild(dirDiv);
+
+    // 批量插入DOM
     toc.appendChild(fragment);
 
     toc.addEventListener("click", event => {
@@ -123,8 +125,8 @@ function getElementTop(element) {
 }
 
 function removeClass(elements) {
-    elements.forEach(v => {
-        const anchor = document.querySelector(`#link-${v.id}`);
+    elements.forEach(element => {
+        const anchor = document.querySelector(`#link-${element.id}`);
         if (anchor) {
             anchor.classList.remove("li-active");
         }
@@ -133,6 +135,9 @@ function removeClass(elements) {
 
 function handleScroll(elements) {
     let ticking = false;
+    const tocItems = document.querySelectorAll(".toc li");
+    const siderbar = document.querySelector(".siderbar");
+
     window.addEventListener("scroll", () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
@@ -141,10 +146,13 @@ function handleScroll(elements) {
 
                 elements.forEach((element, index) => {
                     const targetTop = getElementTop(element);
+                    const elementHeight = element.offsetHeight;
+                    const offset = elementHeight / 2;
+
                     const nextElement = elements[index + 1];
                     const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
 
-                    if (currentPosition >= targetTop && currentPosition < nextTargetTop) {
+                    if (currentPosition + offset >= targetTop && currentPosition + offset < nextTargetTop) {
                         activeElement = element;
                     }
                 });
@@ -159,16 +167,9 @@ function handleScroll(elements) {
                     if (anchor) {
                         anchor.classList.add("li-active");
 
-                        const tocItems = document.querySelectorAll(".toc li");
                         const index = Array.from(elements).indexOf(activeElement);
-                        let sidebarTop = tocItems[index].getBoundingClientRect().top + window.scrollY;
-                        sidebarTop -= toc.getBoundingClientRect().top + window.scrollY;
-
-                        const fontSize = parseFloat(getComputedStyle(tocItems[index]).fontSize);
-                        const offset = fontSize / 2;
-                        sidebarTop += offset - 3;
-
-                        document.querySelector(".siderbar").style.transform = `translateY(${sidebarTop}px)`;
+                        const sidebarTop = tocItems[index].offsetTop;
+                        siderbar.style.transform = `translateY(${sidebarTop + 4}px)`;
                     }
                 }
 
