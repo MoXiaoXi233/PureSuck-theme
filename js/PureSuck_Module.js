@@ -7,38 +7,22 @@ function handleGoTopButton() {
 
     let ticking = false;
 
-    function updateButtonPosition() {
-        const mainContainer = document.getElementById('main-container');
-        if (!mainContainer) return; // 检查 mainContainer 是否存在
-
-        const w = window.innerWidth;
-        const mw = mainContainer.offsetWidth;
-        if ((w - mw) / 2 > 70) {
-            goTopBtn.style.left = 'unset';
-            goTopBtn.style.right = `calc((100% - ${mw}px) / 2 - 80px)`;
-        } else {
-            goTopBtn.style.left = 'unset';
-            goTopBtn.style.right = '10px';
-        }
-    }
-
-    window.addEventListener('scroll', function () {
+    function handleScroll() {
         if (!ticking) {
-            window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(() => {
                 const st = document.documentElement.scrollTop || document.body.scrollTop;
                 if (st > 0) {
-                    updateButtonPosition();
-                    goTopBtn.style.display = 'block';
+                    goTopBtn.classList.add('visible');
                 } else {
-                    goTopBtn.style.display = 'none';
+                    goTopBtn.classList.remove('visible');
                 }
                 ticking = false;
             });
             ticking = true;
         }
-    });
+    }
 
-    window.addEventListener('resize', updateButtonPosition);
+    window.addEventListener('scroll', handleScroll);
 
     goTopAnchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -56,7 +40,7 @@ function generateTOC() {
 
     if (!toc || !postWrapper) return;
 
-    const elements = postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    const elements = Array.from(postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6"));
     if (!elements.length) return;
 
     const fragment = document.createDocumentFragment();
@@ -138,6 +122,8 @@ function handleScroll(elements) {
     const tocItems = document.querySelectorAll(".toc li");
     const siderbar = document.querySelector(".siderbar");
 
+    const elementTops = elements.map(element => getElementTop(element));
+
     window.addEventListener("scroll", () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
@@ -145,12 +131,12 @@ function handleScroll(elements) {
                 let activeElement = null;
 
                 elements.forEach((element, index) => {
-                    const targetTop = getElementTop(element);
+                    const targetTop = elementTops[index];
                     const elementHeight = element.offsetHeight;
                     const offset = elementHeight / 2;
 
                     const nextElement = elements[index + 1];
-                    const nextTargetTop = nextElement ? getElementTop(nextElement) : Number.MAX_SAFE_INTEGER;
+                    const nextTargetTop = nextElement ? elementTops[index + 1] : Number.MAX_SAFE_INTEGER;
 
                     if (currentPosition + offset >= targetTop && currentPosition + offset < nextTargetTop) {
                         activeElement = element;
@@ -167,7 +153,7 @@ function handleScroll(elements) {
                     if (anchor) {
                         anchor.classList.add("li-active");
 
-                        const index = Array.from(elements).indexOf(activeElement);
+                        const index = elements.indexOf(activeElement);
                         const sidebarTop = tocItems[index].offsetTop;
                         siderbar.style.transform = `translateY(${sidebarTop + 4}px)`;
                     }
@@ -378,19 +364,28 @@ function parseTabs() {
         const leftButton = tabContainer.querySelector('.scroll-button.left');
         const rightButton = tabContainer.querySelector('.scroll-button.right');
 
+        let cachedWidths = [];
+        let cachedOffsets = [];
+
         const updateIndicator = (activeLink) => {
-            indicator.style.width = `${activeLink.offsetWidth * 0.75}px`;
-            indicator.style.left = `${activeLink.offsetLeft + (activeLink.offsetWidth * 0.125)}px`;
+            const index = Array.from(tabLinks).indexOf(activeLink);
+            indicator.style.width = `${cachedWidths[index] * 0.75}px`;
+            indicator.style.left = `${cachedOffsets[index] + (cachedWidths[index] * 0.125)}px`;
         };
 
         const checkScrollButtons = () => {
-            const totalWidth = Array.from(tabHeaderElement.children)
-                .reduce((acc, child) => acc + child.offsetWidth, 0);
+            const totalWidth = cachedWidths.reduce((acc, width) => acc + width, 0);
             const containerWidth = tabHeaderElement.offsetWidth;
 
             leftButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
             rightButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
         };
+
+        // 缓存布局相关的属性
+        tabLinks.forEach((link, index) => {
+            cachedWidths[index] = link.offsetWidth;
+            cachedOffsets[index] = link.offsetLeft;
+        });
 
         checkScrollButtons();
         window.addEventListener('resize', checkScrollButtons);
@@ -505,12 +500,16 @@ function initializeStickyTOC() {
     var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
     var tocAboveHeight = Array.from(tocAboveElements).reduce((total, element) => total + element.offsetHeight, 0);
 
+    // 缓存初始的 tocAboveHeight
+    var initialTocAboveHeight = tocAboveHeight;
+
     let ticking = false;
 
     function onScroll() {
         if (!ticking) {
             window.requestAnimationFrame(function () {
-                if (window.scrollY >= tocAboveHeight + buffer) {
+                // 使用缓存的 tocAboveHeight
+                if (window.scrollY >= initialTocAboveHeight + buffer) {
                     tocSection.classList.add('sticky');
                 } else {
                     tocSection.classList.remove('sticky');
