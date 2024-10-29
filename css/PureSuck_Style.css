@@ -4,7 +4,7 @@
 	--card-color: #ffffff;
 	--card2-color: #fbfbfb;
 	--pure-gery-color: #f5f5f5;
-	--border-color: #ddd;
+	--border-color: #e0e0e0;
 	--line-color: #ebebeb;
 	--nav-color: #e4e6e7;
 	--nav-text-color: #374043;
@@ -93,15 +93,15 @@ img {
 }
 
 figure {
-    display: block; 
-    margin: 0; 
-    text-align: center; 
+	display: block;
+	margin: 0;
+	text-align: center;
 }
 
 figcaption {
-    color: var(--text2-color); 
+	color: var(--text2-color);
 	font-size: 0.75rem;
-    margin-top: 0.5em; 
+	margin-top: 0.5em;
 }
 
 object {
@@ -194,7 +194,7 @@ table th,
 table td {
 	padding: 0.4rem 1.25rem;
 	border-bottom: 1px solid var(--line-color);
-	font-size:0.95rem
+	font-size: 0.95rem
 }
 
 table tr {
@@ -245,14 +245,6 @@ h6 a:hover {
 	border-bottom: 0
 }
 
-blockquote {
-	width: 100%;
-	padding: 16px;
-	margin-right: 0;
-	margin-left: 0;
-	font-size: 0.95rem
-}
-
 code,
 kbd {
 	position: relative;
@@ -300,7 +292,7 @@ pre {
 a,
 button,
 input {
-	transition-property: color, border-color, background-color
+	transition: all .2s ease-in-out;
 }
 
 .root,
@@ -1658,7 +1650,7 @@ a:hover {
 	background-color: var(--themecolor);
 	border-radius: 0.4rem;
 	transform: scale(0.8);
-	transition: transform .2s ease-in-out, opacity .2s ease-in-out;
+	transition: all .2s ease-in-out;
 	opacity: 0;
 }
 
@@ -1679,6 +1671,14 @@ blockquote {
 	border-radius: 0.75rem;
 	color: var(--text-color);
 	background-color: var(--pure-gery-color);
+	width: 100%;
+	padding: 16px;
+	margin-right: 0;
+	margin-left: 0;
+	font-size: 0.95rem;
+	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
+	border: 1px solid var(--border-color);
+	box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
 }
 
 code,
@@ -1686,7 +1686,7 @@ kbd {
 	border-radius: 0.4rem;
 	color: var(--text-color);
 	background-color: var(--pure-gery-color);
-	border: .05rem solid var(--border-color);
+	border: 1px solid var(--border-color);
 	margin: 0 5px
 }
 
@@ -1796,7 +1796,6 @@ strong {
 .nav-item {
 	color: inherit;
 	position: relative;
-	display: inline-block;
 	border: 1px solid var(--background-color);
 }
 
@@ -2105,7 +2104,7 @@ textarea.ci {
 	border-radius: 0.45rem;
 	background: linear-gradient(to right, var(--themecolor), rgb(255 255 255 / 0%));
 	opacity: .55;
-    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
+	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
 }
 
 .post-title:hover::after {
