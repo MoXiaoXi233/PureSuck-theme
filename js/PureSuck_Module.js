@@ -298,8 +298,6 @@ function parseCollapsiblePanels() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", parseTabs);
-
 function parseTabs() {
     const tabContainers = document.querySelectorAll('[tabs]');
 
@@ -392,10 +390,12 @@ function parseTabs() {
 
         leftButton.addEventListener('click', () => {
             tabHeaderElement.scrollBy({ left: -100, behavior: 'smooth' });
+            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
         });
 
         rightButton.addEventListener('click', () => {
             tabHeaderElement.scrollBy({ left: 100, behavior: 'smooth' });
+            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
         });
 
         let isDown = false;
@@ -414,6 +414,7 @@ function parseTabs() {
 
         tabHeaderElement.addEventListener('mouseup', () => {
             isDown = false;
+            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
         });
 
         tabHeaderElement.addEventListener('mousemove', (e) => {
@@ -432,6 +433,7 @@ function parseTabs() {
 
         tabHeaderElement.addEventListener('touchend', () => {
             isDown = false;
+            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
         });
 
         tabHeaderElement.addEventListener('touchmove', (e) => {
