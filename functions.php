@@ -126,7 +126,7 @@ function themeConfig($form)
         }
     }
     echo '
-    <h3>当前主题版本：<span style="color: #b45864;">1.2.3</span></h3>
+    <h3>当前主题版本：<span style="color: #b45864;">1.2.4</span></h3>
     <h4>主题开源页面及文档：<span style="color: #b45864;"><a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #3273dc; text-decoration: none;">PureSuck-theme</a></span></h4>
     <h5>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</h5>
     <form class="protected home" action="?' . $name . 'bf" method="post">

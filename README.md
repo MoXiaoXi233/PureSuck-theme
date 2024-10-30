@@ -80,6 +80,12 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 [/timeline]
 ```
 在[timeline]中添加子[timeline-event]一直加下去就行，应该没什么大问题
+#### 视频卡片
+目前只做了b站的
+```
+[bilibili-card bvid="BV1KJ411C7SB"]
+```
+像这样就可以插入一个视频卡片啦！其实就是官方那个 iframe 内嵌代码，更方便更简洁了一点而已，默认不自动播放
 ## 引用库
 [aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
