@@ -183,7 +183,7 @@
                 initializeStickyTOC();
 
                 // AOS 动画
-                AOS.init();
+                AOS.refresh();
 
                 // 确保代码块高亮
                 <?php $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings; ?>

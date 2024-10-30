@@ -316,7 +316,7 @@
     font-size: 0.9em;
     background: var(--card-color);
     color: var(--nav-text-color);
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s ease;
     border: 1px solid var(--border-color);
     box-shadow: 0 0 6px #00000008;
 }
@@ -329,7 +329,7 @@
 .category-cloud .category:active,
 .tag-cloud .tag:active {
     background-color: var(--hover-color);
-    transform: scale(0.95);
+    transform: scale(0.925);
 }
 
 
@@ -392,7 +392,7 @@
 #toc .li {
     border: 1px solid var(--background-color);
     border-radius: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 #toc .li:hover {
@@ -501,7 +501,13 @@
 
 .friendsboard-item:hover {
     transform: translateY(-6px);
+    background-color: var(--hover-color);
     box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
+}
+
+.friendsboard-item:active{
+    background-color: var(--hover-color);
+    transform: scale(0.95);
 }
 
 .friends-card-header {
@@ -661,7 +667,7 @@
 }
 
 .timeline-title a {
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
     color: var(--text-color);
 }
 
@@ -743,10 +749,13 @@
     padding: 10px 20px;
     cursor: pointer;
     color: var(--text2-color);
-    transition: color 0.3s;
+    transition: all 0.3s ease;
     position: relative;
     flex-shrink: 0;
-    /* 防止缩小 */
+}
+
+.tab-link:hover{
+    color: var(--themehovercolor);
 }
 
 .tab-link.active {

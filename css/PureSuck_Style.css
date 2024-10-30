@@ -287,8 +287,6 @@ pre {
 	padding: 12px 16px
 }
 
-.icon-ui:before,
-.icon:before,
 a,
 button,
 input {
@@ -1096,7 +1094,8 @@ body>.wrapper {
 }
 
 .post-meta .meta-item.icon::before {
-	font-size: 22px
+	font-size: 22px;
+	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
 }
 
 [data-js~=share]:before {
@@ -1774,7 +1773,6 @@ strong {
 }
 
 .meta-item:before {
-	color: currentColor;
 	font-size: 18px;
 }
 
@@ -1808,7 +1806,7 @@ strong {
 }
 
 .nav-item:active {
-	transform: scale(0.95);
+	transform: scale(0.925);
 }
 
 .nav-item a,
