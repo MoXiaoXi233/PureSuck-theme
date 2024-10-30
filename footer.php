@@ -12,7 +12,11 @@
 <!-- AOS -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    AOS.init();
+    AOS.init({
+      duration: 450,
+      easing: 'cubic-bezier(0.345, 0.045, 0.345, 1)',
+      delay: 0,
+    });
   });
 </script>
 
