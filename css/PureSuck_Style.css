@@ -421,6 +421,8 @@ small {
 		font-size: 1.375rem;
 		line-height: 34px
 	}
+
+	
 }
 
 @media screen and (min-width:1183px) {
@@ -1984,6 +1986,24 @@ textarea.ci {
 	z-index: 1;
 }
 
+/** PicGird 图片框架 布局 **/
+
+.pic-grid {
+    column-count: 3;
+    column-gap: 10px;
+}
+
+.pic-grid figure {
+    break-inside: avoid;
+    margin-bottom: 10px;
+}
+
+.pic-grid img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
 /* 小尺寸设备样式 */
 @media (max-width: 579px) {
 	.license-info-card {
@@ -2006,6 +2026,10 @@ textarea.ci {
 
 	.cc-icon::before {
 		right: 20px;
+	}
+
+	.pic-grid {
+		column-count: 2; 
 	}
 }
 

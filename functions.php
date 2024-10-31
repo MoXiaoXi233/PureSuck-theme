@@ -614,6 +614,24 @@ function parse_timeline($content)
     return $content;
 }
 
+function parsePicGrid($content)
+{
+    $pattern = '/\[PicGrid\](.*?)\[\/PicGrid\]/s';
+    preg_match_all($pattern, $content, $matches);
+
+    if (!empty($matches[1])) {
+        foreach ($matches[1] as $match) {
+            $cleanMatch = str_replace('<br>', '', $match);
+            $cleanMatch = preg_replace('/<figcaption>.*?<\/figcaption>/', '', $cleanMatch);
+            $cleanMatch = preg_replace('/<\/?p>/', '', $cleanMatch);
+            $gridContent = '<div class="pic-grid">' . $cleanMatch . '</div>';
+            $content = str_replace('[PicGrid]' . $match . '[/PicGrid]', $gridContent, $content);
+        }
+    }
+
+    return $content;
+}
+
 // 运行所有函数
 function parseShortcodes($content)
 {
@@ -621,6 +639,7 @@ function parseShortcodes($content)
     $content = parse_alerts($content);
     $content = parse_windows($content);
     $content = parse_timeline($content);
+    $content = parsePicGrid($content);
 
     $content = add_zoomable_to_images($content); # 图片放大
 
