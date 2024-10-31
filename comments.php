@@ -89,14 +89,12 @@
                         </a>~ <a href="<?php $this->options->logoutUrl(); ?>" title="Logout">退出 &raquo;</a>
                     </span>
                 <?php else: ?>
-                    <?php if ($this->remember('author', true) != "" && $this->remember('mail', true) != "") : ?>
+                    <?php if ($this->remember('author', true) != "" && $this->remember('mail', true) != ""): ?>
                         <span>欢迎
                             <?php $this->remember('author'); ?> 回来~<?php /* |<small style="cursor: pointer;" onclick="tg_c('ainfo','hinfo');">修改资料</small> */ ?>
                         </span>
-                        <div id="ainfo" class="ainfo hinfo">
-                        <?php else : ?>
-                            <div class="ainfo">
-                            <?php endif; ?>
+                    <?php else: ?>
+                        <div class="ainfo">
                             <div class="tbox-container">
                                 <div class="tbox">
                                     <input type="text" name="author" id="author" class="ci" placeholder="您的昵称" value="" required="">
@@ -108,20 +106,21 @@
                                     <input type="url" name="url" id="url" class="ci" placeholder="您的网站（选填）" value="">
                                 </div>
                             </div>
-                            </div>
-                        <?php endif; ?>
-                        <div class="tbox">
-                            <textarea name="text" id="textarea" class="ci OwO-textarea" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text', false); ?></textarea>
-                            <div class="CtBoxBar">
-                                <div class="left-bar">
-                                    <div class="OwO-bar">
-                                        <div class="OwO"></div>
-                                    </div>
-                                    <!-- 未来可以在这里添加更多内容 -->
-                                </div>
-                                <button type="submit" class="submit" id="submit">提交评论</button>
-                            </div>
                         </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <div class="tbox">
+                    <textarea name="text" id="textarea" class="ci OwO-textarea" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text', false); ?></textarea>
+                    <div class="CtBoxBar">
+                        <div class="left-bar">
+                            <div class="OwO-bar">
+                                <div class="OwO"></div>
+                            </div>
+                            <!-- 未来可以在这里添加更多内容 -->
+                        </div>
+                        <button type="submit" class="submit" id="submit">提交评论</button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
