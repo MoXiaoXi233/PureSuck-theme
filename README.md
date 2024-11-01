@@ -98,7 +98,15 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 ```
 像这样就可以插入一个视频卡片啦！其实就是官方那个 iframe 内嵌代码，更方便更简洁了一点而已，默认不自动播放
 ### *开发中的功能组件
+#### 瀑布流图片
+```
+[PicGrid]
+![图片.jpg][1]
+[/PicGrid]
+```
+用 Typecho 默认的插入图片方式即可，用[PicGrid]标签包裹即可完成一个瀑布流的照片展示，适合多张图片展示的场景
 #### MoxDesign
+作为 JS 脚本在页面中自行开发使用  
 需要使用的时候请确保在 DOMContentLoaded 之后调用  
 MoxDesign Notification通知，默认出现在右下角
 ```
