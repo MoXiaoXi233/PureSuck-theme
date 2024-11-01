@@ -1730,7 +1730,7 @@ strong {
 	margin-top: 1rem;
 	margin-bottom: 1rem;
 	color: #aaa;
-	font-size: .766rem
+	font-size: .75rem
 }
 
 .ccr {
@@ -1749,7 +1749,7 @@ strong {
 	border-radius: 2px;
 	color: var(--pure-color);
 	background: var(--themecolor);
-	font-size: .766rem;
+	font-size: .75rem;
 }
 
 .c_p>.children {

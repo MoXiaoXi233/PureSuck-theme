@@ -34,6 +34,17 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 请确保主题文件夹名应该为 PureSuck ，否则会造成样式或者功能缺失！
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述  
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
+#### 建议的工作
+- 开启 Typecho 设置内评论区的 Markdown 功能 
+- 允许使用的HTML标签和属性内填写
+```
+<blockquote><pre><code><strong><em><h5><h6><a href title><table><thead><tr><th><tbody><td>
+<ol><ul><li>
+```
+根据你自己的需要删改，你想要允许引用效果就要加上`<blockquote>`，你想要代码就要加上`<pre><code>`等等
+- 搭配字体 「霞骛文楷」 使用
+- 遇到问题联系作者
+
 ### 功能与组件
 归档页面：后台新建一个页面，右边选择归档即可
 内置一些组件，使用短代码进行解析，使用格式如下
@@ -86,6 +97,29 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 [bilibili-card bvid="BV1KJ411C7SB"]
 ```
 像这样就可以插入一个视频卡片啦！其实就是官方那个 iframe 内嵌代码，更方便更简洁了一点而已，默认不自动播放
+### *开发中的功能组件
+#### MoxDesign
+需要使用的时候请确保在 DOMContentLoaded 之后调用
+MoxDesign Notification通知，默认出现在右下角
+```
+MoxNotification({
+    title: "Persistent Notification",
+    message: "This notification won't auto-close.",
+    duration: 0, //设置为 0 则需要手动关闭，单位毫秒
+});
+```
+MoxDesign Toast弹窗，等同切换颜色时的提醒
+```
+MoxToast({
+    message: "This is a toast message",
+    duration: 3000,
+    position: "bottom", // 可以是 "top" 或 "bottom"
+    backgroundColor: "var(--card2-color)",
+    textColor: "var(--text-color)",
+    borderColor: "var(--border-color)", // 使用CSS变量或默认值
+};
+```
+开发中····
 ## 引用库
 [aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
