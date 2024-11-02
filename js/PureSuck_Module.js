@@ -379,23 +379,31 @@ function parseTabs() {
             rightButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
         };
 
-        // 缓存布局相关的属性
-        tabLinks.forEach((link, index) => {
-            cachedWidths[index] = link.offsetWidth;
-            cachedOffsets[index] = link.offsetLeft;
-        });
+        const updateLayout = () => {
+            cachedWidths = [];
+            cachedOffsets = [];
+            tabLinks.forEach((link, index) => {
+                cachedWidths[index] = link.offsetWidth;
+                cachedOffsets[index] = link.offsetLeft;
+            });
+            checkScrollButtons();
+            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
+        };
 
-        checkScrollButtons();
-        window.addEventListener('resize', checkScrollButtons);
+        // 初始化布局
+        updateLayout();
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', updateLayout);
 
         leftButton.addEventListener('click', () => {
             tabHeaderElement.scrollBy({ left: -100, behavior: 'smooth' });
-            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
+            updateLayout();
         });
 
         rightButton.addEventListener('click', () => {
             tabHeaderElement.scrollBy({ left: 100, behavior: 'smooth' });
-            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
+            updateLayout();
         });
 
         let isDown = false;
@@ -414,7 +422,7 @@ function parseTabs() {
 
         tabHeaderElement.addEventListener('mouseup', () => {
             isDown = false;
-            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
+            updateLayout();
         });
 
         tabHeaderElement.addEventListener('mousemove', (e) => {
@@ -433,7 +441,7 @@ function parseTabs() {
 
         tabHeaderElement.addEventListener('touchend', () => {
             isDown = false;
-            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
+            updateLayout();
         });
 
         tabHeaderElement.addEventListener('touchmove', (e) => {
@@ -486,6 +494,8 @@ function parseTabs() {
                 } else if (targetRect.right > tabHeaderRect.right) {
                     tabHeaderElement.scrollBy({ left: targetRect.right - tabHeaderRect.right, behavior: 'smooth' });
                 }
+
+                updateLayout();
             }
         });
 
