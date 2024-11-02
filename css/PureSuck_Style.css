@@ -1883,9 +1883,8 @@ textarea.ci {
 
 .el-avatar {
 	align-items: center;
-	background: #c0c4cc;
 	box-sizing: border-box;
-	color: #fff;
+	color: var(--text2-color);
 	display: inline-flex;
 	font-size: 14px;
 	height: 120px;
