@@ -498,7 +498,8 @@ object,
 ol,
 p,
 pre,
-ul {
+ul,
+.cp p {
 	margin-top: 0;
 	margin-bottom: 16px
 }
@@ -527,7 +528,8 @@ ul {
 	p,
 	pre,
 	ul,
-	hr {
+	hr,
+	.cp p {
 		margin-bottom: 24px
 	}
 }
@@ -1712,10 +1714,6 @@ strong {
 	word-wrap: break-word;
 }
 
-.cp p {
-	margin: 0
-}
-
 .cr {
 	float: right;
 	display: none
@@ -2353,8 +2351,9 @@ input:-webkit-autofill:active {
 
 .code-block-extension-code-show-num .code-block-extension-code-line::before {
 	content: attr(data-line-num);
-	width: 2em;
-	margin-right: 1.5em;
-	text-align: right;
-	color: #888;
+    width: 1em;
+    margin-right: 1.5em;
+    text-align: right;
+    color: #888;
+    display: inline-block;
 }
