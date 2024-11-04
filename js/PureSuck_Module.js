@@ -503,7 +503,6 @@ function parseTabs() {
     });
 }
 
-
 function initializeStickyTOC() {
     var tocSection = document.getElementById('toc-section');
     if (!tocSection) return;
