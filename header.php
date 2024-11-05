@@ -148,22 +148,6 @@
                         ".right-sidebar"
                     ]
                 });
-
-                // 评论提交状态
-                var submitButton = document.getElementById("submit");
-                var textarea = document.getElementById("textarea");
-
-                // 检查是否存在对应的元素
-                if (!submitButton || !textarea) {
-                    return; // 如果不存在，退出函数
-                }
-
-                submitButton.addEventListener("click", function() {
-                    if (textarea.value !== "") {
-                        submitButton.innerHTML = "提交中~";
-                    }
-                });
-
             });
 
             // Pjax 加载超时时跳转，不然它不给你跳转的！！！
@@ -206,6 +190,7 @@
                     initializeCommentsOwO();
                 }
 
+                Comments_Submit();
             });
         </script>
         <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>

@@ -3,27 +3,18 @@
 
 function handleGoTopButton() {
     const goTopBtn = document.getElementById('go-top');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.boundingClientRect.top < 0) {
+                goTopBtn.classList.add('visible');
+            } else {
+                goTopBtn.classList.remove('visible');
+            }
+        });
+    });
+    observer.observe(document.body);
+
     const goTopAnchor = document.querySelector('#go-top .go');
-
-    let ticking = false;
-
-    function handleScroll() {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const st = document.documentElement.scrollTop || document.body.scrollTop;
-                if (st > 0) {
-                    goTopBtn.classList.add('visible');
-                } else {
-                    goTopBtn.classList.remove('visible');
-                }
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }
-
-    window.addEventListener('scroll', handleScroll);
-
     goTopAnchor.addEventListener('click', function (e) {
         e.preventDefault();
         window.scrollTo({
@@ -63,7 +54,6 @@ function generateTOC() {
     dirDiv.innerHTML += `<div class="sider"><span class="siderbar"></span></div>`;
     fragment.appendChild(dirDiv);
 
-    // 批量插入DOM
     toc.appendChild(fragment);
 
     toc.addEventListener("click", event => {
@@ -72,7 +62,7 @@ function generateTOC() {
             const targetId = event.target.getAttribute('href').substring(1);
             const targetElement = document.getElementById(targetId);
             if (targetElement) {
-                const targetTop = getElementTop(targetElement);
+                const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
                 window.scrollTo({
                     top: targetTop,
                     behavior: "smooth"
@@ -367,16 +357,21 @@ function parseTabs() {
 
         const updateIndicator = (activeLink) => {
             const index = Array.from(tabLinks).indexOf(activeLink);
-            indicator.style.width = `${cachedWidths[index] * 0.75}px`;
-            indicator.style.left = `${cachedOffsets[index] + (cachedWidths[index] * 0.125)}px`;
+            requestAnimationFrame(() => {
+                indicator.style.width = `${cachedWidths[index] * 0.75}px`;
+                indicator.style.left = `${cachedOffsets[index] + (cachedWidths[index] * 0.125)}px`;
+            });
         };
 
         const checkScrollButtons = () => {
             const totalWidth = cachedWidths.reduce((acc, width) => acc + width, 0);
             const containerWidth = tabHeaderElement.offsetWidth;
 
-            leftButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
-            rightButton.style.display = totalWidth <= containerWidth ? 'none' : 'block';
+            requestAnimationFrame(() => {
+                const shouldShowButtons = totalWidth > containerWidth;
+                leftButton.style.display = shouldShowButtons ? 'block' : 'none';
+                rightButton.style.display = shouldShowButtons ? 'block' : 'none';
+            });
         };
 
         const updateLayout = () => {
@@ -387,14 +382,12 @@ function parseTabs() {
                 cachedOffsets[index] = link.offsetLeft;
             });
             checkScrollButtons();
-            updateIndicator(tabLinks[Array.from(tabLinks).findIndex(link => link.classList.contains('active'))]);
+            const activeIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
+            updateIndicator(tabLinks[activeIndex]);
         };
 
-        // 初始化布局
-        updateLayout();
-
-        // 监听窗口大小变化
-        window.addEventListener('resize', updateLayout);
+        const resizeObserver = new ResizeObserver(updateLayout);
+        resizeObserver.observe(tabHeaderElement);
 
         leftButton.addEventListener('click', () => {
             tabHeaderElement.scrollBy({ left: -100, behavior: 'smooth' });
@@ -410,28 +403,29 @@ function parseTabs() {
         let startX;
         let scrollLeft;
 
-        tabHeaderElement.addEventListener('mousedown', (e) => {
+        const onMouseDown = (e) => {
             isDown = true;
             startX = e.pageX - tabHeaderElement.offsetLeft;
             scrollLeft = tabHeaderElement.scrollLeft;
-        });
+        };
 
-        tabHeaderElement.addEventListener('mouseleave', () => {
-            isDown = false;
-        });
-
-        tabHeaderElement.addEventListener('mouseup', () => {
+        const onMouseUpOrLeave = () => {
             isDown = false;
             updateLayout();
-        });
+        };
 
-        tabHeaderElement.addEventListener('mousemove', (e) => {
+        const onMouseMove = (e) => {
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX - tabHeaderElement.offsetLeft;
             const walk = (x - startX) * 2;
             tabHeaderElement.scrollLeft = scrollLeft - walk;
-        });
+        };
+
+        tabHeaderElement.addEventListener('mousedown', onMouseDown);
+        tabHeaderElement.addEventListener('mouseleave', onMouseUpOrLeave);
+        tabHeaderElement.addEventListener('mouseup', onMouseUpOrLeave);
+        tabHeaderElement.addEventListener('mousemove', onMouseMove);
 
         tabHeaderElement.addEventListener('touchstart', (e) => {
             isDown = true;
@@ -439,11 +433,7 @@ function parseTabs() {
             scrollLeft = tabHeaderElement.scrollLeft;
         }, { passive: true });
 
-        tabHeaderElement.addEventListener('touchend', () => {
-            isDown = false;
-            updateLayout();
-        });
-
+        tabHeaderElement.addEventListener('touchend', onMouseUpOrLeave, { passive: true });
         tabHeaderElement.addEventListener('touchmove', (e) => {
             if (!isDown) return;
             const x = e.touches[0].pageX - tabHeaderElement.offsetLeft;
@@ -467,11 +457,7 @@ function parseTabs() {
                 const activePane = document.getElementById(event.target.getAttribute('data-tab'));
                 activePane.classList.add('active');
 
-                if (currentIndex > previousIndex) {
-                    activePane.setAttribute('data-aos', 'fade-left');
-                } else {
-                    activePane.setAttribute('data-aos', 'fade-right');
-                }
+                activePane.setAttribute('data-aos', currentIndex > previousIndex ? 'fade-left' : 'fade-right');
 
                 updateIndicator(event.target);
 
@@ -504,34 +490,40 @@ function parseTabs() {
 }
 
 function initializeStickyTOC() {
-    var tocSection = document.getElementById('toc-section');
+    const tocSection = document.getElementById('toc-section');
     if (!tocSection) return;
 
-    var buffer = 50;
-    var tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
-    var tocAboveHeight = Array.from(tocAboveElements).reduce((total, element) => total + element.offsetHeight, 0);
+    const buffer = 50;
+    const tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
+    const initialTocAboveHeight = Array.from(tocAboveElements).reduce((total, element) => total + element.offsetHeight, 0);
 
-    // 缓存初始的 tocAboveHeight
-    var initialTocAboveHeight = tocAboveHeight;
-
-    let ticking = false;
+    let isTicking = false;
 
     function onScroll() {
-        if (!ticking) {
-            window.requestAnimationFrame(function () {
-                // 使用缓存的 tocAboveHeight
-                if (window.scrollY >= initialTocAboveHeight + buffer) {
-                    tocSection.classList.add('sticky');
-                } else {
-                    tocSection.classList.remove('sticky');
-                }
-                ticking = false;
+        if (!isTicking) {
+            window.requestAnimationFrame(() => {
+                const shouldStick = window.scrollY >= initialTocAboveHeight + buffer;
+                tocSection.classList.toggle('sticky', shouldStick);
+                isTicking = false;
             });
-            ticking = true;
+            isTicking = true;
         }
     }
 
     window.addEventListener('scroll', onScroll);
+}
+
+function Comments_Submit() {
+    const submitButton = document.getElementById("submit");
+    const textarea = document.getElementById("textarea");
+
+    if (!submitButton || !textarea) return;
+
+    submitButton.addEventListener("click", () => {
+        if (textarea.value.trim() !== "") {
+            submitButton.textContent = "提交中~";
+        }
+    });
 }
 
 function runShortcodes() {
@@ -544,6 +536,7 @@ function runShortcodes() {
     mediumZoom('[data-zoomable]', {
         background: 'var(--card-color)'
     });
+    Comments_Submit()
 }
 
 document.addEventListener('DOMContentLoaded', function () {
