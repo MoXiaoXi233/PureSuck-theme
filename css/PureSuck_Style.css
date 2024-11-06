@@ -418,7 +418,7 @@ small {
 		line-height: 34px
 	}
 
-	
+
 }
 
 @media screen and (min-width:1183px) {
@@ -1783,7 +1783,8 @@ strong {
 .ci {
 	overflow: auto;
 	margin: 10px 0;
-	padding: 5px 15px;
+	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
+	padding: 0.4rem 15px;
 	width: 100%;
 	border: 1px solid var(--border-color);
 	border-radius: 0.65rem;
@@ -1798,6 +1799,10 @@ textarea.ci {
 	height: 100%;
 	padding: 15px 15px;
 	min-height: 200px;
+}
+
+.ci:focus {
+	box-shadow: 0 0 0 .05rem var(--themecolor);
 }
 
 .CtBoxBar {
@@ -1862,6 +1867,11 @@ textarea.ci {
 	border-color: var(--border-color);
 	background: var(--hover-color);
 	cursor: pointer
+}
+
+.submit:active {
+	background-color: var(--hover-color);
+	transform: scale(0.95);
 }
 
 @media only screen and (max-width:767px) {
@@ -1982,19 +1992,19 @@ textarea.ci {
 /** PicGird 图片框架 布局 **/
 
 .pic-grid {
-    column-count: 3;
-    column-gap: 10px;
+	column-count: 3;
+	column-gap: 10px;
 }
 
 .pic-grid figure {
-    break-inside: avoid;
-    margin-bottom: 10px;
+	break-inside: avoid;
+	margin-bottom: 10px;
 }
 
 .pic-grid img {
-    width: 100%;
-    height: auto;
-    display: block;
+	width: 100%;
+	height: auto;
+	display: block;
 }
 
 /* 小尺寸设备样式 */
@@ -2022,7 +2032,7 @@ textarea.ci {
 	}
 
 	.pic-grid {
-		column-count: 2; 
+		column-count: 2;
 	}
 }
 
@@ -2347,9 +2357,9 @@ input:-webkit-autofill:active {
 
 .code-block-extension-code-show-num .code-block-extension-code-line::before {
 	content: attr(data-line-num);
-    width: 1em;
-    margin-right: 1.5em;
-    text-align: right;
-    color: #888;
-    display: inline-block;
+	width: 1em;
+	margin-right: 1.5em;
+	text-align: right;
+	color: #888;
+	display: inline-block;
 }
