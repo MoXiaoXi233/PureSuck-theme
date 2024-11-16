@@ -35,14 +35,7 @@
     ?>
         <li id="li-<?php $comments->theId(); ?>" class="<?php echo $cl; ?>">
             <div id="<?php $comments->theId(); ?>">
-                <?php
-                $number = $comments->mail;
-                if (preg_match('|^[1-9]\d{4,11}@qq\.com$|i', $number)) {
-                    $avatarUrl = 'https://q2.qlogo.cn/headimg_dl?bs=' . $number . '&dst_uin=' . $number . '&dst_uin=' . $number . '&spec=100&url_enc=0&referer=bu_interface&term_type=PC';
-                } else {
-                    $avatarUrl = 'https://gravatar.loli.net/avatar/' . md5(strtolower($comments->mail)) . '?s=80&r=X&d=mm';
-                }
-                ?>
+                <?php $avatarUrl = 'https://cn.cravatar.com/avatar/' . md5(strtolower($comments->mail)) . '?s=128&d=mm'; ?>
                 <img class="avatarcc" src="<?php echo $avatarUrl; ?>" loading="lazy" alt="评论头像" />
                 <div class="cp">
                     <?php echo parseOwOcodes($comments->content); ?>
