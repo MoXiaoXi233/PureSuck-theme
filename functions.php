@@ -10,10 +10,7 @@ function themeFields($layout)
     $desc = new Typecho_Widget_Helper_Form_Element_Text('desc', NULL, NULL, _t('文章摘要'), _t('文章摘要信息，会显示在首页文章卡片内，为空则默认显示文章开头一段文字'));
     $desc->input->setAttribute('class', 'text w-100');
     $layout->addItem($desc);
-
-    $description = new Typecho_Widget_Helper_Form_Element_Text('description', NULL, NULL, _t('网页描述'), _t('简单一句话描述文章内容，用于网站 Description，有利于 SEO 优化，非必要'));
-    $description->input->setAttribute('class', 'text w-100');
-    $layout->addItem($description);
+    
 }
 
 function themeInit($archive)
