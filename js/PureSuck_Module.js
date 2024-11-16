@@ -238,8 +238,6 @@ function parseFriendCards() {
 
 function parseCollapsiblePanels() {
     const elements = document.querySelectorAll('[collapsible-panel]');
-    const fragment = document.createDocumentFragment();
-    const headers = [];
 
     elements.forEach(element => {
         const title = element.getAttribute('title');
@@ -258,33 +256,26 @@ function parseCollapsiblePanels() {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = newContent;
         const newPanel = tempDiv.firstChild;
-        fragment.appendChild(newPanel);
-        headers.push(newPanel.querySelector('.collapsible-header'));
-    });
 
-    if (elements[0] && elements[0].parentNode) {
-        elements[0].parentNode.replaceChild(fragment, elements[0]);
-    }
-
-    headers.forEach(button => {
-        const content = button.nextElementSibling;
+        const button = newPanel.querySelector('.collapsible-header');
+        const contentDiv = newPanel.querySelector('.collapsible-content');
         const icon = button.querySelector('.icon');
 
         button.addEventListener('click', function () {
             this.classList.toggle('active');
 
-            if (content && content.style) {
-                if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                    content.style.maxHeight = '0px';
-                    icon.classList.remove('icon-up-open');
-                    icon.classList.add('icon-down-open');
-                } else {
-                    content.style.maxHeight = content.scrollHeight + "px";
-                    icon.classList.remove('icon-down-open');
-                    icon.classList.add('icon-up-open');
-                }
+            if (contentDiv.style.maxHeight && contentDiv.style.maxHeight !== '0px') {
+                contentDiv.style.maxHeight = '0px';
+                icon.classList.remove('icon-up-open');
+                icon.classList.add('icon-down-open');
+            } else {
+                contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
+                icon.classList.remove('icon-down-open');
+                icon.classList.add('icon-up-open');
             }
         });
+
+        element.parentNode.replaceChild(newPanel, element);
     });
 }
 
