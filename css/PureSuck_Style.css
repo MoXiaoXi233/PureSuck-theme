@@ -197,8 +197,8 @@ table tr {
 	transition: all .3s ease;
 }
 
-table tr:hover {
-	background-color: var(--hover-color);
+table tr:has(td):hover {
+    background-color: var(--hover-color);
 }
 
 .icon:empty:before {
