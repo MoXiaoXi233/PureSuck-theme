@@ -550,7 +550,7 @@ function parse_Shortcodes($content)
         // 如果 alt 属性不为空，则添加注释
         if (!empty($alt)) {
             // 将图片标签替换为带有注释的图片标签
-            return '<figure>' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
+            return '<figure data-aos="fade-up" data-aos-anchor-placement="top-bottom">' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
         }
 
         // 如果没有 alt 属性，直接返回原图片标签

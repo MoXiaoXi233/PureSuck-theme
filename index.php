@@ -35,7 +35,7 @@ $this->need('header.php');
                 <!-- 大图样式 -->
                 <?php if ($hasImg): ?>
                     <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                        <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                        <img data-aos="zoom-out" data-aos-anchor-placement="top-bottom" itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
                     </figure>
                 <?php endif; ?>
 

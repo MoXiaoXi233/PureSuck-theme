@@ -283,8 +283,9 @@ pre {
 
 a,
 button,
-input {
-	transition: all .2s ease-in-out;
+input,
+form {
+	transition: all .3s ease-in-out;
 }
 
 .root,

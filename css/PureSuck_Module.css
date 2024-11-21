@@ -110,6 +110,7 @@
     border-radius: 0.7rem;
     box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
     overflow: hidden;
+    cursor: pointer;
     margin: 20px 0 !important;
     display: flex;
     padding: 10px 20px;
@@ -160,6 +161,7 @@
 .notifications-container {
     width: auto;
     height: auto;
+    cursor: pointer;
     font-size: 0.95rem;
     border-radius: 0.7rem;
     line-height: 1.4rem;
@@ -288,6 +290,7 @@
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--text-color);
+    transition: all .3s ease;
 }
 
 .section-header .icon {
