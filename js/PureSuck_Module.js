@@ -487,22 +487,27 @@ function initializeStickyTOC() {
     const buffer = 50;
     const tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
     const initialTocAboveHeight = Array.from(tocAboveElements).reduce((total, element) => total + element.offsetHeight, 0);
+    const threshold = initialTocAboveHeight + buffer;
 
     let isTicking = false;
 
     function onScroll() {
         if (!isTicking) {
+            isTicking = true;
             window.requestAnimationFrame(() => {
-                const shouldStick = window.scrollY >= initialTocAboveHeight + buffer;
-                tocSection.classList.toggle('sticky', shouldStick);
+                const currentScrollY = window.scrollY;
+                const shouldStick = currentScrollY >= threshold;
+                if (tocSection.classList.contains('sticky') !== shouldStick) {
+                    tocSection.classList.toggle('sticky', shouldStick);
+                }
                 isTicking = false;
             });
-            isTicking = true;
         }
     }
 
     window.addEventListener('scroll', onScroll);
 }
+
 
 function Comments_Submit() {
     const submitButton = document.getElementById("submit");

@@ -24,7 +24,7 @@ $this->need('header.php');
                 <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                     <div class="wrapper post-wrapper">
                         <div class="avatar post-author">
-                            <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
+                            <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
                             <span class="avatar-item">
                                 <?php $this->author(); ?>
                             </span>
@@ -47,6 +47,7 @@ $this->need('header.php');
                                 <?php $this->title() ?>
                             </a>
                         </h1>
+
                         <!-- 摘要 -->
                         <p class="post-excerpt">
                             <?php if ($this->fields->desc): ?>

@@ -2,12 +2,12 @@
 
 <?php if ($this->allow('comment')): ?>
     <?php $this->header('commentReply=1&description=0&keywords=0&generator=0&template=0&pingback=0&xmlrpc=0&wlw=0&rss2=0&rss1=0&antiSpam=0&atom'); ?>
-    
+
     <?php
     function threadedComments($comments, $options)
     {
         $cl = $comments->levels > 0 ? 'c_c' : 'c_p';
-        $isAdmin = $comments->authorId == 1; // 判断评论者是否是站长
+        $isAdmin = $comments->authorId === 1; // 判断评论者是否是站长
         $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external nofollow">' . $comments->author . '</a>' : $comments->author;
     ?>
         <li id="li-<?php $comments->theId(); ?>" class="<?php echo $cl; ?>">

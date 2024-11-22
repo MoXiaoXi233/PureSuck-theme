@@ -10,7 +10,6 @@ function themeFields($layout)
     $desc = new Typecho_Widget_Helper_Form_Element_Text('desc', NULL, NULL, _t('文章摘要'), _t('文章摘要信息，会显示在首页文章卡片内，为空则默认显示文章开头一段文字'));
     $desc->input->setAttribute('class', 'text w-100');
     $layout->addItem($desc);
-    
 }
 
 function themeInit($archive)
@@ -550,7 +549,7 @@ function parse_Shortcodes($content)
         // 如果 alt 属性不为空，则添加注释
         if (!empty($alt)) {
             // 将图片标签替换为带有注释的图片标签
-            return '<figure data-aos="fade-up" data-aos-anchor-placement="top-bottom">' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
+            return '<figure data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="85">' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
         }
 
         // 如果没有 alt 属性，直接返回原图片标签

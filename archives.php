@@ -18,7 +18,7 @@ $this->need('header.php');
             <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
-                        <img src="<?php echo $this->options->authorAvatar ? $this->options->authorAvatar : $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
+                        <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
                         <span class="avatar-item">
                             <?php $this->author(); ?>
                         </span>
@@ -29,7 +29,7 @@ $this->need('header.php');
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                    <img itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                    <img data-aos="zoom-out" itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
                 </figure>
             <?php endif; ?>
 
@@ -44,7 +44,7 @@ $this->need('header.php');
 
                         <div class="meta post-meta">
                             这里会归档一切文章<br>
-                            共创作了 <?php echo  getTotalPostsCount() ; ?> 篇文章，合 <?php  echo allOfCharacters(); ?> 字
+                            共创作了 <?php echo  getTotalPostsCount(); ?> 篇文章，合 <?php echo allOfCharacters(); ?> 字
                         </div>
 
                         <?php
