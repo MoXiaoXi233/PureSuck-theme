@@ -90,6 +90,9 @@
                 updateIcon('auto');
             }
         });
+            *{
+            -webkit-tap-highlight-color:rgba(0,0,0,0);
+            }
     </script>
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
