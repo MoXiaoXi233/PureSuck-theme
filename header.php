@@ -98,14 +98,14 @@
     <?php if ($this->options->postTitleAfter != 'off'): ?>
         <style>
             .post-title::after {
-                bottom: <?php echo $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
-                left: <?php echo '0'; ?>;
-                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?php echo '58px'; ?>;
-                height: <?php echo '13px'; ?>;
-                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?php echo '80px'; ?>;
-                height: <?php echo '12px'; ?>;
-                mask: <?php echo "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
-                mask-size: <?php echo '40px 12px'; ?>;
+                bottom: <?= $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
+                left: <?= '0'; ?>;
+                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?= '58px'; ?>;
+                height: <?= '13px'; ?>;
+                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?= '80px'; ?>;
+                height: <?= '12px'; ?>;
+                mask: <?= "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
+                mask-size: <?= '40px 12px'; ?>;
                 <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
                 /* 添加手绘风格的样式 */
                 /* 这里可以添加具体的手绘风格的样式，不过浪费了两个小时也没写好，放弃了 */
@@ -182,7 +182,7 @@
                 <?php endif; ?>
 
                 <?php if ($this->options->PjaxScript): ?>
-                    <?php echo $this->options->PjaxScript; ?>
+                    <?= $this->options->PjaxScript; ?>
                 <?php endif; ?>
 
                 // 评论区部分重载

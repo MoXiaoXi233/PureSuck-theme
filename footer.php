@@ -13,8 +13,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     AOS.init({
-      duration: 450,
-      easing: 'cubic-bezier(0.345, 0.045, 0.345, 1)',
+      duration: 600,
       delay: 0,
     });
   });
@@ -104,7 +103,7 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
 
 <!-- 后台script标签 -->
 <?php if ($this->options->footerScript): ?>
-  <?php echo $this->options->footerScript; ?>
+  <?= $this->options->footerScript; ?>
 <?php endif; ?>
 
 </html>

@@ -549,7 +549,7 @@ function parse_Shortcodes($content)
         // 如果 alt 属性不为空，则添加注释
         if (!empty($alt)) {
             // 将图片标签替换为带有注释的图片标签
-            return '<figure data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="85">' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
+            return '<figure>' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
         }
 
         // 如果没有 alt 属性，直接返回原图片标签
@@ -620,6 +620,14 @@ function parsePicGrid($content)
             $cleanMatch = str_replace('<br>', '', $match);
             $cleanMatch = preg_replace('/<figcaption>.*?<\/figcaption>/', '', $cleanMatch);
             $cleanMatch = preg_replace('/<\/?p>/', '', $cleanMatch);
+
+            // 为每个 <figure> 标签添加属性
+            $cleanMatch = preg_replace_callback('/<figure([^>]*)>/i', function ($matches) {
+                $attributes = $matches[1];
+                $new_attributes = ' data-aos="fade-up" data-aos-anchor-placement="top-bottom" data-aos-delay="85"';
+                return "<figure$attributes$new_attributes>";
+            }, $cleanMatch);
+
             $gridContent = '<div class="pic-grid">' . $cleanMatch . '</div>';
             $content = str_replace('[PicGrid]' . $match . '[/PicGrid]', $gridContent, $content);
         }
@@ -638,6 +646,18 @@ function parseShortcodes($content)
     $content = parsePicGrid($content);
 
     $content = add_zoomable_to_images($content); # 图片放大
+
+    // 为所有HTML标签添加 data-aos（极简正则版）
+    $content = preg_replace_callback(
+        '/<(\w+)(\s|>)/i',
+        function ($matches) {
+
+            return '<' . $matches[1] . ' animation: fadeInUp 0.5s ease forwards; ' . $matches[2];
+
+            return $matches[0];
+        },
+        $content
+    );
 
     return $content;
 }

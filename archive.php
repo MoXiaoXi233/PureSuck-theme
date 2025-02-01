@@ -15,8 +15,8 @@
             <?php
             $hasImg = $this->fields->img ? true : false;
             ?>
-            <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
-                <div class="post-inner">
+            <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item">
+                <div class="post-inner" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
                     <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                         <div class="wrapper post-wrapper">
                             <div class="avatar post-author">
@@ -44,7 +44,7 @@
                             </h1>
                             <p class="post-excerpt">
                                 <?php if ($this->fields->desc): ?>
-                                    <?php echo $this->fields->desc; ?>
+                                    <?= $this->fields->desc; ?>
                                 <?php else: ?>
                                     <?php $this->excerpt(200, ''); ?>
                                 <?php endif; ?>
@@ -91,7 +91,7 @@
 <nav class="nav main-pager" data-js="pager">
     <span class="nav-item-alt">
         第 <?php if ($this->_currentPage > 1) echo $this->_currentPage;
-            else echo 1; ?> 页 / 共 <?php echo ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
+            else echo 1; ?> 页 / 共 <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
     </span>
     <div class="nav nav--pager">
         <?php $this->pageLink('上一页', 'prev'); ?>

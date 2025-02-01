@@ -267,8 +267,7 @@
 /* 右侧边栏 */
 .right-sidebar {
     top: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     padding: 40px 50px 50px 50px;
     position: fixed;
     width: 344px;
@@ -355,8 +354,7 @@
 
 /** TOC 目录**/
 .toc-section {
-    overflow-y: hidden;
-    overflow-x: hidden;
+    overflow: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
 
@@ -508,7 +506,7 @@
     box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
 }
 
-.friendsboard-item:active{
+.friendsboard-item:active {
     background-color: var(--hover-color);
     transform: scale(0.95);
 }
@@ -757,7 +755,7 @@
     flex-shrink: 0;
 }
 
-.tab-link:hover{
+.tab-link:hover {
     color: var(--themehovercolor);
 }
 

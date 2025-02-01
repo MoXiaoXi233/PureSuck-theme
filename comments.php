@@ -1,5 +1,3 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
-
 <?php if ($this->allow('comment')): ?>
     <?php $this->header('commentReply=1&description=0&keywords=0&generator=0&template=0&pingback=0&xmlrpc=0&wlw=0&rss2=0&rss1=0&antiSpam=0&atom'); ?>
 
@@ -7,17 +5,17 @@
     function threadedComments($comments, $options)
     {
         $cl = $comments->levels > 0 ? 'c_c' : 'c_p';
-        $isAdmin = $comments->authorId === 1; // 判断评论者是否是站长
+        $isAdmin = $comments->authorId == 1;
         $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external nofollow">' . $comments->author . '</a>' : $comments->author;
     ?>
-        <li id="li-<?php $comments->theId(); ?>" class="<?php echo $cl; ?>">
+        <li id="li-<?php $comments->theId(); ?>" class="<?= $cl; ?>">
             <div id="<?php $comments->theId(); ?>">
                 <?php $avatarUrl = 'https://cn.cravatar.com/avatar/' . md5(strtolower($comments->mail)) . '?s=128&d=mm'; ?>
-                <img class="avatarcc" src="<?php echo $avatarUrl; ?>" loading="lazy" alt="评论头像" />
+                <img class="avatarcc" src="<?= $avatarUrl; ?>" loading="lazy" alt="评论头像" />
                 <div class="cp">
-                    <?php echo parseOwOcodes($comments->content); ?>
+                    <?= parseOwOcodes($comments->content); ?>
                     <div class="cm">
-                        <span class="ca"><?php echo $author; ?></span>
+                        <span class="ca"><?= $author; ?></span>
                         <?php if ($isAdmin): ?>
                             <span class="badge">博主</span>
                         <?php endif; ?>
@@ -79,7 +77,7 @@
                     </div>
                 <?php endif; ?>
                 <div class="tbox">
-                    <textarea name="text" id="textarea" class="ci OwO-textarea" onkeydown="if(event.ctrlKey&&event.keyCode==13){document.getElementById('submit').click();return false};" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text', false); ?></textarea>
+                    <textarea name="text" id="textarea" class="ci OwO-textarea" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text'); ?></textarea>
                     <div class="CtBoxBar">
                         <div class="left-bar">
                             <div class="OwO-bar">
