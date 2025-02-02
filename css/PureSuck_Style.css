@@ -222,7 +222,8 @@ table tr:has(td):hover {
 a,
 a:after,
 a:before {
-	text-decoration: none
+	text-decoration: none;
+	-webkit-tap-highlight-color: transparent; /* 去除浏览器按压反馈 */
 }
 
 h1 a,

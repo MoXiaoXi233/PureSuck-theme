@@ -2,25 +2,26 @@
 /** 回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
 function handleGoTopButton() {
-    const goTopBtn = document.getElementById('go-top');
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.boundingClientRect.top < 0) {
-                goTopBtn.classList.add('visible');
-            } else {
-                goTopBtn.classList.remove('visible');
-            }
-        });
-    });
-    observer.observe(document.body);
-
+    const goTopBtn = document.getElementById('go-top'); // 按钮容器
     const goTopAnchor = document.querySelector('#go-top .go');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 100) {
+            goTopBtn.classList.add('visible'); // 显示按钮
+        } else {
+            goTopBtn.classList.remove('visible'); // 隐藏按钮
+        }
+    });
+
     goTopAnchor.addEventListener('click', function (e) {
         e.preventDefault();
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
+        setTimeout(() => {
+            goTopBtn.classList.remove('visible'); // 隐藏
+        }, 400); // 等待滚动完成
     });
 }
 
