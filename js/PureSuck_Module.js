@@ -2,7 +2,7 @@
 /** 回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
 function handleGoTopButton() {
-    const goTopBtn = document.getElementById('go-top');
+    const goTopBtn = document.getElementById('go-top'); // 按钮容器
     const goTopAnchor = document.querySelector('#go-top .go');
 
     window.addEventListener('scroll', () => {
@@ -20,12 +20,10 @@ function handleGoTopButton() {
             behavior: 'smooth'
         });
         setTimeout(() => {
-            goTopBtn.classList.remove('visible'); // 隐藏按钮
+            goTopBtn.classList.remove('visible'); // 隐藏
         }, 400); // 等待滚动完成
     });
 }
-handleGoTopButton();
-
 
 function generateTOC() {
     const tocSection = document.getElementById("toc-section");

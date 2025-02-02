@@ -72,7 +72,7 @@
     background-color: var(--themecolor);
     color: var(--pure-color);
     opacity: 0;
-    visibility: hidden; /* 默认隐藏 */
+    visibility: hidden; /* 隐藏 */
     pointer-events: none; /* 默认禁用点击 */
     border-radius: 14px;
     cursor: pointer;
@@ -82,7 +82,7 @@
 
 #go-top.visible {
     opacity: 1;
-    visibility: visible; /* 显示按钮 */
+    visibility: visible; /* 显示 */
     pointer-events: auto; /* 启用点击 */
 }
 
