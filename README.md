@@ -30,7 +30,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 
 更多细节欢迎自行体验~  
 ### 安装与设置
-在 [Releases][3] 下载 zip 源码，解压后移动到 Typecho 主题目录。
+在 [Releases](https://github.com/MoXiaoXi233/PureSuck-theme/releases) 下载 zip 源码，解压后移动到 Typecho 主题目录。
 请确保主题文件夹名应该为 PureSuck ，否则会造成样式或者功能缺失！
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述  
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
