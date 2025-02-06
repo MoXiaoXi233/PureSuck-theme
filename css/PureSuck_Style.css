@@ -1629,6 +1629,10 @@ strong {
 	color: inherit
 }
 
+.main-lastinfo{
+	min-height: 50px;
+}
+
 .nav.main-lastinfo::before {
 	content: "";
 	display: block;
