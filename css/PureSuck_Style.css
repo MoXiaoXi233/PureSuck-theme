@@ -1459,13 +1459,18 @@ a:hover {
 	background-color: var(--themecolor);
 	border-radius: 0.4rem;
 	transform: scale(0.8);
-	transition: all .2s ease-in-out;
+	transition: all 0.3s ease;
 	opacity: 0;
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):hover::before {
 	transform: scale(1.05, 0.88);
 	opacity: 0.25;
+}
+
+.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):active::before {
+    transform: scale(1.03, 0.8); 
+    opacity: 0.4; 
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a)::after {
