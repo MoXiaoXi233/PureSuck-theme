@@ -49,7 +49,7 @@
 
             <section class="post-item post-comments">
                 <div class="wrapper post-wrapper">
-                    <?php $this->need('comments.php'); ?>
+        
                 </div>
             </section>
         </div>
