@@ -1034,7 +1034,8 @@ body>.wrapper {
 .post {
 	float: left;
 	width: 100%;
-	margin-bottom: 24px
+	margin-bottom: 24px;
+	
 }
 
 .post-inner {
