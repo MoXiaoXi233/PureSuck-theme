@@ -1949,6 +1949,7 @@ textarea.ci {
 	object-fit: cover;
 	object-position: center;
 	max-height: 350px;
+	cursor: pointer;
 }
 
 /** LICENCE 卡片 **/
