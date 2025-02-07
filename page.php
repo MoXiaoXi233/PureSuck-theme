@@ -8,7 +8,10 @@
     ?>
     <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item">
         <div class="post-inner" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
-
+            <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
+                <div class="wrapper post-wrapper">
+                </div>
+            </header>
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
