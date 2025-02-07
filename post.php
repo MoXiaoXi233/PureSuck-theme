@@ -62,11 +62,11 @@
                                     </div>
                                     <div>
                                         <span>发布时间</span>
-                                        <span><?php $this->date('Y-m-d'); ?></span>
+                                        <span><?php $this->date('Y-m-d H:i:s'); ?></span>
                                     </div>
                                     <div>
                                         <span>许可协议</span>
-                                        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>
+                                        <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hans">CC BY-NC 4.0</a>
                                     </div>
                                 </div>
                                 <span class="cc-icon"></span>
