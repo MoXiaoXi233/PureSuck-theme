@@ -34,6 +34,16 @@
                                     <?php $this->date(); ?>
                                 </span>
                             </a>
+                            <a itemprop="datePublished" href="<?php $this->permalink() ?>"
+                                class="meta-item meta-date">
+                                <span class="meta-count">
+                                    <?php
+                                        $content = strip_tags($this->content); // 去除 HTML 标签
+                                        $wordCount = mb_strlen($content, 'UTF-8'); // 计算字数
+                                        echo $wordCount
+                                    ?>字
+                                </span>
+                            </a>
                             <a href="<?php $this->permalink() ?>#comments"
                                 class="icon-ui icon-ui-comment meta-item meta-comment">
                                 <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
