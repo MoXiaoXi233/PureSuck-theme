@@ -221,7 +221,7 @@
                 <div class="nav header-item header-credit">
                     Powered by Typecho
                     <br>
-                    <a href="https://github.com/MoXiaoXi233/PureSuck-theme">Theme PureSuck</a>
+                    <a href="https://github.com/MoXiaoXi233/PureSuck-theme" target="_blank">Theme PureSuck</a>
                 </div>
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">

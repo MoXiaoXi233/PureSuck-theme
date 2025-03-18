@@ -79,7 +79,7 @@ h5 a:hover,
 h6 a,
 h6 a:hover {
 	color: inherit;
-	border-bottom: 0
+	border-bottom: 0;
 }
 
 img {
@@ -143,9 +143,6 @@ hr {
 	height: .125rem;
 	border: none;
 	background: var(--card-color) repeating-linear-gradient(-45deg, var(--themecolor), var(--themecolor) 0.25rem, transparent 0.25rem, transparent 0.5rem);
-}
-
-hr {
 	box-sizing: content-box;
 	overflow: visible;
 }
@@ -198,7 +195,7 @@ table tr {
 }
 
 table tr:has(td):hover {
-    background-color: var(--hover-color);
+	background-color: var(--hover-color);
 }
 
 .icon:empty:before {
@@ -223,24 +220,10 @@ a,
 a:after,
 a:before {
 	text-decoration: none;
-	-webkit-tap-highlight-color: transparent; /* 去除浏览器按压反馈 */
+	-webkit-tap-highlight-color: transparent;
+	/* 去除浏览器按压反馈 */
 }
 
-h1 a,
-h1 a:hover,
-h2 a,
-h2 a:hover,
-h3 a,
-h3 a:hover,
-h4 a,
-h4 a:hover,
-h5 a,
-h5 a:hover,
-h6 a,
-h6 a:hover {
-	color: inherit;
-	border-bottom: 0
-}
 
 code,
 kbd {
@@ -1035,7 +1018,7 @@ body>.wrapper {
 	float: left;
 	width: 100%;
 	margin-bottom: 24px;
-	
+
 }
 
 .post-inner {
@@ -1470,8 +1453,8 @@ a:hover {
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):active::before {
-    transform: scale(1.03, 0.8); 
-    opacity: 0.4; 
+	transform: scale(1.03, 0.8);
+	opacity: 0.4;
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a)::after {
@@ -1630,7 +1613,7 @@ strong {
 	color: inherit
 }
 
-.main-lastinfo{
+.main-lastinfo {
 	min-height: 50px;
 }
 
@@ -2083,12 +2066,8 @@ textarea.ci {
 
 @font-face {
 	font-family: 'fontello';
-	src: url('../fonts/fontello.eot?3760722');
-	src: url('../fonts/fontello.eot?3760722#iefix') format('embedded-opentype'),
-		url('../fonts/fontello.woff2?3760722') format('woff2'),
-		url('../fonts/fontello.woff?3760722') format('woff'),
-		url('../fonts/fontello.ttf?3760722') format('truetype'),
-		url('../fonts/fontello.svg?3760722#fontello') format('svg');
+	src: url('../fonts/fontello.woff2?3760722') format('woff2'),
+		url('../fonts/fontello.woff?3760722') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2103,6 +2082,7 @@ textarea.ci {
 	}
   }
   */
+
 [class^="icon-"]:before,
 [class*=" icon-"]:before {
 	font-family: "fontello";
@@ -2376,3 +2356,5 @@ input:-webkit-autofill:active {
 	color: #888;
 	display: inline-block;
 }
+
+/* 本来想改下样式，但这2000行css不敢动 */
