@@ -43,8 +43,7 @@
                                 <span class="meta-count">
                                     &nbsp;&nbsp;&nbsp;
                                     <?php
-                                        $content = trim($this->content); // 去除 HTML 标签
-                                        $wordCount = mb_strlen($content, 'UTF-8'); // 计算字数
+                                        $wordCount = getMarkdownCharacters($content); // 计算字数
                                         echo $wordCount . '字';
 
                                         // 计算阅读时间
