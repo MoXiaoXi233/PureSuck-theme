@@ -46,6 +46,18 @@
                                 <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
                             </a>
                         </div>
+                        <span class="meta-count">
+                            &nbsp;&nbsp;&nbsp;
+                            <?php
+                                $wordCount = getMarkdownCharacters($content); // 计算字数
+                                echo $wordCount . '字';
+
+                                // 计算阅读时间
+                                $wordsPerMinute = 250; // 假设阅读速度为每分钟250字
+                                $readingTime = ceil($wordCount / $wordsPerMinute); // 向上取整
+                                echo '&nbsp;&nbsp;&nbsp;约' . $readingTime . '分钟读完';
+                            ?>
+                        </span>
 
                         <!-- 解析正文以及短代码 -->
                         <?= parseShortcodes($this->content); ?>
