@@ -10,15 +10,8 @@
         <div class="post-inner" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
             <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
-                    <div class="avatar post-author">
-                        <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
-                        <span class="avatar-item">
-                            <?php $this->author(); ?>
-                        </span>
-                    </div>
                 </div>
             </header>
-
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
@@ -56,7 +49,7 @@
 
             <section class="post-item post-comments">
                 <div class="wrapper post-wrapper">
-                    <?php $this->need('comments.php'); ?>
+        
                 </div>
             </section>
         </div>
