@@ -240,7 +240,14 @@
                         </span>
                     <?php endwhile; ?>
                     <!--结束显示页面-->
+                    <br>
+                    <div class="nav header-item header-credit">
+                        Powered by Typecho
+                        <br>
+                        <a href="https://github.com/MoXiaoXi233/PureSuck-theme">Theme PureSuck</a>
+                    </div>
                 </nav>
+                
                 <div class="theme-toggle-container">
                     <button class="theme-toggle" onclick="toggleTheme()" aria-label="日夜切换">
                         <span id="theme-icon"></span>

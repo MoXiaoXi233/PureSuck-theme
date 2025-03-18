@@ -10,15 +10,8 @@
         <div class="post-inner" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
             <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">
-                    <div class="avatar post-author">
-                        <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
-                        <span class="avatar-item">
-                            <?php $this->author(); ?>
-                        </span>
-                    </div>
                 </div>
             </header>
-
             <!-- 大图样式 -->
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
@@ -74,11 +67,11 @@
                                     </div>
                                     <div>
                                         <span>发布时间</span>
-                                        <span><?php $this->date('Y-m-d'); ?></span>
+                                        <span><?php $this->date('Y-m-d H:i:s'); ?></span>
                                     </div>
                                     <div>
                                         <span>许可协议</span>
-                                        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>
+                                        <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hans">CC BY-NC 4.0</a>
                                     </div>
                                 </div>
                                 <span class="cc-icon"></span>
