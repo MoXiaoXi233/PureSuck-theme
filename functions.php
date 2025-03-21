@@ -198,6 +198,19 @@ function themeConfig($form)
     );
     $form->addInput($footerScript);
 
+    $staticCdn = new Typecho_Widget_Helper_Form_Element_Radio(
+        'staticCdn',
+        array(
+            'local' => _t('本地'),
+            'bootcdn' => _t('BootCDN'),
+            'cdnjs' => _t('CDNJS'),
+        ),
+        'local',
+        _t("主题静态资源 CDN"),
+        _t("静态资源 CDN 源选择，默认为本地")
+    );
+    $form->addInput($staticCdn);
+
     // 网页底部信息
     $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerInfo',
@@ -343,6 +356,57 @@ function getColorScheme()
 {
     $colorScheme = Typecho_Widget::widget('Widget_Options')->colorScheme;
     return $colorScheme;
+}
+
+function getStaticURL($path) {
+    $options = Typecho_Widget::widget('Widget_Options');
+    $staticCdn = $options->staticCdn;
+
+    // ===================== CDN 映射表 =====================
+    $staticMap = [
+        // 本地资源（主题目录）
+        'local' => [
+            'aos.js'            => $options->themeUrl . '/js/lib/aos.js',
+            'aos.css'           => $options->themeUrl . '/css/lib/aos.css',
+            'a11y-dark.min.css' => $options->themeUrl . '/css/lib/a11y-dark.min.css',
+            'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
+            'highlight.min.js'  => $options->themeUrl . '/js/lib/highlight.min.js',
+            'pjax.min.js'       => $options->themeUrl . '/js/lib/pjax.min.js',
+        ],
+        'bootcdn' => [
+            'aos.js'            => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
+            'aos.css'           => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.css",
+            'a11y-dark.min.css' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.11.1/styles/a11y-dark.min.css",
+            'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js",
+            'highlight.min.js'  => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.11.1/highlight.min.js",
+            'pjax.min.js'       => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
+            'pace.min.js'       => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js'
+            'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
+        ],
+        "cdnjs" => [
+            'aos.js'            => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
+            'aos.css'           => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css",
+            'a11y-dark.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/a11y-dark.min.css",
+            'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js",
+            'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js",
+            'pjax.min.js'       => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
+            'pace.min.js'       => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js'
+            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-default.min.css"
+        ]
+
+    ];
+
+    // ===================== 路径生成逻辑 =====================
+    if ($staticCdn === 'local') {
+        // 本地模式直接返回映射路径
+        return $staticMap['local'][$path];
+    } elseif (isset($staticMap[$staticCdn][$path])) {
+        // CDN 模式且存在映射时返回CDN地址
+        return $staticMap[$staticCdn][$path];
+    } else {
+        // 其他情况回退到主题默认路径
+        return $staticMap['local'][$path];
+    }
 }
 
 function generateDynamicCSS()
