@@ -401,13 +401,13 @@ function getStaticURL($path) {
     // ===================== 路径生成逻辑 =====================
     if ($staticCdn === 'local') {
         // 本地模式直接返回映射路径
-        return $staticMap['local'][$path];
+        echo $staticMap['local'][$path];
     } elseif (isset($staticMap[$staticCdn][$path])) {
         // CDN 模式且存在映射时返回CDN地址
-        return $staticMap[$staticCdn][$path];
+        echo $staticMap[$staticCdn][$path];
     } else {
         // 其他情况回退到主题默认路径
-        return $staticMap['local'][$path];
+        echo $staticMap['local'][$path];
     }
 }
 
