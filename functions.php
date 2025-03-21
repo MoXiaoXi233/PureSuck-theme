@@ -401,6 +401,15 @@ function generateDynamicCSS()
     </style>';
 }
 
+function getMarkdownCharacters($content)
+{
+    $content = trim($this->text); // 去除 HTML 标签
+    // 使用正则表达式匹配并去除代码块（包括 ``` 包裹的代码块和行内代码块）
+    $content = preg_replace('/```[\s\S]*?```/m', '', $content); // 去除多行代码块
+    $wordCount = mb_strlen($content, 'UTF-8'); // 计算字数
+    return $wordCount;
+}
+
 function allOfCharacters()
 {
     $chars = 0;
@@ -408,7 +417,7 @@ function allOfCharacters()
     $select = $db->select('text')->from('table.contents');
     $rows = $db->fetchAll($select);
     foreach ($rows as $row) {
-        $chars += mb_strlen(trim($row['text']), 'UTF-8');
+        $chars += getMarkdownCharacters($row['text']);
     }
     $unit = '';
     if ($chars >= 10000) {

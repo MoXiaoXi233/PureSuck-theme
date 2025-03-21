@@ -40,6 +40,18 @@
                                 <span class="meta-count">
                                     <?php $this->date(); ?>
                                 </span>
+                                <span class="meta-count">
+                                &nbsp;&nbsp;&nbsp;
+                                <?php
+                                    $wordCount = getMarkdownCharacters($content); // 计算字数
+                                    echo $wordCount . '字';
+
+                                    // 计算阅读时间
+                                    $wordsPerMinute = 250; // 假设阅读速度为每分钟250字
+                                    $readingTime = ceil($wordCount / $wordsPerMinute); // 向上取整
+                                    echo '&nbsp;&nbsp;&nbsp;约' . $readingTime . '分钟读完';
+                                ?>
+                                </span>
                             </a>
                             <a href="<?php $this->permalink() ?>#comments"
                                 class="icon-ui icon-ui-comment meta-item meta-comment">
