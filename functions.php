@@ -378,9 +378,9 @@ function getStaticURL($path) {
         'bootcdn' => [
             'aos.js'            => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
             'aos.css'           => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.css",
-            'a11y-dark.min.css' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.11.1/styles/a11y-dark.min.css",
-            'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js",
-            'highlight.min.js'  => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.11.1/highlight.min.js",
+            'a11y-dark.min.css' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/styles/a11y-dark.min.css",
+            'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
+            'highlight.min.js'  => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js'       => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
             'pace.min.js'       => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js',
             'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
@@ -388,9 +388,9 @@ function getStaticURL($path) {
         "cdnjs" => [
             'aos.js'            => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
             'aos.css'           => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css",
-            'a11y-dark.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/a11y-dark.min.css",
-            'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.6/medium-zoom.min.js",
-            'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js",
+            'a11y-dark.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/a11y-dark.min.css",
+            'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
+            'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js'       => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
             'pace.min.js'       => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
             'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-default.min.css"
