@@ -469,7 +469,7 @@ function generateDynamicCSS()
 
 function getMarkdownCharacters($content)
 {
-    $content = trim($this->text); // 去除 HTML 标签
+    $content = trim($content); // 去除 HTML 标签
     // 使用正则表达式匹配并去除代码块（包括 ``` 包裹的代码块和行内代码块）
     $content = preg_replace('/```[\s\S]*?```/m', '', $content); // 去除多行代码块
     $wordCount = mb_strlen($content, 'UTF-8'); // 计算字数
