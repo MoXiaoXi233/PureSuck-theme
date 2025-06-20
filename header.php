@@ -92,6 +92,7 @@
         });
     </script>
     <!-- Style CSS -->
+     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/icons.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
@@ -114,23 +115,23 @@
         </style>
     <?php endif; ?>
     <!-- AOS -->
-    <script defer src="<?php $this->options->themeUrl('/js/aos.js'); ?>"></script>
+    <script defer src="<?php getStaticURL("aos.js") ?>"></script>
     <!-- ICON Setting -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
     <!-- CSS引入 -->
-    <link href="<?php $this->options->themeUrl('/css/a11y-dark.min.css'); ?>" rel="stylesheet">
+    <link href="<?php getStaticURL('a11y-dark.min.css'); ?>" rel="stylesheet">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
-    <link href="<?php $this->options->themeUrl('/css/aos.css'); ?>" rel="stylesheet">
+    <link href="<?php getStaticURL('aos.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
-    <script defer src="<?php $this->options->themeUrl('/js/medium-zoom.min.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/highlight.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL('highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
     <!-- Pjax -->
     <?php if ($this->options->enablepjax == '1'): ?>
-        <script defer src="<?php $this->options->themeUrl('/js/pjax.min.js'); ?>"></script>
+        <script defer src="<?php getStaticURL('pjax.min.js'); ?>"></script>
         <script type="text/javascript">
             document.addEventListener('DOMContentLoaded', function() {
                 var pjax = new Pjax({
@@ -193,8 +194,8 @@
                 Comments_Submit();
             });
         </script>
-        <script defer src="<?php $this->options->themeUrl('/js/pace.min.js'); ?>"></script>
-        <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/pace-theme-default.min.css'); ?>">
+        <script defer src="<?php getStaticURL('pace.min.js'); ?>"></script>
+        <link rel="stylesheet" href="<?php getStaticURL('pace-theme-default.min.css'); ?>">
     <?php else: ?>
         <!-- 是不是 Pjax 有 bug，哈哈哈 --kissablecho -->
         <!-- 没错我差点死在自己留的鬼判定了--MoXi -->
@@ -221,7 +222,7 @@
                 <div class="nav header-item header-credit">
                     Powered by Typecho
                     <br>
-                    <a href="https://github.com/MoXiaoXi233/PureSuck-theme">Theme PureSuck</a>
+                    <a href="https://github.com/MoXiaoXi233/PureSuck-theme" target="_blank">Theme PureSuck</a>
                 </div>
                 <nav class="nav header-item header-nav">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">

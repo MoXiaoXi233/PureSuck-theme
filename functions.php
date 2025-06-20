@@ -198,6 +198,19 @@ function themeConfig($form)
     );
     $form->addInput($footerScript);
 
+    $staticCdn = new Typecho_Widget_Helper_Form_Element_Radio(
+        'staticCdn',
+        array(
+            'local' => _t('本地'),
+            'bootcdn' => _t('BootCDN'),
+            'cdnjs' => _t('CDNJS'),
+        ),
+        'local',
+        _t("主题静态资源 CDN"),
+        _t("静态资源 CDN 源选择，默认为本地")
+    );
+    $form->addInput($staticCdn);
+
     // 网页底部信息
     $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerInfo',
@@ -300,6 +313,15 @@ function themeConfig($form)
     );
     $form->addInput($showTag);
 
+    // 文章页显示字数信息选项
+    $showWordCount = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showWordCount',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否在文章开头显示字数和预计阅读时间')
+    );
+    $form->addInput($showWordCount);
+
     // 文章页显示版权信息选项
     $showCopyright = new Typecho_Widget_Helper_Form_Element_Radio(
         'showCopyright',
@@ -308,7 +330,6 @@ function themeConfig($form)
         _t('是否在文章页尾显示版权信息')
     );
     $form->addInput($showCopyright);
-
 
     // 代码高亮设置
     $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
@@ -343,6 +364,59 @@ function getColorScheme()
 {
     $colorScheme = Typecho_Widget::widget('Widget_Options')->colorScheme;
     return $colorScheme;
+}
+
+function getStaticURL($path) {
+    $options = Typecho_Widget::widget('Widget_Options');
+    $staticCdn = $options->staticCdn;
+
+    // ===================== CDN 映射表 =====================
+    $staticMap = [
+        // 本地资源（主题目录）
+        'local' => [
+            'aos.js'            => $options->themeUrl . '/js/lib/aos.js',
+            'aos.css'           => $options->themeUrl . '/css/lib/aos.css',
+            'a11y-dark.min.css' => $options->themeUrl . '/css/lib/a11y-dark.min.css',
+            'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
+            'highlight.min.js'  => $options->themeUrl . '/js/lib/highlight.min.js',
+            'pjax.min.js'       => $options->themeUrl . '/js/lib/pjax.min.js',
+            'pace.min.js'       => $options->themeUrl . '/js/lib/pace.min.js',
+            'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css'
+        ],
+        'bootcdn' => [
+            'aos.js'            => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
+            'aos.css'           => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.css",
+            'a11y-dark.min.css' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/styles/a11y-dark.min.css",
+            'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
+            'highlight.min.js'  => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
+            'pjax.min.js'       => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
+            'pace.min.js'       => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js',
+            'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
+        ],
+        "cdnjs" => [
+            'aos.js'            => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
+            'aos.css'           => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css",
+            'a11y-dark.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/a11y-dark.min.css",
+            'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
+            'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
+            'pjax.min.js'       => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
+            'pace.min.js'       => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
+            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
+        ]
+
+    ];
+
+    // ===================== 路径生成逻辑 =====================
+    if ($staticCdn === 'local') {
+        // 本地模式直接返回映射路径
+        echo $staticMap['local'][$path];
+    } elseif (isset($staticMap[$staticCdn][$path])) {
+        // CDN 模式且存在映射时返回CDN地址
+        echo $staticMap[$staticCdn][$path];
+    } else {
+        // 其他情况回退到主题默认路径
+        echo $staticMap['local'][$path];
+    }
 }
 
 function generateDynamicCSS()
@@ -401,6 +475,15 @@ function generateDynamicCSS()
     </style>';
 }
 
+function getMarkdownCharacters($content)
+{
+    $content = trim($content); // 去除 HTML 标签
+    // 使用正则表达式匹配并去除代码块（包括 ``` 包裹的代码块和行内代码块）
+    $content = preg_replace('/```[\s\S]*?```/m', '', $content); // 去除多行代码块
+    $wordCount = mb_strlen($content, 'UTF-8'); // 计算字数
+    return $wordCount;
+}
+
 function allOfCharacters()
 {
     $chars = 0;
@@ -408,7 +491,7 @@ function allOfCharacters()
     $select = $db->select('text')->from('table.contents');
     $rows = $db->fetchAll($select);
     foreach ($rows as $row) {
-        $chars += mb_strlen(trim($row['text']), 'UTF-8');
+        $chars += getMarkdownCharacters($row['text']);
     }
     $unit = '';
     if ($chars >= 10000) {

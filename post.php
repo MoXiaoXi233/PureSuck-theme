@@ -41,12 +41,27 @@
                                     <?php $this->date(); ?>
                                 </span>
                             </a>
+
                             <a href="<?php $this->permalink() ?>#comments"
                                 class="icon-ui icon-ui-comment meta-item meta-comment">
                                 <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
                             </a>
                         </div>
-
+                        <?php if (!$this->hidden && $this->options->showWordCount == '1'): ?>
+                            <div class="meta post-meta">
+                                <div class="icon-record-outline">
+                                    <?php
+                                    $wordCount = getMarkdownCharacters($this->text); // 计算字数
+                                    echo '全文共&nbsp;' . $wordCount . '&nbsp;字，';
+                                    // 计算阅读时间
+                                    $wordsPerMinute = 250; // 假设阅读速度为每分钟250字
+                                    $readingTime = ceil($wordCount / $wordsPerMinute); // 向上取整
+                                    echo '阅读约&nbsp;' . $readingTime . '&nbsp;分钟';
+                                    ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
                         <!-- 解析正文以及短代码 -->
                         <?= parseShortcodes($this->content); ?>
 

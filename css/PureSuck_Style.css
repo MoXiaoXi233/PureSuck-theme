@@ -79,7 +79,7 @@ h5 a:hover,
 h6 a,
 h6 a:hover {
 	color: inherit;
-	border-bottom: 0
+	border-bottom: 0;
 }
 
 img {
@@ -143,9 +143,6 @@ hr {
 	height: .125rem;
 	border: none;
 	background: var(--card-color) repeating-linear-gradient(-45deg, var(--themecolor), var(--themecolor) 0.25rem, transparent 0.25rem, transparent 0.5rem);
-}
-
-hr {
 	box-sizing: content-box;
 	overflow: visible;
 }
@@ -198,7 +195,7 @@ table tr {
 }
 
 table tr:has(td):hover {
-    background-color: var(--hover-color);
+	background-color: var(--hover-color);
 }
 
 .icon:empty:before {
@@ -223,24 +220,10 @@ a,
 a:after,
 a:before {
 	text-decoration: none;
-	-webkit-tap-highlight-color: transparent; /* 去除浏览器按压反馈 */
+	-webkit-tap-highlight-color: transparent;
+	/* 去除浏览器按压反馈 */
 }
 
-h1 a,
-h1 a:hover,
-h2 a,
-h2 a:hover,
-h3 a,
-h3 a:hover,
-h4 a,
-h4 a:hover,
-h5 a,
-h5 a:hover,
-h6 a,
-h6 a:hover {
-	color: inherit;
-	border-bottom: 0
-}
 
 code,
 kbd {
@@ -502,35 +485,6 @@ ul,
 	margin-bottom: 16px
 }
 
-@media (min-width:579px) {
-
-	.avatar,
-	.form,
-	.form-input,
-	.header-avatar,
-	.list,
-	.meta,
-	.nav,
-	.post-body [data-js~=embed],
-	.post-body ol,
-	.post-body ul,
-	blockquote,
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6,
-	object,
-	ol,
-	p,
-	pre,
-	ul,
-	hr,
-	.cp p {
-		margin-bottom: 24px
-	}
-}
 
 .wrapper {
 	position: relative;
@@ -770,6 +724,130 @@ body>.wrapper {
 		padding-right: 32px;
 		padding-left: 32px
 	}
+
+	.header {
+		position: sticky;
+		padding-top: 32px;
+		padding-bottom: 16px
+	}
+
+	.header-wrapper {
+		max-width: 530px
+	}
+
+	.sidebar-wrapper {
+		max-width: 530px
+	}
+
+
+	.header-nav {
+		padding-top: 24px
+	}
+
+	.main {
+		padding-top: 16px;
+		padding-bottom: 32px
+	}
+
+	.main-pager {
+		padding-top: 32px
+	}
+
+	.main-pager .nav-item {
+		margin-right: 16px;
+		margin-left: 16px
+	}
+
+	.post {
+		margin-bottom: 36px
+	}
+
+	.post-item {
+		width: 100%;
+		padding: 32px
+	}
+
+	.post-body {
+		margin-top: -32px
+	}
+
+	.post-wrapper {
+		max-width: 530px
+	}
+
+	.post--link .post-body .post-wrapper>p:first-of-type,
+	.post-title {
+		margin-top: -8px;
+		margin-bottom: 4px
+	}
+
+	[data-js~=share]:before {
+		margin-right: 8px
+	}
+
+	.post-meta .meta-item {
+		padding-right: 16px
+	}
+
+	.post-comments .post-wrapper:before,
+	.post-footer .post-wrapper:before {
+		top: -32px
+	}
+
+	.post--small {
+		width: 50%;
+		padding-top: 50%
+	}
+
+	.post--small+.post--small {
+		margin-bottom: 20px
+	}
+
+	.post--small,
+	.post--small+.post--small:last-child {
+		margin-bottom: -20px
+	}
+
+	.post--small .post-inner {
+		right: 18px;
+		bottom: 18px
+	}
+
+	.post--small+.post--small .post-inner {
+		right: 0;
+		left: 18px
+	}
+
+	.post--small .post-item {
+		padding: 16px
+	}
+
+	.avatar,
+	.form,
+	.form-input,
+	.header-avatar,
+	.list,
+	.meta,
+	.nav,
+	.post-body [data-js~=embed],
+	.post-body ol,
+	.post-body ul,
+	blockquote,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	object,
+	ol,
+	p,
+	pre,
+	ul,
+	hr,
+	.cp p {
+		margin-bottom: 24px
+	}
 }
 
 @media (min-width:769px) {
@@ -837,27 +915,6 @@ body>.wrapper {
 
 .header-title+.header-nav .nav-item:first-child a:before {
 	display: none
-}
-
-@media (min-width:579px) {
-	.header {
-		position: sticky;
-		padding-top: 32px;
-		padding-bottom: 16px
-	}
-
-	.header-wrapper {
-		max-width: 530px
-	}
-
-	.sidebar-wrapper {
-		max-width: 530px
-	}
-
-
-	.header-nav {
-		padding-top: 24px
-	}
 }
 
 @media (min-width:769px) {
@@ -962,21 +1019,6 @@ body>.wrapper {
 	position: relative
 }
 
-@media (min-width:579px) {
-	.main {
-		padding-top: 16px;
-		padding-bottom: 32px
-	}
-
-	.main-pager {
-		padding-top: 32px
-	}
-
-	.main-pager .nav-item {
-		margin-right: 16px;
-		margin-left: 16px
-	}
-}
 
 @media (min-width:769px) {
 	.main {
@@ -1035,7 +1077,7 @@ body>.wrapper {
 	float: left;
 	width: 100%;
 	margin-bottom: 24px;
-	
+
 }
 
 .post-inner {
@@ -1152,43 +1194,6 @@ body>.wrapper {
 	}
 }
 
-@media (min-width:579px) {
-	.post {
-		margin-bottom: 36px
-	}
-
-	.post-item {
-		width: 100%;
-		padding: 32px
-	}
-
-	.post-body {
-		margin-top: -32px
-	}
-
-	.post-wrapper {
-		max-width: 530px
-	}
-
-	.post--link .post-body .post-wrapper>p:first-of-type,
-	.post-title {
-		margin-top: -8px;
-		margin-bottom: 4px
-	}
-
-	[data-js~=share]:before {
-		margin-right: 8px
-	}
-
-	.post-meta .meta-item {
-		padding-right: 16px
-	}
-
-	.post-comments .post-wrapper:before,
-	.post-footer .post-wrapper:before {
-		top: -32px
-	}
-}
 
 @media (min-width:769px) {
 	.post {
@@ -1328,35 +1333,6 @@ body>.wrapper {
 	max-width: 100%
 }
 
-@media (min-width:579px) {
-	.post--small {
-		width: 50%;
-		padding-top: 50%
-	}
-
-	.post--small+.post--small {
-		margin-bottom: 20px
-	}
-
-	.post--small,
-	.post--small+.post--small:last-child {
-		margin-bottom: -20px
-	}
-
-	.post--small .post-inner {
-		right: 18px;
-		bottom: 18px
-	}
-
-	.post--small+.post--small .post-inner {
-		right: 0;
-		left: 18px
-	}
-
-	.post--small .post-item {
-		padding: 16px
-	}
-}
 
 @media (min-width:769px) {
 	.post--small+.post--small {
@@ -1470,8 +1446,8 @@ a:hover {
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):active::before {
-    transform: scale(1.03, 0.8); 
-    opacity: 0.4; 
+	transform: scale(1.03, 0.8);
+	opacity: 0.4;
 }
 
 .inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a)::after {
@@ -1630,7 +1606,7 @@ strong {
 	color: inherit
 }
 
-.main-lastinfo{
+.main-lastinfo {
 	min-height: 50px;
 }
 
@@ -2081,244 +2057,6 @@ textarea.ci {
 	z-index: 999;
 }
 
-@font-face {
-	font-family: 'fontello';
-	src: url('../fonts/fontello.eot?3760722');
-	src: url('../fonts/fontello.eot?3760722#iefix') format('embedded-opentype'),
-		url('../fonts/fontello.woff2?3760722') format('woff2'),
-		url('../fonts/fontello.woff?3760722') format('woff'),
-		url('../fonts/fontello.ttf?3760722') format('truetype'),
-		url('../fonts/fontello.svg?3760722#fontello') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-
-/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
-/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
-/*
-  @media screen and (-webkit-min-device-pixel-ratio:0) {
-	@font-face {
-	  font-family: 'fontello';
-	  src: url('../font/fontello.svg?3760722#fontello') format('svg');
-	}
-  }
-  */
-[class^="icon-"]:before,
-[class*=" icon-"]:before {
-	font-family: "fontello";
-	font-style: normal;
-	font-weight: normal;
-
-	display: inline-block;
-	text-decoration: inherit;
-	width: 1em;
-	margin-right: .2em;
-	text-align: center;
-	/* opacity: .8; */
-
-	/* For safety - reset parent styles, that can break glyph codes*/
-	font-variant: normal;
-	text-transform: none;
-
-	/* fix buttons height, for twitter bootstrap */
-	line-height: 1em;
-
-	/* Animation center compensation - margins should be symmetric */
-	/* remove if not needed */
-	margin-left: .2em;
-
-	/* you can be more comfortable with increased icons size */
-	/* font-size: 120%; */
-
-	/* Font smoothing. That was taken from TWBS */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-
-	/* Uncomment for 3D effect */
-	/* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
-}
-
-.icon-heart-circled:before {
-	content: '\e800';
-}
-
-/* '' */
-.icon-emo-wink:before {
-	content: '\e801';
-}
-
-/* '' */
-.icon-chat:before {
-	content: '\e802';
-}
-
-/* '' */
-.icon-article:before {
-	content: '\e803';
-}
-
-/* '' */
-.icon-record-outline:before {
-	content: '\e804';
-}
-
-/* '' */
-.icon-search:before {
-	content: '\e805';
-}
-
-/* '' */
-.icon-emo-surprised:before {
-	content: '\e806';
-}
-
-/* '' */
-.icon-emo-tongue:before {
-	content: '\e807';
-}
-
-/* '' */
-.icon-emo-coffee:before {
-	content: '\e808';
-}
-
-/* '' */
-.icon-ok-circle:before {
-	content: '\e809';
-}
-
-/* '' */
-.icon-cancel-circle:before {
-	content: '\e80a';
-}
-
-/* '' */
-.icon-attention:before {
-	content: '\e80b';
-}
-
-/* '' */
-.icon-minus-circle:before {
-	content: '\e80c';
-}
-
-/* '' */
-.icon-clock:before {
-	content: '\e80d';
-}
-
-/* '' */
-.icon-flash:before {
-	content: '\e80e';
-}
-
-/* '' */
-.icon-up-open:before {
-	content: '\e80f';
-}
-
-/* '' */
-.icon-down-open:before {
-	content: '\e810';
-}
-
-/* '' */
-.icon-check:before {
-	content: '\e811';
-}
-
-/* '' */
-.icon-cog:before {
-	content: '\e813';
-}
-
-/* '' */
-.icon-wrench:before {
-	content: '\e814';
-}
-
-/* '' */
-.icon-lightbulb:before {
-	content: '\e815';
-}
-
-/* '' */
-.icon-mail:before {
-	content: '\e816';
-}
-
-/* '' */
-.icon-zhihu:before {
-	content: '\e817';
-}
-
-/* '' */
-.icon-bilibili:before {
-	content: '\e818';
-}
-
-/* '' */
-.icon-cc:before {
-	content: '\e819';
-}
-
-/* '' */
-.icon-163music:before {
-	content: '\e81a';
-}
-
-/* '' */
-.icon-sun-inv:before {
-	content: '\e81b';
-}
-
-/* '' */
-.icon-moon-inv:before {
-	content: '\e81c';
-}
-
-/* '' */
-.icon-auto:before {
-	content: '\e81d';
-}
-
-/* '' */
-.icon-sustar:before {
-	content: '\e81e';
-}
-
-/* '' */
-.icon-attach-outline:before {
-	content: '\e81f';
-}
-
-/* '' */
-.icon-info-circled:before {
-	content: '\f085';
-}
-
-/* '' */
-.icon-github-circled:before {
-	content: '\f09b';
-}
-
-/* '' */
-.icon-hashtag:before {
-	content: '\f292';
-}
-
-/* '' */
-.icon-telegram:before {
-	content: '\f2c6';
-}
-
-/* '' */
-.icon-twitter-bird:before {
-	content: '\f303';
-}
-
-/* '' */
-
 
 /* 解决自动填充背景颜色问题 */
 input:-webkit-autofill,
@@ -2375,4 +2113,11 @@ input:-webkit-autofill:active {
 	text-align: right;
 	color: #888;
 	display: inline-block;
+}
+
+/* 本来想改下样式，但这2000行css不敢动 */
+/* 大胆动呗=） 史山不能一直史下去 */
+
+.pace .pace-progress {
+  background: var(--themecolor) !important;
 }
