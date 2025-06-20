@@ -2116,3 +2116,8 @@ input:-webkit-autofill:active {
 }
 
 /* 本来想改下样式，但这2000行css不敢动 */
+/* 大胆动呗=） 史山不能一直史下去 */
+
+.pace .pace-progress {
+  background: var(--themecolor) !important;
+}

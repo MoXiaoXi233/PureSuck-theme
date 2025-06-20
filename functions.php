@@ -313,6 +313,15 @@ function themeConfig($form)
     );
     $form->addInput($showTag);
 
+    // 文章页显示字数信息选项
+    $showWordCount = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showWordCount',
+        array('1' => _t('显示'), '0' => _t('隐藏')),
+        '1',
+        _t('是否在文章开头显示字数和预计阅读时间')
+    );
+    $form->addInput($showWordCount);
+
     // 文章页显示版权信息选项
     $showCopyright = new Typecho_Widget_Helper_Form_Element_Radio(
         'showCopyright',
@@ -321,7 +330,6 @@ function themeConfig($form)
         _t('是否在文章页尾显示版权信息')
     );
     $form->addInput($showCopyright);
-
 
     // 代码高亮设置
     $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
@@ -372,7 +380,7 @@ function getStaticURL($path) {
             'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
             'highlight.min.js'  => $options->themeUrl . '/js/lib/highlight.min.js',
             'pjax.min.js'       => $options->themeUrl . '/js/lib/pjax.min.js',
-            'pace.min.js'       => $options->themeUrl . 'js/lib/pace.min.js',
+            'pace.min.js'       => $options->themeUrl . '/js/lib/pace.min.js',
             'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css'
         ],
         'bootcdn' => [
@@ -393,7 +401,7 @@ function getStaticURL($path) {
             'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js'       => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
             'pace.min.js'       => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
-            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-default.min.css"
+            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
         ]
 
     ];
