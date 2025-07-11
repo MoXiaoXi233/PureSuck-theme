@@ -92,7 +92,7 @@
         });
     </script>
     <!-- Style CSS -->
-     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/icons.css'); ?>">
+     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
