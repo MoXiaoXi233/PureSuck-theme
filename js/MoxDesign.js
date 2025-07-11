@@ -151,3 +151,85 @@ function hideNotification(notification) {
     icon: "https://example.com/icon.png"
     });
  **/
+
+function MoxWindows(options) {
+    const defaults = {
+        header: "窗口标题",
+        content: "这是窗口内容",
+        backgroundColor: "var(--card2-color)",
+        textColor: "var(--text-color)",
+        borderColor: "var(--border-color)"
+    };
+
+    const settings = { ...defaults, ...options };
+
+    // 移除旧的窗口和遮罩
+    const oldWindow = document.querySelector('.mox-window');
+    const oldOverlay = document.querySelector('.mox-overlay');
+    if (oldWindow && document.body.contains(oldWindow)) {
+        document.body.removeChild(oldWindow);
+    }
+    if (oldOverlay && document.body.contains(oldOverlay)) {
+        document.body.removeChild(oldOverlay);
+    }
+
+    // 创建遮罩
+    const overlay = document.createElement("div");
+    overlay.className = "mox-overlay";
+    overlay.onclick = function () {
+        hideWindow(window, overlay);
+    };
+
+    // 创建窗口
+    const window = document.createElement("div");
+    window.className = "mox-window";
+    window.style.backgroundColor = settings.backgroundColor;
+    window.style.color = settings.textColor;
+    window.style.borderColor = settings.borderColor;
+
+    const header = document.createElement("div");
+    header.className = "mox-window-header";
+    header.textContent = settings.header;
+    window.appendChild(header);
+
+    const content = document.createElement("div");
+    content.className = "mox-window-content";
+    content.textContent = settings.content;
+    window.appendChild(content);
+
+    const closeButton = document.createElement("div");
+    closeButton.className = "mox-window-close-btn";
+    closeButton.textContent = "×";
+    closeButton.onclick = function () {
+        hideWindow(window, overlay);
+    };
+    window.appendChild(closeButton);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(window);
+
+    setTimeout(() => {
+        overlay.classList.add('show');
+        window.classList.add('show');
+    }, 10);
+}
+
+function hideWindow(window, overlay) {
+    window.classList.remove('show');
+    overlay.classList.remove('show');
+    setTimeout(() => {
+        if (document.body.contains(window)) {
+            document.body.removeChild(window);
+        }
+        if (document.body.contains(overlay)) {
+            document.body.removeChild(overlay);
+        }
+    }, 300);
+}
+
+/**
+    MoxWindows({
+    header: "模态窗口标题",
+    content: "这是模态窗口的内容。"
+    });
+ **/
