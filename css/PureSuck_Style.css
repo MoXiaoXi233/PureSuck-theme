@@ -1417,7 +1417,7 @@ a:hover {
 	color: var(--themehovercolor);
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a) {
+.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a) {
 	border-radius: 0.35rem;
 	position: relative;
 	display: inline-block;
@@ -1426,7 +1426,7 @@ a:hover {
 	max-width: 100%;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a)::before {
+.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a)::before {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -1440,17 +1440,17 @@ a:hover {
 	opacity: 0;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):hover::before {
+.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a):hover::before {
 	transform: scale(1.05, 0.88);
 	opacity: 0.25;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):active::before {
+.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a):active::before {
 	transform: scale(1.03, 0.8);
 	opacity: 0.4;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a)::after {
+.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a)::after {
 	content: '\e81f';
 	font-family: fontello;
 	color: currentColor;
@@ -1925,7 +1925,6 @@ textarea.ci {
 	object-fit: cover;
 	object-position: center;
 	max-height: 350px;
-	cursor: pointer;
 }
 
 /** LICENCE 卡片 **/

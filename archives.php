@@ -44,9 +44,25 @@ $this->need('header.php');
 
                         <div class="meta post-meta">
                             这里会归档一切文章<br>
-                            共创作了 <?=  getTotalPostsCount(); ?> 篇文章，合 <?= allOfCharacters(); ?> 字
+                            共创作了 <?= getTotalPostsCount(); ?> 篇文章，合 <?= allOfCharacters(); ?> 字
                         </div>
 
+                        <!-- 标签 -->
+                        <h2> 标签 </h2>
+                        <section class="section-body">
+                            <div class="cloud-container">
+                                <?php $this->widget('Widget_Metas_Tag_Cloud')->to($tags); ?>
+                                <?php if ($tags->have()): ?>
+                                    <?php while ($tags->next()): ?>
+                                        <a href="<?php $tags->permalink(); ?>" class="cloud-item"><?php $tags->name(); ?></a>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <p>没有任何标签</p>
+                                <?php endif; ?>
+                            </div>
+                        </section>
+
+                        <h2>时间线</h2>
                         <?php
                         // 获取所有文章
                         $this->widget('Widget_Contents_Post_Recent', 'pageSize=100')->to($posts);
@@ -62,7 +78,7 @@ $this->need('header.php');
 
                         // 输出归档
                         foreach ($archives as $year => $items) {
-                            echo '<h2 class="timeline-year">' . $year . '</h2>'; // 输出年份
+                            echo '<h3 class="timeline-year">' . $year . '</h3>'; // 输出年份
                             echo '<div id="timeline">'; // 开始时间线
                             foreach ($items as $monthDay => $posts) {
                                 foreach ($posts as $item) {

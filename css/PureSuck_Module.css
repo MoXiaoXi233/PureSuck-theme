@@ -278,8 +278,7 @@
 }
 
 /* 分类和标签模块 */
-.category-section,
-.tag-section,
+.cloud-section,
 .toc-section,
 .search-section {
     margin-bottom: 20px;
@@ -304,39 +303,42 @@
     padding: 10px 0;
 }
 
-.category-cloud,
-.tag-cloud {
+.cloud-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
 }
 
-.category-cloud .category,
-.tag-cloud .tag {
+.cloud-item {
     display: inline-block;
     padding: 2px 12px;
-    color: var(--nav-text-color);
     border-radius: 0.4rem;
     text-decoration: none;
     font-size: 0.9em;
     background: var(--card-color);
     color: var(--nav-text-color);
-    transition: all 0.3s ease;
     border: 1px solid var(--border-color);
     box-shadow: 0 0 6px #00000008;
+    transition: all 0.3s ease;
 }
 
-.category-cloud .category:hover,
-.tag-cloud .tag:hover {
+.cloud-item:hover,
+.cloud-item:active {
+    color: var(--nav-text-color);
     background-color: var(--hover-color);
 }
 
-.category-cloud .category:active,
-.tag-cloud .tag:active {
-    background-color: var(--hover-color);
+.cloud-item:active {
+
     transform: scale(0.925);
 }
 
+.count {
+    vertical-align: super;
+    font-size: 0.8em;
+    color: #f00;
+    margin-left: 5px;
+}
 
 @media screen and (max-width: 1183px) {
     .right-sidebar {

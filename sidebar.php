@@ -20,17 +20,17 @@
 
     <!-- 分类模块 -->
     <?php if ($this->options->showCategory === '1'): ?>
-        <div class="category-section">
+        <div class="cloud-section">
             <header class="section-header">
                 <span class="icon-emo-wink"></span>
                 <span class="title">分类</span>
             </header>
             <section class="section-body">
-                <div class="category-cloud">
+                <div class="cloud-container">
                     <?php $this->widget('Widget_Metas_Category_List')->to($categories); ?>
                     <?php if ($categories->have()): ?>
                         <?php while ($categories->next()): ?>
-                            <a href="<?php $categories->permalink(); ?>" class="category"><?php $categories->name(); ?></a>
+                            <a href="<?php $categories->permalink(); ?>" class="cloud-item"><?php $categories->name(); ?></a>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <p>没有任何分类</p>
@@ -42,18 +42,39 @@
 
     <!-- 标签模块 -->
     <?php if ($this->options->showTag === '1'): ?>
-        <div class="tag-section">
+        <div class="cloud-section">
             <header class="section-header">
                 <span class="icon-hashtag"></span>
                 <span class="title">标签</span>
             </header>
             <section class="section-body">
-                <div class="tag-cloud">
+                <div class="cloud-container">
                     <?php $this->widget('Widget_Metas_Tag_Cloud')->to($tags); ?>
                     <?php if ($tags->have()): ?>
-                        <?php while ($tags->next()): ?>
-                            <a href="<?php $tags->permalink(); ?>" class="tag"><?php $tags->name(); ?></a>
+                        <?php $count = 0; ?>
+                        <?php while ($tags->next() && $count < 20): ?>
+                            <a href="<?php $tags->permalink(); ?>" class="cloud-item">
+                                <?php $tags->name(); ?>
+                            </a>
+                            <?php $count++; ?>
                         <?php endwhile; ?>
+
+                        <?php
+                        // 使用 Widget_Contents_Page_List 获取页面信息
+                        $this->widget('Widget_Contents_Page_List')->to($pages);
+                        $archivesUrl = '';
+
+                        while ($pages->next()):
+                            if ($pages->template == 'archives.php'): // 匹配归档页面
+                                $archivesUrl = $pages->permalink;
+                                break;
+                            endif;
+                        endwhile;
+                        ?>
+
+                        <?php if ($tags->next() && $archivesUrl): ?>
+                            <a href="<?php echo $archivesUrl; ?>" class="cloud-item">...</a>
+                        <?php endif; ?>
                     <?php else: ?>
                         <p>没有任何标签</p>
                     <?php endif; ?>
@@ -61,6 +82,8 @@
             </section>
         </div>
     <?php endif; ?>
+
+
 
     <!-- TOC -->
     <?php if ($this->options->showTOC === '1' && ($this->is('post') || $this->is('page') || $this->is('archives'))): ?>
