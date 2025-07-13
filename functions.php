@@ -158,6 +158,16 @@ function themeConfig($form)
     );
     $form->addInput($logoIndex);
 
+    // 左侧 Logo 跳转链接 配置项
+    $logoIndexUrl = new \Typecho\Widget\Helper\Form\Element\Text(
+        'logoIndexUrl',
+        null,
+        null,
+        _t('LOGO 跳转 地址'),
+        _t('点击头像时候跳转的网址，可以设置为引导页等，为空则为博客首页')
+    );
+    $form->addInput($logoIndexUrl);
+
     //作者头像
     $authorAvatar = new \Typecho\Widget\Helper\Form\Element\Text(
         'authorAvatar',
@@ -366,7 +376,8 @@ function getColorScheme()
     return $colorScheme;
 }
 
-function getStaticURL($path) {
+function getStaticURL($path)
+{
     $options = Typecho_Widget::widget('Widget_Options');
     $staticCdn = $options->staticCdn;
 
@@ -424,7 +435,7 @@ function generateDynamicCSS()
     // 获取颜色方案
     $colorScheme = getColorScheme();
 
-        // 定义颜色映射数组
+    // 定义颜色映射数组
     $colorMap = [
         'pink' => ['theme' => '#ea868f', 'hover' => '#DB2777'],  // 粉色
         'green' => ['theme' => '#48c774', 'hover' => '#15803d'], // 绿色
@@ -446,14 +457,14 @@ function generateDynamicCSS()
 
     // 深色模式颜色映射数组
     $darkColorMap = [
-         'pink' => ['theme' => '#b45864', 'hover' => '#d72b6f'],
-         'green' => ['theme' => '#2e7c55', 'hover' => '#0f6933'],
-         'blue' => ['theme' => '#2855b0', 'hover' => '#1f55e6'],
-         'yellow' => ['theme' => '#bf763f', 'hover' => '#934109'],
-         'red' => ['theme' => '#b91c1c', 'hover' => '#991b1b'],    // 暗红色
-         'purple' => ['theme' => '#6d28d9', 'hover' => '#5b21b6'], // 暗紫色
-         'cyan' => ['theme' => '#0e7490', 'hover' => '#155e75'],   // 暗青色
-         'orange' => ['theme' => '#c2410c', 'hover' => '#9a3412'], // 暗橙色
+        'pink' => ['theme' => '#b45864', 'hover' => '#d72b6f'],
+        'green' => ['theme' => '#2e7c55', 'hover' => '#0f6933'],
+        'blue' => ['theme' => '#2855b0', 'hover' => '#1f55e6'],
+        'yellow' => ['theme' => '#bf763f', 'hover' => '#934109'],
+        'red' => ['theme' => '#b91c1c', 'hover' => '#991b1b'],    // 暗红色
+        'purple' => ['theme' => '#6d28d9', 'hover' => '#5b21b6'], // 暗紫色
+        'cyan' => ['theme' => '#0e7490', 'hover' => '#155e75'],   // 暗青色
+        'orange' => ['theme' => '#c2410c', 'hover' => '#9a3412'], // 暗橙色
     ];
 
     // 根据颜色方案设置 dark 模式下的主题颜色和悬停颜色

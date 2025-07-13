@@ -1886,6 +1886,36 @@ textarea.ci {
 	width: 120px
 }
 
+.avatar-hover-effect {
+	transition: all 0.3s ease;
+	cursor: pointer;
+	position: relative;
+}
+
+.avatar-hover-effect:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 0 0 3px var(--themecolor);
+	opacity: 0.75;
+}
+
+.avatar-hover-effect:active {
+	transform: translateY(0) scale(0.925);
+}
+
+.avatar-hover-effect::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.15);
+	opacity: 0;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+	pointer-events: none;
+}
+
 .wrapper {
 	position: relative;
 }
@@ -2118,5 +2148,5 @@ input:-webkit-autofill:active {
 /* 大胆动呗=） 史山不能一直史下去 */
 
 .pace .pace-progress {
-  background: var(--themecolor) !important;
+	background: var(--themecolor) !important;
 }

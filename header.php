@@ -92,7 +92,7 @@
         });
     </script>
     <!-- Style CSS -->
-     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
@@ -207,9 +207,16 @@
     <div class="wrapper">
         <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
-                <span class="el-avatar el-avatar--circle">
-                    <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="120" height="120">
-                </span>
+                <a href="<?= $this->options->logoIndexUrl ?: $this->options->siteUrl; ?>" class="avatar-link" aria-label="博主名字">
+                    <span class="el-avatar el-avatar--circle avatar-hover-effect">
+                        <img src="<?= $this->options->logoIndex; ?>"
+                            style="object-fit:cover;"
+                            alt="博主头像"
+                            width="120"
+                            height="120"
+                            data-name="博主名字">
+                    </span>
+                </a>
                 <div class="header-title">
                     <?= $this->options->titleIndex(); ?>
                 </div>
@@ -249,4 +256,3 @@
             </div>
         </header>
         <main class="main">
-            
