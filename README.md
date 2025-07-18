@@ -1,21 +1,26 @@
 ![Banner](https://s2.loli.net/2024/08/05/M4FTuyI2b7aU3Ag.png)
+
 # PureSuck-Theme
 ![Static Badge](https://img.shields.io/github/v/release/MoXiaoXi233/PureSuck-theme)
 ![Static Badge](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Static Badge](https://img.shields.io/badge/AUTHOR-MoXiify-pink)  
+
 PureSuck，干净，纯洁，淡雅朴素的typecho主题。  
 由于是第一次正经意义上的做一个项目，遇到问题欢迎反馈解决。  
 另外主题样式和基调还在不断迭代中，可能会遇到版本更新后样式发生变化的情况  
 感谢你的使用！
+
 ## 外观
 可以前往[希记](https://note.moxiify.cn)查看最新版演示效果  
-主题本身有四种强调色可以选择，同时内置几种多彩的小组件（欢迎issues提交建议）  
+主题本身有八种强调色可以选择，同时内置几种多彩的小组件（欢迎issues提交建议）  
 ![PureSuck](https://s2.loli.net/2025/07/13/BvewG6DAnUrF7Pi.png)
+
 ## TODO
 - [x] Pjax
 - [ ] 重新设计组件
 - [ ] 精简代码，优化性能
 - [ ] 统一设计语言
+
 ## 特性
 - 代码高亮   
 - 细微动效设计  
@@ -30,10 +35,12 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 
 更多细节欢迎自行体验~  
 ### 安装与设置
+
 在 [Releases](https://github.com/MoXiaoXi233/PureSuck-theme/releases) 下载 zip 源码，解压后移动到 Typecho 主题目录。
 请确保主题文件夹名应该为 PureSuck ，否则会造成样式或者功能缺失！
 主题设置页面位置：Typecho 后台->控制台->外观->设置外观，里面有如何设置的描述  
 [CommentNotifier](https://github.com/jrotty/CommentNotifier)回调函数名：parseOwOcodes
+
 #### 建议的工作
 - 开启 Typecho 设置内评论区的 Markdown 功能 
 - 允许使用的HTML标签和属性内填写
@@ -48,6 +55,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 ### 功能与组件
 归档页面：后台新建一个页面，右边选择归档即可
 内置一些组件，使用短代码进行解析，使用格式如下
+
 #### 引用条
 ```
 [alert type="red"]这是一个红色警告。[/alert]
@@ -57,22 +65,26 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 [alert type="pink"]这是一个粉色警告。[/alert]
 ```
 五种颜色可选，在 type 中填写，效果图可以看上面合集，普通的灰色样式用自带的 blockquote 即可
+
 #### 彩色信息窗
 ```
 [window type="red" title="信息窗口"]这是一个信息窗口。[/window]
 [window type="yellow" title="警告窗口"]这是一个信息窗口。<br>这是一个信息窗口的第二行。[/window]
 ```
 同样五色可选，type 处填写五种颜色之一，在 title 处填写标题，注意内部如果要换行请用`<br>`标签
+
 #### 友链卡片
 ```
 [friend-card name="好友" ico="avatar.jpg" url="http://example.com"]这是好友的描述。[/friend-card]
 ```
 不可选择颜色，默认跟着主题强调色走的（在主题设置里切换），描述信息如果要换行请用`<br>`标签，描述信息尽量简短避免影响样式
+
 #### 折叠内容
 ```
 [collapsible-panel title="折叠面板标题"]这是面板的内容。[/collapsible-panel]
 ```
 没有颜色选，灰色，用来折叠比较长的内容
+
 #### Tabs选项组
 ```
 [tabs]
@@ -83,6 +95,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 [/tabs]
 ```
 按道理来说可以简单嵌套，简单测试了一下没什么问题
+
 #### 时间线
 ```
 [timeline]
@@ -91,13 +104,15 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 [/timeline]
 ```
 在[timeline]中添加子[timeline-event]一直加下去就行，应该没什么大问题
+
 #### 视频卡片
 目前只做了b站的
 ```
 [bilibili-card bvid="BV1KJ411C7SB"]
 ```
 像这样就可以插入一个视频卡片啦！其实就是官方那个 iframe 内嵌代码，更方便更简洁了一点而已，默认不自动播放
-### *开发中的功能组件
+
+### 开发中的功能组件
 #### 瀑布流图片
 ```
 [PicGrid]
@@ -125,9 +140,10 @@ MoxToast({
     backgroundColor: "var(--card2-color)",
     textColor: "var(--text-color)",
     borderColor: "var(--border-color)", // 使用CSS变量或默认值
-};
+});
 ```
 开发中····
+
 ## 引用库
 [aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
@@ -135,6 +151,7 @@ MoxToast({
 [HighLight.JS](https://github.com/highlightjs/highlight.js)  
 [Pjax](https://github.com/MoOx/pjax)  
 [Pace](https://github.com/CodeByZach/pace)
+
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！  
 感谢，每一个使用本主题的朋友们！
