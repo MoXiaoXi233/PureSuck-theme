@@ -341,6 +341,22 @@ function themeConfig($form)
     );
     $form->addInput($showCopyright);
 
+    $ccLicense = new Typecho_Widget_Helper_Form_Element_Radio(
+        'ccLicense',
+        array(
+            'by-nc-sa' => _t('CC BY-NC-SA 4.0'),
+            'by-nc' => _t('CC BY-NC 4.0'),
+            'by' => _t('CC BY 4.0'),
+            'by-sa' => _t('CC BY-SA 4.0'),
+            'by-nc-nd' => _t('CC BY-NC-ND 4.0'),
+            'zero' => _t('CC0 1.0'),
+        ),
+        'by-nc-sa',
+        _t('使用的CC协议'),
+        _t('选择使用的CC协议，默认为CC BY-NC-SA 4.0')
+    );
+    $form->addInput($ccLicense);
+
     // 代码高亮设置
     $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
         'codeBlockSettings',
@@ -566,6 +582,11 @@ function add_zoomable_to_images($content)
     }, $content);
 
     return $content;
+}
+
+function get_cc_link() {
+    $options = Typecho_Widget::widget('Widget_Options');
+    return 'https://creativecommons.org/licenses/' . $options->ccLicense . '/4.0/deed.zh-hans';
 }
 
 function parse_Shortcodes($content)
