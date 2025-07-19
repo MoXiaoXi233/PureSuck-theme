@@ -65,11 +65,11 @@
     color: var(--pure-color);
     font-weight: bold;
     font-size: 0.95rem;
-}
 
-.alert-box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 1px 6px 1px rgba(0, 0, 0, 0.06);
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 1px 6px 1px rgba(0, 0, 0, 0.06);
+    }
 }
 
 .alert-icon {
@@ -78,29 +78,31 @@
     line-height: 1;
 }
 
-.alert-box.green {
-    background-color: var(--green-base-color);
-    border: 1px solid var(--green-base-color);
-}
+.alert-box {
+    &.green {
+        background-color: var(--green-base-color);
+        border: 1px solid var(--green-base-color);
+    }
 
-.alert-box.blue {
-    background-color: var(--blue-base-color);
-    border: 1px solid var(--blue-base-color);
-}
+    &.blue {
+        background-color: var(--blue-base-color);
+        border: 1px solid var(--blue-base-color);
+    }
 
-.alert-box.yellow {
-    background-color: var(--yellow-base-color);
-    border: 1px solid var(--yellow-base-color);
-}
+    &.yellow {
+        background-color: var(--yellow-base-color);
+        border: 1px solid var(--yellow-base-color);
+    }
 
-.alert-box.red {
-    background-color: var(--red-base-color);
-    border: 1px solid var(--red-base-color);
-}
+    &.red {
+        background-color: var(--red-base-color);
+        border: 1px solid var(--red-base-color);
+    }
 
-.alert-box.pink {
-    background-color: var(--pink-base-color);
-    border: 1px solid var(--pink-base-color);
+    &.pink {
+        background-color: var(--pink-base-color);
+        border: 1px solid var(--pink-base-color);
+    }
 }
 
 /* WINDOW 信息窗 */
@@ -134,69 +136,38 @@
 .window {
     padding: 20px 0px 0px 10px;
     border-radius: 0.7rem;
-}
 
-.window.blue {
-    background-color: var(--blue-pale-color);
-    border: 1px solid var(--blue-border-color);
-}
+    // Define a mixin for common color styles
+    .color-variant(@color-name) {
+        &.@{color-name} {
+            // Targeting classes like .window.blue
+            background-color: var(~"--@{color-name}-pale-color");
+            border: 1px solid var(~"--@{color-name}-border-color");
 
-.window.green {
-    background-color: var(--green-pale-color);
-    border: 1px solid var(--green-border-color);
-}
+            &,
+            // Targeting .window.blue
+            .window-prompt-heading {
+                // Targeting .window.blue .window-prompt-heading
+                color: var(~"--@{color-name}-bold-color");
+                margin-bottom: 14px;
+            }
+        }
+    }
 
-.window.yellow {
-    background-color: var(--yellow-pale-color);
-    border: 1px solid var(--yellow-border-color);
-}
-
-.window.red {
-    background-color: var(--red-pale-color);
-    border: 1px solid var(--red-border-color);
-}
-
-.window.pink {
-    background-color: var(--pink-pale-color);
-    border: 1px solid var(--pink-border-color);
-}
-
-.window.blue,
-.window.blue .window-prompt-heading {
-    color: var(--blue-bold-color);
-    margin-bottom: 14px;
-}
-
-.window.green,
-.window.green .window-prompt-heading {
-    color: var(--green-bold-color);
-    margin-bottom: 14px;
-}
-
-.window.yellow,
-.window.yellow .window-prompt-heading {
-    color: var(--yellow-bold-color);
-    margin-bottom: 14px;
-}
-
-.window.red,
-.window.red .window-prompt-heading {
-    color: var(--red-bold-color);
-    margin-bottom: 14px;
-}
-
-.window.pink,
-.window.pink .window-prompt-heading {
-    color: var(--pink-bold-color);
-    margin-bottom: 14px;
+    // Apply the mixin for each color
+    .color-variant(blue);
+    .color-variant(green);
+    .color-variant(yellow);
+    .color-variant(red);
+    .color-variant(pink);
 }
 
 .window-prompt-wrap {
     margin: 0 0.75rem;
-}
 
-.window-prompt-wrap a {
-    color: inherit;
+    a {
+        color: inherit;
+    }
 }
 
 .window-prompt-heading {
@@ -663,17 +634,19 @@
     transform: translateY(-50%);
     z-index: 1;
     font-family: "fontello";
+
+    &.left {
+        left: -5px;
+        transform: translateY(-50%) rotate(-90deg);
+    }
+
+    &.right {
+        right: -5px;
+        transform: translateY(-50%) rotate(90deg);
+    }
 }
 
-.scroll-button.left {
-    left: -5px;
-    transform: translateY(-50%) rotate(-90deg);
-}
 
-.scroll-button.right {
-    right: -5px;
-    transform: translateY(-50%) rotate(90deg);
-}
 
 .tab-header {
     display: flex;
@@ -694,15 +667,15 @@
     transition: all 0.3s ease;
     position: relative;
     flex-shrink: 0;
-}
 
-.tab-link:hover {
-    color: var(--themehovercolor);
-}
+    .active {
+        color: var(--themecolor);
+        background-color: var(--card-color);
+    }
 
-.tab-link.active {
-    color: var(--themecolor);
-    background-color: var(--card-color);
+    &:hover {
+        color: var(--themehovercolor);
+    }
 }
 
 .tab-indicator {
@@ -775,11 +748,11 @@
     background-color: #000;
     border-radius: 8px;
     overflow: hidden;
-}
 
-.bilibili-card iframe {
-    width: 100%;
-    height: 450px;
-    /* 根据需要调整高度 */
-    border: none;
+    iframe {
+        width: 100%;
+        height: 450px;
+        /* 根据需要调整高度 */
+        border: none;
+    }
 }
