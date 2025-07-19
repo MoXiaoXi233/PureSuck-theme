@@ -93,7 +93,7 @@
     </script>
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
+    <link rel="stylesheet/less" type="text/css" href="<?= $this->options->themeUrl('css/PureSuck_Style.less'); ?>">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter != 'off'): ?>
@@ -126,6 +126,7 @@
     <!-- JS引入 -->
     <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php getStaticURL('highlight.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL('less.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
