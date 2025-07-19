@@ -13,7 +13,7 @@
     transform: translate(-50%, -50%);
     bottom: 45px;
     font-size: 0.95rem;
-    box-shadow: 0 0 6px #00000008;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.03);
     line-height: normal;
     will-change: transform, opacity;
 }

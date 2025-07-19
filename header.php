@@ -91,36 +91,14 @@
             }
         });
     </script>
-    <!-- Style CSS -->
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
-    <link rel="stylesheet/less" type="text/css" href="<?= $this->options->themeUrl('css/PureSuck_Style.less'); ?>">
-    <!-- 主题样式微调 -->
-    <!-- 标题线条 -->
-    <?php if ($this->options->postTitleAfter != 'off'): ?>
-        <style>
-            .post-title::after {
-                bottom: <?= $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
-                left: <?= '0'; ?>;
-                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?= '58px'; ?>;
-                height: <?= '13px'; ?>;
-                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?= '80px'; ?>;
-                height: <?= '12px'; ?>;
-                mask: <?= "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
-                mask-size: <?= '40px 12px'; ?>;
-                <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
-                /* 添加手绘风格的样式 */
-                /* 这里可以添加具体的手绘风格的样式，不过浪费了两个小时也没写好，放弃了 */
-                <?php endif; ?>
-            }
-        </style>
-    <?php endif; ?>
     <!-- AOS -->
     <script defer src="<?php getStaticURL("aos.js") ?>"></script>
     <!-- ICON Setting -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
     <!-- CSS引入 -->
+     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
+    <link rel="stylesheet/less" type="text/css" href="<?= $this->options->themeUrl('css/PureSuck_Style.less'); ?>">
     <link href="<?php getStaticURL('a11y-dark.min.css'); ?>" rel="stylesheet">
-    <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
     <link href="<?php getStaticURL('aos.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
@@ -202,6 +180,26 @@
         <!-- 没错我差点死在自己留的鬼判定了--MoXi -->
         <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 --kissablecho -->
     <?php endif; ?>
+    <!-- 主题样式微调 -->
+    <!-- 标题线条 -->
+    <?php if ($this->options->postTitleAfter != 'off'): ?>
+        <style>
+            .post-title::after {
+                bottom: <?= $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
+                left: <?= '0'; ?>;
+                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?= '58px'; ?>;
+                height: <?= '13px'; ?>;
+                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?= '80px'; ?>;
+                height: <?= '12px'; ?>;
+                mask: <?= "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
+                mask-size: <?= '40px 12px'; ?>;
+                <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
+                /* 添加手绘风格的样式 */
+                /* 这里可以添加具体的手绘风格的样式，不过浪费了两个小时也没写好，放弃了 */
+                <?php endif; ?>
+            }
+        </style>
+    <?php endif; ?>
 </head>
 
 <body>
@@ -209,7 +207,7 @@
         <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
                 <a href="<?= $this->options->logoIndexUrl ?: $this->options->siteUrl; ?>" class="avatar-link" aria-label="博主名字">
-                    <span class="el-avatar el-avatar--circle avatar-hover-effect">
+                    <span class="el-avatar avatar-hover-effect">
                         <img src="<?= $this->options->logoIndex; ?>"
                             style="object-fit:cover;"
                             alt="博主头像"
