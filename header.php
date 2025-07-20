@@ -95,16 +95,10 @@
     <script defer src="<?php getStaticURL("aos.js") ?>"></script>
     <!-- ICON Setting -->
     <link rel="icon" href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>" type="image/x-icon">
-    <!-- CSS引入 -->
-     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
-    <link rel="stylesheet/less" type="text/css" href="<?= $this->options->themeUrl('css/PureSuck_Style.less'); ?>">
-    <link href="<?php getStaticURL('a11y-dark.min.css'); ?>" rel="stylesheet">
-    <link href="<?php getStaticURL('aos.css'); ?>" rel="stylesheet">
-    <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
     <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php getStaticURL('highlight.min.js'); ?>"></script>
-    <script defer src="<?php getStaticURL('less.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL('less.min.js'); ?>"></script><!-- CF的rocketloader成功的给整炸了 -->
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
@@ -180,6 +174,12 @@
         <!-- 没错我差点死在自己留的鬼判定了--MoXi -->
         <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 --kissablecho -->
     <?php endif; ?>
+    <!-- CSS引入 -->
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
+    <link rel="stylesheet/less" type="text/css" href="<?= $this->options->themeUrl('css/PureSuck_Style.less'); ?>">
+    <link href="<?php getStaticURL('a11y-dark.min.css'); ?>" rel="stylesheet">
+    <link href="<?php getStaticURL('aos.css'); ?>" rel="stylesheet">
+    <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter != 'off'): ?>
