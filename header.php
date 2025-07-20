@@ -98,7 +98,7 @@
     <!-- JS引入 -->
     <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php getStaticURL('highlight.min.js'); ?>"></script>
-    <script defer src="<?php getStaticURL('less.min.js'); ?>"></script><!-- CF的rocketloader成功的给整炸了 -->
+    <script defer data-cfasync="false" src="<?php getStaticURL('less.min.js'); ?>"></script><!-- CF的rocketloader成功的给less整炸了 -->
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
