@@ -20,7 +20,7 @@
                         <?php if ($isAdmin): ?>
                             <span class="badge">博主</span>
                         <?php endif; ?>
-                        <?php $comments->date(); ?>
+                        <?php $comments->date("Y-m-d H:i:s l"); ?>
                         <span class="cr">
                             <?php $comments->reply(); ?>
                         </span>
