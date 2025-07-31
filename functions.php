@@ -341,6 +341,22 @@ function themeConfig($form)
     );
     $form->addInput($showCopyright);
 
+    $ccLicense = new Typecho_Widget_Helper_Form_Element_Radio(
+        'ccLicense',
+        array(
+            'by-nc-sa' => _t('CC BY-NC-SA 4.0'),
+            'by-nc' => _t('CC BY-NC 4.0'),
+            'by' => _t('CC BY 4.0'),
+            'by-sa' => _t('CC BY-SA 4.0'),
+            'by-nc-nd' => _t('CC BY-NC-ND 4.0'),
+            'zero' => _t('CC0 1.0'),
+        ),
+        'by-nc-sa',
+        _t('使用的CC协议'),
+        _t('选择使用的CC协议，默认为CC BY-NC-SA 4.0')
+    );
+    $form->addInput($ccLicense);
+
     // 代码高亮设置
     $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
         'codeBlockSettings',
@@ -392,7 +408,8 @@ function getStaticURL($path)
             'highlight.min.js'  => $options->themeUrl . '/js/lib/highlight.min.js',
             'pjax.min.js'       => $options->themeUrl . '/js/lib/pjax.min.js',
             'pace.min.js'       => $options->themeUrl . '/js/lib/pace.min.js',
-            'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css'
+            'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css',
+            'less.min.js'        => $options->themeUrl . '/js/lib/less.min.js',
         ],
         'bootcdn' => [
             'aos.js'            => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
@@ -402,7 +419,8 @@ function getStaticURL($path)
             'highlight.min.js'  => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js'       => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
             'pace.min.js'       => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js',
-            'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
+            'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css",
+            'less.min.js'        => "https://cdn.bootcdn.net/ajax/libs/less.js/4.3.0/less.min.js",
         ],
         "cdnjs" => [
             'aos.js'            => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
@@ -412,7 +430,8 @@ function getStaticURL($path)
             'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js'       => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
             'pace.min.js'       => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
-            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
+            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace-theme-default.min.css",
+            'less.min.js'        => "https://cdnjs.cloudflare.com/ajax/libs/less.js/4.3.0/less.min.js",
         ]
 
     ];
@@ -566,6 +585,11 @@ function add_zoomable_to_images($content)
     }, $content);
 
     return $content;
+}
+
+function get_cc_link() {
+    $options = Typecho_Widget::widget('Widget_Options');
+    return 'https://creativecommons.org/licenses/' . $options->ccLicense . '/4.0/deed.zh-hans';
 }
 
 function parse_Shortcodes($content)
