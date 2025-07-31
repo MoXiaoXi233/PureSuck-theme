@@ -225,7 +225,7 @@ function themeConfig($form)
     $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(
         'footerInfo',
         null,
-        null,
+        '在 Typecho 后台主题设置填写此处字段<br>感谢使用 PureSuck 主题',
         _t('网页底部信息'),
         _t('填写网页底部的自定义信息，可以包含HTML内容，用br标签换行')
     );

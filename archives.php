@@ -108,9 +108,7 @@ $this->need('header.php');
         <span class="nav-item-alt">
             <?php
             $options = Typecho_Widget::widget('Widget_Options');
-            if (!empty($options->footerInfo)) {
-                echo $options->footerInfo;
-            }
+            echo $options->footerInfo;
             ?>
         </span>
     </div>

@@ -3,11 +3,9 @@
 
 <!-- 回到顶端 -->
 
-<body>
-  <div class="go-top" id="go-top">
-    <a href="#" class="go icon-up-open" aria-label="返回顶部"></a>
-  </div>
-</body>
+<div class="go-top" id="go-top">
+  <a href="#" class="go icon-up-open" aria-label="返回顶部"></a>
+</div>
 
 <!-- AOS -->
 <script>
@@ -105,5 +103,6 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
 <?php if ($this->options->footerScript): ?>
   <?= $this->options->footerScript; ?>
 <?php endif; ?>
+</body>
 
 </html>

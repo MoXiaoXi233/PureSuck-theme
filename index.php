@@ -90,14 +90,12 @@ $this->need('header.php');
 </nav>
 
 <div class="nav main-lastinfo">
-    <span class="nav-item-alt">
-        <?php
-        $options = Typecho_Widget::widget('Widget_Options');
-        if (!empty($options->footerInfo)) {
+        <span class="nav-item-alt">
+            <?php
+            $options = Typecho_Widget::widget('Widget_Options');
             echo $options->footerInfo;
-        }
-        ?>
-    </span>
+            ?>
+        </span>
 </div>
 </main>
 <?php $this->need('sidebar.php'); ?>

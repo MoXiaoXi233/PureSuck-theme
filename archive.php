@@ -104,10 +104,9 @@
     <span class="nav-item-alt">
         <?php
         $options = Typecho_Widget::widget('Widget_Options');
-        if (!empty($options->footerInfo)) {
-            echo $options->footerInfo;
-        }
-        ?> </span>
+        echo $options->footerInfo;
+        ?>
+    </span>
 </div>
 </main>
 <?php $this->need('sidebar.php'); ?>

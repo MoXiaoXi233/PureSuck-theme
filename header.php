@@ -214,7 +214,7 @@
                             alt="博主头像"
                             width="120"
                             height="120"
-                            data-name="博主名字">
+                            data-name="博主名字" draggable="false">
                     </span>
                 </a>
                 <div class="header-title">
