@@ -125,7 +125,7 @@ MoxToast({
     backgroundColor: "var(--card2-color)",
     textColor: "var(--text-color)",
     borderColor: "var(--border-color)", // 使用CSS变量或默认值
-};
+});
 ```
 开发中····
 ## 引用库
