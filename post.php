@@ -81,7 +81,7 @@
                                     </div>
                                     <div>
                                         <span>许可协议</span>
-                                        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans">CC BY-NC-SA 4.0</a>
+                                        <a href="<?php echo get_cc_link(); ?>">CC <?php echo strtoupper($this->options->ccLicense); ?> 4.0</a>
                                     </div>
                                 </div>
                                 <span class="cc-icon"></span>
