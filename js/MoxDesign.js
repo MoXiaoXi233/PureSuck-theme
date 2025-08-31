@@ -98,12 +98,12 @@ function MoxNotification(options) {
 
     const title = document.createElement("div");
     title.className = "mox-title";
-    title.textContent = settings.title;
+    title.innerHTML = settings.title;
     content.appendChild(title);
 
     const message = document.createElement("div");
     message.className = "mox-message";
-    message.textContent = settings.message;
+    message.innerHTML = settings.message;
     content.appendChild(message);
 
     notification.appendChild(content);
@@ -189,12 +189,12 @@ function MoxWindows(options) {
 
     const header = document.createElement("div");
     header.className = "mox-window-header";
-    header.textContent = settings.header;
+    header.innerHTML = settings.header;
     window.appendChild(header);
 
     const content = document.createElement("div");
     content.className = "mox-window-content";
-    content.textContent = settings.content;
+    content.innerHTML = settings.content;
     window.appendChild(content);
 
     const closeButton = document.createElement("div");
