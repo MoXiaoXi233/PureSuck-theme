@@ -1922,7 +1922,6 @@ textarea.ci {
 
 .post-title {
 	position: relative;
-	display: inline-block;
 }
 
 .post-title::after {
