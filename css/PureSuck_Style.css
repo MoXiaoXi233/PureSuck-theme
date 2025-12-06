@@ -1477,7 +1477,7 @@ kbd {
 	color: var(--text-color);
 	background-color: var(--pure-gery-color);
 	border: 1px solid var(--border-color);
-	margin: 0 5px
+	margin: 4px 5px
 }
 
 ol,
