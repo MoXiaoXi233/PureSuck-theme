@@ -1,4 +1,5 @@
 /** 一些后期添加的模块样式 **/
+/** 本CSS包含解析项目、右侧边栏及部分小模块 **/
 :root {
     /* 边框颜色 */
     --blue-border-color: #7f9cdc;
@@ -72,8 +73,10 @@
     background-color: var(--themecolor);
     color: var(--pure-color);
     opacity: 0;
-    visibility: hidden; /* 隐藏 */
-    pointer-events: none; /* 默认禁用点击 */
+    visibility: hidden;
+    /* 隐藏 */
+    pointer-events: none;
+    /* 默认禁用点击 */
     border-radius: 14px;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -82,8 +85,10 @@
 
 #go-top.visible {
     opacity: 1;
-    visibility: visible; /* 显示 */
-    pointer-events: auto; /* 启用点击 */
+    visibility: visible;
+    /* 显示 */
+    pointer-events: auto;
+    /* 启用点击 */
 }
 
 .go-top:hover {
@@ -100,8 +105,7 @@
     height: 100%;
 }
 
-/* 短代码模块 */
-
+/* 短代码模块相关 CSS 位于下方 */
 /* ALERT */
 .text-xs.font-semibold {
     margin-top: 0 !important;
@@ -266,211 +270,6 @@
     font-size: 0.85rem;
     color: inherit;
 }
-
-/* 右侧边栏 */
-.right-sidebar {
-    top: 0;
-    overflow: hidden;
-    padding: 40px 50px 50px 50px;
-    position: fixed;
-    width: 344px;
-    z-index: 1
-}
-
-/* 分类和标签模块 */
-.cloud-section,
-.toc-section,
-.search-section {
-    margin-bottom: 20px;
-    position: relative
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--text-color);
-    transition: all .3s ease;
-}
-
-.section-header .icon {
-    font-size: 1.5rem;
-    margin-right: 8px;
-}
-
-.section-body {
-    padding: 10px 0;
-}
-
-.cloud-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.cloud-item {
-    display: inline-block;
-    padding: 2px 12px;
-    border-radius: 0.4rem;
-    text-decoration: none;
-    font-size: 0.9em;
-    background: var(--card-color);
-    color: var(--nav-text-color);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 0 6px #00000008;
-    transition: all 0.3s ease;
-}
-
-.cloud-item:hover,
-.cloud-item:active {
-    color: var(--nav-text-color);
-    background-color: var(--hover-color);
-}
-
-.cloud-item:active {
-
-    transform: scale(0.925);
-}
-
-.count {
-    vertical-align: super;
-    font-size: 0.8em;
-    color: #f00;
-    margin-left: 5px;
-}
-
-@media screen and (max-width: 1183px) {
-    .right-sidebar {
-        display: none;
-    }
-
-    .toc-section {
-        display: none;
-    }
-
-}
-
-@media (min-width: 1183px) {
-    .right-sidebar {
-        display: inline;
-    }
-}
-
-/** TOC 目录**/
-.toc-section {
-    overflow: hidden;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-
-}
-
-.toc-section.sticky {
-    position: fixed;
-    padding: 35px 100px 50px 0px;
-    width: 344px;
-    top: 0;
-}
-
-.toc-section::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari, Opera */
-}
-
-.toc {
-    right: 2%;
-    top: 80px;
-}
-
-.dir {
-    position: relative;
-    padding-bottom: 8px;
-    box-sizing: border-box;
-}
-
-#toc {
-    margin: 0;
-    padding-left: 15px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-#toc .li {
-    border: 1px solid var(--background-color);
-    border-radius: 5px;
-    transition: all 0.3s ease;
-}
-
-#toc .li:hover {
-    border: 1px solid var(--border-color);
-    background-color: var(--nav-color);
-}
-
-#toc .li:active {
-    background-color: var(background);
-    transform: scale(0.95);
-}
-
-#toc .toc-a {
-    text-decoration: none;
-    display: block;
-}
-
-.toc-a.li-active {
-    color: var(--themehovercolor);
-}
-
-.sider {
-    width: 2px;
-    height: 100%;
-    background: var(--line-color);
-    position: absolute;
-    left: 0;
-    top: 0;
-    border-radius: 10px;
-    margin: auto;
-    bottom: 0;
-}
-
-.siderbar {
-    display: flex;
-    width: 100%;
-    height: 20px;
-    line-height: 2;
-    background: var(--themecolor);
-    transition: transform 0.3s ease;
-}
-
-.toc-a {
-    color: var(--nav-text-color);
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.li-1 .toc-a {
-    padding-left: 0px;
-}
-
-.li-2 .toc-a {
-    padding-left: 8px;
-}
-
-.li-3 .toc-a {
-    padding-left: 16px;
-}
-
-.li-4 .toc-a {
-    padding-left: 24px;
-}
-
-.li-5 .toc-a {
-    padding-left: 32px;
-}
-
-.li-6 .toc-a {
-    padding-left: 40px;
-}
-
 
 /**友链卡片**/
 .friendsboard-list {
@@ -800,6 +599,208 @@
     }
 }
 
+.bilibili-card {
+    width: 100%;
+    margin: 0 auto;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.bilibili-card iframe {
+    width: 100%;
+    height: 450px;
+    /* 根据需要调整高度 */
+    border: none;
+}
+
+/* 右侧边栏相关 CSS 位于下方 */
+/* 右侧边栏 */
+.right-sidebar {
+    top: 0;
+    overflow: hidden;
+    padding: 40px 50px 50px 50px;
+    position: fixed;
+    z-index: 1
+}
+
+/* 分类和标签模块 */
+.cloud-section,
+.toc-section,
+.search-section {
+    margin-bottom: 20px;
+    position: relative
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    transition: all .3s ease;
+}
+
+.section-header .icon {
+    font-size: 1.5rem;
+    margin-right: 8px;
+}
+
+.section-body {
+    padding: 10px 0;
+}
+
+.cloud-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.cloud-item {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 0.4rem;
+    text-decoration: none;
+    font-size: 0.9em;
+    background: var(--card-color);
+    color: var(--nav-text-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 6px #00000008;
+    transition: all 0.3s ease;
+}
+
+.cloud-item:hover,
+.cloud-item:active {
+    color: var(--nav-text-color);
+    background-color: var(--hover-color);
+}
+
+.cloud-item:active {
+
+    transform: scale(0.925);
+}
+
+.count {
+    vertical-align: super;
+    font-size: 0.8em;
+    color: #f00;
+    margin-left: 5px;
+}
+
+/** TOC 目录**/
+.toc-section {
+    overflow: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+}
+
+.toc-section.sticky {
+    position: fixed;
+    padding: 35px 100px 50px 0px;
+    width: 344px;
+    top: 0;
+}
+
+.toc-section::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+.toc {
+    right: 2%;
+    top: 80px;
+}
+
+.dir {
+    position: relative;
+    padding-bottom: 8px;
+    box-sizing: border-box;
+}
+
+#toc {
+    margin: 0;
+    padding-left: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#toc .li {
+    border: 1px solid var(--background-color);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+#toc .li:hover {
+    border: 1px solid var(--border-color);
+    background-color: var(--nav-color);
+}
+
+#toc .li:active {
+    background-color: var(background);
+    transform: scale(0.95);
+}
+
+#toc .toc-a {
+    text-decoration: none;
+    display: block;
+}
+
+.toc-a.li-active {
+    color: var(--themehovercolor);
+}
+
+.sider {
+    width: 2px;
+    height: 100%;
+    background: var(--line-color);
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+    margin: auto;
+    bottom: 0;
+}
+
+.siderbar {
+    display: flex;
+    width: 100%;
+    height: 20px;
+    line-height: 2;
+    background: var(--themecolor);
+    transition: transform 0.3s ease;
+}
+
+.toc-a {
+    color: var(--nav-text-color);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.li-1 .toc-a {
+    padding-left: 0px;
+}
+
+.li-2 .toc-a {
+    padding-left: 8px;
+}
+
+.li-3 .toc-a {
+    padding-left: 16px;
+}
+
+.li-4 .toc-a {
+    padding-left: 24px;
+}
+
+.li-5 .toc-a {
+    padding-left: 32px;
+}
+
+.li-6 .toc-a {
+    padding-left: 40px;
+}
+
 /* 侧边栏 搜索*/
 .search-container {
     display: flex;
@@ -826,24 +827,53 @@
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px 10px 10px 0px;
+    padding: 10px 10px 10px 5px;
     display: flex;
     align-items: center;
     color: var(--text-color);
     justify-content: center;
 }
 
-.bilibili-card {
-    width: 100%;
-    margin: 0 auto;
-    background-color: #000;
-    border-radius: 8px;
-    overflow: hidden;
+@media screen and (max-width: 1183px) {
+    .right-sidebar {
+        display: none;
+    }
+
+    .toc-section {
+        display: none;
+    }
+
 }
 
-.bilibili-card iframe {
-    width: 100%;
-    height: 450px;
-    /* 根据需要调整高度 */
-    border: none;
+@media (min-width:1183px) {
+    .right-sidebar {
+        display: inline;
+    }
+
+    .search-button {
+        padding: 10px 10px 10px 35px;
+    }
+
+    .search-input {
+        width: 165px;
+    }
+
+        .right-sidebar {
+        padding: 20px 35px 50px 30px
+    }
+}
+
+@media (min-width:1400px) {
+    .search-button {
+        padding: 10px 10px 10px 5px;
+    }
+
+    .search-input {
+        width: 200px;
+    }
+
+    .right-sidebar {
+        width: 344px;
+        padding: 40px 50px 50px 50px
+    }
 }
