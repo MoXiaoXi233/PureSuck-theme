@@ -26,7 +26,25 @@
             document.documentElement.setAttribute('data-theme', initialTheme);
         })();
     </script>
-    
+
+    <script>
+        (function() {
+            // 读取 Cookie 中的 theme
+            const matches = document.cookie.match(/(?:^|;)\s*theme=([^;]+)/);
+            let mode = matches ? matches[1] : "auto";
+
+            // auto 模式下，根据系统主题提前决定 effective 主题
+            if (mode === "auto") {
+                mode = window.matchMedia("(prefers-color-scheme: dark)").matches ?
+                    "dark" :
+                    "light";
+            }
+
+            // 提前设定 data-theme，避免闪烁
+            document.documentElement.setAttribute("data-theme", mode);
+        })();
+    </script>
+
     <!-- Dark Mode -->
     <script>
         /* 自动获取根域名，例如 www.xxx.cn → .xxx.cn */
