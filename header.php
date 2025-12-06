@@ -26,36 +26,62 @@
             document.documentElement.setAttribute('data-theme', initialTheme);
         })();
     </script>
+    
     <!-- Dark Mode -->
     <script>
+        /* 自动获取根域名，例如 www.xxx.cn → .xxx.cn */
+        function getRootDomain() {
+            const host = window.location.hostname;
+            const parts = host.split(".");
+            if (parts.length <= 2) return host; // 如 localhost
+            return "." + parts.slice(-2).join(".");
+        }
+
+        /* 写入跨子域 Cookie，用于同步主题 */
+        function setThemeCookie(theme) {
+            const rootDomain = getRootDomain();
+            document.cookie = `theme=${theme}; path=/; domain=${rootDomain}; SameSite=Lax`;
+        }
+
+        /* 读取 Cookie */
+        function getCookie(name) {
+            const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+            return match ? match[2] : null;
+        }
+
         function setTheme(theme) {
-            if (theme === 'auto') {
-                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', systemTheme);
-                localStorage.setItem('theme', 'auto');
+            // 自动模式 → 跟随系统
+            if (theme === "auto") {
+                const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                document.documentElement.setAttribute("data-theme", systemTheme);
+                localStorage.setItem("theme", "auto");
+                setThemeCookie("auto");
             } else {
-                document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
+                // 明暗模式
+                document.documentElement.setAttribute("data-theme", theme);
+                localStorage.setItem("theme", theme);
+                setThemeCookie(theme);
             }
+
             updateIcon(theme);
         }
 
         function toggleTheme() {
-            const currentTheme = localStorage.getItem('theme') || 'auto';
+            const currentTheme = localStorage.getItem("theme") || "auto";
             let newTheme;
 
-            if (currentTheme === 'light') {
-                newTheme = 'dark';
+            if (currentTheme === "light") {
+                newTheme = "dark";
                 MoxToast({
                     message: "已切换至深色模式"
                 });
-            } else if (currentTheme === 'dark') {
-                newTheme = 'auto';
+            } else if (currentTheme === "dark") {
+                newTheme = "auto";
                 MoxToast({
                     message: "模式将跟随系统 ㆆᴗㆆ"
                 });
             } else {
-                newTheme = 'light';
+                newTheme = "light";
                 MoxToast({
                     message: "已切换至浅色模式"
                 });
@@ -65,32 +91,36 @@
         }
 
         function updateIcon(theme) {
-            const iconElement = document.getElementById('theme-icon');
+            const iconElement = document.getElementById("theme-icon");
             if (iconElement) {
-                iconElement.classList.remove('icon-sun-inv', 'icon-moon-inv', 'icon-auto');
-                if (theme === 'light') {
-                    iconElement.classList.add('icon-sun-inv');
-                } else if (theme === 'dark') {
-                    iconElement.classList.add('icon-moon-inv');
+                iconElement.classList.remove("icon-sun-inv", "icon-moon-inv", "icon-auto");
+                if (theme === "light") {
+                    iconElement.classList.add("icon-sun-inv");
+                } else if (theme === "dark") {
+                    iconElement.classList.add("icon-moon-inv");
                 } else {
-                    iconElement.classList.add('icon-auto');
+                    iconElement.classList.add("icon-auto");
                 }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'auto';
+        /* 初始化：优先读取 Cookie → 保证跨站同步 */
+        document.addEventListener("DOMContentLoaded", function() {
+            const cookieTheme = getCookie("theme");
+            const savedTheme = cookieTheme || localStorage.getItem("theme") || "auto";
             setTheme(savedTheme);
         });
 
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            if (localStorage.getItem('theme') === 'auto') {
-                const newTheme = e.matches ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                updateIcon('auto');
+        /* 系统主题变化时（仅 auto 模式生效） */
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
+            if (localStorage.getItem("theme") === "auto") {
+                const newTheme = e.matches ? "dark" : "light";
+                document.documentElement.setAttribute("data-theme", newTheme);
+                updateIcon("auto");
             }
         });
     </script>
+
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
