@@ -161,16 +161,17 @@ table {
 
 /* 表格滚动容器 */
 .table-scroll {
-    overflow-x: auto;
-    margin: 1.5em 0;
-    border: 1px solid var(--pure-gery-color);
-    border-radius: 0.35rem
+	overflow-x: auto;
+	margin: 1.5em 0;
+	border: 1px solid var(--pure-gery-color);
+	border-radius: 0.35rem
 }
 
 .table-scroll table {
-    margin: 0;
-    min-width: 600px; /* 保证内容不换行 */
-    border-collapse: collapse;
+	margin: 0;
+	min-width: 600px;
+	/* 保证内容不换行 */
+	border-collapse: collapse;
 }
 
 table thead {
@@ -1450,7 +1451,7 @@ blockquote {
 	border-radius: 0.75rem;
 	color: var(--text-color);
 	width: 100%;
-    padding: 0.75rem 0.75rem 0.75rem 3rem;
+	padding: 0.75rem 0.75rem 0.75rem 3rem;
 	margin-right: 0;
 	margin-left: 0;
 	position: relative;
@@ -1464,29 +1465,29 @@ blockquote:has(p + p),
 blockquote:has(ul),
 blockquote:has(ol),
 blockquote:has(pre) {
-  padding-top: 1.75rem;
-  padding-bottom: 1.75rem;
+	padding-top: 1.75rem;
+	padding-bottom: 1.75rem;
 }
 
-blockquote::before {	
-content: '';
-    position: absolute;
-    left: 0.75rem;
-    top: 0.75rem;
-    width: 1rem;
-    height: 1rem;
-    background: radial-gradient(circle at 0.25rem 0.25rem, var(--themecolor) 1.5px, transparent 2px), radial-gradient(circle at 0.75rem 0.25rem, var(--themecolor) 1px, transparent 1.5px), radial-gradient(circle at 0.25rem 0.75rem, var(--themecolor) 1px, transparent 1.5px), radial-gradient(circle at 0.75rem 0.75rem, var(--themecolor) 1.5px, transparent 2px);
+blockquote::before {
+	content: '';
+	position: absolute;
+	left: 0.75rem;
+	top: 0.75rem;
+	width: 1rem;
+	height: 1rem;
+	background: radial-gradient(circle at 0.25rem 0.25rem, var(--themecolor) 1.5px, transparent 2px), radial-gradient(circle at 0.75rem 0.25rem, var(--themecolor) 1px, transparent 1.5px), radial-gradient(circle at 0.25rem 0.75rem, var(--themecolor) 1px, transparent 1.5px), radial-gradient(circle at 0.75rem 0.75rem, var(--themecolor) 1.5px, transparent 2px);
 }
 
-blockquote::after {	
-    content: '';
-    position: absolute;
-    left: 1.25rem;
-    top: 1.25rem;
-    width: 1px;
-    height: calc(100% - 1.75rem);
-    background: linear-gradient(to bottom, var(--themecolor), transparent);
-    opacity: 0.3;
+blockquote::after {
+	content: '';
+	position: absolute;
+	left: 1.25rem;
+	top: 1.25rem;
+	width: 1px;
+	height: calc(100% - 1.75rem);
+	background: linear-gradient(to bottom, var(--themecolor), transparent);
+	opacity: 0.3;
 }
 
 code,
@@ -1962,55 +1963,147 @@ textarea.ci {
 	max-height: 350px;
 }
 
-/** LICENCE 卡片 **/
+/* 文章版权信息卡片 */
 .license-info-card {
-	padding: 20px 30px;
-	background-color: var(--background-color);
-	box-shadow: 0 0 6px #00000008;
-	border-radius: 0.75rem;
+	--_theme: var(--theme-color, #ea868f);
+	--_theme-soft: color-mix(in srgb, var(--_theme) 14%, transparent);
+	--_theme-line: color-mix(in srgb, var(--_theme) 55%, var(--border-color));
+
 	position: relative;
+	margin: 2.8em 0 0;
+	padding: 22px 26px;
+
+	background-color: var(--card-color);
 	border: 1px solid var(--border-color);
+	border-radius: 12px;
+
+	box-shadow: none;
 	overflow: hidden;
 }
 
+.license-info-card::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+
+	width: 220px;
+	height: 220px;
+
+	background: radial-gradient(circle at 100% 0%,
+			color-mix(in srgb, var(--_theme) 18%, transparent) 0%,
+			color-mix(in srgb, var(--_theme) 10%, transparent) 35%,
+			transparent 70%);
+
+	pointer-events: none;
+}
+
 .license-info-title {
-	font-size: 1.5em;
-	font-weight: bold;
+	position: relative;
+	padding-left: 12px;
+
+	font-size: 1.12em;
+	font-weight: 650;
+	margin-bottom: .6em;
+
+	color: color-mix(in srgb, var(--_theme) 70%, var(--text-color));
+}
+
+.license-info-title::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.15em;
+	bottom: 0.15em;
+	width: 2px;
+
+	background-color: var(--_theme);
+	opacity: .65;
+}
+
+.license-info-link {
+	display: block;
+	margin-bottom: 1.1em;
+
+	font-size: .92em;
+	color: var(--text2-color);
+	word-break: break-all;
 }
 
 .license-info-meta {
-	display: flex;
-	justify-content: flex-start;
-	align-items: flex-start;
+	position: relative;
+	z-index: 1;
+
+	display: grid;
+	grid-template-columns: repeat(3, minmax(120px, 1fr));
+	gap: 16px 22px;
+
+	font-size: .9em;
 	color: var(--text2-color);
-	gap: 25px;
 }
 
-.license-info-meta div {
+.license-info-meta>div {
 	display: flex;
 	flex-direction: column;
+	gap: 6px;
 }
 
-.license-info-meta div span {
-	margin-bottom: 5px;
+.license-info-meta span:first-child {
+	font-size: .84em;
+	opacity: .85;
+}
+
+.license-info-meta span:last-child,
+.license-info-meta a {
+	color: var(--text-color);
+}
+
+
+.cc-icon {
+	position: absolute;
+	right: 14px;
+	bottom: 22px;
+
+	width: 26px;
+	height: 26px;
+
+	opacity: .45;
+	pointer-events: none;
 }
 
 .cc-icon::before {
 	content: '\e819';
 	font-family: 'fontello';
-	font-size: 10em;
-	opacity: .55;
-	color: var(--border-color);
-	position: absolute;
-	right: 40px;
-	top: 0;
-	pointer-events: none;
-	z-index: 0;
+	font-size: 26px;
+	line-height: 26px;
+
+	color: color-mix(in srgb,
+			var(--_theme) 28%,
+			var(--border-color));
 }
 
-.license-info-card * {
-	z-index: 1;
+@media (max-width: 900px) {
+	.license-info-meta {
+		grid-template-columns: repeat(2, minmax(120px, 1fr));
+	}
 }
+
+@media (max-width: 560px) {
+	.license-info-card {
+		padding: 18px 18px;
+	}
+
+	.license-info-card::after {
+		width: 28px;
+		height: 12px;
+		opacity: .7;
+	}
+
+	.cc-icon {
+		bottom: 16px;
+	}
+}
+
 
 /** PicGird 图片框架 布局 **/
 
