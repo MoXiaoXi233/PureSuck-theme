@@ -114,25 +114,6 @@ li>ul {
 	margin-bottom: 0
 }
 
-code,
-pre {
-	font-family: ui-monospace, JetBrains Mono, SFMono-Regular, Menlo, Monaco, Consolas, Andale Mono, Liberation Mono, Ubuntu Mono, Courier New, monospace;
-	font-size: .9em
-}
-
-pre {
-	word-wrap: break-word;
-	position: relative;
-}
-
-pre>code,
-pre>code:hover {
-	padding: 0;
-	border-radius: 0;
-	border: 0;
-	margin: 0;
-}
-
 blockquote p:last-child {
 	margin-bottom: 0
 }
@@ -271,10 +252,6 @@ ol,
 ul {
 	list-style: none;
 	padding-left: 0
-}
-
-pre {
-	padding: 12px 16px
 }
 
 a,
@@ -1534,17 +1511,6 @@ li:before {
 	color: #858585
 }
 
-pre {
-	border-radius: 0.5rem;
-	color: #fff;
-	background-color: #1e2021;
-	overflow-y: auto;
-	overflow-x: hidden;
-	max-height: 800px;
-	box-shadow: 0 0 6px #00000008;
-	border: 1px solid var(--border-color);
-}
-
 .comment-title {
 	font-weight: 800;
 }
@@ -2158,29 +2124,6 @@ input:-webkit-autofill:active {
 	border-radius: 25px;
 	background-clip: padding-box;
 	background-color: rgb(62 62 62 / 72%)
-}
-
-.copy-button {
-	position: absolute;
-	right: 12px;
-	top: 12px;
-	cursor: pointer;
-	background-color: #262a2b;
-	color: var(--pure-color);
-	border-radius: 0.25rem;
-	border: 1px solid #333739;
-	padding: 6px 12px;
-	font-size: 12px;
-	z-index: 10;
-}
-
-.code-block-extension-code-show-num .code-block-extension-code-line::before {
-	content: attr(data-line-num);
-	width: 1em;
-	margin-right: 1.5em;
-	text-align: right;
-	color: #888;
-	display: inline-block;
 }
 
 /* 本来想改下样式，但这2000行css不敢动 */

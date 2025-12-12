@@ -1,0 +1,241 @@
+/* 设计理念：轻量，安静，干净 */
+/* PaperSu-Code v1.0 */
+
+/* 圆角层级设计 card > block > inline */
+/* --radius-card: 12px; --radius-block: 8px; --radius-inline: 4px; */
+
+/* 代码颜色（Light） */
+:root {
+  --code-bg: var(--pure-gery-color);
+  --code-border: var(--line-color);
+  --code-inline-bg: var(--hover-color);
+
+  --code-text: var(--text-color);
+  --code-muted: var(--text2-color);
+
+  --code-blue: var(--blue-base-color);
+  --code-green: var(--green-base-color);
+  --code-yellow: var(--yellow-base-color);
+  --code-red: var(--red-base-color);
+  --code-pink: var(--pink-base-color);
+}
+
+/* 代码颜色（Dark） */
+[data-theme="dark"],
+.dark,
+:root.dark {
+  --code-bg: var(--card2-color);
+  --code-border: var(--line-color);
+  --code-inline-bg: var(--hover-color);
+
+  --code-text: var(--text-color);
+  --code-muted: var(--text2-color);
+
+  --code-blue: var(--blue-bold-color);
+  --code-green: var(--green-bold-color);
+  --code-yellow: var(--yellow-bold-color);
+  --code-red: var(--red-bold-color);
+  --code-pink: var(--pink-bold-color);
+}
+
+
+/* 代码块本体 */
+pre {
+  padding: 12px 16px;
+  margin: 1.2em 0;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  overflow: auto;
+  font-family: ui-monospace, JetBrains Mono, SFMono-Regular, Menlo, Monaco, Consolas, Andale Mono, Liberation Mono, Ubuntu Mono, Courier New, monospace;
+  font-size: .9em;
+  word-wrap: break-word;
+  position: relative;
+  max-height: 750px;
+}
+
+pre>code,
+pre>code:hover {
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  margin: 0;
+}
+
+
+/* 代码文本 */
+pre code.hljs {
+  display: block;
+  background: transparent;
+  padding: 0.75em 1em;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+  line-height: 1.7;
+
+  color: var(--code-text);
+}
+
+
+/* 行内代码 */
+:not(pre)>code,
+:not(pre)>code.hljs {
+  padding: 0.15em 0.4em;
+  margin: 0 0.1em;
+
+  background: var(--code-inline-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 4px;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+
+  color: var(--code-text);
+  white-space: nowrap;
+}
+
+
+/* 高亮设计 */
+
+/* 默认 */
+.hljs {
+  color: var(--code-text);
+}
+
+/* 注释 */
+.hljs-comment,
+.hljs-quote {
+  color: var(--code-muted);
+  opacity: 0.65;
+}
+
+/* 结构词*/
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-title.function_,
+.hljs-title.class_,
+.hljs-built_in {
+  color: var(--code-blue);
+}
+
+/* 字符串*/
+.hljs-string,
+.hljs-attr,
+.hljs-attribute {
+  color: var(--code-green);
+}
+
+/* 数值：确定的东西 */
+.hljs-number,
+.hljs-literal {
+  color: var(--code-yellow);
+}
+
+/* 类型 / 标签 / 抽象名 */
+.hljs-type,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-regexp {
+  color: var(--code-red);
+}
+
+.hljs-meta,
+.hljs-doctag {
+  color: var(--code-pink);
+}
+
+
+/* 强调 */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 650;
+}
+
+pre code.hljs::selection,
+pre code.hljs *::selection {
+  background: rgba(211, 107, 140, 0.18);
+}
+
+
+/* 滚动条 */
+pre code.hljs::-webkit-scrollbar {
+  height: 10px;
+}
+
+pre code.hljs::-webkit-scrollbar-thumb {
+  background: var(--code-border);
+  border-radius: 999px;
+}
+
+@media screen and (-ms-high-contrast:active) {
+  .hljs {
+    color: windowText;
+  }
+
+  .hljs-keyword,
+  .hljs-selector-tag {
+    font-weight: 700;
+  }
+}
+
+/* Copy 按钮 */
+pre {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+
+  padding: 2px 6px;
+  font-size: 14px;
+  line-height: 1.4;
+
+  background: transparent;
+  color: var(--text2-color);
+
+  border: none;
+  border-radius: 4px;
+
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity .15s ease,
+    color .15s ease,
+    background-color .15s ease;
+}
+
+pre:hover .copy-button,
+pre:focus-within .copy-button{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.copy-button:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.copy-button:active {
+  background: var(--pure-gery-color);
+}
+
+
+/* 代码行数 */
+.code-block-extension-code-show-num .code-block-extension-code-line::before {
+  content: attr(data-line-num);
+  width: 1em;
+  margin-right: 1.5em;
+  text-align: right;
+  color: #888;
+  display: inline-block;
+}
