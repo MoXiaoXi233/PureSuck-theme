@@ -30,11 +30,11 @@
     --pink-bold-color: #b94a73;
 
     /* 饱和度高一点的 */
-    --blue-alert-color:   #6482db;
-    --green-alert-color:  #4ead86;
+    --blue-alert-color: #6482db;
+    --green-alert-color: #4ead86;
     --yellow-alert-color: #e5b96e;
-    --red-alert-color:    #cd575f;
-    --pink-alert-color:   #ea868f;
+    --red-alert-color: #cd575f;
+    --pink-alert-color: #ea868f;
 
 }
 
@@ -67,11 +67,11 @@
     --red-bold-color: #e0a8a8;
     --pink-bold-color: #e0a8c0;
 
-    --blue-alert-color:   #44579a;  
-    --green-alert-color:  #397e63;  
-    --yellow-alert-color: #ab8748;  
-    --red-alert-color:    #9a444b;  
-    --pink-alert-color:   #bf677a;  
+    --blue-alert-color: #44579a;
+    --green-alert-color: #397e63;
+    --yellow-alert-color: #ab8748;
+    --red-alert-color: #9a444b;
+    --pink-alert-color: #bf677a;
 }
 
 /** 回到顶部 **/
@@ -246,12 +246,10 @@
     right: 3rem;
     bottom: 0.4rem;
     height: 1px;
-    background: linear-gradient(
-        to right,
-        transparent,
-        currentColor,
-        transparent
-    );
+    background: linear-gradient(to right,
+            transparent,
+            currentColor,
+            transparent);
     opacity: 0.04;
     pointer-events: none;
 }
@@ -383,11 +381,9 @@
 @media (hover: hover) {
     .friendsboard-item:hover {
         background-color: var(--hover-color);
-        border-color: color-mix(
-            in srgb,
-            var(--themecolor) 30%,
-            var(--border-color)
-        );
+        border-color: color-mix(in srgb,
+                var(--themecolor) 30%,
+                var(--border-color));
     }
 }
 
@@ -445,11 +441,9 @@
 
 @media (hover: hover) {
     .friendsboard-item:hover .friends-card-username {
-        color: color-mix(
-            in srgb,
-            var(--themecolor) 60%,
-            var(--text-color)
-        );
+        color: color-mix(in srgb,
+                var(--themecolor) 60%,
+                var(--text-color));
         letter-spacing: 0.03em;
     }
 
@@ -511,11 +505,9 @@
     }
 
     .friendsboard-item:active .friends-card-username {
-        color: color-mix(
-            in srgb,
-            var(--themecolor) 65%,
-            var(--text-color)
-        );
+        color: color-mix(in srgb,
+                var(--themecolor) 65%,
+                var(--text-color));
     }
 
     .friendsboard-item:active .friends-card-username::before {
@@ -529,17 +521,14 @@
 
     .friendsboard-item:active .friends-card-text,
     .friendsboard-item:active .friends-card-text p {
-        color: color-mix(
-            in srgb,
-            var(--themecolor) 45%,
-            var(--text2-color)
-        );
+        color: color-mix(in srgb,
+                var(--themecolor) 45%,
+                var(--text2-color));
     }
 
     .friendsboard-item:active .friends-card-avatar {
         border-color: var(--themecolor);
-        box-shadow: 0 0 0 3px
-            color-mix(in srgb, var(--themecolor) 22%, transparent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--themecolor) 22%, transparent);
     }
 }
 
@@ -556,47 +545,111 @@
     }
 }
 
-
 /* 折叠面板 */
 .collapsible-panel {
-    margin-bottom: 20px;
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
+    margin: 36px 0;
+    border: 1px solid var(--line-color);
+    border-radius: 0.9rem;
+    background-color: var(--card-color);
     overflow: hidden;
     font-size: 0.95rem;
 }
 
 .collapsible-header {
-    background-color: var(--pure-gery-color);
-    color: var(--text2-color);
-    cursor: pointer;
-    padding: 16px;
-    text-align: left;
-    outline: none;
-    border: none;
     width: 100%;
+    padding: 16px 22px;
+    background-color: var(--card2-color);
+    border: none;
+    color: var(--text-color);
+    text-align: left;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    position: relative;
+    letter-spacing: 0.01em;
+    font-weight: 500;
+    transition: background-color .3s ease, letter-spacing .25s ease, font-weight .25s ease;
+}
+
+.collapsible-header::after {
+    content: '';
+    position: absolute;
+    left: 22px;
+    right: 22px;
+    bottom: 0;
+    height: 1px;
+    background-color: var(--line-color);
+    opacity: 0;
+    transition: opacity .25s ease;
+}
+
+.collapsible-header.active {
+    letter-spacing: 0.035em;
+    font-weight: 550;
+    background-color: color-mix(in srgb,
+            var(--themecolor) 6%,
+            var(--card2-color));
+}
+
+.collapsible-header.active::after {
+    opacity: 1;
 }
 
 .collapsible-header .icon {
-    transition: transform 0.3s;
+    flex-shrink: 0;
+    font-size: 0.85em;
+    color: var(--text2-color);
+    transform: translateY(1px);
+    transition: transform .3s ease, color .3s ease;
 }
 
 .collapsible-header.active .icon {
-    transform: rotate(180deg);
+    transform: rotate(180deg) translateY(-1px);
+    color: var(--themecolor);
 }
 
 .collapsible-content {
     max-height: 0;
     overflow: hidden;
+    transition: max-height .45s ease;
 }
 
 .collapsible-details {
-    padding: 16px;
-    background-color: var(--card-color);
+    padding: 22px 24px 28px;
+    color: var(--text2-color);
+    line-height: 1.85;
+    transform: translateY(-6px);
+    opacity: 0;
+    transition: transform .4s ease, opacity .4s ease;
 }
+
+.collapsible-details>*:first-child {
+    margin-top: 0;
+}
+
+.collapsible-details>*:first-child::first-letter {
+    margin-left: 0.05em;
+}
+
+.collapsible-header.active+.collapsible-content .collapsible-details {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.collapsible-panel+.collapsible-panel {
+    margin-top: 42px;
+}
+
+@media (hover: none) {
+    .collapsible-header.active {
+        background-color: color-mix(in srgb,
+                var(--themecolor) 8%,
+                var(--card2-color));
+    }
+}
+
 
 /* 时间线 */
 
@@ -694,11 +747,9 @@
 }
 
 .timeline-item:hover::before {
-    background-image: linear-gradient(
-        90deg,
-        var(--themecolor),
-        transparent
-    );
+    background-image: linear-gradient(90deg,
+            var(--themecolor),
+            transparent);
     opacity: 1;
 }
 
