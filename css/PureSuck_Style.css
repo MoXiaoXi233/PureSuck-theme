@@ -175,8 +175,21 @@ table {
 	box-shadow: 0 0 6px #00000008;
 	overflow: hidden;
 	text-align: left;
-	border-radius: 0.35rem;
 	margin: 1.25rem 0;
+}
+
+/* 表格滚动容器 */
+.table-scroll {
+    overflow-x: auto;
+    margin: 1.5em 0;
+    border: 1px solid var(--pure-gery-color);
+    border-radius: 0.35rem
+}
+
+.table-scroll table {
+    margin: 0;
+    min-width: 600px; /* 保证内容不换行 */
+    border-collapse: collapse;
 }
 
 table thead {
@@ -186,7 +199,6 @@ table thead {
 table th,
 table td {
 	padding: 0.4rem 1.25rem;
-	border-bottom: 1px solid var(--line-color);
 	font-size: 0.95rem
 }
 
@@ -2116,7 +2128,7 @@ input:-webkit-autofill:active {
 	height: 6px;
 	border-radius: 25px;
 	background-clip: padding-box;
-	background-color: rgba(0, 0, 0, 0.30);
+	background-color: rgb(62 62 62 / 72%)
 }
 
 .copy-button {

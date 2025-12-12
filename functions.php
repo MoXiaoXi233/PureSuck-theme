@@ -742,6 +742,15 @@ function parsePicGrid($content)
     return $content;
 }
 
+function theme_wrap_tables($content) {
+    // 直接在表格外套一层 div
+    return preg_replace(
+        '/<table\b[^>]*>.*?<\/table>/is',
+        '<div class="table-scroll">$0</div>',
+        $content
+    );
+}
+
 // 运行所有函数
 function parseShortcodes($content)
 {
@@ -751,6 +760,7 @@ function parseShortcodes($content)
     $content = parse_timeline($content);
     $content = parsePicGrid($content);
 
+    $content = theme_wrap_tables($content); # 表格外嵌套，用于适配滚动
     $content = add_zoomable_to_images($content); # 图片放大
 
     // 为所有HTML标签添加 data-aos（极简正则版）
