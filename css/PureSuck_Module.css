@@ -334,13 +334,22 @@
     color: inherit;
 }
 
-/**友链卡片**/
+/** 友链卡片 **/
 .friendsboard-list {
     display: flex;
     flex-flow: row wrap;
-    justify-content: flex-start;
-    width: calc(100% + 15px);
-    margin-left: -15px;
+    width: calc(100% + 16px);
+    margin-left: -16px;
+}
+
+@media (hover: hover) {
+    .friendsboard-list:hover .friendsboard-item {
+        opacity: 0.55;
+    }
+
+    .friendsboard-list:hover .friendsboard-item:hover {
+        opacity: 1;
+    }
 }
 
 .friendsboard-list,
@@ -350,102 +359,200 @@
 
 .friendsboard-item {
     position: relative;
-    cursor: pointer;
-    box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
-    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
-    overflow: hidden;
-    background: var(--card2-color);
-    border-radius: 0.7rem;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: flex-start;
     display: block;
-    margin-left: 15px;
-    margin-bottom: 25px;
-    width: calc(33.3333% - 15px);
-    padding: 20px;
+
+    width: calc(33.3333% - 16px);
+    margin-left: 16px;
+    margin-bottom: 20px;
+
+    padding: 16px 18px 18px 18px;
+    border-radius: 0.6rem;
+
+    background-color: var(--card-color);
     border: 1px solid var(--border-color);
+
+    color: inherit;
+    text-decoration: none;
+
+    transition:
+        background-color .2s ease,
+        border-color .2s ease,
+        opacity .2s ease;
 }
 
-.friendsboard-item:hover {
-    transform: translateY(-6px);
-    background-color: var(--hover-color);
-    box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
-}
-
-.friendsboard-item:active {
-    background-color: var(--hover-color);
-    transform: scale(0.95);
+@media (hover: hover) {
+    .friendsboard-item:hover {
+        background-color: var(--hover-color);
+        border-color: color-mix(
+            in srgb,
+            var(--themecolor) 30%,
+            var(--border-color)
+        );
+    }
 }
 
 .friends-card-header {
-    display: flex;
-    align-items: center;
-    position: relative;
+    margin-bottom: 10px;
 }
 
 .friends-card-username {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-right: 0.5rem;
+    position: relative;
+    padding-left: 18px;
+
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--text-color);
+
+    transition:
+        color .2s ease,
+        letter-spacing .2s ease;
 }
 
-.friends-card-dot {
-    width: 10px;
-    height: 10px;
-    background-image: linear-gradient(var(--themecolor), transparent);
-    border-radius: 50%;
-    opacity: .45;
+.friends-card-username::before {
+    content: '';
     position: absolute;
-    left: -3px;
-    top: 20px;
+    left: 0;
+    top: 0.5em;
+
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+
+    border: 1.5px solid var(--line-color);
+    background-color: transparent;
+
+    transition:
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+.friends-card-username::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: calc(0.5em + 2px);
+
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+
+    background-color: var(--themecolor);
+    opacity: 0;
+
+    transition: opacity .2s ease;
+}
+
+@media (hover: hover) {
+    .friendsboard-item:hover .friends-card-username {
+        color: color-mix(
+            in srgb,
+            var(--themecolor) 60%,
+            var(--text-color)
+        );
+        letter-spacing: 0.03em;
+    }
+
+    .friendsboard-item:hover .friends-card-username::before {
+        border-color: var(--themecolor);
+        transform: scale(1.15);
+    }
+
+    .friendsboard-item:hover .friends-card-username::after {
+        opacity: 0.85;
+    }
 }
 
 .friends-card-body {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    position: relative;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .friends-card-text,
 .friends-card-text p {
-    font-size: 0.85rem;
     margin: 0;
+
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: var(--text2-color);
+
     white-space: nowrap;
-    text-overflow: ellipsis;
     overflow: hidden;
+    text-overflow: ellipsis;
+
+    transition: color .2s ease;
+}
+
+.friends-card-avatar-container {
+    flex-shrink: 0;
 }
 
 .friends-card-avatar {
-    width: 70px;
+    width: 56px;
+    height: 56px;
+
     border-radius: 50%;
     object-fit: cover;
-    flex-shrink: 0;
-    transition: visibility 0s, opacity 0.5s linear;
+
+    background-color: var(--pure-color);
+    border: 1px solid var(--line-color);
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
 }
 
-.friends-card-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+@media (hover: none) {
+    .friendsboard-item:active {
+        background-color: var(--hover-color);
+        border-color: var(--themecolor);
+    }
+
+    .friendsboard-item:active .friends-card-username {
+        color: color-mix(
+            in srgb,
+            var(--themecolor) 65%,
+            var(--text-color)
+        );
+    }
+
+    .friendsboard-item:active .friends-card-username::before {
+        border-color: var(--themecolor);
+        transform: scale(1.15);
+    }
+
+    .friendsboard-item:active .friends-card-username::after {
+        opacity: 0.85;
+    }
+
+    .friendsboard-item:active .friends-card-text,
+    .friendsboard-item:active .friends-card-text p {
+        color: color-mix(
+            in srgb,
+            var(--themecolor) 45%,
+            var(--text2-color)
+        );
+    }
+
+    .friendsboard-item:active .friends-card-avatar {
+        border-color: var(--themecolor);
+        box-shadow: 0 0 0 3px
+            color-mix(in srgb, var(--themecolor) 22%, transparent);
+    }
 }
 
-.friends-card-avatar.hidden {
-    visibility: hidden;
-    opacity: 0;
-}
-
-/* media query for responsive design */
-@media screen and (max-width: 1303px) {
+@media screen and (max-width: 1300px) {
     .friendsboard-item {
-        width: calc(50% - 15px);
+        width: calc(50% - 16px);
     }
 }
 
 @media screen and (max-width: 450px) {
     .friendsboard-item {
-        width: calc(100% - 15px);
+        width: calc(100% - 16px);
+        padding: 18px 18px 20px;
     }
 }
 
