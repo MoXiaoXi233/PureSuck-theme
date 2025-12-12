@@ -119,13 +119,26 @@ blockquote p:last-child {
 }
 
 hr {
-	position: relative;
-	width: calc(100% - 4px);
-	height: .125rem;
-	border: none;
-	background: var(--card-color) repeating-linear-gradient(-45deg, var(--themecolor), var(--themecolor) 0.25rem, transparent 0.25rem, transparent 0.5rem);
-	box-sizing: content-box;
-	overflow: visible;
+  margin: 3.2em 0;
+  border: none;
+  height: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+hr::before {
+  content: "● ● ●";
+  font-size: 6px;
+  letter-spacing: 8px;
+
+  color: var(--themecolor);
+  opacity: .55;
+}
+
+[data-theme="dark"] hr::before {
+  opacity: .65;
 }
 
 button,
