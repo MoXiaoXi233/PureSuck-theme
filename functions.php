@@ -437,14 +437,14 @@ function generateDynamicCSS()
 
     // 定义颜色映射数组
     $colorMap = [
-        'pink' => ['theme' => '#ea868f', 'hover' => '#DB2777'],  // 粉色
-        'green' => ['theme' => '#48c774', 'hover' => '#15803d'], // 绿色
-        'blue' => ['theme' => '#3273dc', 'hover' => '#3B82F6'],  // 蓝色
-        'yellow' => ['theme' => '#feb272', 'hover' => '#B45309'], // 黄色
-        'red' => ['theme' => '#ef4444', 'hover' => '#dc2626'],   // 红色
-        'purple' => ['theme' => '#8b5cf6', 'hover' => '#7c3aed'], // 紫色
-        'cyan' => ['theme' => '#06b6d4', 'hover' => '#0891b2'],   // 青色
-        'orange' => ['theme' => '#f97316', 'hover' => '#ea580c'], // 橙色
+    'pink'   => ['theme' => '#ea868f', 'hover' => '#d1606e'],
+    'green'  => ['theme' => '#5fae8a', 'hover' => '#3f8f6a'],
+    'blue'   => ['theme' => '#6482db', 'hover' => '#4f6fdc'],
+    'yellow' => ['theme' => '#e5b96e', 'hover' => '#cfa24d'],
+    'red'    => ['theme' => '#cd575f', 'hover' => '#b84a4a'],
+    'purple' => ['theme' => '#8f7acb', 'hover' => '#6d5fb3'],
+    'cyan'   => ['theme' => '#5fb3b8', 'hover' => '#3f8f93'],
+    'orange' => ['theme' => '#e39a5c', 'hover' => '#c97a3f'],
     ];
 
     // 设置默认颜色
@@ -457,14 +457,14 @@ function generateDynamicCSS()
 
     // 深色模式颜色映射数组
     $darkColorMap = [
-        'pink' => ['theme' => '#b45864', 'hover' => '#d72b6f'],
-        'green' => ['theme' => '#2e7c55', 'hover' => '#0f6933'],
-        'blue' => ['theme' => '#2855b0', 'hover' => '#1f55e6'],
-        'yellow' => ['theme' => '#bf763f', 'hover' => '#934109'],
-        'red' => ['theme' => '#b91c1c', 'hover' => '#991b1b'],    // 暗红色
-        'purple' => ['theme' => '#6d28d9', 'hover' => '#5b21b6'], // 暗紫色
-        'cyan' => ['theme' => '#0e7490', 'hover' => '#155e75'],   // 暗青色
-        'orange' => ['theme' => '#c2410c', 'hover' => '#9a3412'], // 暗橙色
+    'pink'   => ['theme' => '#bf677a', 'hover' => '#d6728a'],
+    'green'  => ['theme' => '#3f8a6c', 'hover' => '#2f6f56'],
+    'blue'   => ['theme' => '#44579a', 'hover' => '#5b6fc4'],
+    'yellow' => ['theme' => '#ab8748', 'hover' => '#cfa24d'],
+    'red'    => ['theme' => '#9a444b', 'hover' => '#b84a4a'],
+    'purple' => ['theme' => '#5f548a', 'hover' => '#7668a8'],
+    'cyan'   => ['theme' => '#3f7a7f', 'hover' => '#5f9ea3'],
+    'orange' => ['theme' => '#9f5a2f', 'hover' => '#b86a3a'],
     ];
 
     // 根据颜色方案设置 dark 模式下的主题颜色和悬停颜色

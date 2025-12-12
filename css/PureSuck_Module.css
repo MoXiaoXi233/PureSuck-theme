@@ -1,65 +1,77 @@
 /** 一些后期添加的模块样式 **/
 /** 本CSS包含解析项目、右侧边栏及部分小模块 **/
 :root {
-    /* 边框颜色 */
-    --blue-border-color: #7f9cdc;
-    --green-border-color: #8ba394;
-    --yellow-border-color: #ccb191;
-    --red-border-color: #be8585;
-    --pink-border-color: #c487a0;
+    /* Pale：纸感 + 明确色相 */
+    --blue-pale-color: #f4f7ff;
+    --green-pale-color: #f4faf6;
+    --yellow-pale-color: #fff9ee;
+    --red-pale-color: #fff5f5;
+    --pink-pale-color: #fff4f8;
 
-    /* 浅色 */
-    --blue-pale-color: #dbeafe;
-    --green-pale-color: #f0fdf4;
-    --yellow-pale-color: #fef3c7;
-    --red-pale-color: #fee2e2;
-    --pink-pale-color: #f9dfe2;
+    /* Border：低饱和但有色 */
+    --blue-border-color: #c3d2f5;
+    --green-border-color: #c6e0d0;
+    --yellow-border-color: #f0d9b5;
+    --red-border-color: #efc2c2;
+    --pink-border-color: #eec3d4;
 
-    /* 基础色 */
-    --blue-base-color: #3273dc;
-    --green-base-color: #48c774;
-    --yellow-base-color: #feb272;
-    --red-base-color: #dc3545;
-    --pink-base-color: #ea868f;
+    /* Base：给 Tab / 轻强调 */
+    --blue-base-color: #4f6fdc;
+    --green-base-color: #4f9b6a;
+    --yellow-base-color: #d6a65a;
+    --red-base-color: #d46a6a;
+    --pink-base-color: #d36b8c;
 
-    /* 深色 */
-    --blue-bold-color: #2563eb;
-    --green-bold-color: #166534;
-    --yellow-bold-color: #d97706;
-    --red-bold-color: #b91c1c;
-    --pink-bold-color: #DB2777;
-    /* Light 颜色变量 */
+    /* Bold：标题 / 关键字（降一点闷感） */
+    --blue-bold-color: #365acb;
+    --green-bold-color: #2f7d4f;
+    --yellow-bold-color: #b7791f;
+    --red-bold-color: #b84a4a;
+    --pink-bold-color: #b94a73;
+
+    /* 饱和度高一点的 */
+    --blue-alert-color:   #6482db;
+    --green-alert-color:  #4ead86;
+    --yellow-alert-color: #e5b96e;
+    --red-alert-color:    #cd575f;
+    --pink-alert-color:   #ea868f;
+
 }
 
 [data-theme="dark"] {
-    /* 边框颜色 */
-    --blue-border-color: #5b77a8;
-    --green-border-color: #6b7d6e;
-    --yellow-border-color: #a88e6d;
-    --red-border-color: #9a6666;
-    --pink-border-color: #9f6c7e;
+    /* Pale：暗色纸面（雾化，有色但不亮） */
+    --blue-pale-color: #1c2230;
+    --green-pale-color: #1d2621;
+    --yellow-pale-color: #262318;
+    --red-pale-color: #261b1b;
+    --pink-pale-color: #261b22;
 
-    /* 浅色 */
-    --blue-pale-color: #8ea0bf;
-    --green-pale-color: #a8c0a8;
-    --yellow-pale-color: #c9b992;
-    --red-pale-color: #cfa1a1;
-    --pink-pale-color: #c79ba4;
+    /* Border：低存在感结构线 */
+    --blue-border-color: #2a3554;
+    --green-border-color: #2a3f35;
+    --yellow-border-color: #4a4026;
+    --red-border-color: #4a2a2a;
+    --pink-border-color: #4a2a3a;
 
-    /* 基础色 */
-    --blue-base-color: #1e4b99;
-    --green-base-color: #3b9c5e;
-    --yellow-base-color: #d18b57;
-    --red-base-color: #a12a35;
-    --pink-base-color: #c35b63;
+    /* Base：Tab / 次强调（被压亮度） */
+    --blue-base-color: #5f74c8;
+    --green-base-color: #5fa37f;
+    --yellow-base-color: #c6a25a;
+    --red-base-color: #c67a7a;
+    --pink-base-color: #c67a9a;
 
-    /* 深色 */
-    --blue-bold-color: #0f275e;
-    --green-bold-color: #0c3a1d;
-    --yellow-bold-color: #8f4304;
-    --red-bold-color: #5e0f0f;
-    --pink-bold-color: #841247;
-    /* Dark 颜色变量 */
+    /* Bold：标题 / Tab（不刺、不亮） */
+    --blue-bold-color: #8fa2e0;
+    --green-bold-color: #8fcfa8;
+    --yellow-bold-color: #e0c98a;
+    --red-bold-color: #e0a8a8;
+    --pink-bold-color: #e0a8c0;
+
+    --blue-alert-color:   #44579a;  
+    --green-alert-color:  #397e63;  
+    --yellow-alert-color: #ab8748;  
+    --red-alert-color:    #9a444b;  
+    --pink-alert-color:   #bf677a;  
 }
 
 /** 回到顶部 **/
@@ -129,7 +141,7 @@
 }
 
 .alert-box:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
 }
 
@@ -140,28 +152,28 @@
 }
 
 .alert-box.green {
-    background-color: var(--green-base-color);
-    border: 1px solid var(--green-base-color);
+    background-color: var(--green-alert-color);
+    border: 1px solid var(--green-alert-color);
 }
 
 .alert-box.blue {
-    background-color: var(--blue-base-color);
-    border: 1px solid var(--blue-base-color);
+    background-color: var(--blue-alert-color);
+    border: 1px solid var(--blue-alert-color);
 }
 
 .alert-box.yellow {
-    background-color: var(--yellow-base-color);
-    border: 1px solid var(--yellow-base-color);
+    background-color: var(--yellow-alert-color);
+    border: 1px solid var(--yellow-alert-color);
 }
 
 .alert-box.red {
-    background-color: var(--red-base-color);
-    border: 1px solid var(--red-base-color);
+    background-color: var(--red-alert-color);
+    border: 1px solid var(--red-alert-color);
 }
 
 .alert-box.pink {
-    background-color: var(--pink-base-color);
-    border: 1px solid var(--pink-base-color);
+    background-color: var(--pink-alert-color);
+    border: 1px solid var(--pink-alert-color);
 }
 
 /* WINDOW 信息窗 */
@@ -179,9 +191,25 @@
     box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
 }
 
+
+.notifications-container {
+    transition: box-shadow .25s ease, transform .25s ease;
+}
+
 .notifications-container:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 1px 6px 1px rgba(0, 0, 0, .06);
+    transform: translateY(-2px);
+    /* 减半 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+/* Tab Header 在 hover 时“醒一下” */
+.notifications-container:hover .window::before {
+    opacity: 0.35;
+}
+
+/* 右侧出现极弱的结构提示 */
+.notifications-container:hover .window::after {
+    opacity: 0.14;
 }
 
 .flex {
@@ -194,7 +222,42 @@
 
 .window {
     padding: 20px 0px 0px 10px;
+    position: relative;
     border-radius: 0.7rem;
+}
+
+.window::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 2.25rem;
+    width: 72px;
+    height: 5px;
+    background: currentColor;
+    opacity: 0.22;
+    border-radius: 0 0 3px 3px;
+    pointer-events: none;
+}
+
+.window::after {
+    content: '';
+    position: absolute;
+    left: 3rem;
+    right: 3rem;
+    bottom: 0.4rem;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        currentColor,
+        transparent
+    );
+    opacity: 0.04;
+    pointer-events: none;
+}
+
+.notifications-container:active .window::after {
+    opacity: 0.08;
 }
 
 .window.blue {
@@ -858,7 +921,7 @@
         width: 165px;
     }
 
-        .right-sidebar {
+    .right-sidebar {
         padding: 20px 35px 50px 30px
     }
 }
