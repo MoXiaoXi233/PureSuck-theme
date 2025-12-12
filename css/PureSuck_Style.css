@@ -1472,15 +1472,44 @@ a:hover {
 blockquote {
 	border-radius: 0.75rem;
 	color: var(--text-color);
-	background-color: var(--pure-gery-color);
 	width: 100%;
-	padding: 16px;
+    padding: 0.75rem 0.75rem 0.75rem 3rem;
 	margin-right: 0;
 	margin-left: 0;
+	position: relative;
 	font-size: 0.95rem;
 	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
 	border: 1px solid var(--border-color);
-	box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
+}
+
+/* 多段内容的时候让排版更优雅，但只适合新点的浏览器 */
+blockquote:has(p + p),
+blockquote:has(ul),
+blockquote:has(ol),
+blockquote:has(pre) {
+  padding-top: 1.75rem;
+  padding-bottom: 1.75rem;
+}
+
+blockquote::before {	
+content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    width: 1rem;
+    height: 1rem;
+    background: radial-gradient(circle at 0.25rem 0.25rem, var(--themecolor) 1.5px, transparent 2px), radial-gradient(circle at 0.75rem 0.25rem, var(--themecolor) 1px, transparent 1.5px), radial-gradient(circle at 0.25rem 0.75rem, var(--themecolor) 1px, transparent 1.5px), radial-gradient(circle at 0.75rem 0.75rem, var(--themecolor) 1.5px, transparent 2px);
+}
+
+blockquote::after {	
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    top: 1.25rem;
+    width: 1px;
+    height: calc(100% - 1.75rem);
+    background: linear-gradient(to bottom, var(--themecolor), transparent);
+    opacity: 0.3;
 }
 
 code,
