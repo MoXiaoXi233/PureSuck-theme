@@ -288,7 +288,7 @@ function parseTabs() {
         const tabTitles = [];
         const tabContents = [];
 
-        tabElements.forEach((child) => {
+        tabElements.forEach(child => {
             const title = child.getAttribute('tab-title');
             if (title) {
                 tabTitles.push(title);
@@ -296,13 +296,13 @@ function parseTabs() {
             }
         });
 
-        if (tabTitles.length === 0) return;
+        if (!tabTitles.length) return;
 
         const tabHeaderHTML = tabTitles.map((title, index) => `
-            <div class="tab-link ${index === 0 ? 'active' : ''}" 
-                 data-tab="tab${containerIndex + 1}-${index + 1}" 
-                 role="tab" 
-                 aria-controls="tab${containerIndex + 1}-${index + 1}" 
+            <div class="tab-link ${index === 0 ? 'active' : ''}"
+                 data-tab="tab${containerIndex + 1}-${index + 1}"
+                 role="tab"
+                 aria-controls="tab${containerIndex + 1}-${index + 1}"
                  tabindex="${index === 0 ? '0' : '-1'}">
                 ${title}
             </div>
@@ -323,7 +323,7 @@ function parseTabs() {
         tabContainer.innerHTML = `
             <div class="tab-header-wrapper">
                 <button class="scroll-button left" aria-label="向左"></button>
-                <div class="tab-header" role="tablist">
+                <div class="tab-header dir-right" role="tablist">
                     ${tabHeaderHTML}
                     <div class="tab-indicator"></div>
                 </div>
@@ -337,149 +337,66 @@ function parseTabs() {
         container.innerHTML = '';
         container.appendChild(tabContainer);
 
-        const tabHeaderElement = tabContainer.querySelector('.tab-header');
-        const tabLinks = tabHeaderElement.querySelectorAll('.tab-link');
-        const tabPanes = tabContainer.querySelectorAll('.tab-pane');
-        const indicator = tabContainer.querySelector('.tab-indicator');
+        const tabHeader = tabContainer.querySelector('.tab-header');
+        const tabLinks = Array.from(tabHeader.querySelectorAll('.tab-link'));
+        const tabPanes = Array.from(tabContainer.querySelectorAll('.tab-pane'));
+        const indicator = tabHeader.querySelector('.tab-indicator');
         const leftButton = tabContainer.querySelector('.scroll-button.left');
         const rightButton = tabContainer.querySelector('.scroll-button.right');
 
         let cachedWidths = [];
         let cachedOffsets = [];
 
-        const updateIndicator = (activeLink) => {
-            const index = Array.from(tabLinks).indexOf(activeLink);
-            requestAnimationFrame(() => {
-                indicator.style.width = `${cachedWidths[index] * 0.75}px`;
-                indicator.style.left = `${cachedOffsets[index] + (cachedWidths[index] * 0.125)}px`;
-            });
+        const updateCache = () => {
+            cachedWidths = tabLinks.map(l => l.offsetWidth);
+            cachedOffsets = tabLinks.map(l => l.offsetLeft);
         };
 
-        const checkScrollButtons = () => {
-            const totalWidth = cachedWidths.reduce((acc, width) => acc + width, 0);
-            const containerWidth = tabHeaderElement.offsetWidth;
-
+        const updateIndicator = index => {
             requestAnimationFrame(() => {
-                const shouldShowButtons = totalWidth > containerWidth;
-                leftButton.style.display = shouldShowButtons ? 'block' : 'none';
-                rightButton.style.display = shouldShowButtons ? 'block' : 'none';
+                indicator.style.width = `${cachedWidths[index] * 0.75}px`;
+                indicator.style.left = `${cachedOffsets[index] + cachedWidths[index] * 0.125}px`;
             });
         };
 
         const updateLayout = () => {
-            cachedWidths = [];
-            cachedOffsets = [];
-            tabLinks.forEach((link, index) => {
-                cachedWidths[index] = link.offsetWidth;
-                cachedOffsets[index] = link.offsetLeft;
+            updateCache();
+            const activeIndex = tabLinks.findIndex(l => l.classList.contains('active'));
+            updateIndicator(activeIndex);
+        };
+
+        new ResizeObserver(updateLayout).observe(tabHeader);
+
+        tabHeader.addEventListener('click', e => {
+            const target = e.target.closest('.tab-link');
+            if (!target) return;
+
+            const newIndex = tabLinks.indexOf(target);
+            const oldIndex = tabLinks.findIndex(l => l.classList.contains('active'));
+            if (newIndex === oldIndex) return;
+
+            tabHeader.classList.remove('dir-left', 'dir-right');
+            tabHeader.classList.add(newIndex > oldIndex ? 'dir-right' : 'dir-left');
+
+            tabLinks.forEach(l => {
+                l.classList.remove('active');
+                l.setAttribute('tabindex', '-1');
             });
-            checkScrollButtons();
-            const activeIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
-            updateIndicator(tabLinks[activeIndex]);
-        };
 
-        const resizeObserver = new ResizeObserver(updateLayout);
-        resizeObserver.observe(tabHeaderElement);
+            tabPanes.forEach(p => p.classList.remove('active'));
 
-        leftButton.addEventListener('click', () => {
-            tabHeaderElement.scrollBy({ left: -100, behavior: 'smooth' });
-            updateLayout();
+            target.classList.add('active');
+            target.setAttribute('tabindex', '0');
+            target.focus();
+
+            tabPanes[newIndex].classList.add('active');
+            updateIndicator(newIndex);
         });
 
-        rightButton.addEventListener('click', () => {
-            tabHeaderElement.scrollBy({ left: 100, behavior: 'smooth' });
-            updateLayout();
-        });
-
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        const onMouseDown = (e) => {
-            isDown = true;
-            startX = e.pageX - tabHeaderElement.offsetLeft;
-            scrollLeft = tabHeaderElement.scrollLeft;
-        };
-
-        const onMouseUpOrLeave = () => {
-            isDown = false;
-            updateLayout();
-        };
-
-        const onMouseMove = (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - tabHeaderElement.offsetLeft;
-            const walk = (x - startX) * 2;
-            tabHeaderElement.scrollLeft = scrollLeft - walk;
-        };
-
-        tabHeaderElement.addEventListener('mousedown', onMouseDown);
-        tabHeaderElement.addEventListener('mouseleave', onMouseUpOrLeave);
-        tabHeaderElement.addEventListener('mouseup', onMouseUpOrLeave);
-        tabHeaderElement.addEventListener('mousemove', onMouseMove);
-
-        tabHeaderElement.addEventListener('touchstart', (e) => {
-            isDown = true;
-            startX = e.touches[0].pageX - tabHeaderElement.offsetLeft;
-            scrollLeft = tabHeaderElement.scrollLeft;
-        }, { passive: true });
-
-        tabHeaderElement.addEventListener('touchend', onMouseUpOrLeave, { passive: true });
-        tabHeaderElement.addEventListener('touchmove', (e) => {
-            if (!isDown) return;
-            const x = e.touches[0].pageX - tabHeaderElement.offsetLeft;
-            const walk = (x - startX) * 2;
-            tabHeaderElement.scrollLeft = scrollLeft - walk;
-        }, { passive: true });
-
-        tabHeaderElement.addEventListener('click', (event) => {
-            if (event.target.classList.contains('tab-link')) {
-                const currentIndex = Array.from(tabLinks).indexOf(event.target);
-                const previousIndex = Array.from(tabLinks).findIndex(link => link.classList.contains('active'));
-
-                tabLinks.forEach(link => link.classList.remove('active'));
-                tabPanes.forEach(pane => {
-                    pane.classList.remove('active');
-                    pane.removeAttribute('data-aos');
-                    pane.classList.remove('aos-animate');
-                });
-
-                event.target.classList.add('active');
-                const activePane = document.getElementById(event.target.getAttribute('data-tab'));
-                activePane.classList.add('active');
-
-                activePane.setAttribute('data-aos', currentIndex > previousIndex ? 'fade-left' : 'fade-right');
-
-                updateIndicator(event.target);
-
-                setTimeout(() => {
-                    activePane.classList.add('aos-animate');
-                }, 0);
-
-                if (typeof AOS !== 'undefined') {
-                    AOS.refresh();
-                }
-
-                tabLinks.forEach(link => link.setAttribute('tabindex', '-1'));
-                event.target.setAttribute('tabindex', '0');
-                event.target.focus();
-
-                const tabHeaderRect = tabHeaderElement.getBoundingClientRect();
-                const targetRect = event.target.getBoundingClientRect();
-                if (targetRect.left < tabHeaderRect.left) {
-                    tabHeaderElement.scrollBy({ left: targetRect.left - tabHeaderRect.left, behavior: 'smooth' });
-                } else if (targetRect.right > tabHeaderRect.right) {
-                    tabHeaderElement.scrollBy({ left: targetRect.right - tabHeaderRect.right, behavior: 'smooth' });
-                }
-
-                updateLayout();
-            }
-        });
-
-        updateIndicator(tabLinks[0]);
+        updateLayout();
     });
 }
+
 
 function initializeStickyTOC() {
     const tocSection = document.getElementById('toc-section');

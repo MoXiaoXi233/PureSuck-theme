@@ -790,7 +790,6 @@ timeline-description {
 }
 
 
-/* tabs 标签栏 */
 .tab-header-wrapper {
     display: flex;
     align-items: center;
@@ -799,28 +798,112 @@ timeline-description {
 
 .scroll-button {
     display: none;
-    background: var(--card-color);
+    background: transparent;
     border: none;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    color: var(--themecolor);
+    color: var(--text2-color);
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     z-index: 1;
     font-family: "fontello";
+    opacity: 0.45;
+    transition: opacity .25s ease, color .25s ease;
 }
 
 .scroll-button.left {
-    left: -5px;
+    left: -10px;
     transform: translateY(-50%) rotate(-90deg);
 }
 
 .scroll-button.right {
-    right: -5px;
+    right: -10px;
     transform: translateY(-50%) rotate(90deg);
 }
 
+.scroll-button:hover {
+    opacity: 0.9;
+    color: var(--themecolor);
+}
+
+
+.tab-header-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.scroll-button {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--text2-color);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    font-family: "fontello";
+    opacity: 0.45;
+    transition: opacity .25s ease, color .25s ease;
+}
+
+.scroll-button.left {
+    left: -10px;
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.scroll-button.right {
+    right: -10px;
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.scroll-button:hover {
+    opacity: 0.9;
+    color: var(--themecolor);
+}
+
+
+/* Tabs */
+
+.tab-header-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.scroll-button {
+    display: none;
+    background: transparent;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--text2-color);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    font-family: "fontello";
+    opacity: 0.45;
+    transition: opacity .25s ease, color .25s ease;
+}
+
+.scroll-button.left {
+    left: -10px;
+    transform: translateY(-50%) rotate(-90deg);
+}
+
+.scroll-button.right {
+    right: -10px;
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.scroll-button:hover {
+    opacity: 0.9;
+    color: var(--themecolor);
+}
 
 .tab-header {
     display: flex;
@@ -835,12 +918,13 @@ timeline-description {
 }
 
 .tab-link {
-    padding: 10px 20px;
+    padding: 14px 20px;
     cursor: pointer;
     color: var(--text2-color);
-    transition: all 0.3s ease;
     position: relative;
     flex-shrink: 0;
+    letter-spacing: 0.015em;
+    transition: color .25s ease, letter-spacing .25s ease;
 }
 
 .tab-link:hover {
@@ -848,20 +932,40 @@ timeline-description {
 }
 
 .tab-link.active {
-    color: var(--themecolor);
-    background-color: var(--card-color);
+    color: color-mix(in srgb, var(--themecolor) 72%, var(--text-color));
+    letter-spacing: 0.035em;
 }
 
 .tab-indicator {
     position: absolute;
     bottom: -1px;
     height: 2px;
-    background-color: var(--themecolor);
-    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
+    border-radius: 2px;
+    transition:
+        left .42s cubic-bezier(0.345, 0.045, 0.345, 1),
+        width .42s cubic-bezier(0.345, 0.045, 0.345, 1);
+}
+
+.tab-header.dir-right .tab-indicator {
+    background: linear-gradient(
+        90deg,
+        var(--themecolor) 0%,
+        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+        color-mix(in srgb, var(--themecolor) 35%, var(--card-color)) 100%
+    );
+}
+
+.tab-header.dir-left .tab-indicator {
+    background: linear-gradient(
+        270deg,
+        var(--themecolor) 0%,
+        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+        color-mix(in srgb, var(--themecolor) 35%, var(--card-color)) 100%
+    );
 }
 
 .tab-content {
-    padding: 20px 0;
+    padding: 28px 0 0;
     background-color: var(--card-color);
 }
 
@@ -873,15 +977,49 @@ timeline-description {
     display: block;
 }
 
+.tab-pane.active > *:first-child {
+    margin-top: 0;
+    transform: translateY(-6px);
+    opacity: 0;
+    animation: tab-content-in .45s ease forwards;
+}
+
+@keyframes tab-content-in {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 @media (max-width: 768px) {
     .tab-header {
         white-space: nowrap;
     }
 
     .tab-link {
-        flex-shrink: 0;
+        padding: 16px 18px;
     }
 }
+
+html[data-theme="dark"] .tab-header.dir-right .tab-indicator {
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--themecolor) 92%, #fff) 0%,
+        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+        color-mix(in srgb, var(--themecolor) 40%, var(--card-color)) 100%
+    );
+}
+
+html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
+    background: linear-gradient(
+        270deg,
+        color-mix(in srgb, var(--themecolor) 92%, #fff) 0%,
+        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+        color-mix(in srgb, var(--themecolor) 40%, var(--card-color)) 100%
+    );
+}
+
+
 
 .bilibili-card {
     width: 100%;
