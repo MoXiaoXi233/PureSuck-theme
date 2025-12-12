@@ -947,21 +947,17 @@ timeline-description {
 }
 
 .tab-header.dir-right .tab-indicator {
-    background: linear-gradient(
-        90deg,
-        var(--themecolor) 0%,
-        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
-        color-mix(in srgb, var(--themecolor) 35%, var(--card-color)) 100%
-    );
+    background: linear-gradient(90deg,
+            var(--themecolor) 0%,
+            color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+            color-mix(in srgb, var(--themecolor) 35%, var(--card-color)) 100%);
 }
 
 .tab-header.dir-left .tab-indicator {
-    background: linear-gradient(
-        270deg,
-        var(--themecolor) 0%,
-        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
-        color-mix(in srgb, var(--themecolor) 35%, var(--card-color)) 100%
-    );
+    background: linear-gradient(270deg,
+            var(--themecolor) 0%,
+            color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+            color-mix(in srgb, var(--themecolor) 35%, var(--card-color)) 100%);
 }
 
 .tab-content {
@@ -977,7 +973,7 @@ timeline-description {
     display: block;
 }
 
-.tab-pane.active > *:first-child {
+.tab-pane.active>*:first-child {
     margin-top: 0;
     transform: translateY(-6px);
     opacity: 0;
@@ -1002,21 +998,17 @@ timeline-description {
 }
 
 html[data-theme="dark"] .tab-header.dir-right .tab-indicator {
-    background: linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--themecolor) 92%, #fff) 0%,
-        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
-        color-mix(in srgb, var(--themecolor) 40%, var(--card-color)) 100%
-    );
+    background: linear-gradient(90deg,
+            color-mix(in srgb, var(--themecolor) 92%, #fff) 0%,
+            color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+            color-mix(in srgb, var(--themecolor) 40%, var(--card-color)) 100%);
 }
 
 html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
-    background: linear-gradient(
-        270deg,
-        color-mix(in srgb, var(--themecolor) 92%, #fff) 0%,
-        color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
-        color-mix(in srgb, var(--themecolor) 40%, var(--card-color)) 100%
-    );
+    background: linear-gradient(270deg,
+            color-mix(in srgb, var(--themecolor) 92%, #fff) 0%,
+            color-mix(in srgb, var(--themecolor) 65%, var(--card-color)) 55%,
+            color-mix(in srgb, var(--themecolor) 40%, var(--card-color)) 100%);
 }
 
 
@@ -1051,7 +1043,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 .toc-section,
 .search-section {
     margin-bottom: 20px;
-    position: relative
+    position: relative;
 }
 
 .section-header {
@@ -1060,7 +1052,6 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--text-color);
-    transition: all .3s ease;
 }
 
 .section-header .icon {
@@ -1079,35 +1070,90 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 }
 
 .cloud-item {
-    display: inline-block;
-    padding: 2px 12px;
-    border-radius: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    min-height: 32px;
+    border-radius: 0.45rem;
     text-decoration: none;
-    font-size: 0.9em;
-    background: var(--card-color);
+    font-size: 0.92em;
+    line-height: 1;
     color: var(--nav-text-color);
+    background-color: color-mix(in srgb,
+            var(--card-color) 70%,
+            var(--background-color));
     border: 1px solid var(--border-color);
-    box-shadow: 0 0 6px #00000008;
-    transition: all 0.3s ease;
+    transition:
+        transform .2s ease,
+        border-color .25s ease,
+        background-color .25s ease,
+        color .25s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.cloud-item:hover,
-.cloud-item:active {
-    color: var(--nav-text-color);
-    background-color: var(--hover-color);
+.cloud-item:hover {
+    color: color-mix(in srgb,
+            var(--themecolor) 70%,
+            var(--nav-text-color));
+    border-color: color-mix(in srgb,
+            var(--themecolor) 45%,
+            var(--border-color));
+    background-color: color-mix(in srgb,
+            var(--themecolor) 8%,
+            var(--card-color));
 }
 
 .cloud-item:active {
+    transform: scale(0.96);
+    border-color: color-mix(in srgb,
+            var(--themecolor) 55%,
+            var(--border-color));
+    background-color: color-mix(in srgb,
+            var(--themecolor) 12%,
+            var(--card-color));
+}
 
-    transform: scale(0.925);
+.cloud-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb,
+            var(--themecolor) 35%,
+            transparent);
+    border-color: color-mix(in srgb,
+            var(--themecolor) 55%,
+            var(--border-color));
 }
 
 .count {
     vertical-align: super;
-    font-size: 0.8em;
-    color: #f00;
-    margin-left: 5px;
+    font-size: 0.78em;
+    margin-left: 2px;
+    color: color-mix(in srgb,
+            var(--themecolor) 65%,
+            var(--text2-color));
 }
+
+@media (max-width: 768px) {
+    .cloud-container {
+        gap: 8px;
+    }
+
+    .cloud-item {
+        padding: 8px 12px;
+        min-height: 36px;
+    }
+}
+
+@media (hover: none) {
+    .cloud-item:hover {
+        color: var(--nav-text-color);
+        border-color: var(--border-color);
+        background-color: color-mix(in srgb,
+                var(--card-color) 70%,
+                var(--background-color));
+    }
+}
+
 
 /** TOC 目录**/
 .toc-section {
@@ -1227,44 +1273,55 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 .search-container {
     display: flex;
     align-items: center;
+    width: 100%;
     background-color: var(--card-color);
     border-radius: 0.65rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 0 6px #00000008;
+    transition: border-color .25s ease, background-color .25s ease;
 }
 
 .search-input {
+    flex: 1;
     border: none;
     outline: none;
-    background-color: var(--card-color);
-    font-size: 16px;
-    padding: 10px 10px 10px 12px;
-    border-radius: 0.75rem;
-    width: 200px;
+    background: transparent;
+    font-size: 0.95rem;
+    padding: 10px 12px;
     color: var(--text-color);
-    box-shadow: none;
+}
+
+.search-input::placeholder {
+    color: var(--text2-color);
 }
 
 .search-button {
-    background: none;
     border: none;
+    background: transparent;
     cursor: pointer;
-    padding: 10px 10px 10px 5px;
+    padding: 10px 12px;
     display: flex;
     align-items: center;
-    color: var(--text-color);
     justify-content: center;
+    color: var(--text2-color);
+    transition: color .25s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
-@media screen and (max-width: 1183px) {
-    .right-sidebar {
-        display: none;
-    }
+.search-container:hover {
+    border-color: color-mix(in srgb,
+            var(--themecolor) 35%,
+            var(--border-color));
+}
 
-    .toc-section {
-        display: none;
-    }
+.search-container:focus-within {
+    border-color: var(--themecolor);
+    background-color: color-mix(in srgb,
+            var(--themecolor) 6%,
+            var(--card-color));
+}
 
+.search-container:focus-within .search-button {
+    color: var(--themecolor);
 }
 
 @media (min-width:1183px) {
@@ -1272,30 +1329,30 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
         display: inline;
     }
 
-    .search-button {
-        padding: 10px 10px 10px 35px;
-    }
-
     .search-input {
         width: 165px;
     }
 
     .right-sidebar {
-        padding: 20px 35px 50px 30px
+        padding: 20px 35px 50px 30px;
     }
 }
 
 @media (min-width:1400px) {
-    .search-button {
-        padding: 10px 10px 10px 5px;
-    }
-
     .search-input {
         width: 200px;
     }
 
     .right-sidebar {
         width: 344px;
-        padding: 40px 50px 50px 50px
+        padding: 40px 50px 50px 50px;
+    }
+}
+
+@media (max-width:1183px) {
+
+    .right-sidebar,
+    .toc-section {
+        display: none;
     }
 }
