@@ -133,7 +133,7 @@
     margin: 20px 0 !important;
     display: flex;
     padding: 10px 20px;
-    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
+    transition: all .3s ease;
     transform: scale(1);
     color: var(--pure-color);
     font-weight: bold;
@@ -338,15 +338,20 @@
     flex-flow: row wrap;
     width: calc(100% + 16px);
     margin-left: -16px;
+    transition: scale .3s ease;
 }
 
 @media (hover: hover) {
     .friendsboard-list:hover .friendsboard-item {
         opacity: 0.55;
+        scale: 1;
     }
 
     .friendsboard-list:hover .friendsboard-item:hover {
         opacity: 1;
+        background-color: 
+ color-mix(in srgb, var(--themecolor) 8%, var(--card-color));
+        scale: 1.03;
     }
 }
 
@@ -372,18 +377,15 @@
     color: inherit;
     text-decoration: none;
 
-    transition:
-        background-color .2s ease,
-        border-color .2s ease,
-        opacity .2s ease;
+    transition: all .3s ease;
 }
 
 @media (hover: hover) {
     .friendsboard-item:hover {
         background-color: var(--hover-color);
         border-color: color-mix(in srgb,
-                var(--themecolor) 30%,
-                var(--border-color));
+                var(--themehovercolor) 75%,
+                var(--border-color))
     }
 }
 
@@ -400,9 +402,7 @@
     letter-spacing: 0.01em;
     color: var(--text-color);
 
-    transition:
-        color .2s ease,
-        letter-spacing .2s ease;
+    transition: all .3s ease;
 }
 
 .friends-card-username::before {
@@ -418,9 +418,7 @@
     border: 1.5px solid var(--line-color);
     background-color: transparent;
 
-    transition:
-        border-color .2s ease,
-        transform .2s ease;
+    transition: all .3 ease;
 }
 
 .friends-card-username::after {
@@ -433,7 +431,7 @@
     height: 3px;
     border-radius: 50%;
 
-    background-color: var(--themecolor);
+    background-color: var(--themehovercolor);
     opacity: 0;
 
     transition: opacity .2s ease;
@@ -442,13 +440,13 @@
 @media (hover: hover) {
     .friendsboard-item:hover .friends-card-username {
         color: color-mix(in srgb,
-                var(--themecolor) 60%,
+                var(--themehovercolor) 75%,
                 var(--text-color));
         letter-spacing: 0.03em;
     }
 
     .friendsboard-item:hover .friends-card-username::before {
-        border-color: var(--themecolor);
+        border-color: var(--themehovercolor);
         transform: scale(1.15);
     }
 
@@ -493,25 +491,23 @@
     background-color: var(--pure-color);
     border: 1px solid var(--line-color);
 
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease;
+    transition: all .3 ease;
 }
 
 @media (hover: none) {
     .friendsboard-item:active {
         background-color: var(--hover-color);
-        border-color: var(--themecolor);
+        border-color: var(--themehovercolor);
     }
 
     .friendsboard-item:active .friends-card-username {
         color: color-mix(in srgb,
-                var(--themecolor) 65%,
+                var(--themehovercolor) 75%,
                 var(--text-color));
     }
 
     .friendsboard-item:active .friends-card-username::before {
-        border-color: var(--themecolor);
+        border-color: var(--themehovercolor);
         transform: scale(1.15);
     }
 
@@ -522,13 +518,13 @@
     .friendsboard-item:active .friends-card-text,
     .friendsboard-item:active .friends-card-text p {
         color: color-mix(in srgb,
-                var(--themecolor) 45%,
+                var(--themehovercolor) 45%,
                 var(--text2-color));
     }
 
     .friendsboard-item:active .friends-card-avatar {
-        border-color: var(--themecolor);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--themecolor) 22%, transparent);
+        border-color: var(--themehovercolor);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--themehovercolor) 22%, transparent);
     }
 }
 
@@ -788,45 +784,6 @@ timeline-description {
         opacity: 1;
     }
 }
-
-
-.tab-header-wrapper {
-    display: flex;
-    align-items: center;
-    position: relative;
-}
-
-.scroll-button {
-    display: none;
-    background: transparent;
-    border: none;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: var(--text2-color);
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1;
-    font-family: "fontello";
-    opacity: 0.45;
-    transition: opacity .25s ease, color .25s ease;
-}
-
-.scroll-button.left {
-    left: -10px;
-    transform: translateY(-50%) rotate(-90deg);
-}
-
-.scroll-button.right {
-    right: -10px;
-    transform: translateY(-50%) rotate(90deg);
-}
-
-.scroll-button:hover {
-    opacity: 0.9;
-    color: var(--themecolor);
-}
-
 
 .tab-header-wrapper {
     display: flex;
@@ -1202,11 +1159,6 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 #toc .li:hover {
     border: 1px solid var(--border-color);
     background-color: var(--nav-color);
-}
-
-#toc .li:active {
-    background-color: var(background);
-    transform: scale(0.95);
 }
 
 #toc .toc-a {
