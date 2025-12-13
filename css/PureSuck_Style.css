@@ -1720,6 +1720,14 @@ strong {
 	font-size: 0.75rem;
 }
 
+.cm:has(.badge) {
+    color: color-mix(
+        in srgb,
+        var(--text2-color) 92%,
+        var(--themecolor)
+    );
+}
+
 .ccr,
 .cm {
 	margin-top: 1rem;
@@ -1879,30 +1887,62 @@ textarea.ci {
 }
 
 
+/* 评论发布区 */
+.respond {
+    margin-top: 3rem;
+}
+
+.ainfo .ci {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    background: color-mix(in srgb, var(--card-color) 90%, transparent);
+}
+
+.ainfo .ci:focus {
+    opacity: 1;
+}
+
+textarea.ci {
+    min-height: 220px;
+    font-size: 1rem;
+    line-height: 1.8;
+    border-radius: 0.9rem;
+    background: var(--card-color);
+    box-shadow: 0 8px 30px rgba(0,0,0,.04);
+}
+
+.CtBoxBar {
+    margin-top: 12px;
+    opacity: .8;
+    transition: opacity .3s ease;
+}
+
+textarea:focus + .CtBoxBar,
+textarea:focus-within + .CtBoxBar {
+    opacity: 1;
+}
+
+
 .submit {
-	display: block;
-	padding: 8px 30px;
-	margin-top: 10px;
-	border: 1px solid var(--border-color);
-	background: var(--card-color);
-	text-align: center;
-	font-size: 1rem;
-	color: var(--text2-color);
-	line-height: 36px;
-	border-radius: 10px;
-	box-shadow: 0 0 6px #00000008;
+    margin-top: 24px;
+    align-self: flex-end;
+    padding: 10px 36px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    background: var(--themecolor);
+    color: var(--pure-color);
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
 
 .submit:hover {
-	border-color: var(--border-color);
-	background: var(--hover-color);
-	cursor: pointer
+    transform: translateY(-1px);
 }
 
 .submit:active {
-	background-color: var(--hover-color);
-	transform: scale(0.95);
+    transform: scale(.96);
 }
+
 
 @media only screen and (max-width:767px) {
 	.avatarcc {
@@ -1917,6 +1957,7 @@ textarea.ci {
 	}
 }
 
+/* 网站主头像 */
 .el-avatar {
 	display: inline-flex;
 	align-items: center;
@@ -2013,7 +2054,7 @@ textarea.ci {
 	}
 }
 
-
+/* 主内容块 */
 .wrapper {
 	position: relative;
 }

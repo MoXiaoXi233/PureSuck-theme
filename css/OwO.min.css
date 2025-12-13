@@ -1,368 +1,247 @@
 .OwO {
-  user-select: none;
-}
-
-.OwO:hover .OwO-logo {
-  color: var(--text2-color);
-}
-
-.OwO.OwO-open .OwO-logo {
-  border-radius: 0.45rem 0.45rem 0 0;
-  border-bottom: none;
-  color: var(--text2-color);
-}
-
-.OwO.OwO-open .OwO-body {
-  display: block;
-}
-
-.OwO.OwO-up .OwO-body {
-  top: inherit;
-  transform: translateY(-113%);
-  /* 向上移动自身的高度 */
-  border-radius: 0.45rem 0.45rem 0.45rem 0;
-}
-
-.OwO.OwO-up .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
-  border-radius: 0;
-}
-
-.OwO-package-active {
-  color: var(--themecolor);
-}
-
-.OwO.OwO-up.OwO-open .OwO-logo {
-  border: 1px solid var(--border-color);
-  border-radius: 0 0 0.45rem 0.45rem;
-  border-top: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none
 }
 
 .OwO .OwO-logo {
-  position: relative;
-  display: inline-block;
-  color: var(--text2-color);
-  background: var(--card-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
   border: 1px solid var(--border-color);
-  border-radius: 0.45rem;
-  font-size: 13px;
-  padding: 15px 5px;
-  margin: 5px 0px 0px 0px;
+  border-radius: .65rem;
+  background: var(--card-color);
+  color: var(--text2-color);
   cursor: pointer;
-  height: 22px;
-  box-sizing: border-box;
-  z-index: 2;
-  line-height: 0px;
-  box-shadow: 0 0 6px #00000008;
-}
-
-.OwO .OwO-logo:hover span {
-  display: inline-block;
-  animation: my-face 5s infinite ease-in-out;
+  transition: transform .22s cubic-bezier(.2, .9, .2, 1), box-shadow .22s cubic-bezier(.2, .9, .2, 1), border-color .22s cubic-bezier(.2, .9, .2, 1), background-color .22s cubic-bezier(.2, .9, .2, 1)
 }
 
 .OwO .OwO-logo:active {
-  background-color: var(--hover-color);
-  transform: scale(0.95);
+  transform: scale(.96)
+}
+
+.OwO.OwO-open .OwO-logo {
+  border-color: color-mix(in srgb, var(--themecolor) 55%, var(--border-color))
 }
 
 .OwO .OwO-body {
-  display: none;
   position: absolute;
-  width: 400px;
-  background: var(--card-color);
+  left: 0;
+  bottom: calc(100% + 10px);
+  width: min(420px, calc(100vw - 24px));
+  z-index: 50;
+  opacity: 0;
+  transform: translateY(6px) scale(.985);
+  pointer-events: none;
+  transition: opacity .22s cubic-bezier(.2, .9, .2, 1), transform .22s cubic-bezier(.2, .9, .2, 1);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .1))
+}
+
+.OwO.OwO-open .OwO-body {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto
+}
+
+.OwO .OwO-panel {
   border: 1px solid var(--border-color);
-  z-index: 1;
-  top: 26px;
-  border-radius: 0 0.45rem 0.45rem 0.45rem;
-}
-
-.OwO .OwO-body .OwO-items {
-  user-select: none;
-  display: none;
-  padding: 15px 0px 0px 10px;
-  margin: 0;
-  overflow: auto;
-  height: 210px;
-  font-size: 0;
-}
-
-.OwO .OwO-body .OwO-items .OwO-item {
-  list-style-type: none;
-  background: var(--pure-gery-color);
-  padding: 5px 15px;
-  border-radius: 0.45rem;
-  display: inline-block;
-  font-size: 12px;
-  line-height: 14px;
-  margin: 0 10px 12px 0;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.OwO .OwO-body .OwO-items .OwO-item:hover {
-  background: var(--hover-color);
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1), 0 3px 1px -2px rgba(0, 0, 0, 0.1), 0 1px 5px 0 rgba(0, 0, 0, 0.1);
-  animation: my-face 5s infinite ease-in-out;
-}
-
-.OwO .OwO-body .OwO-items-emoji .OwO-item {
-  font-size: 20px;
-  line-height: 19px;
-}
-
-.OwO .OwO-body .OwO-items-image .OwO-item {
-  max-width: calc(25% - 10px);
-  box-sizing: border-box;
-}
-
-.OwO .OwO-body .OwO-items-image .OwO-item img {
-  max-width: 100%;
-}
-
-.OwO .OwO-body .OwO-items-show {
-  display: block;
-}
-
-.OwO .OwO-body .OwO-bar {
-  width: 100%;
-  height: 30px;
-  border-top: 1px solid var(--border-color);
+  border-radius: .85rem;
   background: var(--card-color);
-  border-radius: 0 0 0.45rem 0.45rem;
-  color: var(--text2-color);
+  overflow: hidden
 }
 
-.OwO .OwO-body .OwO-bar .OwO-packages {
+.OwO .OwO-viewport {
+  position: relative;
+  background: var(--card-color);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .28s cubic-bezier(.22, 1, .24, 1)
+}
+
+.OwO .OwO-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--themecolor) 8%, var(--card-color)) 0, var(--card-color) 55%);
+  opacity: .9;
+  pointer-events: none
+}
+
+.OwO .OwO-items {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 12px 14px;
+  margin: 0;
+  list-style: none;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch
+}
+
+.OwO .OwO-items[hidden] {
+  display: none !important
+}
+
+.OwO .OwO-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: .65rem;
+  background: color-mix(in srgb, var(--card-color) 75%, var(--pure-gery-color));
+  border: 1px solid color-mix(in srgb, var(--border-color) 78%, var(--card-color));
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.2, .9, .2, 1), border-color .18s cubic-bezier(.2, .9, .2, 1), background-color .18s cubic-bezier(.2, .9, .2, 1)
+}
+
+.OwO .OwO-item:hover {
+  border-color: color-mix(in srgb, var(--themecolor) 45%, var(--border-color));
+  background: color-mix(in srgb, var(--themecolor) 10%, var(--card-color))
+}
+
+.OwO .OwO-item:active {
+  transform: scale(.96)
+}
+
+.OwO .OwO-items-emoji .OwO-item {
+  font-size: 20px;
+  line-height: 1
+}
+
+.OwO .OwO-items-image .OwO-item {
+  padding: 8px;
+  min-height: unset
+}
+
+.OwO .OwO-items-image .OwO-item img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: .55rem
+}
+
+.OwO .OwO-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--card-color) 88%, var(--pure-gery-color))
+}
+
+.OwO .OwO-packages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
   padding: 0;
-  font-size: 0;
+  list-style: none;
+  white-space: nowrap;
+  overflow: auto;
+  scrollbar-width: none
 }
 
-.OwO .OwO-body .OwO-bar .OwO-packages li {
-  list-style-type: none;
-  display: inline-block;
-  line-height: 30px;
-  font-size: 14px;
+.OwO .OwO-packages::-webkit-scrollbar {
+  width: 0;
+  height: 0
+}
+
+.OwO .OwO-packages li {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
   padding: 0 10px;
+  border-radius: .65rem;
+  color: var(--text2-color);
   cursor: pointer;
-  margin-right: 3px;
+  transition: color .18s ease, background-color .18s ease, transform .18s cubic-bezier(.2, .9, .2, 1)
 }
 
-.OwO .OwO-body .OwO-bar .OwO-packages li:nth-child(1) {
-  border-radius: 0 0 0 0.45rem;
+.OwO .OwO-packages li:hover {
+  background: color-mix(in srgb, var(--themecolor) 10%, var(--card-color));
+  color: color-mix(in srgb, var(--themecolor) 65%, var(--text2-color))
 }
 
-.OwO .OwO-body .OwO-bar .OwO-packages .OwO-package-active {
-  background: var(--themehovercolor);
-  transition: 0.3s;
-  content: "";
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--themecolor);
+.OwO .OwO-packages li:active {
+  transform: scale(.97)
+}
+
+.OwO .OwO-packages .OwO-package-active {
+  color: var(--text-color)
+}
+
+.OwO .OwO-indicator {
+  position: absolute;
+  left: 10px;
+  bottom: 6px;
   height: 3px;
-  pointer-events: none;
+  border-radius: 999px;
+  width: 0;
+  transform: translateX(0);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--themecolor) 88%, var(--card-color)) 0, color-mix(in srgb, var(--themecolor) 58%, var(--card-color)) 55%, color-mix(in srgb, var(--themecolor) 18%, var(--card-color)) 100%);
+  transition: width .32s cubic-bezier(.22, 1, .24, 1), transform .32s cubic-bezier(.22, 1, .24, 1);
+  will-change: width, transform
 }
 
-@keyframes my-face {
-  2% {
-    transform: translate(0, 1.5px) rotate(1.5deg);
+.OwO.OwO-snap-indicator .OwO-indicator {
+  transition-duration: 0s
+}
+
+@media (max-width:520px) {
+  .OwO .OwO-body {
+    width: min(92vw, 420px)
   }
 
-  4% {
-    transform: translate(0, -1.5px) rotate(-0.5deg);
+  .OwO .OwO-items {
+    gap: 8px;
+    padding: 10px 10px 12px
   }
 
-  6% {
-    transform: translate(0, 1.5px) rotate(-1.5deg);
+  .OwO .OwO-item {
+    border-radius: .6rem
   }
+}
 
-  8% {
-    transform: translate(0, -1.5px) rotate(-1.5deg);
-  }
+@media (prefers-reduced-motion:reduce) {
 
-  10% {
-    transform: translate(0, 2.5px) rotate(1.5deg);
+  .OwO .OwO-body,
+  .OwO .OwO-indicator,
+  .OwO .OwO-item,
+  .OwO .OwO-logo,
+  .OwO .OwO-packages li,
+  .OwO .OwO-viewport {
+    transition: none !important
   }
+}
 
-  12% {
-    transform: translate(0, -0.5px) rotate(1.5deg);
-  }
+.OwO[data-owo-measure="1"] .OwO-items[hidden] {
+  display: flex !important;
+  position: absolute !important;
+  left: -99999px !important;
+  top: -99999px !important;
+  visibility: hidden !important;
+  pointer-events: none !important
+}
 
-  14% {
-    transform: translate(0, -1.5px) rotate(1.5deg);
-  }
+.OwO .OwO-viewport {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .28s cubic-bezier(.22, 1, .24, 1)
+}
 
-  16% {
-    transform: translate(0, -0.5px) rotate(-1.5deg);
-  }
-
-  18% {
-    transform: translate(0, 0.5px) rotate(-1.5deg);
-  }
-
-  20% {
-    transform: translate(0, -1.5px) rotate(2.5deg);
-  }
-
-  22% {
-    transform: translate(0, 0.5px) rotate(-1.5deg);
-  }
-
-  24% {
-    transform: translate(0, 1.5px) rotate(1.5deg);
-  }
-
-  26% {
-    transform: translate(0, 0.5px) rotate(0.5deg);
-  }
-
-  28% {
-    transform: translate(0, 0.5px) rotate(1.5deg);
-  }
-
-  30% {
-    transform: translate(0, -0.5px) rotate(2.5deg);
-  }
-
-  32% {
-    transform: translate(0, 1.5px) rotate(-0.5deg);
-  }
-
-  34% {
-    transform: translate(0, 1.5px) rotate(-0.5deg);
-  }
-
-  36% {
-    transform: translate(0, -1.5px) rotate(2.5deg);
-  }
-
-  38% {
-    transform: translate(0, 1.5px) rotate(-1.5deg);
-  }
-
-  40% {
-    transform: translate(0, -0.5px) rotate(2.5deg);
-  }
-
-  42% {
-    transform: translate(0, 2.5px) rotate(-1.5deg);
-  }
-
-  44% {
-    transform: translate(0, 1.5px) rotate(0.5deg);
-  }
-
-  46% {
-    transform: translate(0, -1.5px) rotate(2.5deg);
-  }
-
-  48% {
-    transform: translate(0, -0.5px) rotate(0.5deg);
-  }
-
-  50% {
-    transform: translate(0, 0.5px) rotate(0.5deg);
-  }
-
-  52% {
-    transform: translate(0, 2.5px) rotate(2.5deg);
-  }
-
-  54% {
-    transform: translate(0, -1.5px) rotate(1.5deg);
-  }
-
-  56% {
-    transform: translate(0, 2.5px) rotate(2.5deg);
-  }
-
-  58% {
-    transform: translate(0, 0.5px) rotate(2.5deg);
-  }
-
-  60% {
-    transform: translate(0, 2.5px) rotate(2.5deg);
-  }
-
-  62% {
-    transform: translate(0, -0.5px) rotate(2.5deg);
-  }
-
-  64% {
-    transform: translate(0, -0.5px) rotate(1.5deg);
-  }
-
-  66% {
-    transform: translate(0, 1.5px) rotate(-0.5deg);
-  }
-
-  68% {
-    transform: translate(0, -1.5px) rotate(-0.5deg);
-  }
-
-  70% {
-    transform: translate(0, 1.5px) rotate(0.5deg);
-  }
-
-  72% {
-    transform: translate(0, 2.5px) rotate(1.5deg);
-  }
-
-  74% {
-    transform: translate(0, -0.5px) rotate(0.5deg);
-  }
-
-  76% {
-    transform: translate(0, -0.5px) rotate(2.5deg);
-  }
-
-  78% {
-    transform: translate(0, -0.5px) rotate(1.5deg);
-  }
-
-  80% {
-    transform: translate(0, 1.5px) rotate(1.5deg);
-  }
-
-  82% {
-    transform: translate(0, -0.5px) rotate(0.5deg);
-  }
-
-  84% {
-    transform: translate(0, 1.5px) rotate(2.5deg);
-  }
-
-  86% {
-    transform: translate(0, -1.5px) rotate(-1.5deg);
-  }
-
-  88% {
-    transform: translate(0, -0.5px) rotate(2.5deg);
-  }
-
-  90% {
-    transform: translate(0, 2.5px) rotate(-0.5deg);
-  }
-
-  92% {
-    transform: translate(0, 0.5px) rotate(-0.5deg);
-  }
-
-  94% {
-    transform: translate(0, 2.5px) rotate(0.5deg);
-  }
-
-  96% {
-    transform: translate(0, -0.5px) rotate(1.5deg);
-  }
-
-  98% {
-    transform: translate(0, -1.5px) rotate(-0.5deg);
-  }
-
-  0%,
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
+.OwO.OwO-height-animating .OwO-viewport {
+  transition: height .28s cubic-bezier(.22, 1, .24, 1)
 }
