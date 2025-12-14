@@ -6,7 +6,7 @@
 
 /* 代码颜色（Light） */
 :root {
-  --code-bg: var(--pure-gery-color);
+  --code-bg: var(--pure-grey-color);
   --code-border: var(--line-color);
   --code-inline-bg: var(--hover-color);
 
@@ -222,7 +222,7 @@ pre:focus-within .copy-button{
 }
 
 .copy-button:active {
-  background: var(--pure-gery-color);
+  background: var(--pure-grey-color);
 }
 
 
