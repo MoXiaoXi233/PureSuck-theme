@@ -68,6 +68,8 @@ body {
 
 }
 
+a { text-decoration:none; -webkit-tap-highlight-color:transparent; }
+
 h1 a,
 h1 a:hover,
 h2 a,
@@ -605,6 +607,18 @@ ul,
 .post-body ul ul ul,
 .cp ul ul ul {
 	list-style-type: square;
+}
+
+.post--cover .post-header {
+	position: absolute;
+	z-index: 5;
+	top: 0;
+	right: 0;
+	left: 0
+}
+
+.post--cover .post-body {
+	margin-top: 0
 }
 
 .meta {
