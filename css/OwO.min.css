@@ -98,7 +98,7 @@
   min-height: 32px;
   padding: 6px 10px;
   border-radius: .65rem;
-  background: color-mix(in srgb, var(--card-color) 75%, var(--pure-gery-color));
+  background: color-mix(in srgb, var(--card-color) 75%, var(--pure-grey-color));
   border: 1px solid color-mix(in srgb, var(--border-color) 78%, var(--card-color));
   cursor: pointer;
   transition: transform .18s cubic-bezier(.2, .9, .2, 1), border-color .18s cubic-bezier(.2, .9, .2, 1), background-color .18s cubic-bezier(.2, .9, .2, 1)
@@ -137,7 +137,7 @@
   gap: 6px;
   padding: 8px 10px;
   border-top: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--card-color) 88%, var(--pure-gery-color))
+  background: color-mix(in srgb, var(--card-color) 88%, var(--pure-grey-color))
 }
 
 .OwO .OwO-packages {

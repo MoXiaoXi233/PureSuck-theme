@@ -3,7 +3,7 @@
 	--pure-color: #ffffff;
 	--card-color: #ffffff;
 	--card2-color: #fbfbfb;
-	--pure-gery-color: #f5f5f5;
+	--pure-grey-color: #f5f5f5;
 	--border-color: #e0e0e0;
 	--line-color: #ebebeb;
 	--nav-color: #e4e6e7;
@@ -20,7 +20,7 @@
 	--pure-color: #f2f2f2;
 	--card-color: #222426;
 	--card2-color: #2e2e2e;
-	--pure-gery-color: #323232;
+	--pure-grey-color: #323232;
 	--border-color: #333739;
 	--line-color: #363a3c;
 	--nav-color: #262a2b;
@@ -56,7 +56,8 @@
 html {
 	text-size-adjust: 100%;
 	scroll-behavior: smooth;
-	text-autospace: normal; /* After Chrome 140+++ */
+	text-autospace: normal;
+	/* After Chrome 140+++ */
 }
 
 
@@ -104,6 +105,11 @@ figcaption {
 object {
 	max-width: 100%
 }
+
+/* =====================================================
+   Lists & Tables
+===================================================== */
+
 
 ol,
 ul {
@@ -157,7 +163,6 @@ input {
 	padding: 10px 10px 10px 12px;
 	border-radius: 0.75rem;
 	width: 200px;
-	box-shadow: 0 0 6px #00000008;
 }
 
 textarea {
@@ -167,7 +172,6 @@ textarea {
 table {
 	width: 100%;
 	border-collapse: collapse;
-	box-shadow: 0 0 6px #00000008;
 	overflow: hidden;
 	text-align: left;
 	margin: 1.25rem 0;
@@ -177,7 +181,7 @@ table {
 .table-scroll {
 	overflow-x: auto;
 	margin: 1.5em 0;
-	border: 1px solid var(--pure-gery-color);
+	border: 1px solid var(--pure-grey-color);
 	border-radius: 0.35rem
 }
 
@@ -189,7 +193,7 @@ table {
 }
 
 table thead {
-	background-color: var(--pure-gery-color);
+	background-color: var(--pure-grey-color);
 }
 
 table th,
@@ -223,15 +227,6 @@ table tr:has(td):hover {
 .icon-ui-date:before {
 	content: "\E80D"
 }
-
-a,
-a:after,
-a:before {
-	text-decoration: none;
-	-webkit-tap-highlight-color: transparent;
-	/* 去除浏览器按压反馈 */
-}
-
 
 code,
 kbd {
@@ -282,7 +277,6 @@ html {
 }
 
 .h1,
-.post--link .post-body .post-wrapper>p:first-of-type,
 .post-title,
 h1 {
 	font-size: 1.75rem;
@@ -372,7 +366,6 @@ small {
 	}
 
 	.h1,
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title,
 	h1 {
 		font-size: 2rem;
@@ -413,7 +406,6 @@ small {
 @media screen and (min-width:1183px) {
 
 	.h1,
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title,
 	h1 {
 		font-size: 2.215rem;
@@ -556,20 +548,6 @@ ul,
 	padding-left: 8px
 }
 
-[data-js~=embed] {
-	position: relative;
-	padding: 0;
-	margin-bottom: 0
-}
-
-[data-js~=embed]>* {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%
-}
-
 .post-body [href^="#fn:"] {
 	margin-left: 1px;
 	margin-right: 1px
@@ -670,9 +648,7 @@ ul,
 
 .nav-item {
 	display: inline-block;
-	margin-right: 8px;
-	margin: 3px;
-	margin-left: 8px;
+	margin: 3px 3px 3px 8px;
 	border-radius: 0.4rem;
 	transition: all .3s ease;
 }
@@ -763,14 +739,9 @@ body>.wrapper {
 		max-width: 530px
 	}
 
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -8px;
 		margin-bottom: 4px
-	}
-
-	[data-js~=share]:before {
-		margin-right: 8px
 	}
 
 	.post-meta .meta-item {
@@ -780,34 +751,6 @@ body>.wrapper {
 	.post-comments .post-wrapper:before,
 	.post-footer .post-wrapper:before {
 		top: -32px
-	}
-
-	.post--small {
-		width: 50%;
-		padding-top: 50%
-	}
-
-	.post--small+.post--small {
-		margin-bottom: 20px
-	}
-
-	.post--small,
-	.post--small+.post--small:last-child {
-		margin-bottom: -20px
-	}
-
-	.post--small .post-inner {
-		right: 18px;
-		bottom: 18px
-	}
-
-	.post--small+.post--small .post-inner {
-		right: 0;
-		left: 18px
-	}
-
-	.post--small .post-item {
-		padding: 16px
 	}
 
 	.avatar,
@@ -1070,6 +1013,22 @@ body>.wrapper {
 	width: 100%
 }
 
+.post-inner::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 0.85rem;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity .28s ease;
+	box-shadow:
+		inset 0 0 0 1px rgba(0, 0, 0, .03);
+}
+
+.post:hover .post-inner::after {
+	opacity: 1;
+}
+
 .post-item {
 	float: left;
 	width: 100%;
@@ -1084,7 +1043,6 @@ body>.wrapper {
 	margin-top: -16px
 }
 
-.post--link .post-body .post-wrapper>p:first-of-type,
 .post-title {
 	margin-top: -7px;
 	margin-bottom: 9px
@@ -1123,22 +1081,6 @@ body>.wrapper {
 	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
 }
 
-[data-js~=share]:before {
-	margin-right: 0
-}
-
-[data-js~=share] .meta-count {
-	display: none
-}
-
-[data-js~=share][data-js~=share-start]:before {
-	margin-right: 8px
-}
-
-[data-js~=share][data-js~=share-start] .meta-count {
-	display: inline
-}
-
 @media (min-width:386px) {
 	.post {
 		margin-bottom: 32px
@@ -1157,7 +1099,6 @@ body>.wrapper {
 		max-width: 436px
 	}
 
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-bottom: 17px
 	}
@@ -1191,7 +1132,6 @@ body>.wrapper {
 		margin-top: -55px
 	}
 
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-bottom: 6px
 	}
@@ -1232,7 +1172,6 @@ body>.wrapper {
 		max-width: 848px
 	}
 
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -10px;
 		margin-bottom: 10px
@@ -1257,7 +1196,6 @@ body>.wrapper {
 		width: 100%
 	}
 
-	.post--link .post-body .post-wrapper>p:first-of-type,
 	.post-title {
 		margin-top: -10px;
 	}
@@ -1277,124 +1215,12 @@ body>.wrapper {
 	}
 }
 
-.post--cover .post-header {
-	position: absolute;
-	z-index: 5;
-	top: 0;
-	right: 0;
-	left: 0
-}
-
-.post--cover .post-body {
-	margin-top: 0
-}
-
-.post--link .post-body .post-wrapper>p:first-of-type {
-	word-break: break-word;
-	hyphens: auto
-}
-
-.post--small {
-	position: relative;
-	height: 0;
-	width: 100%;
-	padding-top: 100%
-}
-
-.post--small .post-inner {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	width: auto;
-	height: auto
-}
-
-.post--small .post-wrapper {
-	max-width: 100%
-}
-
-
-@media (min-width:769px) {
-	.post--small+.post--small {
-		margin-bottom: 26px
-	}
-
-	.post--small,
-	.post--small+.post--small:last-child {
-		margin-bottom: -26px
-	}
-
-	.post--small .post-inner {
-		right: 26px;
-		bottom: 26px
-	}
-
-	.post--small+.post--small .post-inner {
-		right: 0;
-		left: 26px
-	}
-
-	.post--small .post-item {
-		padding: 24px
-	}
-}
-
-@media (min-width:1183px) {
-	.post--small+.post--small {
-		margin-bottom: 41px
-	}
-
-	.post--small,
-	.post--small+.post--small:last-child {
-		margin-bottom: -41px
-	}
-
-	.post--small .post-inner {
-		right: 41px;
-		bottom: 41px
-	}
-
-	.post--small+.post--small .post-inner {
-		left: 16px 2.5625
-	}
-
-	.post--small .post-item {
-		padding: 16px
-	}
-}
-
-@media (min-width:1400px) {
-	.post--small+.post--small {
-		margin-bottom: 57px
-	}
-
-	.post--small,
-	.post--small+.post--small:last-child {
-		margin-bottom: -57px
-	}
-
-	.post--small .post-inner {
-		right: 57px;
-		bottom: 57px
-	}
-
-	.post--small+.post--small .post-inner {
-		left: 57px
-	}
-
-	.post--small .post-item {
-		padding: 32px
-	}
-}
-
-.post--link .post-title a,
+.post-title a,
 a {
-	color: var(--themecolor);
+	color: var(--text-color);
 }
 
-.post--link .post-title a:hover,
+.post-title a:hover,
 a:hover {
 	color: var(--themehovercolor);
 }
@@ -1487,7 +1313,7 @@ code,
 kbd {
 	border-radius: 0.4rem;
 	color: var(--text-color);
-	background-color: var(--pure-gery-color);
+	background-color: var(--pure-grey-color);
 	border: 1px solid var(--border-color);
 	margin: 4px 5px
 }
@@ -1628,11 +1454,6 @@ strong {
 	background-color: var(--card-color)
 }
 
-.post--link .post-title a:hover,
-.post-body p a:hover {
-	border-bottom-color: var(--text-color)
-}
-
 .post-comments .post-wrapper:before,
 .post-footer .post-wrapper:before {
 	border-top: 1px solid var(--line-color)
@@ -1656,10 +1477,6 @@ strong {
 
 .post--cover .post-body p:first-child strong {
 	font-weight: inherit
-}
-
-.doc_comments {
-	padding: 0
 }
 
 /** comment footer **/
@@ -1688,7 +1505,7 @@ strong {
 	width: 56px;
 	height: 56px;
 	border-radius: 50%;
-	background-color: var(--pure-gery-color);
+	background-color: var(--pure-grey-color);
 }
 
 /** comment post **/
@@ -1721,11 +1538,9 @@ strong {
 }
 
 .cm:has(.badge) {
-    color: color-mix(
-        in srgb,
-        var(--text2-color) 92%,
-        var(--themecolor)
-    );
+	color: color-mix(in srgb,
+			var(--text2-color) 92%,
+			var(--themecolor));
 }
 
 .ccr,
@@ -1743,7 +1558,7 @@ strong {
 .ca {
 	padding: .1rem .3rem;
 	border-radius: 0.3rem;
-	background-color: var(--pure-gery-color);
+	background-color: var(--pure-grey-color);
 	font-size: .75rem;
 }
 
@@ -1789,27 +1604,6 @@ strong {
 	border: 1px solid var(--border-color);
 	padding: 16px;
 	border-radius: 5px;
-}
-
-.ci {
-	overflow: auto;
-	margin: 10px 0;
-	transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
-	padding: 0.4rem 15px;
-	width: 100%;
-	border: 1px solid var(--border-color);
-	border-radius: 0.65rem;
-	background: var(--card-color);
-	color: var(--text2-color);
-	line-height: 1.7
-}
-
-textarea.ci {
-	resize: none;
-	margin-left: 0px;
-	height: 100%;
-	padding: 15px 15px;
-	min-height: 200px;
 }
 
 .ci:focus {
@@ -1889,58 +1683,73 @@ textarea.ci {
 
 /* 评论发布区 */
 .respond {
-    margin-top: 3rem;
+	margin-top: 3rem;
 }
 
 .ainfo .ci {
-    font-size: 0.85rem;
-    opacity: 0.85;
-    background: color-mix(in srgb, var(--card-color) 90%, transparent);
+	font-size: 0.85rem;
+	opacity: 0.85;
+	background: color-mix(in srgb, var(--card-color) 90%, transparent);
 }
 
 .ainfo .ci:focus {
-    opacity: 1;
+	opacity: 1;
+}
+
+.ci {
+	overflow: auto;
+	margin: 10px 0;
+	transition: all ease;
+	padding: 0.4rem 15px;
+	width: 100%;
+	border: 1px solid var(--border-color);
+	border-radius: 0.65rem;
+	background: var(--card-color);
+	color: var(--text2-color);
+	line-height: 1.7
 }
 
 textarea.ci {
-    min-height: 220px;
-    font-size: 1rem;
-    line-height: 1.8;
-    border-radius: 0.9rem;
-    background: var(--card-color);
-    box-shadow: 0 8px 30px rgba(0,0,0,.04);
+	resize: none;
+	margin-left: 0px;
+	height: 100%;
+	padding: 15px 15px;
+	min-height: 220px;
+	font-size: 1rem;
+	line-height: 1.8;
+	border-radius: 0.9rem;
+	background: var(--card-color);
 }
 
 .CtBoxBar {
-    margin-top: 12px;
-    opacity: .8;
-    transition: opacity .3s ease;
+	margin-top: 12px;
+	opacity: .8;
+	transition: opacity .3s ease;
 }
 
-textarea:focus + .CtBoxBar,
-textarea:focus-within + .CtBoxBar {
-    opacity: 1;
+textarea:focus+.CtBoxBar,
+textarea:focus-within+.CtBoxBar {
+	opacity: 1;
 }
 
 
 .submit {
-    margin-top: 24px;
-    align-self: flex-end;
-    padding: 10px 36px;
-    border-radius: 999px;
-    font-size: 0.95rem;
-    background: var(--themecolor);
-    color: var(--pure-color);
-    border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+	align-self: flex-end;
+	padding: 10px 36px;
+	border-radius: 999px;
+	font-size: 0.95rem;
+	background: var(--themecolor);
+	color: var(--pure-color);
+	border: none;
+	cursor: pointer;
 }
 
 .submit:hover {
-    transform: translateY(-1px);
+	transform: translateY(-1px);
 }
 
 .submit:active {
-    transform: scale(.96);
+	transform: scale(.96);
 }
 
 
@@ -2112,9 +1921,8 @@ textarea:focus-within + .CtBoxBar {
 
 /* 文章版权信息卡片 */
 .license-info-card {
-	--_theme: var(--theme-color, #ea868f);
-	--_theme-soft: color-mix(in srgb, var(--_theme) 14%, transparent);
-	--_theme-line: color-mix(in srgb, var(--_theme) 55%, var(--border-color));
+	--_theme-soft: color-mix(in srgb, var(--themecolor) 14%, transparent);
+	--_theme-line: color-mix(in srgb, var(--themecolor) 55%, var(--border-color));
 
 	position: relative;
 	margin: 2.8em 0 0;
@@ -2138,8 +1946,8 @@ textarea:focus-within + .CtBoxBar {
 	height: 220px;
 
 	background: radial-gradient(circle at 100% 0%,
-			color-mix(in srgb, var(--_theme) 18%, transparent) 0%,
-			color-mix(in srgb, var(--_theme) 10%, transparent) 35%,
+			color-mix(in srgb, var(--themecolor) 18%, transparent) 0%,
+			color-mix(in srgb, var(--themecolor) 10%, transparent) 35%,
 			transparent 70%);
 
 	pointer-events: none;
@@ -2153,7 +1961,7 @@ textarea:focus-within + .CtBoxBar {
 	font-weight: 650;
 	margin-bottom: .6em;
 
-	color: color-mix(in srgb, var(--_theme) 70%, var(--text-color));
+	color: color-mix(in srgb, var(--themecolor) 70%, var(--text-color));
 }
 
 .license-info-title::before {
@@ -2164,7 +1972,7 @@ textarea:focus-within + .CtBoxBar {
 	bottom: 0.15em;
 	width: 2px;
 
-	background-color: var(--_theme);
+	background-color: var(--themecolor);
 	opacity: .65;
 }
 
@@ -2221,7 +2029,7 @@ textarea:focus-within + .CtBoxBar {
 	line-height: 26px;
 
 	color: color-mix(in srgb,
-			var(--_theme) 28%,
+			var(--themecolor) 28%,
 			var(--border-color));
 }
 
@@ -2283,7 +2091,7 @@ textarea:focus-within + .CtBoxBar {
 		line-height: 26px;
 
 		color: color-mix(in srgb,
-				var(--_theme) 28%,
+				var(--themecolor) 28%,
 				var(--border-color));
 	}
 }
@@ -2361,4 +2169,3 @@ input:-webkit-autofill:active {
 .pace .pace-progress {
 	background: var(--themecolor) !important;
 }
-

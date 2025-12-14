@@ -349,8 +349,8 @@
 
     .friendsboard-list:hover .friendsboard-item:hover {
         opacity: 1;
-        background-color: 
- color-mix(in srgb, var(--themecolor) 8%, var(--card-color));
+        background-color:
+            color-mix(in srgb, var(--themecolor) 8%, var(--card-color));
         scale: 1.03;
     }
 }
@@ -387,6 +387,10 @@
                 var(--themehovercolor) 75%,
                 var(--border-color))
     }
+}
+
+.friendsboard-item:active {
+    transform: scale(0.96);
 }
 
 .friends-card-header {
@@ -1159,6 +1163,10 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 #toc .li:hover {
     border: 1px solid var(--border-color);
     background-color: var(--nav-color);
+}
+
+#toc .li:active {
+    transform: scale(0.96);
 }
 
 #toc .toc-a {
