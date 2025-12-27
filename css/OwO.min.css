@@ -33,7 +33,7 @@
   position: absolute;
   left: 0;
   bottom: calc(100% + 10px);
-  width: min(420px, calc(100vw - 24px));
+  width: min(550px, calc(100vw - 24px));
   z-index: 50;
   opacity: 0;
   transform: translateY(6px) scale(.985);
@@ -202,7 +202,7 @@
 
 @media (max-width:520px) {
   .OwO .OwO-body {
-    width: min(92vw, 420px)
+    width: min(78vw, 420px)
   }
 
   .OwO .OwO-items {

@@ -211,7 +211,7 @@ function parseFriendCards() {
                                 ${node.innerHTML}
                             </div>
                             <div class="friends-card-avatar-container">
-                                <img src="${avatarUrl}" alt="Avatar" class="friends-card-avatar">
+                                <img src="${avatarUrl}" alt="Avatar" class="friends-card-avatar" draggable="false">
                             </div>
                         </div>
                     `;

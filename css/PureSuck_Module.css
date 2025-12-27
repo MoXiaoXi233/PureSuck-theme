@@ -377,6 +377,8 @@
     color: inherit;
     text-decoration: none;
 
+    user-select: none;
+
     transition: all .3s ease;
 }
 
@@ -1248,6 +1250,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     font-size: 0.95rem;
     padding: 10px 12px;
     color: var(--text-color);
+    transition: all 0.3s ease;
 }
 
 .search-input::placeholder {

@@ -68,7 +68,10 @@ body {
 
 }
 
-a { text-decoration:none; -webkit-tap-highlight-color:transparent; }
+a {
+	text-decoration: none;
+	-webkit-tap-highlight-color: transparent;
+}
 
 h1 a,
 h1 a:hover,
@@ -89,7 +92,7 @@ h6 a:hover {
 img {
 	height: auto;
 	max-width: 100%;
-	vertical-align: middle;
+	vertical-align: bottom;
 }
 
 figure {
@@ -1110,7 +1113,7 @@ body>.wrapper {
 	}
 
 	.post-wrapper {
-		max-width: 436px
+		max-width: 546px
 	}
 
 	.post-title {
@@ -1620,10 +1623,6 @@ strong {
 	border-radius: 5px;
 }
 
-.ci:focus {
-	box-shadow: 0 0 0 .05rem var(--themecolor);
-}
-
 .CtBoxBar {
 	display: flex;
 	justify-content: space-between;
@@ -1704,6 +1703,7 @@ strong {
 	font-size: 0.85rem;
 	opacity: 0.85;
 	background: color-mix(in srgb, var(--card-color) 90%, transparent);
+	transition: all 0.3s ease;
 }
 
 .ainfo .ci:focus {
@@ -1713,14 +1713,23 @@ strong {
 .ci {
 	overflow: auto;
 	margin: 10px 0;
-	transition: all ease;
 	padding: 0.4rem 15px;
 	width: 100%;
 	border: 1px solid var(--border-color);
 	border-radius: 0.65rem;
 	background: var(--card-color);
 	color: var(--text2-color);
-	line-height: 1.7
+	line-height: 1.7;
+	transition: all 0.3s ease;
+}
+
+.ci:hover {
+	border-color: color-mix(in srgb, var(--themecolor) 35%, var(--border-color));
+}
+
+.ci:focus {
+	border-color: var(--themecolor);
+	background-color: color-mix(in srgb, var(--themecolor) 6%, var(--card-color));
 }
 
 textarea.ci {
@@ -2020,12 +2029,6 @@ textarea:focus-within+.CtBoxBar {
 	font-size: .84em;
 	opacity: .85;
 }
-
-.license-info-meta span:last-child,
-.license-info-meta a {
-	color: var(--text-color);
-}
-
 
 .cc-icon {
 	position: absolute;
