@@ -1,11 +1,13 @@
+/* OwO 基础容器 */
 .OwO {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  user-select: none
+  user-select: none;
 }
 
+/* OwO 激活按钮 */
 .OwO .OwO-logo {
   display: inline-flex;
   align-items: center;
@@ -18,49 +20,54 @@
   background: var(--card-color);
   color: var(--text2-color);
   cursor: pointer;
-  transition: transform .22s cubic-bezier(.2, .9, .2, 1), box-shadow .22s cubic-bezier(.2, .9, .2, 1), border-color .22s cubic-bezier(.2, .9, .2, 1), background-color .22s cubic-bezier(.2, .9, .2, 1)
+  transition: transform .22s cubic-bezier(.2, .9, .2, 1), box-shadow .22s cubic-bezier(.2, .9, .2, 1), border-color .22s cubic-bezier(.2, .9, .2, 1), background-color .22s cubic-bezier(.2, .9, .2, 1);
 }
 
 .OwO .OwO-logo:active {
-  transform: scale(.96)
+  transform: scale(.96);
 }
 
 .OwO.OwO-open .OwO-logo {
-  border-color: color-mix(in srgb, var(--themecolor) 55%, var(--border-color))
+  border-color: color-mix(in srgb, var(--themecolor) 55%, var(--border-color));
 }
 
+/* 表情包主体面板 */
 .OwO .OwO-body {
   position: absolute;
   left: 0;
   bottom: calc(100% + 10px);
   width: min(550px, calc(100vw - 24px));
-  z-index: 50;
+  z-index: 100; /* 确保层级足够高 */
   opacity: 0;
   transform: translateY(6px) scale(.985);
   pointer-events: none;
   transition: opacity .22s cubic-bezier(.2, .9, .2, 1), transform .22s cubic-bezier(.2, .9, .2, 1);
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .1))
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .1));
 }
 
 .OwO.OwO-open .OwO-body {
   opacity: 1;
   transform: translateY(0) scale(1);
-  pointer-events: auto
+  pointer-events: auto;
 }
 
 .OwO .OwO-panel {
   border: 1px solid var(--border-color);
   border-radius: .85rem;
   background: var(--card-color);
-  overflow: hidden
+  overflow: hidden;
+  display: flex;
+  flex-direction: column; /* 纵向排列表情区和Tab区 */
 }
 
+/* 表情展示视口 */
 .OwO .OwO-viewport {
   position: relative;
   background: var(--card-color);
   overflow: hidden;
   max-height: 0;
-  transition: max-height .28s cubic-bezier(.22, 1, .24, 1)
+  z-index: 1;
+  transition: max-height .28s cubic-bezier(.22, 1, .24, 1);
 }
 
 .OwO .OwO-viewport::before {
@@ -69,27 +76,30 @@
   inset: 0;
   background: linear-gradient(180deg, color-mix(in srgb, var(--themecolor) 8%, var(--card-color)) 0, var(--card-color) 55%);
   opacity: .9;
-  pointer-events: none
+  pointer-events: none;
+  z-index: 0;
 }
 
+/* 表情列表容器 */
 .OwO .OwO-items {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px 12px 14px;
   margin: 0;
   list-style: none;
-  overflow: auto;
+  overflow-y: auto;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch
+  -webkit-overflow-scrolling: touch;
 }
 
 .OwO .OwO-items[hidden] {
-  display: none !important
+  display: none !important;
 }
 
+/* 单个表情项目 */
 .OwO .OwO-item {
   display: inline-flex;
   align-items: center;
@@ -101,43 +111,44 @@
   background: color-mix(in srgb, var(--card-color) 75%, var(--pure-grey-color));
   border: 1px solid color-mix(in srgb, var(--border-color) 78%, var(--card-color));
   cursor: pointer;
-  transition: transform .18s cubic-bezier(.2, .9, .2, 1), border-color .18s cubic-bezier(.2, .9, .2, 1), background-color .18s cubic-bezier(.2, .9, .2, 1)
+  transition: transform .18s cubic-bezier(.2, .9, .2, 1), border-color .18s cubic-bezier(.2, .9, .2, 1), background-color .18s cubic-bezier(.2, .9, .2, 1);
 }
 
 .OwO .OwO-item:hover {
   border-color: color-mix(in srgb, var(--themecolor) 45%, var(--border-color));
-  background: color-mix(in srgb, var(--themecolor) 10%, var(--card-color))
+  background: color-mix(in srgb, var(--themecolor) 10%, var(--card-color));
 }
 
 .OwO .OwO-item:active {
-  transform: scale(.96)
+  transform: scale(.96);
 }
 
 .OwO .OwO-items-emoji .OwO-item {
   font-size: 20px;
-  line-height: 1
+  line-height: 1;
 }
 
 .OwO .OwO-items-image .OwO-item {
   padding: 8px;
-  min-height: unset
+  min-height: unset;
 }
 
 .OwO .OwO-items-image .OwO-item img {
   display: block;
   max-width: 100%;
   height: auto;
-  border-radius: .55rem
+  border-radius: .55rem;
 }
 
 .OwO .OwO-bar {
   position: relative;
+  z-index: 10; /* 提高层级，防止被内容区遮挡 */
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
   border-top: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--card-color) 88%, var(--pure-grey-color))
+  background: color-mix(in srgb, var(--card-color) 96%, var(--pure-grey-color));
 }
 
 .OwO .OwO-packages {
@@ -148,100 +159,67 @@
   padding: 0;
   list-style: none;
   white-space: nowrap;
-  overflow: auto;
-  scrollbar-width: none
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .OwO .OwO-packages::-webkit-scrollbar {
-  width: 0;
-  height: 0
+  display: none;
 }
 
 .OwO .OwO-packages li {
   position: relative;
+  z-index: 10; 
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 30px;
-  padding: 0 10px;
+  padding: 0 12px;
   border-radius: .65rem;
   color: var(--text2-color);
   cursor: pointer;
-  transition: color .18s ease, background-color .18s ease, transform .18s cubic-bezier(.2, .9, .2, 1)
+  transition: color .18s ease, background-color .18s ease, transform .18s cubic-bezier(.2, .9, .2, 1);
 }
 
 .OwO .OwO-packages li:hover {
   background: color-mix(in srgb, var(--themecolor) 10%, var(--card-color));
-  color: color-mix(in srgb, var(--themecolor) 65%, var(--text2-color))
+  color: color-mix(in srgb, var(--themecolor) 65%, var(--text2-color));
 }
 
 .OwO .OwO-packages li:active {
-  transform: scale(.97)
+  transform: scale(.97);
 }
 
 .OwO .OwO-packages .OwO-package-active {
-  color: var(--text-color)
+  color: var(--text-color);
+  font-weight: bold;
 }
 
 .OwO .OwO-indicator {
   position: absolute;
-  left: 10px;
   bottom: 6px;
   height: 3px;
   border-radius: 999px;
-  width: 0;
-  transform: translateX(0);
   background: linear-gradient(90deg, color-mix(in srgb, var(--themecolor) 88%, var(--card-color)) 0, color-mix(in srgb, var(--themecolor) 58%, var(--card-color)) 55%, color-mix(in srgb, var(--themecolor) 18%, var(--card-color)) 100%);
   transition: width .32s cubic-bezier(.22, 1, .24, 1), transform .32s cubic-bezier(.22, 1, .24, 1);
-  will-change: width, transform
+  will-change: width, transform;
+  pointer-events: none; 
+  z-index: 11;
 }
 
 .OwO.OwO-snap-indicator .OwO-indicator {
-  transition-duration: 0s
+  transition-duration: 0s;
 }
 
+/* 移动端适配 */
 @media (max-width:520px) {
   .OwO .OwO-body {
-    width: min(78vw, 420px)
+    width: calc(100vw - 24px);
+    left: 12px;
   }
 
   .OwO .OwO-items {
     gap: 8px;
-    padding: 10px 10px 12px
+    padding: 10px 10px 12px;
   }
-
-  .OwO .OwO-item {
-    border-radius: .6rem
-  }
-}
-
-@media (prefers-reduced-motion:reduce) {
-
-  .OwO .OwO-body,
-  .OwO .OwO-indicator,
-  .OwO .OwO-item,
-  .OwO .OwO-logo,
-  .OwO .OwO-packages li,
-  .OwO .OwO-viewport {
-    transition: none !important
-  }
-}
-
-.OwO[data-owo-measure="1"] .OwO-items[hidden] {
-  display: flex !important;
-  position: absolute !important;
-  left: -99999px !important;
-  top: -99999px !important;
-  visibility: hidden !important;
-  pointer-events: none !important
-}
-
-.OwO .OwO-viewport {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height .28s cubic-bezier(.22, 1, .24, 1)
-}
-
-.OwO.OwO-height-animating .OwO-viewport {
-  transition: height .28s cubic-bezier(.22, 1, .24, 1)
 }
