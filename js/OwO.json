@@ -1,659 +1,139 @@
 {
-    "颜文字": {
-        "type": "emoticon",
-        "container": [
-            {
-                "icon": "OωO",
-                "text": "Author: DIYgod"
-            },
-            {
-                "icon": "|´・ω・)ノ",
-                "text": "Hi"
-            },
-            {
-                "icon": "ヾ(≧∇≦*)ゝ",
-                "text": "开心"
-            },
-            {
-                "icon": "(☆ω☆)",
-                "text": "星星眼"
-            },
-            {
-                "icon": "（╯‵□′）╯︵┴─┴",
-                "text": "掀桌"
-            },
-            {
-                "icon": "￣﹃￣",
-                "text": "流口水"
-            },
-            {
-                "icon": "(/ω＼)",
-                "text": "捂脸"
-            },
-            {
-                "icon": "∠( ᐛ 」∠)＿",
-                "text": "给跪"
-            },
-            {
-                "icon": "(๑•̀ㅁ•́ฅ)",
-                "text": "Hi"
-            },
-            {
-                "icon": "→_→",
-                "text": "斜眼"
-            },
-            {
-                "icon": "୧(๑•̀⌄•́๑)૭",
-                "text": "加油"
-            },
-            {
-                "icon": "٩(ˊᗜˋ*)و",
-                "text": "有木有WiFi"
-            },
-            {
-                "icon": "(ノ°ο°)ノ",
-                "text": "前方高能预警"
-            },
-            {
-                "icon": "(´இ皿இ｀)",
-                "text": "我从未见过如此厚颜无耻之人"
-            },
-            {
-                "icon": "⌇●﹏●⌇",
-                "text": "吓死宝宝惹"
-            },
-            {
-                "icon": "(ฅ´ω`ฅ)",
-                "text": "已阅留爪"
-            },
-            {
-                "icon": "(╯°A°)╯︵○○○",
-                "text": "去吧大师球"
-            },
-            {
-                "icon": "φ(￣∇￣o)",
-                "text": "太萌惹"
-            },
-            {
-                "icon": "ヾ(´･ ･｀｡)ノ\"",
-                "text": "咦咦咦"
-            },
-            {
-                "icon": "( ง ᵒ̌皿ᵒ̌)ง⁼³₌₃",
-                "text": "气呼呼"
-            },
-            {
-                "icon": "(ó﹏ò｡)",
-                "text": "我受到了惊吓"
-            },
-            {
-                "icon": "Σ(っ °Д °;)っ",
-                "text": "什么鬼"
-            },
-            {
-                "icon": "( ,,´･ω･)ﾉ",
-                "text": "摸摸头"
-            },
-            {
-                "icon": "╮(╯▽╰)╭ ",
-                "text": "无奈"
-            },
-            {
-                "icon": "o(*////▽////*)q ",
-                "text": "脸红"
-            },
-            {
-                "icon": "＞﹏＜",
-                "text": ""
-            },
-            {
-                "icon": "( ๑´•ω•)",
-                "text": ""
-            },
-            {
-                "icon": "(｡•ˇ‸ˇ•｡)",
-                "text": ""
-            }
-        ]
-    },
-    "Emoji": {
-        "type": "emoji",
-        "container": [
-            {
-                "icon": "😂",
-                "text": ""
-            },
-            {
-                "icon": "😀",
-                "text": ""
-            },
-            {
-                "icon": "😅",
-                "text": ""
-            },
-            {
-                "icon": "😊",
-                "text": ""
-            },
-            {
-                "icon": "🙂",
-                "text": ""
-            },
-            {
-                "icon": "🙃",
-                "text": ""
-            },
-            {
-                "icon": "😌",
-                "text": ""
-            },
-            {
-                "icon": "😍",
-                "text": ""
-            },
-            {
-                "icon": "😘",
-                "text": ""
-            },
-            {
-                "icon": "😜",
-                "text": ""
-            },
-            {
-                "icon": "😝",
-                "text": ""
-            },
-            {
-                "icon": "😏",
-                "text": ""
-            },
-            {
-                "icon": "😒",
-                "text": ""
-            },
-            {
-                "icon": "🙄",
-                "text": ""
-            },
-            {
-                "icon": "😳",
-                "text": ""
-            },
-            {
-                "icon": "😡",
-                "text": ""
-            },
-            {
-                "icon": "😔",
-                "text": ""
-            },
-            {
-                "icon": "😫",
-                "text": ""
-            },
-            {
-                "icon": "😱",
-                "text": ""
-            },
-            {
-                "icon": "😭",
-                "text": ""
-            },
-            {
-                "icon": "💩",
-                "text": ""
-            },
-            {
-                "icon": "👻",
-                "text": ""
-            },
-            {
-                "icon": "🙌",
-                "text": ""
-            },
-            {
-                "icon": "🖕",
-                "text": ""
-            },
-            {
-                "icon": "👍",
-                "text": ""
-            },
-            {
-                "icon": "👫",
-                "text": ""
-            },
-            {
-                "icon": "👬",
-                "text": ""
-            },
-            {
-                "icon": "👭",
-                "text": ""
-            },
-            {
-                "icon": "🌚",
-                "text": ""
-            },
-            {
-                "icon": "🌝",
-                "text": ""
-            },
-            {
-                "icon": "🙈",
-                "text": ""
-            },
-            {
-                "icon": "💊",
-                "text": ""
-            },
-            {
-                "icon": "😶",
-                "text": ""
-            },
-            {
-                "icon": "🙏",
-                "text": ""
-            },
-            {
-                "icon": "🍦",
-                "text": ""
-            },
-            {
-                "icon": "🍉",
-                "text": ""
-            },
-            {
-                "icon": "😣",
-                "text": ""
-            },
-            {
-                "icon": "⭐️",
-                "text": ""
-            },
-            {
-                "icon": "👿",
-                "text": ""
-            },
-            {
-                "icon": "😈",
-                "text": ""
-            },
-            {
-                "icon": "💬",
-                "text": ""
-            },
-            {
-                "icon": "😶",
-                "text": ""
-            },
-            {
-                "icon": "😇",
-                "text": ""
-            },
-            {
-                "icon": "👽",
-                "text": ""
-            },
-            {
-                "icon": "💛",
-                "text": ""
-            },
-            {
-                "icon": "💙",
-                "text": ""
-            },
-            {
-                "icon": "💜",
-                "text": ""
-            },
-            {
-                "icon": "❤️",
-                "text": ""
-            },
-            {
-                "icon": "💚",
-                "text": ""
-            },
-            {
-                "icon": "💔",
-                "text": ""
-            },
-            {
-                "icon": "💓",
-                "text": ""
-            },
-            {
-                "icon": "💗",
-                "text": ""
-            },
-            {
-                "icon": "💕",
-                "text": ""
-            },
-            {
-                "icon": "💞",
-                "text": ""
-            },
-            {
-                "icon": "💘",
-                "text": ""
-            },
-            {
-                "icon": "💖",
-                "text": ""
-            },
-            {
-                "icon": "✨",
-                "text": ""
-            },
-            {
-                "icon": "⭐️",
-                "text": ""
-            },
-            {
-                "icon": "🌟",
-                "text": ""
-            },
-            {
-                "icon": "💫",
-                "text": ""
-            },
-            {
-                "icon": "💥",
-                "text": ""
-            },
-            {
-                "icon": "💥",
-                "text": ""
-            },
-            {
-                "icon": "💢",
-                "text": ""
-            },
-            {
-                "icon": "❗️",
-                "text": ""
-            },
-            {
-                "icon": "❓",
-                "text": ""
-            },
-            {
-                "icon": "❕",
-                "text": ""
-            },
-            {
-                "icon": "❔",
-                "text": ""
-            },
-            {
-                "icon": "💤",
-                "text": ""
-            },
-            {
-                "icon": "💨",
-                "text": ""
-            },
-            {
-                "icon": "💦",
-                "text": ""
-            },
-            {
-                "icon": "🎶",
-                "text": ""
-            },
-            {
-                "icon": "🎵",
-                "text": ""
-            },
-            {
-                "icon": "🔥",
-                "text": ""
-            }
-        ]
-    },
-    "MoXiify": {
-        "type": "image",
-        "width": "48px",
-        "container": [
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Wink.gif",
-                "text": "Wink",
-                "input": ":#(MoXiify_Wink)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Why.gif",
-                "text": "疑问",
-                "input": ":#(MoXiify_Why)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_SpeechLess.gif",
-                "text": "沉默",
-                "input": ":#(MoXiify_SpeechLess)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Smile.gif",
-                "text": "微笑",
-                "input": ":#(MoXiify_Smile)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Sleep.gif",
-                "text": "犯困",
-                "input": ":#(MoXiify_Sleep)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/moxi/MoXi_Silent.gif",
-                "text": "无语",
-                "input": ":#(MoXiify_Silent)"
-            }
-        ]
-    },
-    "BiliBili": {
-        "type": "image",
-        "width": "32px",
-        "container": [
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/doge.gif",
-                "text": "doge",
-                "input": ":$(BiliBili_doge)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/亲亲.gif",
-                "text": "亲亲",
-                "input": ":$(BiliBili_亲亲)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/偷笑.gif",
-                "text": "偷笑",
-                "input": ":$(BiliBili_偷笑)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/再见.gif",
-                "text": "再见",
-                "input": ":$(BiliBili_再见)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/发怒.gif",
-                "text": "发怒",
-                "input": ":$(BiliBili_发怒)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/发财.gif",
-                "text": "发财",
-                "input": ":$(BiliBili_发财)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/可爱.gif",
-                "text": "可爱",
-                "input": ":$(BiliBili_可爱)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/吐血.gif",
-                "text": "吐血",
-                "input": ":$(BiliBili_吐血)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/呆.gif",
-                "text": "呆",
-                "input": ":$(BiliBili_呆)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/呕吐.gif",
-                "text": "呕吐",
-                "input": ":$(BiliBili_呕吐)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/困.gif",
-                "text": "困",
-                "input": ":$(BiliBili_困)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/坏笑.gif",
-                "text": "坏笑",
-                "input": ":$(BiliBili_坏笑)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/大佬.gif",
-                "text": "大佬",
-                "input": ":$(BiliBili_大佬)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/大哭.gif",
-                "text": "大哭",
-                "input": ":$(BiliBili_大哭)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/委屈.gif",
-                "text": "委屈",
-                "input": ":$(BiliBili_委屈)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/害羞.gif",
-                "text": "害羞",
-                "input": ":$(BiliBili_害羞)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/尴尬.gif",
-                "text": "尴尬",
-                "input": ":$(BiliBili_尴尬)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/微笑.gif",
-                "text": "微笑",
-                "input": ":$(BiliBili_微笑)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/思考.gif",
-                "text": "思考",
-                "input": ":$(BiliBili_思考)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/惊吓.gif",
-                "text": "惊吓",
-                "input": ":$(BiliBili_惊吓)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/打脸.gif",
-                "text": "打脸",
-                "input": ":$(BiliBili_打脸)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/抓狂.gif",
-                "text": "抓狂",
-                "input": ":$(BiliBili_抓狂)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/抠鼻子.gif",
-                "text": "抠鼻子",
-                "input": ":$(BiliBili_抠鼻子)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili/斜眼笑.gif",
-                "text": "斜眼笑",
-                "input": ":$(BiliBili_斜眼笑)"
-            }
-        ]
-    },
-    "2233娘": {
-        "type": "image",
-        "width": "48px",
-        "container": [
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/1.png",
-                "text": "bilibili2233-1",
-                "input": ":#(bilibili2233-1)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/10.png",
-                "text": "bilibili2233-2",
-                "input": ":#(bilibili2233-2)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/11.png",
-                "text": "bilibili2233-3",
-                "input": ":#(bilibili2233-3)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/12.png",
-                "text": "bilibili2233-4",
-                "input": ":#(bilibili2233-4)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/13.png",
-                "text": "bilibili2233-5",
-                "input": ":#(bilibili2233-5)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/14.png",
-                "text": "bilibili2233-6",
-                "input": ":#(bilibili2233-6)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/15.png",
-                "text": "bilibili2233-7",
-                "input": ":#(bilibili2233-7)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/2.png",
-                "text": "bilibili2233-8",
-                "input": ":#(bilibili2233-8)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/3.png",
-                "text": "bilibili2233-9",
-                "input": ":#(bilibili2233-9)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/4.png",
-                "text": "bilibili2233-10",
-                "input": ":#(bilibili2233-10)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/5.png",
-                "text": "bilibili2233-11",
-                "input": ":#(bilibili2233-11)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/6.png",
-                "text": "bilibili2233-12",
-                "input": ":#(bilibili2233-12)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/7.png",
-                "text": "bilibili2233-13",
-                "input": ":#(bilibili2233-13)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/8.png",
-                "text": "bilibili2233-14",
-                "input": ":#(bilibili2233-14)"
-            },
-            {
-                "icon": "/usr/themes/PureSuck/images/owo/bilibili_2233/9.png",
-                "text": "bilibili2233-15",
-                "input": ":#(bilibili2233-15)"
-            }
-        ]
-    }
+  "颜文字": {
+    "type": "emoticon",
+    "container": [
+      { "icon": "OωO", "text": "Author: DIYgod" },
+      { "icon": "|´・ω・)ノ", "text": "Hi" },
+      { "icon": "ヾ(≧∇≦*)ゝ", "text": "开心" },
+      { "icon": "(☆ω☆)", "text": "星星眼" },
+      { "icon": "（╯‵□′）╯︵┴─┴", "text": "掀桌" },
+      { "icon": "￣﹃￣", "text": "流口水" },
+      { "icon": "(/ω＼)", "text": "捂脸" },
+      { "icon": "∠( ᐛ 」∠)＿", "text": "给跪" },
+      { "icon": "(๑•̀ㅁ•́ฅ)", "text": "Hi" },
+      { "icon": "→_→", "text": "斜眼" },
+      { "icon": "୧(๑•̀⌄•́๑)૭", "text": "加油" },
+      { "icon": "٩(ˊᗜˋ*)و", "text": "有木有WiFi" },
+      { "icon": "(ノ°ο°)ノ", "text": "前方高能预警" },
+      { "icon": "(´இ皿இ｀)", "text": "我从未见过如此厚颜无耻之人" },
+      { "icon": "⌇●﹏●⌇", "text": "吓死宝宝惹" },
+      { "icon": "(ฅ´ω`ฅ)", "text": "已阅留爪" },
+      { "icon": "(╯°A°)╯︵○○○", "text": "去吧大师球" },
+      { "icon": "φ(￣∇￣o)", "text": "太萌惹" },
+      { "icon": "ヾ(´･ ･｀｡)ノ\"", "text": "咦咦咦" },
+      { "icon": "( ง ᵒ̌皿ᵒ̌)ง⁼³₌₃", "text": "气呼呼" },
+      { "icon": "(ó﹏ò｡)", "text": "我受到了惊吓" },
+      { "icon": "Σ(っ °Д °;)っ", "text": "什么鬼" },
+      { "icon": "( ,,´･ω･)ﾉ", "text": "摸摸头" },
+      { "icon": "╮(╯▽╰)╭", "text": "无奈" },
+      { "icon": "o(*////▽////*)q", "text": "脸红" },
+      { "icon": "＞﹏＜", "text": "" },
+      { "icon": "( ๑´•ω•)", "text": "" },
+      { "icon": "(｡•ˇ‸ˇ•｡)", "text": "" }
+    ]
+  },
+
+  "Emoji": {
+    "type": "emoji",
+    "container": [
+    { "icon": "😂" }, { "icon": "🤣" }, { "icon": "😭" }, { "icon": "😅" },
+    { "icon": "😊" }, { "icon": "😍" }, { "icon": "😡" }, { "icon": "😳" },
+    { "icon": "😔" }, { "icon": "😫" }, { "icon": "😱" },
+
+    { "icon": "👍" }, { "icon": "🙌" }, { "icon": "🙏" },
+    { "icon": "👀" }, { "icon": "🤔" },
+    { "icon": "🔥" }, { "icon": "🎉" },
+
+    { "icon": "❤️" }, { "icon": "💔" },
+    { "icon": "💕" }, { "icon": "💖" }, { "icon": "💗" },
+
+    { "icon": "🙂" }, { "icon": "🙃" }, { "icon": "😏" },
+    { "icon": "😒" }, { "icon": "🙄" }, { "icon": "😌" }, { "icon": "😣" },
+    { "icon": "🙈" },
+
+    { "icon": "🌚" }, { "icon": "🌝" },
+    { "icon": "😈" }, { "icon": "👿" }, { "icon": "👻" }, { "icon": "👽" },
+
+    { "icon": "✨" }, { "icon": "⭐️" }, { "icon": "🌟" }, { "icon": "💫" },
+
+    { "icon": "💛" }, { "icon": "💙" }, { "icon": "💚" }, { "icon": "💜" },
+    { "icon": "💓" }, { "icon": "💞" }, { "icon": "💘" },
+
+    { "icon": "🎶" }, { "icon": "🎵" },
+    { "icon": "💢" }, { "icon": "❗️" }, { "icon": "❓" },
+    { "icon": "❕" }, { "icon": "❔" },
+    { "icon": "💨" }, { "icon": "💦" }, { "icon": "💊" }, { "icon": "💤" },
+
+    { "icon": "💩" }
+    ]
+  },
+
+  "MoXiify": {
+    "type": "image",
+    "width": "48px",
+    "base": "owo/moxi/",
+    "container": [
+      { "icon": "MoXi_Wink.gif", "text": "Wink", "input": ":#(MoXiify_Wink)" },
+      { "icon": "MoXi_Why.gif", "text": "疑问", "input": ":#(MoXiify_Why)" },
+      { "icon": "MoXi_SpeechLess.gif", "text": "沉默", "input": ":#(MoXiify_SpeechLess)" },
+      { "icon": "MoXi_Smile.gif", "text": "微笑", "input": ":#(MoXiify_Smile)" },
+      { "icon": "MoXi_Sleep.gif", "text": "犯困", "input": ":#(MoXiify_Sleep)" },
+      { "icon": "MoXi_Silent.gif", "text": "无语", "input": ":#(MoXiify_Silent)" }
+    ]
+  },
+
+  "BiliBili": {
+    "type": "image",
+    "width": "32px",
+    "base": "owo/bilibili/",
+    "container": [
+      { "icon": "doge.gif", "text": "doge", "input": ":$(BiliBili_doge)" },
+      { "icon": "亲亲.gif", "text": "亲亲", "input": ":$(BiliBili_亲亲)" },
+      { "icon": "偷笑.gif", "text": "偷笑", "input": ":$(BiliBili_偷笑)" },
+      { "icon": "再见.gif", "text": "再见", "input": ":$(BiliBili_再见)" },
+      { "icon": "发怒.gif", "text": "发怒", "input": ":$(BiliBili_发怒)" },
+      { "icon": "发财.gif", "text": "发财", "input": ":$(BiliBili_发财)" },
+      { "icon": "可爱.gif", "text": "可爱", "input": ":$(BiliBili_可爱)" },
+      { "icon": "吐血.gif", "text": "吐血", "input": ":$(BiliBili_吐血)" },
+      { "icon": "呆.gif", "text": "呆", "input": ":$(BiliBili_呆)" },
+      { "icon": "呕吐.gif", "text": "呕吐", "input": ":$(BiliBili_呕吐)" },
+      { "icon": "困.gif", "text": "困", "input": ":$(BiliBili_困)" },
+      { "icon": "坏笑.gif", "text": "坏笑", "input": ":$(BiliBili_坏笑)" },
+      { "icon": "大佬.gif", "text": "大佬", "input": ":$(BiliBili_大佬)" },
+      { "icon": "大哭.gif", "text": "大哭", "input": ":$(BiliBili_大哭)" },
+      { "icon": "委屈.gif", "text": "委屈", "input": ":$(BiliBili_委屈)" },
+      { "icon": "害羞.gif", "text": "害羞", "input": ":$(BiliBili_害羞)" },
+      { "icon": "尴尬.gif", "text": "尴尬", "input": ":$(BiliBili_尴尬)" },
+      { "icon": "微笑.gif", "text": "微笑", "input": ":$(BiliBili_微笑)" },
+      { "icon": "思考.gif", "text": "思考", "input": ":$(BiliBili_思考)" },
+      { "icon": "惊吓.gif", "text": "惊吓", "input": ":$(BiliBili_惊吓)" },
+      { "icon": "打脸.gif", "text": "打脸", "input": ":$(BiliBili_打脸)" },
+      { "icon": "抓狂.gif", "text": "抓狂", "input": ":$(BiliBili_抓狂)" },
+      { "icon": "抠鼻子.gif", "text": "抠鼻子", "input": ":$(BiliBili_抠鼻子)" },
+      { "icon": "斜眼笑.gif", "text": "斜眼笑", "input": ":$(BiliBili_斜眼笑)" }
+    ]
+  },
+
+  "2233娘": {
+    "type": "image",
+    "width": "48px",
+    "base": "owo/bilibili_2233/",
+    "container": [
+      { "icon": "1.png", "input": ":#(bilibili2233-1)" },
+      { "icon": "10.png", "input": ":#(bilibili2233-2)" },
+      { "icon": "11.png", "input": ":#(bilibili2233-3)" },
+      { "icon": "12.png", "input": ":#(bilibili2233-4)" },
+      { "icon": "13.png", "input": ":#(bilibili2233-5)" },
+      { "icon": "14.png", "input": ":#(bilibili2233-6)" },
+      { "icon": "15.png", "input": ":#(bilibili2233-7)" },
+      { "icon": "2.png", "input": ":#(bilibili2233-8)" },
+      { "icon": "3.png", "input": ":#(bilibili2233-9)" },
+      { "icon": "4.png", "input": ":#(bilibili2233-10)" },
+      { "icon": "5.png", "input": ":#(bilibili2233-11)" },
+      { "icon": "6.png", "input": ":#(bilibili2233-12)" },
+      { "icon": "7.png", "input": ":#(bilibili2233-13)" },
+      { "icon": "8.png", "input": ":#(bilibili2233-14)" },
+      { "icon": "9.png", "input": ":#(bilibili2233-15)" }
+    ]
+  }
 }

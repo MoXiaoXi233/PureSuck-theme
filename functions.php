@@ -1,5 +1,6 @@
 <?php
-if (!defined('__TYPECHO_ROOT_DIR__')) exit;
+if (!defined('__TYPECHO_ROOT_DIR__'))
+    exit;
 
 function themeFields($layout)
 {
@@ -19,38 +20,94 @@ function themeInit($archive)
 
 function parseOwOcodes($content)
 {
-    // 读取 JSON 文件
+    // 快速跳过：内容里根本没有 OwO 短码
+    if (strpos($content, ':$(') === false && strpos($content, ':#(') === false) {
+        return $content;
+    }
+
     $jsonFile = __DIR__ . '/js/OwO.json';
     if (!file_exists($jsonFile)) {
-        return htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+        return $content;
     }
 
     $jsonContent = file_get_contents($jsonFile);
     $shortcodes = json_decode($jsonContent, true);
 
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+    if (!is_array($shortcodes)) {
+        return $content;
     }
 
-    // 遍历 JSON 文件中的所有表情包类型
-    foreach ($shortcodes as $key => $package) {
-        if (isset($package['type']) && $package['type'] === 'image' && isset($package['container'])) {
-            foreach ($package['container'] as $data) {
-                $shortcode = htmlspecialchars($data['input'], ENT_QUOTES, 'UTF-8');
-                $imgUrl = Typecho_Common::url(htmlspecialchars($data['icon'], ENT_QUOTES, 'UTF-8'), Helper::options()->siteUrl);
-                $imgTag = sprintf(
-                    '<img src="%s" width="%s" loading="lazy" alt="%s">',
-                    $imgUrl,
-                    htmlspecialchars($package['width'], ENT_QUOTES, 'UTF-8'),
-                    htmlspecialchars($data['text'], ENT_QUOTES, 'UTF-8')
-                );
-                $content = str_replace($shortcode, $imgTag, $content);
+    // 主题 URL（不是 siteUrl）
+    $themeUrl = rtrim(Helper::options()->themeUrl, '/');
+
+    /**
+     * 构建一次性映射表
+     * :#(xxx) / :$(xxx) => <img>
+     */
+    static $owoMap = null;
+    if ($owoMap === null) {
+        $owoMap = [];
+
+        foreach ($shortcodes as $package) {
+            if (
+                !isset($package['type']) ||
+                $package['type'] !== 'image' ||
+                empty($package['container']) ||
+                !is_array($package['container'])
+            ) {
+                continue;
+            }
+
+            $base = isset($package['base'])
+                ? trim($package['base'], '/') . '/'
+                : '';
+
+            $width = isset($package['width'])
+                ? htmlspecialchars($package['width'], ENT_QUOTES, 'UTF-8')
+                : '';
+
+            foreach ($package['container'] as $item) {
+                if (empty($item['input']) || empty($item['icon'])) {
+                    continue;
+                }
+
+                $shortcode = htmlspecialchars($item['input'], ENT_QUOTES, 'UTF-8');
+                $icon = $item['icon'];
+
+                // 统一解析 icon URL
+                if (preg_match('#^(https?:)?//#', $icon)) {
+                    // CDN / 外链
+                    $imgUrl = $icon;
+                } elseif (strpos($icon, '/') === 0) {
+                    // 旧 JSON：/usr/themes/xxx/...
+                    $imgUrl = $icon;
+                } else {
+                    // 新规范：themeUrl + /images/ + base + icon
+                    $imgUrl = $themeUrl . '/images/' . $base . $icon;
+                }
+
+                $alt = isset($item['text'])
+                    ? htmlspecialchars($item['text'], ENT_QUOTES, 'UTF-8')
+                    : '';
+
+                $imgTag = '<img src="'
+                    . htmlspecialchars($imgUrl, ENT_QUOTES, 'UTF-8') . '"'
+                    . ($width ? ' width="' . $width . '"' : '')
+                    . ' loading="lazy"'
+                    . ' alt="' . $alt . '">';
+
+                $owoMap[$shortcode] = $imgTag;
             }
         }
     }
 
-    return $content;
+    if (!$owoMap) {
+        return $content;
+    }
+
+    return str_replace(array_keys($owoMap), array_values($owoMap), $content);
 }
+
 
 function themeConfig($form)
 {
@@ -67,7 +124,7 @@ function themeConfig($form)
                 $update = $db->update('table.options')->rows(array('value' => $ysj))->where('name = ?', 'theme:' . $name . 'bf');
                 $updateRows = $db->query($update);
                 echo '<div class="tongzhi home">备份已更新，请等待自动刷新！如果等不到请点击';
-?>
+                ?>
                 <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
                 <script language="JavaScript">
                     window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);
@@ -79,12 +136,12 @@ function themeConfig($form)
                         ->rows(array('name' => 'theme:' . $name . 'bf', 'user' => '0', 'value' => $ysj));
                     $insertId = $db->query($insert);
                     echo '<div class="tongzhi home">备份完成，请等待自动刷新！如果等不到请点击';
-                ?>
+                    ?>
                     <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
                     <script language="JavaScript">
                         window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);
                     </script>
-                <?php
+                    <?php
                 }
             }
         }
@@ -100,7 +157,7 @@ function themeConfig($form)
                 <script language="JavaScript">
                     window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2000);
                 </script>
-            <?php
+                <?php
             } else {
                 echo '<div class="tongzhi home">没有模板备份数据，恢复不了哦！</div>';
             }
@@ -110,12 +167,12 @@ function themeConfig($form)
                 $delete = $db->delete('table.options')->where('name = ?', 'theme:' . $name . 'bf');
                 $deletedRows = $db->query($delete);
                 echo '<div class="tongzhi home">删除成功，请等待自动刷新，如果等不到请点击';
-            ?>
+                ?>
                 <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
                 <script language="JavaScript">
                     window.setTimeout("location=\'<?php Helper::options()->adminUrl('options-theme.php'); ?>\'", 2500);
                 </script>
-<?php
+                <?php
             } else {
                 echo '<div class="tongzhi home">不用删了！备份不存在！！！</div>';
             }
@@ -401,30 +458,30 @@ function getStaticURL($path)
     $staticMap = [
         // 本地资源（主题目录）
         'local' => [
-            'aos.js'            => $options->themeUrl . '/js/lib/aos.js',
-            'aos.css'           => $options->themeUrl . '/css/lib/aos.css',
+            'aos.js' => $options->themeUrl . '/js/lib/aos.js',
+            'aos.css' => $options->themeUrl . '/css/lib/aos.css',
             'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
-            'highlight.min.js'  => $options->themeUrl . '/js/lib/highlight.min.js',
-            'pjax.min.js'       => $options->themeUrl . '/js/lib/pjax.min.js',
-            'pace.min.js'       => $options->themeUrl . '/js/lib/pace.min.js',
+            'highlight.min.js' => $options->themeUrl . '/js/lib/highlight.min.js',
+            'pjax.min.js' => $options->themeUrl . '/js/lib/pjax.min.js',
+            'pace.min.js' => $options->themeUrl . '/js/lib/pace.min.js',
             'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css'
         ],
         'bootcdn' => [
-            'aos.js'            => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
-            'aos.css'           => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.css",
+            'aos.js' => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
+            'aos.css' => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.css",
             'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
-            'highlight.min.js'  => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
-            'pjax.min.js'       => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
-            'pace.min.js'       => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js',
+            'highlight.min.js' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
+            'pjax.min.js' => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
+            'pace.min.js' => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js',
             'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
         ],
         "cdnjs" => [
-            'aos.js'            => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
-            'aos.css'           => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css",
+            'aos.js' => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
+            'aos.css' => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css",
             'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
-            'highlight.min.js'  => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
-            'pjax.min.js'       => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
-            'pace.min.js'       => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
+            'highlight.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
+            'pjax.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
+            'pace.min.js' => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
             'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
         ]
 
@@ -450,14 +507,14 @@ function generateDynamicCSS()
 
     // 定义颜色映射数组
     $colorMap = [
-    'pink'   => ['theme' => '#ea868f', 'hover' => '#d1606e'],
-    'green'  => ['theme' => '#5fae8a', 'hover' => '#3f8f6a'],
-    'blue'   => ['theme' => '#6482db', 'hover' => '#4f6fdc'],
-    'yellow' => ['theme' => '#e5b96e', 'hover' => '#cfa24d'],
-    'red'    => ['theme' => '#cd575f', 'hover' => '#b84a4a'],
-    'purple' => ['theme' => '#8f7acb', 'hover' => '#6d5fb3'],
-    'cyan'   => ['theme' => '#5fb3b8', 'hover' => '#3f8f93'],
-    'orange' => ['theme' => '#e39a5c', 'hover' => '#c97a3f'],
+        'pink' => ['theme' => '#ea868f', 'hover' => '#d1606e'],
+        'green' => ['theme' => '#5fae8a', 'hover' => '#3f8f6a'],
+        'blue' => ['theme' => '#6482db', 'hover' => '#4f6fdc'],
+        'yellow' => ['theme' => '#e5b96e', 'hover' => '#cfa24d'],
+        'red' => ['theme' => '#cd575f', 'hover' => '#b84a4a'],
+        'purple' => ['theme' => '#8f7acb', 'hover' => '#6d5fb3'],
+        'cyan' => ['theme' => '#5fb3b8', 'hover' => '#3f8f93'],
+        'orange' => ['theme' => '#e39a5c', 'hover' => '#c97a3f'],
     ];
 
     // 设置默认颜色
@@ -470,14 +527,14 @@ function generateDynamicCSS()
 
     // 深色模式颜色映射数组
     $darkColorMap = [
-    'pink'   => ['theme' => '#bf677a', 'hover' => '#d6728a'],
-    'green'  => ['theme' => '#3f8a6c', 'hover' => '#2f6f56'],
-    'blue'   => ['theme' => '#44579a', 'hover' => '#5b6fc4'],
-    'yellow' => ['theme' => '#ab8748', 'hover' => '#cfa24d'],
-    'red'    => ['theme' => '#9a444b', 'hover' => '#b84a4a'],
-    'purple' => ['theme' => '#5f548a', 'hover' => '#7668a8'],
-    'cyan'   => ['theme' => '#3f7a7f', 'hover' => '#5f9ea3'],
-    'orange' => ['theme' => '#9f5a2f', 'hover' => '#b86a3a'],
+        'pink' => ['theme' => '#bf677a', 'hover' => '#d6728a'],
+        'green' => ['theme' => '#3f8a6c', 'hover' => '#2f6f56'],
+        'blue' => ['theme' => '#44579a', 'hover' => '#5b6fc4'],
+        'yellow' => ['theme' => '#ab8748', 'hover' => '#cfa24d'],
+        'red' => ['theme' => '#9a444b', 'hover' => '#b84a4a'],
+        'purple' => ['theme' => '#5f548a', 'hover' => '#7668a8'],
+        'cyan' => ['theme' => '#3f7a7f', 'hover' => '#5f9ea3'],
+        'orange' => ['theme' => '#9f5a2f', 'hover' => '#b86a3a'],
     ];
 
     // 根据颜色方案设置 dark 模式下的主题颜色和悬停颜色
@@ -581,7 +638,8 @@ function add_zoomable_to_images($content)
     return $content;
 }
 
-function get_cc_link() {
+function get_cc_link()
+{
     $options = Typecho_Widget::widget('Widget_Options');
     return 'https://creativecommons.org/licenses/' . $options->ccLicense . '/4.0/deed.zh-hans';
 }
@@ -745,14 +803,15 @@ function parsePicGrid($content)
                 '/<figcaption>.*?<\/figcaption>/s', // 移除 figcaption 及其内容
                 '/<\/?p>/i',               // 移除 <p> 和 </p>
             ], '', $matches[1]);
-            
+
             return '<div class="pic-grid">' . $cleanMatch . '</div>';
         },
         $content
     );
 }
 
-function theme_wrap_tables($content) {
+function theme_wrap_tables($content)
+{
     // 直接在表格外套一层 div
     return preg_replace(
         '/<table\b[^>]*>.*?<\/table>/is',
