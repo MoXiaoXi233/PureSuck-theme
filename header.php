@@ -211,7 +211,7 @@
                     scrollRestoration: true,
                     cacheBust: false,
                     timeout: 6500,
-                    elements: 'a[href^="<?php Helper::options()->siteUrl() ?>"]:not(a[target="_blank"], a[no-pjax] ), form[action]',
+                    elements: 'a[href^="<?php Helper::options()->siteUrl() ?>"]:not(a[target="_blank"], a[no-pjax])',
                     selectors: [
                         "pjax",
                         "script[data-pjax]",
