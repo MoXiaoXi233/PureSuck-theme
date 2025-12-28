@@ -51,7 +51,7 @@
                 <?php $comments->cancelReply(); ?>
             </div>
             <div class="response comment-title icon-chat">发表新评论</div>
-            <form method="post" action="<?php $this->commentUrl() ?>" id="cf">
+            <form method="post" action="<?php $this->commentUrl() ?>" id="cf" no-pjax>
                 <?php if ($this->user->hasLogin()): ?>
                     <span>亲爱的<a href="<?php $this->options->profileUrl(); ?>">
                             <?php $this->user->screenName(); ?>
