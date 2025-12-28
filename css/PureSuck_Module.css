@@ -875,7 +875,8 @@ timeline-description {
     font-size: 0.95rem;
     white-space: nowrap;
     flex-grow: 1;
-    overflow: hidden;
+    overflow-x: scroll;
+    scrollbar-width: none;
 }
 
 .tab-link {
