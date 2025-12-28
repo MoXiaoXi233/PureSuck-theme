@@ -1687,6 +1687,9 @@ strong {
 	}
 }
 
+#comments div[id^="comment-"] {
+    scroll-margin-top: 100px;
+}
 
 /* 评论发布区 */
 .respond {
@@ -1734,7 +1737,6 @@ textarea.ci {
 	min-height: 220px;
 	font-size: 1rem;
 	line-height: 1.8;
-	border-radius: 0.9rem;
 	background: var(--card-color);
 }
 
@@ -1749,11 +1751,10 @@ textarea:focus-within+.CtBoxBar {
 	opacity: 1;
 }
 
-
 .submit {
 	align-self: flex-end;
 	padding: 10px 36px;
-	border-radius: 999px;
+	border-radius: .85rem;
 	font-size: 0.95rem;
 	background: var(--themecolor);
 	color: var(--pure-color);

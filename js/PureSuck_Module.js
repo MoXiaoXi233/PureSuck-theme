@@ -428,17 +428,61 @@ function initializeStickyTOC() {
 
 
 function Comments_Submit() {
-    const submitButton = document.getElementById("submit");
-    const textarea = document.getElementById("textarea");
+    const form = document.getElementById("cf");
+    if (!form) return;
+
+    // 防止 PJAX 重复绑定
+    if (form.dataset.binded === "1") return;
+    form.dataset.binded = "1";
+
+    const submitButton = form.querySelector("#submit");
+    const textarea = form.querySelector("#textarea");
 
     if (!submitButton || !textarea) return;
 
-    submitButton.addEventListener("click", () => {
-        if (textarea.value.trim() !== "") {
-            submitButton.textContent = "提交中~";
+    let isSubmitting = false;
+    const originalText = submitButton.textContent;
+
+    // 只监听 submit（关键）
+    form.addEventListener("submit", function (e) {
+        // 防止重复提交
+        if (isSubmitting) {
+            e.preventDefault();
+            return;
         }
+
+        // 内容为空，交给浏览器 / Typecho 提示
+        if (textarea.value.trim() === "") {
+            return;
+        }
+
+        isSubmitting = true;
+
+        submitButton.disabled = true;
+        submitButton.textContent = "提交中…";
     });
+
+    // HTML5 校验失败时恢复
+    form.addEventListener(
+        "invalid",
+        function () {
+            reset();
+        },
+        true
+    );
+
+    // 页面未跳转（例如 Typecho 校验失败）
+    window.addEventListener("pageshow", function () {
+        reset();
+    });
+
+    function reset() {
+        isSubmitting = false;
+        submitButton.disabled = false;
+        submitButton.textContent = originalText;
+    }
 }
+
 
 function runShortcodes() {
     history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
