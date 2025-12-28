@@ -9,7 +9,8 @@
  * @version 1.2.6
  * @link https://www.moxiify.cn
  */
-if (!defined('__TYPECHO_ROOT_DIR__')) exit;
+if (!defined('__TYPECHO_ROOT_DIR__'))
+    exit;
 $this->need('header.php');
 ?>
 
@@ -24,10 +25,9 @@ $this->need('header.php');
                 <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                     <div class="wrapper post-wrapper">
                         <div class="avatar post-author">
-                            <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
-                            <span class="avatar-item">
-                                <?php $this->author(); ?>
-                            </span>
+                            <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>"
+                                alt="作者头像" class="avatar-item avatar-img">
+                            <span class="avatar-item"><?php $this->author(); ?></span>
                         </div>
                     </div>
                 </header>
@@ -35,7 +35,8 @@ $this->need('header.php');
                 <!-- 大图样式 -->
                 <?php if ($hasImg): ?>
                     <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                        <img data-aos="zoom-out" data-aos-anchor-placement="top-bottom" itemprop="image" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                        <img data-aos="zoom-out" data-aos-anchor-placement="top-bottom" itemprop="image"
+                            src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
                     </figure>
                 <?php endif; ?>
 
@@ -43,7 +44,7 @@ $this->need('header.php');
                 <section class="post-item post-body">
                     <div class="wrapper post-wrapper">
                         <h1 class="post-title">
-                            <a href="<?php $this->permalink() ?>" title="<?php $this->title() ?>">
+                            <a href="<?php $this->permalink() ?>">
                                 <?php $this->title() ?>
                             </a>
                         </h1>
@@ -62,12 +63,14 @@ $this->need('header.php');
                 <footer class="post-item post-footer">
                     <div class="wrapper post-wrapper">
                         <div class="meta post-meta">
-                            <a itemprop="datePublished" href="<?php $this->permalink() ?>" class="icon-ui icon-ui-date meta-item meta-date">
+                            <a itemprop="datePublished" href="<?php $this->permalink() ?>"
+                                class="icon-ui icon-ui-date meta-item meta-date">
                                 <span class="meta-count">
                                     <?php $this->date(); ?>
                                 </span>
                             </a>
-                            <a href="<?php $this->permalink() ?>#comments" class="icon-ui icon-ui-comment meta-item meta-comment">
+                            <a href="<?php $this->permalink() ?>#comments"
+                                class="icon-ui icon-ui-comment meta-item meta-comment">
                                 <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
                             </a>
                         </div>
@@ -80,7 +83,8 @@ $this->need('header.php');
 
 <nav class="nav main-pager" data-js="pager">
     <span class="nav-item-alt">
-        第 <?= $this->_currentPage > 1 ? $this->_currentPage : 1; ?> 页 / 共 <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
+        第 <?= $this->_currentPage > 1 ? $this->_currentPage : 1; ?> 页 / 共
+        <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
     </span>
     <div class="nav nav--pager">
         <?php $this->pageLink('上一页'); ?>
@@ -90,12 +94,12 @@ $this->need('header.php');
 </nav>
 
 <div class="nav main-lastinfo">
-        <span class="nav-item-alt">
-            <?php
-            $options = Typecho_Widget::widget('Widget_Options');
-            echo $options->footerInfo;
-            ?>
-        </span>
+    <span class="nav-item-alt">
+        <?php
+        $options = Typecho_Widget::widget('Widget_Options');
+        echo $options->footerInfo;
+        ?>
+    </span>
 </div>
 </main>
 <?php $this->need('sidebar.php'); ?>

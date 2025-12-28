@@ -1,14 +1,15 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
+<?php if (!defined('__TYPECHO_ROOT_DIR__'))
+    exit; ?>
 <?php $this->need('header.php'); ?>
 
 <div class="wrapper">
 
     <h3 class="archive-title"><?php $this->archiveTitle([
-                                    'category' => _t('分类 %s 下的文章'),
-                                    'search'   => _t('包含关键字 %s 的文章'),
-                                    'tag'      => _t('标签 %s 下的文章'),
-                                    'author'   => _t('%s 发布的文章')
-                                ], '', ''); ?></h3>
+        'category' => _t('分类 %s 下的文章'),
+        'search' => _t('包含关键字 %s 的文章'),
+        'tag' => _t('标签 %s 下的文章'),
+        'author' => _t('%s 发布的文章')
+    ], '', ''); ?></h3>
 
     <?php if ($this->have()): ?>
         <?php while ($this->next()): ?>
@@ -20,10 +21,9 @@
                     <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                         <div class="wrapper post-wrapper">
                             <div class="avatar post-author">
-                                <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>" alt="作者头像" class="avatar-item avatar-img">
-                                <span class="avatar-item">
-                                    <?php $this->author(); ?>
-                                </span>
+                                <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.png'); ?>"
+                                    alt="作者头像" class="avatar-item avatar-img">
+                                <span class="avatar-item"><?php $this->author(); ?></span>
                             </div>
                         </div>
                     </header>
@@ -31,7 +31,8 @@
                     <!-- 大图样式 -->
                     <?php if ($hasImg): ?>
                         <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                            <img data-aos="zoom-out" data-aos-anchor-placement="top-bottom" src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                            <img data-aos="zoom-out" data-aos-anchor-placement="top-bottom" src="<?php $this->fields->img(); ?>"
+                                alt="头图" width="2000" height="800">
                         </figure>
                     <?php endif; ?>
 
@@ -55,12 +56,14 @@
                     <footer class="post-item post-footer">
                         <div class="wrapper post-wrapper">
                             <div class="meta post-meta">
-                                <a itemprop="datePublished" href="<?php $this->permalink() ?>" class="icon-ui icon-ui-date meta-item meta-date">
+                                <a itemprop="datePublished" href="<?php $this->permalink() ?>"
+                                    class="icon-ui icon-ui-date meta-item meta-date">
                                     <span class="meta-count">
                                         <?php $this->date(); ?>
                                     </span>
                                 </a>
-                                <a href="<?php $this->permalink() ?>#comments" class="icon-ui icon-ui-comment meta-item meta-comment">
+                                <a href="<?php $this->permalink() ?>#comments"
+                                    class="icon-ui icon-ui-comment meta-item meta-comment">
                                     <?php $this->commentsNum('暂无评论', '1 条评论', '%d 条评论'); ?>
                                 </a>
                             </div>
@@ -75,7 +78,8 @@
                 <section class="post-item post-body" style="margin-top: 0px;">
                     <div class="wrapper post-wrapper">
                         <p style="text-align: center;">
-                            <img src="<?php $this->options->themeUrl('images/Zai_Cry.png'); ?>" id="ZaiJPG" alt="没有适合的结果" style="display: block; margin: 0 auto;max-height: 200px;">
+                            <img src="<?php $this->options->themeUrl('images/Zai_Cry.png'); ?>" id="ZaiJPG" alt="没有适合的结果"
+                                style="display: block; margin: 0 auto;max-height: 200px;">
                         </p>
                         <p style="text-align: center;"><?php _e('肥肠抱歉，没有找到适合的结果( ´ﾟДﾟ`)'); ?></p>
                         <p style="text-align: center;"><?php _e('不妨在本站到处逛逛？'); ?></p>
@@ -90,8 +94,10 @@
 
 <nav class="nav main-pager" data-js="pager">
     <span class="nav-item-alt">
-        第 <?php if ($this->_currentPage > 1) echo $this->_currentPage;
-            else echo 1; ?> 页 / 共 <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
+        第 <?php if ($this->_currentPage > 1)
+            echo $this->_currentPage;
+        else
+            echo 1; ?> 页 / 共 <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
     </span>
     <div class="nav nav--pager">
         <?php $this->pageLink('上一页', 'prev'); ?>

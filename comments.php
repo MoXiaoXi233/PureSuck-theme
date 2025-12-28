@@ -1,4 +1,5 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
+<?php if (!defined('__TYPECHO_ROOT_DIR__'))
+    exit; ?>
 <?php if ($this->allow('comment')): ?>
     <?php $this->header('commentReply=1&description=0&keywords=0&generator=0&template=0&pingback=0&xmlrpc=0&wlw=0&rss2=0&rss1=0&antiSpam=0&atom'); ?>
 
@@ -8,7 +9,7 @@
         $cl = $comments->levels > 0 ? 'c_c' : 'c_p';
         $isAdmin = $comments->authorId == 1;
         $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external nofollow">' . $comments->author . '</a>' : $comments->author;
-    ?>
+        ?>
         <li id="li-<?php $comments->theId(); ?>" class="<?= $cl; ?>">
             <div id="<?php $comments->theId(); ?>">
                 <?php $avatarUrl = 'https://cn.cravatar.com/avatar/' . md5(strtolower($comments->mail)) . '?s=128&d=mm'; ?>
@@ -59,26 +60,28 @@
                     </span>
                 <?php else: ?>
                     <?php if ($this->remember('author', true) != "" && $this->remember('mail', true) != ""): ?>
-                        <span>欢迎
-                            <?php $this->remember('author'); ?> 回来~
-                        </span>
+                        <span>欢迎回来，<?php $this->remember('author'); ?></span>
                     <?php endif; ?>
                     <div class="ainfo">
                         <div class="tbox-container">
                             <div class="tbox">
-                                <input type="text" name="author" id="author" class="ci" placeholder="您的昵称" value="<?php $this->remember('author'); ?>" required="">
+                                <input type="text" name="author" id="author" class="ci" placeholder="您的昵称"
+                                    value="<?php $this->remember('author'); ?>" required="">
                             </div>
                             <div class="tbox">
-                                <input type="email" name="mail" id="mail" class="ci" placeholder="邮箱地址" value="<?php $this->remember('mail'); ?>" required="">
+                                <input type="email" name="mail" id="mail" class="ci" placeholder="邮箱地址"
+                                    value="<?php $this->remember('mail'); ?>" required="">
                             </div>
                             <div class="tbox">
-                                <input type="url" name="url" id="url" class="ci" placeholder="您的网站（选填）" value="<?php $this->remember('url'); ?>">
+                                <input type="url" name="url" id="url" class="ci" placeholder="您的网站（选填）"
+                                    value="<?php $this->remember('url'); ?>">
                             </div>
                         </div>
                     </div>
                 <?php endif; ?>
                 <div class="tbox">
-                    <textarea name="text" id="textarea" class="ci OwO-textarea" placeholder="请在这里输入您的评论内容" required><?php $this->remember('text'); ?></textarea>
+                    <textarea name="text" id="textarea" class="ci OwO-textarea" placeholder="请在这里输入您的评论内容"
+                        required><?php $this->remember('text'); ?></textarea>
                     <div class="CtBoxBar">
                         <div class="left-bar">
                             <div class="OwO-bar">
