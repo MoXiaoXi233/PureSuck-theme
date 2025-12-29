@@ -82,7 +82,7 @@ pre code.hljs {
 :not(pre)>code.hljs {
   background: var(--code-inline-bg);
   border: 1px solid var(--code-border);
-  
+
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.92em;
 
@@ -156,7 +156,7 @@ pre code.hljs {
 
 pre code.hljs::selection,
 pre code.hljs *::selection {
-  background: rgba(211, 107, 140, 0.18);
+  background: color-mix(in srgb, var(--themecolor) 18%, transparent);
 }
 
 
@@ -211,7 +211,7 @@ pre {
 }
 
 pre:hover .copy-button,
-pre:focus-within .copy-button{
+pre:focus-within .copy-button {
   opacity: 1;
   pointer-events: auto;
 }

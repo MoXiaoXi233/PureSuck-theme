@@ -1,4 +1,5 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
+<?php if (!defined('__TYPECHO_ROOT_DIR__'))
+  exit; ?>
 <?php $this->footer(); ?>
 
 <!-- 回到顶端 -->
@@ -9,7 +10,7 @@
 
 <!-- AOS -->
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     AOS.init({
       duration: 600,
       delay: 0,

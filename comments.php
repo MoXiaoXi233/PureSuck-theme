@@ -1,5 +1,3 @@
-<?php if (!defined('__TYPECHO_ROOT_DIR__'))
-    exit; ?>
 <?php if ($this->allow('comment')): ?>
     <?php $this->header('commentReply=1&description=0&keywords=0&generator=0&template=0&pingback=0&xmlrpc=0&wlw=0&rss2=0&rss1=0&antiSpam=0&atom'); ?>
 
@@ -15,6 +13,15 @@
                 <?php $avatarUrl = 'https://cn.cravatar.com/avatar/' . md5(strtolower($comments->mail)) . '?s=128&d=mm'; ?>
                 <img class="avatarcc" src="<?= $avatarUrl; ?>" loading="lazy" alt="评论头像" />
                 <div class="cp">
+                    <?php
+                    $status = isset($comments->status) ? $comments->status : null;
+                    // status 拿不到时，就尽量保守：不显示提示（避免误伤正常评论）
+                    // 如果能拿到 status，并且不是 approved，就提示待审核/被屏蔽
+                    if ($status && $status !== 'approved'):
+                        ?>
+                        <div class="cp-waiting">这条评论正在等待审核，审核通过后将对所有人可见。</div>
+                    <?php endif; ?>
+
                     <?= parseOwOcodes($comments->content); ?>
                     <div class="cm">
                         <span class="ca"><?= $author; ?></span>

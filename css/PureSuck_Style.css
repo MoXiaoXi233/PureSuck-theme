@@ -41,6 +41,9 @@
 	/* Dark 颜色变量 */
 }
 
+* {
+-webkit-tap-highlight-color:rgba(0,0,0,0);
+}
 
 *,
 :after,
@@ -1475,7 +1478,7 @@ strong {
 }
 
 .post--cover .post-author {
-	padding: 4px 8px;
+	padding-right: 8px;
 	border-radius: 999px;
 	background: rgb(0 0 0 / 15%);
 	color: #f5f5f5;
@@ -1525,6 +1528,17 @@ strong {
 	border-bottom: 1px solid var(--line-color);
 	word-wrap: break-word;
 }
+
+.cp-waiting{
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: .9;
+  background: color-mix(in srgb, var(--themecolor) 18%, transparent);
+}
+
 
 .cp p {
 	margin: 0 0 0.6rem 0;
@@ -1752,7 +1766,7 @@ textarea:focus-within+.CtBoxBar {
 
 .submit {
 	align-self: flex-end;
-	padding: 10px 36px;
+	padding: 8px 28px;
 	border-radius: .85rem;
 	font-size: 0.95rem;
 	background: var(--themecolor);
@@ -2181,6 +2195,11 @@ input:-webkit-autofill:active {
 	background: var(--themecolor) !important;
 }
 
+/* 自定义选中文本的背景色和文字颜色 */
+::selection {
+	background-color: color-mix(in srgb, var(--themecolor) 18%, transparent);
+}
+
 /* 加密文章组件设计 */
 .protected-block.v3 {
 	margin: 2.6rem 0 3.2rem;
@@ -2299,3 +2318,4 @@ input:-webkit-autofill:active {
 .protected-ghost span:nth-child(4) {
 	width: 50%;
 }
+

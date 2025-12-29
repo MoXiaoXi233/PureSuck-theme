@@ -148,38 +148,36 @@
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
-    <?php if ($this->options->postTitleAfter != 'off'): ?>
+    <?php if ($this->options->postTitleAfter == 'off'): ?>
+        <style>
+            .post-title::after {
+                content: none !important;
+                display: none !important;
+            }
+
+            .post-title {
+                margin: 0;
+            }
+        </style>
+    <?php else: ?>
         <style>
             .post-title::after {
                 bottom:
                     <?= $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>
                 ;
-                left:
-                    <?= '0'; ?>
-                ;
+                left: 0;
                 <?php if ($this->options->postTitleAfter == 'boldLine'): ?>
-                    width:
-                        <?= '58px'; ?>
-                    ;
-                    height:
-                        <?= '13px'; ?>
-                    ;
+                    width: 58px;
+                    height: 13px;
                 <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>
-                    width:
-                        <?= '80px'; ?>
-                    ;
-                    height:
-                        <?= '12px'; ?>
-                    ;
+                    width: 80px;
+                    height: 12px;
                     mask:
                         <?= "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>
                     ;
-                    mask-size:
-                        <?= '40px 12px'; ?>
-                    ;
+                    mask-size: 40px 12px;
                 <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
-                /* 添加手绘风格的样式 */
-                /* 这里可以添加具体的手绘风格的样式，不过浪费了两个小时也没写好，放弃了 */
+                    /* handDrawn... */
                 <?php endif; ?>
             }
         </style>
@@ -193,11 +191,11 @@
     <!-- CSS引入 -->
     <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
-    <link href="<?php getStaticURL('aos.css'); ?>" rel="stylesheet">
+    <link href="<?php getStaticURL(path: 'aos.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
-    <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
-    <script defer src="<?php getStaticURL('highlight.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
