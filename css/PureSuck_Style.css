@@ -513,8 +513,8 @@ ul,
 
 .avatar {
 	position: relative;
-    display: inline-table;
-    width: auto;  
+	display: inline-table;
+	width: auto;
 	line-height: 16px
 }
 
@@ -549,7 +549,7 @@ ul,
 }
 
 .avatar-item+.avatar-item {
-	padding:0 8px
+	padding: 0 8px
 }
 
 .post-body [href^="#fn:"] {
@@ -1009,7 +1009,6 @@ body>.wrapper {
 .protected input[type="submit"] {
 	padding: 10px;
 	margin: 5px 0;
-	background: var(--card-color);
 	width: 300px;
 	box-sizing: border-box;
 }
@@ -1477,9 +1476,9 @@ strong {
 
 .post--cover .post-author {
 	padding: 4px 8px;
-    border-radius: 999px;
-    background: rgb(0 0 0 / 15%);
-    color: #f5f5f5;
+	border-radius: 999px;
+	background: rgb(0 0 0 / 15%);
+	color: #f5f5f5;
 }
 
 .post--cover .post-cover+.post-footer .post-wrapper:before {
@@ -1688,7 +1687,7 @@ strong {
 }
 
 #comments div[id^="comment-"] {
-    scroll-margin-top: 100px;
+	scroll-margin-top: 100px;
 }
 
 /* 评论发布区 */
@@ -2180,4 +2179,123 @@ input:-webkit-autofill:active {
 
 .pace .pace-progress {
 	background: var(--themecolor) !important;
+}
+
+/* 加密文章组件设计 */
+.protected-block.v3 {
+	margin: 2.6rem 0 3.2rem;
+	padding: 0.2rem 0;
+}
+
+.protected-head {
+	display: flex;
+	align-items: flex-start;
+	gap: .85rem;
+	margin-bottom: .9rem;
+}
+
+.protected-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--themecolor) 80%, white);
+	box-shadow: 0 0 0 6px color-mix(in srgb, var(--themecolor) 18%, transparent);
+	transform: translateY(.45rem);
+}
+
+.protected-title {
+	font-weight: 600;
+	font-size: 1rem;
+	line-height: 1.2;
+}
+
+.protected-sub {
+	margin-top: .35rem;
+	font-size: .88rem;
+	color: color-mix(in srgb, var(--text-color) 45%, transparent);
+}
+
+.protected-divider {
+	height: 1px;
+	margin: 1.1rem 0 1.2rem;
+	background: linear-gradient(90deg,
+			transparent,
+			color-mix(in srgb, var(--border-color) 75%, transparent),
+			transparent);
+}
+
+.protected-search {
+	width: min(520px, 100%);
+	gap: .65rem;
+	padding: .15rem .2rem;
+}
+
+.protected-input {
+	flex: 1;
+	border: none;
+	background: transparent;
+	outline: none;
+	padding: .7rem .85rem;
+	font-size: .95rem;
+}
+
+.protected-btn {
+	border: 1px solid var(--border-color);
+	border-radius: .55rem;
+	padding: .55rem .95rem;
+	background-color: color-mix(in srgb, var(--themecolor) 8%, var(--card-color));
+	color: color-mix(in srgb, var(--text-color) 78%, transparent);
+	cursor: pointer;
+	transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.protected-btn:hover {
+	background-color: color-mix(in srgb, var(--themecolor) 12%, var(--card-color));
+	border-color: color-mix(in srgb, var(--themecolor) 35%, var(--border-color));
+	color: color-mix(in srgb, var(--text-color) 86%, transparent);
+}
+
+.protected-btn:active {
+	background-color: color-mix(in srgb, var(--themecolor) 16%, var(--card-color));
+	border-color: color-mix(in srgb, var(--themecolor) 45%, var(--border-color));
+}
+
+.protected-btn:focus-visible {
+	outline: none;
+	border-color: var(--themecolor);
+	background-color: color-mix(in srgb, var(--themecolor) 10%, var(--card-color));
+}
+
+
+.protected-ghost {
+	width: min(520px, 100%);
+	margin-top: 1.25rem;
+	display: grid;
+	gap: .55rem;
+}
+
+.protected-ghost span {
+	display: block;
+	height: 10px;
+	border-radius: 999px;
+	background: linear-gradient(90deg,
+			color-mix(in srgb, var(--border-color) 50%, transparent),
+			transparent);
+	opacity: .55;
+}
+
+.protected-ghost span:nth-child(1) {
+	width: 88%;
+}
+
+.protected-ghost span:nth-child(2) {
+	width: 76%;
+}
+
+.protected-ghost span:nth-child(3) {
+	width: 64%;
+}
+
+.protected-ghost span:nth-child(4) {
+	width: 50%;
 }
