@@ -50,13 +50,23 @@ $this->need('header.php');
                         </h1>
 
                         <!-- 摘要 -->
-                        <p class="post-excerpt">
-                            <?php if ($this->fields->desc): ?>
-                                <?= $this->fields->desc; ?>
-                            <?php else: ?>
-                                <?php $this->excerpt(200, ''); ?>
-                            <?php endif; ?>
-                        </p>
+                        <?php if (
+                            isset($this->password)
+                            && $this->password !== Typecho_Cookie::get('protectPassword')
+                            && $this->authorId !== $this->user->uid
+                            && !$this->user->pass('editor', true)
+                        ): ?>
+                            <p class="post-excerpt">该文章已加密，请输入密码后查看。</p>
+                        <?php else: ?>
+                            <p class="post-excerpt">
+                                <?php if ($this->fields->desc): ?>
+                                    <?= $this->fields->desc; ?>
+                                <?php else: ?>
+                                    <?php $this->excerpt(200, ''); ?>
+                                <?php endif; ?>
+                            </p>
+                        <?php endif; ?>
+
                     </div>
                 </section>
 
