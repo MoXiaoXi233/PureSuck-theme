@@ -18,6 +18,25 @@
             ?>
             <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item">
                 <div class="post-inner" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+                    <?php
+                    $showCardCategory = isset($this->options->showCardCategory)
+                        && $this->options->showCardCategory === '1';
+
+                    // 仅在开启时才取分类
+                    if ($showCardCategory) {
+                        $categories = $this->categories;
+                        if (!empty($categories)) {
+                            $cat = $categories[0];
+                        }
+                    }
+                    ?>
+
+                    <?php if ($showCardCategory && !empty($cat)): ?>
+                        <span class="post-cat-vertical">
+                            <?= htmlspecialchars($cat['name']); ?>
+                        </span>
+                    <?php endif; ?>
+
                     <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                         <div class="wrapper post-wrapper">
                             <div class="avatar post-author">

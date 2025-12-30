@@ -440,6 +440,21 @@ function themeConfig($form)
     $defaultColor = 'pink';  // 默认配色
     $colorSelect = new Typecho_Widget_Helper_Form_Element_Radio('colorScheme', $colors, $defaultColor, _t('配色方案'), _t('选择一个配色方案，默认为素粉'));
     $form->addInput($colorSelect);
+
+    // 卡片竖排分类显示选项
+    $showCardCategory = new Typecho_Widget_Helper_Form_Element_Radio(
+        'showCardCategory',
+        array(
+            '1' => _t('显示'),
+            '0' => _t('隐藏')
+        ),
+        '1',
+        _t('是否在文章卡片右上角显示竖排分类'),
+        _t('只在首页及搜索页等小卡片显示，不在文章内显示')
+
+    );
+    $form->addInput($showCardCategory);
+
 }
 
 // 主题配色
