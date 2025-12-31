@@ -3,29 +3,37 @@
 ![Static Badge](https://img.shields.io/github/v/release/MoXiaoXi233/PureSuck-theme)
 ![Static Badge](https://img.shields.io/badge/LICENSE-MIT-green)
 ![Static Badge](https://img.shields.io/badge/AUTHOR-MoXiify-pink)  
-PureSuck，干净，纯洁，淡雅朴素的typecho主题。  
-由于是第一次正经意义上的做一个项目，遇到问题欢迎反馈解决。  
-另外主题样式和基调还在不断迭代中，可能会遇到版本更新后样式发生变化的情况  
+PureSuck，干净，纯洁，淡雅朴素的 Typecho 主题。 
+
+Pure 意指纯洁、干净，后者取自爱人 RuoSuck，希望这份干净的爱恋能得到你的喜欢
+
+## 说明
+整体追求现代化，不适配较为老旧的浏览器内核和过低的 PHP 版本 
+
+主题设计理念更偏向简约、干净的阅读和分享，但也不过分的简陋，暂时不考虑加入过多与阅读体验关联不大的功能 
+
+主题本身设计并无太多框架，需要使用者用自己的文字让样式更加饱满丰富，不然也就失去了本身的意义
+
 感谢你的使用！
+
 ## 外观
-可以前往[希记](https://note.moxiify.cn)查看最新版演示效果  
-主题本身有四种强调色可以选择，同时内置几种多彩的小组件（欢迎issues提交建议）  
+可以前往[希记](https://note.moxiify.cn)查看最新版演示效果（也可能处在 Dev 阶段，则与 Release 版本略有差异）  
+
 ![PureSuck](https://s2.loli.net/2025/07/13/BvewG6DAnUrF7Pi.png)
 ## TODO
-- [x] Pjax
-- [ ] 重新设计组件
-- [ ] 精简代码，优化性能
-- [ ] 统一设计语言
+- [ ] 优化各种速度，力求性能
+- [ ] 评论区层级优化
+- [ ] 移动端功能
 ## 特性
 - 代码高亮   
-- 细微动效设计  
-- **界面简约干净**  
-- 有一定自定义空间  
+- 自然的动效设计  
+- **界面简约舒适**  
+- 丰富的自定义空间  
 - **阅读体验良好**  
 - TOC目录树  
 - 头图功能  
-- **流畅！**  
-- 内置几个小组件  
+- **流畅！流畅！流畅！**  
+- 满足大部分内容的内置组件  
 - ~~作者人比较好，愿意陪你瞎扯~~
 
 更多细节欢迎自行体验~  
@@ -42,7 +50,7 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 <ol><ul><li>
 ```
 根据你自己的需要删改，你想要允许引用效果就要加上`<blockquote>`，你想要代码就要加上`<pre><code>`等等
-- 搭配字体 「霞骛文楷」 使用
+- **搭配字体 「霞骛文楷」 使用**
 - 遇到问题联系作者
 
 ### 功能与组件
@@ -102,6 +110,8 @@ PureSuck，干净，纯洁，淡雅朴素的typecho主题。
 ```
 [PicGrid]
 ![图片.jpg][1]
+![图片.jpg][2]
+![图片.jpg][3]
 [/PicGrid]
 ```
 用 Typecho 默认的插入图片方式即可，用[PicGrid]标签包裹即可完成一个瀑布流的照片展示，适合多张图片展示的场景
@@ -137,4 +147,4 @@ MoxToast({
 [Pace](https://github.com/CodeByZach/pace)
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！  
-感谢，每一个使用本主题的朋友们！
+感谢使用本主题！❤
