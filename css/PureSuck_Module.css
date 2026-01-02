@@ -92,7 +92,7 @@
     border-radius: 14px;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: all .4s cubic-bezier(0.345, 0.045, 0.345, 1);
+    transition: opacity .3s ease, background-color .3s ease;
 }
 
 #go-top.visible {
@@ -133,7 +133,7 @@
     margin: 20px 0 !important;
     display: flex;
     padding: 10px 20px;
-    transition: all .3s ease;
+    transition: transform .3s ease, box-shadow .3s ease;
     transform: scale(1);
     color: var(--pure-color);
     font-weight: bold;
@@ -187,13 +187,12 @@
     flex-direction: column;
     gap: 1rem;
     margin: 20px 0 !important;
-    transition: all .3s cubic-bezier(0.345, 0.045, 0.345, 1);
     box-shadow: 1px 1px 3px 0 rgba(0, 0, 0, .05);
 }
 
 
 .notifications-container {
-    transition: box-shadow .25s ease, transform .25s ease;
+    transition: box-shadow .3s ease, transform .3s ease;
 }
 
 .notifications-container:hover {
@@ -379,7 +378,7 @@
 
     user-select: none;
 
-    transition: all .3s ease;
+    transition: background-color .3s ease, border-color .3s ease, transform .3s ease, scale .3s ease, opacity .3s ease;
 }
 
 @media (hover: hover) {
@@ -408,7 +407,7 @@
     letter-spacing: 0.01em;
     color: var(--text-color);
 
-    transition: all .3s ease;
+    transition: color .3s ease, letter-spacing .3s ease;
 }
 
 .friends-card-username::before {
@@ -424,7 +423,7 @@
     border: 1.5px solid var(--line-color);
     background-color: transparent;
 
-    transition: all .3 ease;
+    transition: border-color .3s ease, transform .3s ease;
 }
 
 .friends-card-username::after {
@@ -497,7 +496,7 @@
     background-color: var(--pure-color);
     border: 1px solid var(--line-color);
 
-    transition: all .3 ease;
+    transition: border-color .3s ease, box-shadow .3s ease;
 }
 
 @media (hover: none) {
@@ -1160,7 +1159,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 #toc .li {
     border: 1px solid var(--background-color);
     border-radius: 5px;
-    transition: all 0.3s ease;
+    transition: border-color .3s ease, background-color .3s ease;
 }
 
 #toc .li:hover {
@@ -1251,7 +1250,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     font-size: 0.95rem;
     padding: 10px 12px;
     color: var(--text-color);
-    transition: all 0.3s ease;
+    transition: color .3s ease;
 }
 
 .search-input::placeholder {

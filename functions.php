@@ -712,7 +712,7 @@ function parse_Shortcodes($content)
             . $title
             . '<span class="icon icon-down-open"></span>'
             . '</button>'
-            . '<div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: all .4s cubic-bezier(0.345, 0.045, 0.345, 1);">'
+            . '<div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: max-height .45s ease;">'
             . '<div class="collapsible-details">' . $text . '</div>'
             . '</div>'
             . '</div>';
