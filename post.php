@@ -92,7 +92,7 @@
                                 </div>
                             </section>
                         <?php else: ?>
-                            <?= parseShortcodes($this->content); ?>
+                            <?= renderPostContent($this->content); ?>
                         <?php endif; ?>
 
                         <!-- 判断并显示版权信息 -->

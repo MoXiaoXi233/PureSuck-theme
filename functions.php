@@ -624,6 +624,7 @@ function add_zoomable_to_images($content)
     $exclude_elements = array(
         '.no-zoom',  // 排除带有 no-zoom 类的元素
         '#no-zoom',  // 排除带有 id 为 special-image 的元素
+        'friends-card-avatar', // 友链头像不参与放大
         // 可以在这里添加更多的排除规则
     );
 
@@ -661,6 +662,7 @@ function get_cc_link()
 
 function parse_Shortcodes($content)
 {
+    static $tabsInstance = 0;
     // 替换短代码结束标签后的 <br> 标签
     $content = preg_replace('/\[\/(alert|window|friend-card|collapsible-panel|timeline|tabs)\](<br\s*\/?>)?/i', '[/$1]', $content);
     $content = preg_replace('/\[\/timeline-event\](<br\s*\/?>)?/i', '[/timeline-event]', $content);
@@ -683,18 +685,37 @@ function parse_Shortcodes($content)
 
     // 处理 [friend-card] 短代码
     $content = preg_replace_callback('/\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/s', function ($matches) {
-        $name = $matches[1];
-        $ico = $matches[2];
-        $url = $matches[3];
+        $name = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
+        $ico = htmlspecialchars($matches[2], ENT_QUOTES, 'UTF-8');
+        $url = htmlspecialchars($matches[3], ENT_QUOTES, 'UTF-8');
         $description = $matches[4];
-        return "<div friend-name=\"$name\" ico=\"$ico\" url=\"$url\">$description</div>";
+        return '<a href="' . $url . '" class="friendsboard-item" target="_blank">'
+            . '<div class="friends-card-header">'
+            . '<span class="friends-card-username">' . $name . '</span>'
+            . '<span class="friends-card-dot"></span>'
+            . '</div>'
+            . '<div class="friends-card-body">'
+            . '<div class="friends-card-text">' . $description . '</div>'
+            . '<div class="friends-card-avatar-container">'
+            . '<img src="' . $ico . '" alt="Avatar" class="friends-card-avatar no-zoom no-figcaption" draggable="false">'
+            . '</div>'
+            . '</div>'
+            . '</a>';
     }, $content);
 
     // 处理 [collapsible-panel] 短代码
     $content = preg_replace_callback('/\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/s', function ($matches) {
-        $title = $matches[1];
+        $title = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
         $text = preg_replace('/^<br\s*\/?>/', '', $matches[2]);
-        return "<div collapsible-panel title=\"$title\">$text</div>";
+        return '<div class="collapsible-panel">'
+            . '<button class="collapsible-header">'
+            . $title
+            . '<span class="icon icon-down-open"></span>'
+            . '</button>'
+            . '<div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: all .4s cubic-bezier(0.345, 0.045, 0.345, 1);">'
+            . '<div class="collapsible-details">' . $text . '</div>'
+            . '</div>'
+            . '</div>';
     }, $content);
 
     // 处理 [timeline] 短代码
@@ -710,14 +731,51 @@ function parse_Shortcodes($content)
     }, $content);
 
     // 处理 [tabs] 短代码
-    $content = preg_replace_callback('/\[tabs\](.*?)\[\/tabs\]/s', function ($matches) {
+    $content = preg_replace_callback('/\[tabs\](.*?)\[\/tabs\]/s', function ($matches) use (&$tabsInstance) {
         $innerContent = $matches[1];
-        $innerContent = preg_replace_callback('/\[tab title="([^"]*)"\](.*?)\[\/tab\]/s', function ($tabMatches) {
-            $title = $tabMatches[1];
-            $tabContent = preg_replace('/^\s*<br\s*\/?>/', '', $tabMatches[2]);
-            return "<div tab-title=\"$title\">$tabContent</div>";
-        }, $innerContent);
-        return "<div tabs>$innerContent</div>";
+        preg_match_all('/\[tab title="([^"]*)"\](.*?)\[\/tab\]/s', $innerContent, $tabMatches, PREG_SET_ORDER);
+        if (!$tabMatches) {
+            return '';
+        }
+
+        $tabsInstance++;
+        $tabIdBase = 'tab' . $tabsInstance;
+        $tabLinks = [];
+        $tabPanes = [];
+
+        foreach ($tabMatches as $index => $match) {
+            $title = htmlspecialchars($match[1], ENT_QUOTES, 'UTF-8');
+            $tabContent = preg_replace('/^\s*<br\s*\/?>/', '', $match[2]);
+            $tabId = $tabIdBase . '-' . ($index + 1);
+            $isActive = $index === 0;
+
+            $tabLinks[] = '<div class="tab-link' . ($isActive ? ' active' : '') . '"'
+                . ' data-tab="' . $tabId . '" role="tab"'
+                . ' aria-controls="' . $tabId . '"'
+                . ' tabindex="' . ($isActive ? '0' : '-1') . '">'
+                . $title
+                . '</div>';
+
+            $tabPanes[] = '<div class="tab-pane' . ($isActive ? ' active' : '') . '"'
+                . ' id="' . $tabId . '" role="tabpanel"'
+                . ' aria-labelledby="' . $tabId . '">'
+                . $tabContent
+                . '</div>';
+        }
+
+        return '<div class="tab-container">'
+            . '<div class="tab-header-wrapper">'
+            . '<button class="scroll-button left" aria-label="向左"></button>'
+            . '<div class="tab-header dir-right" role="tablist">'
+            . implode('', $tabLinks)
+            . '<div class="tab-indicator"></div>'
+            . '</div>'
+            . '<button class="scroll-button right" aria-label="向右"></button>'
+            . '</div>'
+            . '<div class="tab-content">'
+            . implode('', $tabPanes)
+            . '</div>'
+            . '</div>';
     }, $content);
 
     // 处理 [bilibili-card] 短代码
@@ -731,12 +789,20 @@ function parse_Shortcodes($content)
     ";
     }, $content);
 
+    // friend-card 连续合并为列表容器
+    $content = preg_replace_callback('/(?:\s*<a[^>]*class="[^"]*friendsboard-item[^"]*"[^>]*>.*?<\/a>\s*)+/s', function ($matches) {
+        return '<div class="friendsboard-list">' . trim($matches[0]) . '</div>';
+    }, $content);
+
     // 图片底部文字注释结构
     // 使用正则表达式匹配所有的图片标签
     $pattern = '/<img.*?src=[\'"](.*?)[\'"].*?>/i';
 
     // 使用 preg_replace_callback 来处理每个匹配到的图片标签
     $content = preg_replace_callback($pattern, function ($matches) {
+        if (strpos($matches[0], 'friends-card-avatar') !== false || strpos($matches[0], 'no-figcaption') !== false) {
+            return $matches[0];
+        }
         // 获取图片的 alt 属性
         $alt = '';
         if (preg_match('/alt=[\'"](.*?)[\'"]/i', $matches[0], $alt_matches)) {
@@ -836,7 +902,7 @@ function theme_wrap_tables($content)
 }
 
 // 运行所有函数
-function parseShortcodes($content)
+function renderPostContent($content)
 {
     $content = parse_Shortcodes($content);
     $content = parse_alerts($content);
@@ -847,5 +913,103 @@ function parseShortcodes($content)
     $content = theme_wrap_tables($content); # 表格外嵌套，用于适配滚动
     $content = add_zoomable_to_images($content); # 图片放大
 
-    return $content;
+    return TOC_Generate($content);
+}
+
+function TOC_Generate($content)
+{
+    $result = [
+        'content' => $content,
+        'toc' => ''
+    ];
+
+    if (trim($content) === '') {
+        $GLOBALS['toc_html'] = '';
+        return $content;
+    }
+
+    $slugify = function ($text) {
+        $text = trim(strip_tags($text));
+        $text = strtolower($text);
+        $text = preg_replace('/[\s_]+/', '-', $text);
+        $text = preg_replace('/[^a-z0-9\-\x{4e00}-\x{9fa5}]/u', '', $text);
+        $text = preg_replace('/-+/', '-', $text);
+        $text = trim($text, '-');
+        return $text ?: 'heading';
+    };
+
+    $innerHtml = function ($node) {
+        $html = '';
+        foreach ($node->childNodes as $child) {
+            $html .= $node->ownerDocument->saveHTML($child);
+        }
+        return $html;
+    };
+
+    $doc = new DOMDocument('1.0', 'UTF-8');
+    libxml_use_internal_errors(true);
+    $doc->loadHTML('<?xml encoding="UTF-8"><div id="toc-root">' . $content . '</div>');
+    libxml_clear_errors();
+
+    $root = $doc->getElementById('toc-root');
+    if (!$root) {
+        $GLOBALS['toc_html'] = '';
+        return $content;
+    }
+
+    $xpath = new DOMXPath($doc);
+    $headings = $xpath->query('.//h1|.//h2|.//h3|.//h4|.//h5|.//h6', $root);
+
+    if (!$headings || $headings->length === 0) {
+        $GLOBALS['pure_suck_toc_html'] = '';
+        return $innerHtml($root);
+    }
+
+    $ids = [];
+    $tocItems = [];
+
+    foreach ($headings as $heading) {
+        $level = (int)substr($heading->nodeName, 1);
+        $text = trim($heading->textContent);
+        if ($text === '') {
+            continue;
+        }
+
+        $id = $heading->getAttribute('id');
+        if ($id === '') {
+            $baseId = $slugify($text);
+            $id = $baseId;
+            $counter = 2;
+            while (isset($ids[$id])) {
+                $id = $baseId . '-' . $counter;
+                $counter++;
+            }
+            $heading->setAttribute('id', $id);
+        }
+
+        $ids[$id] = true;
+        $tocItems[] = [
+            'id' => $id,
+            'level' => $level,
+            'text' => htmlspecialchars($text, ENT_QUOTES, 'UTF-8')
+        ];
+    }
+
+    if ($tocItems) {
+        $listHtml = '<ul id="toc">';
+        foreach ($tocItems as $item) {
+            $listHtml .= '<li class="li li-' . $item['level'] . '">'
+                . '<a href="#' . $item['id'] . '" id="link-' . $item['id'] . '" class="toc-a">'
+                . $item['text']
+                . '</a>'
+                . '</li>';
+        }
+        $listHtml .= '</ul>';
+        $result['toc'] = '<div class="dir">' . $listHtml . '<div class="sider"><span class="siderbar"></span></div></div>';
+    }
+
+    $result['content'] = $innerHtml($root);
+    $GLOBALS['toc_html'] = $result['toc'];
+
+    return $result['content'];
 }

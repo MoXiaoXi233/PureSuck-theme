@@ -25,7 +25,7 @@ function handleGoTopButton() {
     });
 }
 
-function generateTOC() {
+function initializeTOC() {
     const tocSection = document.getElementById("toc-section");
     const toc = document.querySelector(".toc");
     const postWrapper = document.querySelector(".inner-post-wrapper");
@@ -33,49 +33,30 @@ function generateTOC() {
     if (!toc || !postWrapper) return;
 
     const elements = Array.from(postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6"));
-    if (!elements.length) return;
+    const tocLinks = toc.querySelectorAll(".toc-a");
 
-    const fragment = document.createDocumentFragment();
-    const ul = document.createElement('ul');
-    ul.id = 'toc';
+    if (!elements.length || !tocLinks.length) return;
 
-    elements.forEach((element, index) => {
-        if (!element.id) {
-            element.id = `heading-${index}`;
-        }
-        const li = document.createElement('li');
-        li.className = `li li-${element.tagName[1]}`;
-        li.innerHTML = `<a href="#${element.id}" id="link-${element.id}" class="toc-a">${element.textContent}</a>`;
-        ul.appendChild(li);
-    });
-
-    const dirDiv = document.createElement('div');
-    dirDiv.className = 'dir';
-    dirDiv.appendChild(ul);
-    dirDiv.innerHTML += `<div class="sider"><span class="siderbar"></span></div>`;
-    fragment.appendChild(dirDiv);
-
-    toc.appendChild(fragment);
-
-    toc.addEventListener("click", event => {
-        if (event.target.matches('.toc-a')) {
-            event.preventDefault();
-            const targetId = event.target.getAttribute('href').substring(1);
-            const targetElement = document.getElementById(targetId);
-            if (targetElement) {
-                const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
-                window.scrollTo({
-                    top: targetTop,
-                    behavior: "smooth"
-                });
-                setTimeout(() => {
-                    window.location.hash = targetId;
-                }, 300);
+    if (toc.dataset.binded !== "1") {
+        toc.addEventListener("click", event => {
+            if (event.target.matches('.toc-a')) {
+                event.preventDefault();
+                const targetId = event.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({
+                        top: targetTop,
+                        behavior: "smooth"
+                    });
+                    setTimeout(() => {
+                        window.location.hash = targetId;
+                    }, 300);
+                }
             }
-        }
-    });
-
-    handleScroll(elements);
+        });
+        toc.dataset.binded = "1";
+    }
 
     if (tocSection) {
         tocSection.style.display = "block";
@@ -86,6 +67,7 @@ function generateTOC() {
         }
     }
 
+    handleScroll(elements);
     window.dispatchEvent(new Event('scroll'));
 }
 
@@ -112,6 +94,8 @@ function handleScroll(elements) {
     let ticking = false;
     const tocItems = document.querySelectorAll(".toc li");
     const siderbar = document.querySelector(".siderbar");
+
+    if (!tocItems.length || !siderbar) return;
 
     const elementTops = elements.map(element => getElementTop(element));
 
@@ -157,192 +141,54 @@ function handleScroll(elements) {
     });
 }
 
-function parseFriendCards() {
-    const container = document.body;
-    const fragment = document.createDocumentFragment();
+function bindCollapsiblePanels() {
+    const panels = document.querySelectorAll('.collapsible-panel');
 
-    function identifyGroups(node) {
-        const groups = [];
-        let currentGroup = null;
+    panels.forEach(panel => {
+        if (panel.dataset.binded === "1") return;
+        panel.dataset.binded = "1";
 
-        while (node) {
-            if (node.nodeType === Node.ELEMENT_NODE && node.hasAttribute('friend-name')) {
-                if (!currentGroup) {
-                    currentGroup = [];
-                    groups.push(currentGroup);
-                }
-                currentGroup.push(node);
-            } else if (node.nodeType === Node.ELEMENT_NODE ||
-                (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '')) {
-                currentGroup = null;
-            }
+        const button = panel.querySelector('.collapsible-header');
+        const contentDiv = panel.querySelector('.collapsible-content');
+        const icon = button ? button.querySelector('.icon') : null;
 
-            if (node.firstChild) {
-                groups.push(...identifyGroups(node.firstChild));
-            }
-
-            node = node.nextSibling;
-        }
-        return groups;
-    }
-
-    function replaceGroups(groups) {
-        groups.forEach(group => {
-            if (group.length > 0) {
-                const friendsBoardList = document.createElement('div');
-                friendsBoardList.classList.add('friendsboard-list');
-
-                group.forEach(node => {
-                    const friendName = node.getAttribute('friend-name');
-                    const avatarUrl = node.getAttribute('ico');
-                    const url = node.getAttribute('url');
-
-                    const newContent = document.createElement('a');
-                    newContent.href = url;
-                    newContent.classList.add('friendsboard-item');
-                    newContent.target = "_blank";
-                    newContent.innerHTML = `
-                        <div class="friends-card-header">
-                            <span class="friends-card-username">${friendName}</span>
-                            <span class="friends-card-dot"></span>
-                        </div>
-                        <div class="friends-card-body">
-                            <div class="friends-card-text">
-                                ${node.innerHTML}
-                            </div>
-                            <div class="friends-card-avatar-container">
-                                <img src="${avatarUrl}" alt="Avatar" class="friends-card-avatar" draggable="false">
-                            </div>
-                        </div>
-                    `;
-
-                    friendsBoardList.appendChild(newContent);
-                });
-
-                const firstNode = group[0];
-                firstNode.innerHTML = '';
-                firstNode.appendChild(friendsBoardList);
-
-                for (let i = 1; i < group.length; i++) {
-                    group[i].remove();
-                }
-            }
-        });
-    }
-
-    const groups = identifyGroups(container.firstChild);
-    replaceGroups(groups);
-
-    container.appendChild(fragment);
-}
-
-
-function parseCollapsiblePanels() {
-    const elements = document.querySelectorAll('[collapsible-panel]');
-
-    elements.forEach(element => {
-        const title = element.getAttribute('title');
-        const content = element.innerHTML;
-
-        const newContent = `<div class="collapsible-panel">
-            <button class="collapsible-header">
-                ${title}
-                <span class="icon icon-down-open"></span>
-            </button>
-            <div class="collapsible-content" style="max-height: 0; overflow: hidden; transition: all .4s cubic-bezier(0.345, 0.045, 0.345, 1);">
-                <div class="collapsible-details">${content}</div>
-            </div>
-        </div>`;
-
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newContent;
-        const newPanel = tempDiv.firstChild;
-
-        const button = newPanel.querySelector('.collapsible-header');
-        const contentDiv = newPanel.querySelector('.collapsible-content');
-        const icon = button.querySelector('.icon');
+        if (!button || !contentDiv) return;
 
         button.addEventListener('click', function () {
             this.classList.toggle('active');
 
             if (contentDiv.style.maxHeight && contentDiv.style.maxHeight !== '0px') {
                 contentDiv.style.maxHeight = '0px';
-                icon.classList.remove('icon-up-open');
-                icon.classList.add('icon-down-open');
+                if (icon) {
+                    icon.classList.remove('icon-up-open');
+                    icon.classList.add('icon-down-open');
+                }
             } else {
                 contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
-                icon.classList.remove('icon-down-open');
-                icon.classList.add('icon-up-open');
+                if (icon) {
+                    icon.classList.remove('icon-down-open');
+                    icon.classList.add('icon-up-open');
+                }
             }
         });
-
-        element.parentNode.replaceChild(newPanel, element);
     });
 }
 
-function parseTabs() {
-    const tabContainers = document.querySelectorAll('[tabs]');
+function bindTabs() {
+    const tabContainers = document.querySelectorAll('.tab-container');
 
-    tabContainers.forEach((container, containerIndex) => {
-        const tabElements = Array.from(container.children);
-        const tabTitles = [];
-        const tabContents = [];
+    tabContainers.forEach(container => {
+        if (container.dataset.binded === "1") return;
+        container.dataset.binded = "1";
 
-        tabElements.forEach(child => {
-            const title = child.getAttribute('tab-title');
-            if (title) {
-                tabTitles.push(title);
-                tabContents.push(child.cloneNode(true));
-            }
-        });
+        const tabHeader = container.querySelector('.tab-header');
+        if (!tabHeader) return;
 
-        if (!tabTitles.length) return;
-
-        const tabHeaderHTML = tabTitles.map((title, index) => `
-            <div class="tab-link ${index === 0 ? 'active' : ''}"
-                 data-tab="tab${containerIndex + 1}-${index + 1}"
-                 role="tab"
-                 aria-controls="tab${containerIndex + 1}-${index + 1}"
-                 tabindex="${index === 0 ? '0' : '-1'}">
-                ${title}
-            </div>
-        `).join('');
-
-        const tabContentHTML = tabContents.map((content, index) => {
-            const tabPane = document.createElement('div');
-            tabPane.className = `tab-pane ${index === 0 ? 'active' : ''}`;
-            tabPane.id = `tab${containerIndex + 1}-${index + 1}`;
-            tabPane.setAttribute('role', 'tabpanel');
-            tabPane.setAttribute('aria-labelledby', `tab${containerIndex + 1}-${index + 1}`);
-            tabPane.appendChild(content);
-            return tabPane.outerHTML;
-        }).join('');
-
-        const tabContainer = document.createElement('div');
-        tabContainer.className = 'tab-container';
-        tabContainer.innerHTML = `
-            <div class="tab-header-wrapper">
-                <button class="scroll-button left" aria-label="向左"></button>
-                <div class="tab-header dir-right" role="tablist">
-                    ${tabHeaderHTML}
-                    <div class="tab-indicator"></div>
-                </div>
-                <button class="scroll-button right" aria-label="向右"></button>
-            </div>
-            <div class="tab-content">
-                ${tabContentHTML}
-            </div>
-        `;
-
-        container.innerHTML = '';
-        container.appendChild(tabContainer);
-
-        const tabHeader = tabContainer.querySelector('.tab-header');
         const tabLinks = Array.from(tabHeader.querySelectorAll('.tab-link'));
-        const tabPanes = Array.from(tabContainer.querySelectorAll('.tab-pane'));
+        const tabPanes = Array.from(container.querySelectorAll('.tab-pane'));
         const indicator = tabHeader.querySelector('.tab-indicator');
-        const leftButton = tabContainer.querySelector('.scroll-button.left');
-        const rightButton = tabContainer.querySelector('.scroll-button.right');
+
+        if (!tabLinks.length || !indicator) return;
 
         let cachedWidths = [];
         let cachedOffsets = [];
@@ -362,10 +208,12 @@ function parseTabs() {
         const updateLayout = () => {
             updateCache();
             const activeIndex = tabLinks.findIndex(l => l.classList.contains('active'));
-            updateIndicator(activeIndex);
+            updateIndicator(activeIndex >= 0 ? activeIndex : 0);
         };
 
-        new ResizeObserver(updateLayout).observe(tabHeader);
+        if (window.ResizeObserver) {
+            new ResizeObserver(updateLayout).observe(tabHeader);
+        }
 
         tabHeader.addEventListener('click', e => {
             const target = e.target.closest('.tab-link');
@@ -389,14 +237,15 @@ function parseTabs() {
             target.setAttribute('tabindex', '0');
             target.focus();
 
-            tabPanes[newIndex].classList.add('active');
+            if (tabPanes[newIndex]) {
+                tabPanes[newIndex].classList.add('active');
+            }
             updateIndicator(newIndex);
         });
 
         updateLayout();
     });
 }
-
 
 function initializeStickyTOC() {
     const tocSection = document.getElementById('toc-section');
@@ -483,14 +332,12 @@ function Comments_Submit() {
     }
 }
 
-
 function runShortcodes() {
     history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
-    parseFriendCards();
-    parseCollapsiblePanels();
-    parseTabs();
+    bindCollapsiblePanels();
+    bindTabs();
     handleGoTopButton();
-    generateTOC();
+    initializeTOC();
     mediumZoom('[data-zoomable]', {
         background: 'var(--card-color)'
     });

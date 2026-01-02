@@ -49,7 +49,7 @@
                         </div>
 
                         <!-- 解析正文以及短代码 -->
-                        <?= parseShortcodes($this->content); ?>
+                        <?= renderPostContent($this->content); ?>
 
                     </div>
                 </div>
