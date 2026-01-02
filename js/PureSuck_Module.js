@@ -1,6 +1,304 @@
 /** 这个JS包含了各种需要处理的的内容 **/
 /** 回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
+const initializeTOC = (() => {
+    let state = null;
+    let listenersBound = false;
+    let hashTimer = 0;
+    let scrollEndTimer = 0;
+    let scrollEndHandler = null;
+
+    function reset() {
+        if (!state) return;
+
+        if (hashTimer) {
+            clearTimeout(hashTimer);
+            hashTimer = 0;
+        }
+
+        if (scrollEndHandler) {
+            window.removeEventListener("scroll", scrollEndHandler);
+            scrollEndHandler = null;
+        }
+
+        if (scrollEndTimer) {
+            clearTimeout(scrollEndTimer);
+            scrollEndTimer = 0;
+        }
+
+        if (state.observer) {
+            state.observer.disconnect();
+            state.observer = null;
+        }
+
+        const previousElement = state.elements[state.activeIndex];
+        if (previousElement && previousElement.id) {
+            const previousLink = state.linkById.get(previousElement.id);
+            if (previousLink) {
+                previousLink.classList.remove("li-active");
+            }
+        }
+
+        state = null;
+    }
+
+    function refreshLayout() {
+        if (!state) return;
+        bindObserver();
+        setActive(getInitialActiveIndex());
+    }
+
+    function getInitialActiveIndex() {
+        if (!state) return 0;
+        const activationOffset = state.activationOffset;
+        let activeIndex = 0;
+
+        state.elements.forEach((element, index) => {
+            if (element.getBoundingClientRect().top <= activationOffset) {
+                activeIndex = index;
+            }
+        });
+
+        return activeIndex;
+    }
+
+    function bindObserver() {
+        if (!state) return;
+        if (state.observer) {
+            state.observer.disconnect();
+        }
+
+        state.intersecting.clear();
+
+        const activationRatio = 0.15;
+        const bottomRatio = 1;
+        state.activationOffset = Math.round(window.innerHeight * activationRatio);
+        state.observer = new IntersectionObserver(handleIntersect, {
+            rootMargin: `-${activationRatio * 100}% 0px -${bottomRatio * 100}% 0px`,
+            threshold: 0
+        });
+
+        state.elements.forEach(element => {
+            if (element.id) {
+                state.observer.observe(element);
+            }
+        });
+    }
+
+    function handleIntersect(entries) {
+        if (!state) return;
+        let bestIndex = -1;
+        let bestDistance = Infinity;
+
+        entries.forEach(entry => {
+            const index = state.indexByElement.get(entry.target);
+            if (index == null) return;
+            if (entry.isIntersecting) {
+                state.intersecting.add(index);
+                state.topByIndex.set(index, entry.boundingClientRect.top);
+            } else {
+                state.intersecting.delete(index);
+            }
+        });
+
+        state.intersecting.forEach(index => {
+            const top = state.topByIndex.get(index);
+            if (top == null) return;
+            const distance = Math.abs(top - state.activationOffset);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestIndex = index;
+            }
+        });
+
+        if (bestIndex >= 0) {
+            setActive(bestIndex);
+        }
+    }
+
+    function setActive(index) {
+        if (!state) return;
+        if (index < 0 || index >= state.elements.length) return;
+        if (state.activeIndex === index) return;
+
+        const element = state.elements[index];
+        if (!element || !element.id) return;
+        const link = state.linkById.get(element.id);
+        if (!link) return;
+
+        const previousElement = state.elements[state.activeIndex];
+        if (previousElement && previousElement.id) {
+            const previousLink = state.linkById.get(previousElement.id);
+            if (previousLink) {
+                previousLink.classList.remove("li-active");
+            }
+        }
+
+        link.classList.add("li-active");
+        state.activeIndex = index;
+
+        const item = state.itemById.get(element.id);
+        if (state.siderbar && item) {
+            state.siderbar.style.transform = `translate3d(0, ${item.offsetTop + 4}px, 0)`;
+        }
+    }
+
+    function waitForScrollEnd(done, timeout = 160) {
+        if (scrollEndHandler) {
+            window.removeEventListener("scroll", scrollEndHandler);
+            scrollEndHandler = null;
+        }
+
+        if (scrollEndTimer) {
+            clearTimeout(scrollEndTimer);
+            scrollEndTimer = 0;
+        }
+
+        scrollEndHandler = () => {
+            if (scrollEndTimer) {
+                clearTimeout(scrollEndTimer);
+            }
+            scrollEndTimer = window.setTimeout(() => {
+                window.removeEventListener("scroll", scrollEndHandler);
+                scrollEndHandler = null;
+                scrollEndTimer = 0;
+                done();
+            }, timeout);
+        };
+
+        window.addEventListener("scroll", scrollEndHandler, { passive: true });
+        scrollEndHandler();
+    }
+
+    function handleClick(event) {
+        if (!state) return;
+        const link = event.target instanceof Element ? event.target.closest(".toc-a") : null;
+        if (!link) return;
+
+        const href = link.getAttribute("href");
+        if (!href || href.charAt(0) !== "#") return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const targetId = href.slice(1);
+        const targetElement = document.getElementById(targetId);
+        if (!targetElement) return;
+
+        const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+            top: targetTop,
+            behavior: "smooth"
+        });
+
+        if (state.observer) {
+            state.observer.disconnect();
+            state.observer = null;
+        }
+
+        if (hashTimer) {
+            clearTimeout(hashTimer);
+        }
+        hashTimer = window.setTimeout(() => {
+            window.location.hash = targetId;
+            hashTimer = 0;
+        }, 300);
+
+        const index = state.indexById.get(targetId);
+        if (index != null) {
+            setActive(index);
+        }
+
+        waitForScrollEnd(() => {
+            bindObserver();
+            setActive(getInitialActiveIndex());
+        });
+    }
+
+    return function initializeTOC() {
+        const tocSection = document.getElementById("toc-section");
+        const toc = document.querySelector(".toc");
+        const postWrapper = document.querySelector(".inner-post-wrapper");
+
+        if (!toc || !postWrapper) {
+            reset();
+            return;
+        }
+
+        const elements = Array.from(postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+        const links = Array.from(toc.querySelectorAll(".toc-a"));
+        const siderbar = document.querySelector(".siderbar");
+
+        if (!elements.length || !links.length || !siderbar) {
+            reset();
+            return;
+        }
+
+        siderbar.style.transition = "transform 0.5s ease";
+
+        if (tocSection) {
+            tocSection.style.display = "block";
+            const rightSidebar = document.querySelector(".right-sidebar");
+            if (rightSidebar) {
+                rightSidebar.style.position = "absolute";
+                rightSidebar.style.top = "0";
+            }
+        }
+
+        links.forEach(link => {
+            link.setAttribute("no-pjax", "");
+            link.classList.remove("li-active");
+        });
+
+        state = {
+            elements,
+            links,
+            siderbar,
+            activeIndex: -1,
+            indexByElement: new Map(),
+            indexById: new Map(),
+            linkById: new Map(),
+            itemById: new Map(),
+            topByIndex: new Map(),
+            activationOffset: 0,
+            observer: null,
+            intersecting: new Set()
+        };
+
+        state.elements.forEach((element, index) => {
+            state.indexByElement.set(element, index);
+            if (element.id) {
+                state.indexById.set(element.id, index);
+            }
+        });
+
+        state.links.forEach(link => {
+            const href = link.getAttribute("href");
+            if (!href || href.charAt(0) !== "#") return;
+            const id = href.slice(1);
+            state.linkById.set(id, link);
+            const item = link.closest("li");
+            if (item) {
+                state.itemById.set(id, item);
+            }
+        });
+
+        if (toc.dataset.binded !== "1") {
+            toc.addEventListener("click", handleClick, true);
+            toc.dataset.binded = "1";
+        }
+
+        if (!listenersBound) {
+            listenersBound = true;
+            window.addEventListener("resize", refreshLayout, { passive: true });
+            window.addEventListener("orientationchange", refreshLayout);
+            window.addEventListener("load", refreshLayout, { once: true });
+        }
+
+        refreshLayout();
+    };
+})();
+
 function handleGoTopButton() {
     const goTopBtn = document.getElementById('go-top'); // 按钮容器
     const goTopAnchor = document.querySelector('#go-top .go');
@@ -22,122 +320,6 @@ function handleGoTopButton() {
         setTimeout(() => {
             goTopBtn.classList.remove('visible'); // 隐藏
         }, 400); // 等待滚动完成
-    });
-}
-
-function initializeTOC() {
-    const tocSection = document.getElementById("toc-section");
-    const toc = document.querySelector(".toc");
-    const postWrapper = document.querySelector(".inner-post-wrapper");
-
-    if (!toc || !postWrapper) return;
-
-    const elements = Array.from(postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6"));
-    const tocLinks = toc.querySelectorAll(".toc-a");
-
-    if (!elements.length || !tocLinks.length) return;
-
-    if (toc.dataset.binded !== "1") {
-        toc.addEventListener("click", event => {
-            if (event.target.matches('.toc-a')) {
-                event.preventDefault();
-                const targetId = event.target.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
-                    window.scrollTo({
-                        top: targetTop,
-                        behavior: "smooth"
-                    });
-                    setTimeout(() => {
-                        window.location.hash = targetId;
-                    }, 300);
-                }
-            }
-        });
-        toc.dataset.binded = "1";
-    }
-
-    if (tocSection) {
-        tocSection.style.display = "block";
-        const rightSidebar = document.querySelector(".right-sidebar");
-        if (rightSidebar) {
-            rightSidebar.style.position = "absolute";
-            rightSidebar.style.top = "0";
-        }
-    }
-
-    handleScroll(elements);
-    window.dispatchEvent(new Event('scroll'));
-}
-
-function getElementTop(element) {
-    let actualTop = element.offsetTop;
-    let current = element.offsetParent;
-    while (current !== null) {
-        actualTop += current.offsetTop;
-        current = current.offsetParent;
-    }
-    return actualTop;
-}
-
-function removeClass(elements) {
-    elements.forEach(element => {
-        const anchor = document.querySelector(`#link-${element.id}`);
-        if (anchor) {
-            anchor.classList.remove("li-active");
-        }
-    });
-}
-
-function handleScroll(elements) {
-    let ticking = false;
-    const tocItems = document.querySelectorAll(".toc li");
-    const siderbar = document.querySelector(".siderbar");
-
-    if (!tocItems.length || !siderbar) return;
-
-    const elementTops = elements.map(element => getElementTop(element));
-
-    window.addEventListener("scroll", () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const currentPosition = window.scrollY;
-                let activeElement = null;
-
-                elements.forEach((element, index) => {
-                    const targetTop = elementTops[index];
-                    const elementHeight = element.offsetHeight;
-                    const offset = elementHeight / 2;
-
-                    const nextElement = elements[index + 1];
-                    const nextTargetTop = nextElement ? elementTops[index + 1] : Number.MAX_SAFE_INTEGER;
-
-                    if (currentPosition + offset >= targetTop && currentPosition + offset < nextTargetTop) {
-                        activeElement = element;
-                    }
-                });
-
-                if (!activeElement && elements.length > 0) {
-                    activeElement = elements[0];
-                }
-
-                if (activeElement) {
-                    removeClass(elements);
-                    const anchor = document.querySelector(`#link-${activeElement.id}`);
-                    if (anchor) {
-                        anchor.classList.add("li-active");
-
-                        const index = elements.indexOf(activeElement);
-                        const sidebarTop = tocItems[index].offsetTop;
-                        siderbar.style.transform = `translateY(${sidebarTop + 4}px)`;
-                    }
-                }
-
-                ticking = false;
-            });
-            ticking = true;
-        }
     });
 }
 
@@ -247,33 +429,57 @@ function bindTabs() {
     });
 }
 
-function initializeStickyTOC() {
-    const tocSection = document.getElementById('toc-section');
-    if (!tocSection) return;
+const initializeStickyTOC = (() => {
+    let state = {
+        section: null,
+        sidebar: null,
+        threshold: 0,
+        raf: 0,
+        bound: false
+    };
 
-    const buffer = 50;
-    const tocAboveElements = document.querySelectorAll('.right-sidebar > *:not(#toc-section)');
-    const initialTocAboveHeight = Array.from(tocAboveElements).reduce((total, element) => total + element.offsetHeight, 0);
-    const threshold = initialTocAboveHeight + buffer;
-
-    let isTicking = false;
-
-    function onScroll() {
-        if (!isTicking) {
-            isTicking = true;
-            window.requestAnimationFrame(() => {
-                const currentScrollY = window.scrollY;
-                const shouldStick = currentScrollY >= threshold;
-                if (tocSection.classList.contains('sticky') !== shouldStick) {
-                    tocSection.classList.toggle('sticky', shouldStick);
-                }
-                isTicking = false;
-            });
-        }
+    function updateThreshold() {
+        if (!state.section || !state.sidebar) return;
+        const tocAboveElements = Array.from(state.sidebar.children).filter(element => element !== state.section);
+        state.threshold = tocAboveElements.reduce((total, element) => total + element.offsetHeight, 0) + 50;
     }
 
-    window.addEventListener('scroll', onScroll);
-}
+    function requestUpdate() {
+        if (state.raf) return;
+        state.raf = window.requestAnimationFrame(() => {
+            state.raf = 0;
+            if (!state.section) return;
+            const shouldStick = window.scrollY >= state.threshold;
+            state.section.classList.toggle("sticky", shouldStick);
+        });
+    }
+
+    function handleResize() {
+        updateThreshold();
+        requestUpdate();
+    }
+
+    return function initializeStickyTOC() {
+        const tocSection = document.getElementById("toc-section");
+        const rightSidebar = document.querySelector(".right-sidebar");
+        if (!tocSection || !rightSidebar) return;
+
+        state.section = tocSection;
+        state.sidebar = rightSidebar;
+        state.threshold = 0;
+
+        updateThreshold();
+        requestUpdate();
+
+        if (state.bound) return;
+        state.bound = true;
+
+        window.addEventListener("scroll", requestUpdate, { passive: true });
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("orientationchange", handleResize);
+        window.addEventListener("load", handleResize, { once: true });
+    };
+})();
 
 
 function Comments_Submit() {
