@@ -473,8 +473,6 @@ function getStaticURL($path)
     $staticMap = [
         // 本地资源（主题目录）
         'local' => [
-            'aos.js' => $options->themeUrl . '/js/lib/aos.js',
-            'aos.css' => $options->themeUrl . '/css/lib/aos.css',
             'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
             'highlight.min.js' => $options->themeUrl . '/js/lib/highlight.min.js',
             'pjax.min.js' => $options->themeUrl . '/js/lib/pjax.min.js',
@@ -482,8 +480,6 @@ function getStaticURL($path)
             'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css'
         ],
         'bootcdn' => [
-            'aos.js' => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.js",
-            'aos.css' => "https://cdn.bootcdn.net/ajax/libs/aos/2.3.4/aos.css",
             'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
             'highlight.min.js' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js' => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
@@ -491,8 +487,6 @@ function getStaticURL($path)
             'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
         ],
         "cdnjs" => [
-            'aos.js' => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js",
-            'aos.css' => "https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css",
             'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
             'highlight.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
             'pjax.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",

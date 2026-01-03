@@ -15,6 +15,44 @@
 }
 
 
+:root {
+	/* ============================= */
+	/* Core reveal motion (main feel) */
+	/* ============================= */
+	--scroll-reveal-offset: 56px;
+	--scroll-reveal-scale: 0.997;
+	--scroll-reveal-duration: 720ms;
+	--scroll-reveal-easing: cubic-bezier(.22, 1, .36, 1);
+
+	/* ============================= */
+	/* Content sequencing */
+	/* ============================= */
+	--scroll-reveal-title-offset: 8px;
+	--scroll-reveal-content-offset: 10px;
+
+	--scroll-reveal-content-delay: 140ms;
+	--scroll-reveal-content-delay-step: 40ms;
+
+	--scroll-reveal-content-node-delay: 180ms;
+	--scroll-reveal-content-node-step: 30ms;
+
+	--scroll-reveal-comments-delay: 320ms;
+
+	/* ============================= */
+	/* Media / images */
+	/* ============================= */
+	--scroll-reveal-image-blur: 6px;
+	--scroll-reveal-image-scale: 1.02;
+	--scroll-reveal-media-duration: 680ms;
+
+	/* ============================= */
+	/* Trigger timing */
+	/* ============================= */
+	--scroll-reveal-trigger-ratio: 1;
+	--scroll-reveal-root-margin: 0px 0px 0px 0px;
+
+}
+
 [data-theme="dark"] {
 	--background-color: #121416;
 	--pure-color: #f2f2f2;
@@ -75,6 +113,7 @@ body {
 	from {
 		opacity: 1;
 	}
+
 	to {
 		opacity: 0;
 	}
@@ -84,6 +123,7 @@ body {
 	from {
 		opacity: 0;
 	}
+
 	to {
 		opacity: 1;
 	}
@@ -98,6 +138,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
 	::view-transition-old(root),
 	::view-transition-new(root) {
 		animation: none;
@@ -873,6 +914,16 @@ body>.wrapper {
 	display: flex;
 }
 
+.header-wrapper.header-title {
+	transition: none;
+	will-change: auto;
+}
+
+.right-sidebar {
+	transition: none;
+	will-change: auto;
+}
+
 .sidebar-wrapper {
 	max-width: 275px
 }
@@ -1071,6 +1122,153 @@ body>.wrapper {
 	width: 100%
 }
 
+html.js-scroll-reveal .post-inner {
+	opacity: 0;
+	transform: translate3d(0, var(--scroll-reveal-offset, 20px), 0) scale(var(--scroll-reveal-scale, 0.994));
+	transition:
+		opacity var(--scroll-reveal-duration, 600ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
+		transform var(--scroll-reveal-duration, 600ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+	transition-delay: var(--reveal-delay, 0ms);
+	will-change: opacity, transform;
+}
+
+html.js-scroll-reveal .post-inner.is-revealed {
+	opacity: 1;
+	transform: translate3d(0, 0, 0) scale(1);
+}
+
+html.js-scroll-reveal .post-inner .post-title,
+html.js-scroll-reveal .post-inner .post-meta,
+html.js-scroll-reveal .post-inner .post-excerpt,
+html.js-scroll-reveal .post-inner .post-author {
+	opacity: 0.001;
+	transform: translate3d(0, var(--scroll-reveal-title-offset, 8px), 0);
+	transition:
+		opacity 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
+		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+	will-change: opacity, transform;
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .post-author {
+	opacity: 1;
+	transform: none;
+	transition-delay: calc(var(--reveal-delay, 0ms) + 80ms);
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .post-title {
+	opacity: 1;
+	transform: none;
+	transition-delay: calc(var(--reveal-delay, 0ms) + 120ms);
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .post-meta {
+	opacity: 1;
+	transform: none;
+	transition-delay: calc(var(--reveal-delay, 0ms) + 160ms);
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .post-excerpt {
+	opacity: 1;
+	transform: none;
+	transition-delay: calc(var(--reveal-delay, 0ms) + 200ms);
+}
+
+html.js-scroll-reveal .post-inner .inner-post-wrapper> :not(.post-meta):not(.post-content) {
+	opacity: 0.001;
+	transform: translate3d(0, var(--scroll-reveal-content-offset, 6px), 0);
+	transition:
+		opacity 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
+		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+	transition-delay:
+		calc(var(--reveal-delay, 0ms) + var(--scroll-reveal-content-delay, 180ms) + (var(--content-index, 0) * var(--scroll-reveal-content-delay-step, 50ms)));
+	will-change: opacity, transform;
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .inner-post-wrapper> :not(.post-meta):not(.post-content) {
+	opacity: 1;
+	transform: none;
+}
+
+html.js-scroll-reveal .post-inner .post-content>* {
+	opacity: 0.001;
+	transform: translate3d(0, var(--scroll-reveal-content-offset, 6px), 0);
+	transition:
+		opacity 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
+		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+	transition-delay:
+		calc(var(--reveal-delay, 0ms) + var(--scroll-reveal-content-node-delay, 200ms) + (var(--content-child-index, 0) * var(--scroll-reveal-content-node-step, 35ms)));
+	will-change: opacity, transform;
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .post-content>* {
+	opacity: 1;
+	transform: none;
+}
+
+html.js-scroll-reveal .post-inner #comments {
+	opacity: 0.001;
+	transform: translate3d(0, var(--scroll-reveal-content-offset, 6px), 0);
+	transition:
+		opacity 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
+		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+	transition-delay:
+		calc(var(--reveal-delay, 0ms) + var(--scroll-reveal-comments-delay, 360ms));
+	will-change: opacity, transform;
+}
+
+html.js-scroll-reveal .post-inner.is-revealed #comments {
+	opacity: 1;
+	transform: none;
+}
+
+html.js-scroll-reveal .post-inner .post-media img {
+	transition:
+		filter var(--scroll-reveal-media-duration, 700ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
+		transform var(--scroll-reveal-media-duration, 700ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+	will-change: filter, transform;
+}
+
+html.js-scroll-reveal .post-inner:not(.is-revealed) .post-media img {
+	filter: blur(var(--scroll-reveal-image-blur, 8px));
+	transform: scale(var(--scroll-reveal-image-scale, 1.02));
+}
+
+html.js-scroll-reveal .post-inner.is-revealed .post-media img {
+	filter: none;
+	transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.js-scroll-reveal .post-inner {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+
+	html.js-scroll-reveal .post-inner .post-title,
+	html.js-scroll-reveal .post-inner .post-meta,
+	html.js-scroll-reveal .post-inner .post-excerpt,
+	html.js-scroll-reveal .post-inner .post-author {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+
+	html.js-scroll-reveal .post-inner .post-media img {
+		transition: none;
+		filter: none;
+		transform: none;
+	}
+
+	html.js-scroll-reveal .post-inner .inner-post-wrapper> :not(.post-meta):not(.post-content),
+	html.js-scroll-reveal .post-inner .post-content>*,
+	html.js-scroll-reveal .post-inner #comments {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}
+
 .post-cat-vertical {
 	position: absolute;
 	top: 1rem;
@@ -1090,7 +1288,7 @@ body>.wrapper {
 
 .post-inner:hover .post-cat-vertical,
 .post-inner:focus-within .post-cat-vertical {
-    opacity: .65;
+	opacity: .65;
 }
 
 .post-inner::after {

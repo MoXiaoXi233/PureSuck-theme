@@ -167,6 +167,16 @@
         window.THEME_URL = "<?php $this->options->themeUrl(); ?>";
     </script>
 
+    <script>
+        (function () {
+            var root = document.documentElement;
+            root.classList.add("js-scroll-reveal");
+            window.__scrollRevealFailSafe = window.setTimeout(function () {
+                root.classList.remove("js-scroll-reveal");
+            }, 2500);
+        })();
+    </script>
+
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
@@ -206,8 +216,6 @@
             }
         </style>
     <?php endif; ?>
-    <!-- AOS -->
-    <script defer src="<?php getStaticURL("aos.js") ?>"></script>
     <!-- ICON Setting -->
     <link rel="icon"
         href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>"
@@ -215,12 +223,12 @@
     <!-- CSS引入 -->
     <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
-    <link href="<?php getStaticURL(path: 'aos.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
     <!-- JS引入 -->
     <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ScrollReveal.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
     <!-- Pjax -->
@@ -260,9 +268,6 @@
 
                 // TOC吸附
                 initializeStickyTOC();
-
-                // AOS 动画
-                AOS.refresh();
 
                 // 确保代码块高亮
                 <?php $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings; ?>
