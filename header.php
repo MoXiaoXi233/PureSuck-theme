@@ -230,69 +230,24 @@
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ScrollReveal.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
+
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
-    <!-- Pjax -->
+    <!-- 史诗级重构: 智能预加载 + View Transitions + 分层渲染 -->
     <?php if ($this->options->enablepjax == '1'): ?>
         <script defer src="<?php getStaticURL('pjax.min.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Preloader.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ViewTransitions.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_LayeredRenderer.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Pjax.js'); ?>"></script>
+
+        <?php if ($this->options->PjaxScript): ?>
         <script type="text/javascript">
-            document.addEventListener('DOMContentLoaded', function () {
-                var pjax = new Pjax({
-                    history: true,
-                    scrollRestoration: true,
-                    cacheBust: false,
-                    timeout: 6500,
-                    elements: 'a[href^="<?php Helper::options()->siteUrl() ?>"]:not(a[target="_blank"], a[no-pjax]), form[action]:not([no-pjax])',
-                    selectors: [
-                        "pjax",
-                        "script[data-pjax]",
-                        "title",
-                        ".nav.header-item.header-nav",
-                        ".main",
-                        ".right-sidebar"
-                    ]
-                });
-            });
-
-            // Pjax 加载超时时跳转，不然它不给你跳转的！！！
-            document.addEventListener('pjax:error', function (e) {
-                console.error(e);
-                console.log('pjax error: \n' + JSON.stringify(e));
-                window.location.href = e.triggerElement.href;
-            });
-
-            // Pjax 完成后 JS 重载
-            document.addEventListener("pjax:success", function (event) {
-
-                // 短代码及模块部分
-                runShortcodes();
-
-                // TOC吸附
-                initializeStickyTOC();
-
-                // 确保代码块高亮
-                <?php $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings; ?>
-                document.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                    <?php if (is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings)): ?>
-                        addLineNumber(block);
-                    <?php endif; ?>
-                });
-                <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
-                    addCopyButtons();
-                <?php endif; ?>
-
-                <?php if ($this->options->PjaxScript): ?>
-                    <?= $this->options->PjaxScript; ?>
-                <?php endif; ?>
-
-                // 评论区部分重载
-                if (document.querySelector('.OwO-textarea')) {
-                    initializeCommentsOwO();
-                }
-
-                Comments_Submit();
-            });
+            // 注册用户自定义的 PJAX 回调
+            window.pjaxCustomCallback = function() {
+                <?= $this->options->PjaxScript; ?>
+            };
         </script>
+        <?php endif; ?>
         <script defer src="<?php getStaticURL('pace.min.js'); ?>"></script>
         <link rel="stylesheet" href="<?php getStaticURL('pace-theme-default.min.css'); ?>">
     <?php else: ?>
