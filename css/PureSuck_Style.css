@@ -1119,16 +1119,26 @@ body>.wrapper {
 	z-index: 1;
 	overflow: hidden;
 	float: left;
-	width: 100%
+	width: 100%;
+	/* ✅ 性能优化：强制使用 GPU 加速 */
+	transform: translateZ(0);
+	backface-visibility: hidden;
 }
 
 html.js-scroll-reveal .post-inner {
 	opacity: 0;
 	transform: translate3d(0, var(--scroll-reveal-offset, 20px), 0) scale(var(--scroll-reveal-scale, 0.994));
+	/* 保持原有的缓动函数，不要改变 */
 	transition:
-		opacity var(--scroll-reveal-duration, 600ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
-		transform var(--scroll-reveal-duration, 600ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+		opacity 720ms cubic-bezier(.22, 1, .36, 1),
+		transform 720ms cubic-bezier(.22, 1, .36, 1);
 	transition-delay: var(--reveal-delay, 0ms);
+	/* 让浏览器自动判断 will-change */
+	will-change: auto;
+}
+
+/* 对于正在动画的元素，手动设置 will-change */
+html.js-scroll-reveal .post-inner:not(.is-revealed) {
 	will-change: opacity, transform;
 }
 
@@ -1146,6 +1156,13 @@ html.js-scroll-reveal .post-inner .post-author {
 	transition:
 		opacity 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
 		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
+}
+
+/* 仅对未 reveal 的元素使用 will-change */
+html.js-scroll-reveal .post-inner:not(.is-revealed) .post-title,
+html.js-scroll-reveal .post-inner:not(.is-revealed) .post-meta,
+html.js-scroll-reveal .post-inner:not(.is-revealed) .post-excerpt,
+html.js-scroll-reveal .post-inner:not(.is-revealed) .post-author {
 	will-change: opacity, transform;
 }
 
@@ -1181,6 +1198,10 @@ html.js-scroll-reveal .post-inner .inner-post-wrapper> :not(.post-meta):not(.pos
 		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
 	transition-delay:
 		calc(var(--reveal-delay, 0ms) + var(--scroll-reveal-content-delay, 180ms) + (var(--content-index, 0) * var(--scroll-reveal-content-delay-step, 50ms)));
+}
+
+/* 仅对未 reveal 的元素使用 will-change */
+html.js-scroll-reveal .post-inner:not(.is-revealed) .inner-post-wrapper> :not(.post-meta):not(.post-content) {
 	will-change: opacity, transform;
 }
 
@@ -1197,6 +1218,10 @@ html.js-scroll-reveal .post-inner .post-content>* {
 		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
 	transition-delay:
 		calc(var(--reveal-delay, 0ms) + var(--scroll-reveal-content-node-delay, 200ms) + (var(--content-child-index, 0) * var(--scroll-reveal-content-node-step, 35ms)));
+}
+
+/* 仅对未 reveal 的元素使用 will-change */
+html.js-scroll-reveal .post-inner:not(.is-revealed) .post-content>* {
 	will-change: opacity, transform;
 }
 
@@ -1213,6 +1238,10 @@ html.js-scroll-reveal .post-inner #comments {
 		transform 520ms var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
 	transition-delay:
 		calc(var(--reveal-delay, 0ms) + var(--scroll-reveal-comments-delay, 360ms));
+}
+
+/* 仅对未 reveal 的元素使用 will-change */
+html.js-scroll-reveal .post-inner:not(.is-revealed) #comments {
 	will-change: opacity, transform;
 }
 
@@ -1222,15 +1251,17 @@ html.js-scroll-reveal .post-inner.is-revealed #comments {
 }
 
 html.js-scroll-reveal .post-inner .post-media img {
+	/* 仅在动画时使用 will-change */
 	transition:
-		filter var(--scroll-reveal-media-duration, 700ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1)),
-		transform var(--scroll-reveal-media-duration, 700ms) var(--scroll-reveal-easing, cubic-bezier(.25, .8, .25, 1));
-	will-change: filter, transform;
+		filter 680ms cubic-bezier(.25, .8, .25, 1),
+		transform 680ms cubic-bezier(.25, .8, .25, 1);
 }
 
 html.js-scroll-reveal .post-inner:not(.is-revealed) .post-media img {
-	filter: blur(var(--scroll-reveal-image-blur, 8px));
-	transform: scale(var(--scroll-reveal-image-scale, 1.02));
+	filter: blur(var(--scroll-reveal-image-blur, 6px));
+	transform: scale(1.02);
+	will-change: filter, transform;
+	/* 动画期间优化 */
 }
 
 html.js-scroll-reveal .post-inner.is-revealed .post-media img {
@@ -2206,9 +2237,9 @@ textarea:focus-within+.CtBoxBar {
 
 .post-media img {
 	width: 100%;
+	max-height: 350px;
 	object-fit: cover;
 	object-position: center;
-	max-height: 350px;
 }
 
 /* 文章版权信息卡片 */
@@ -2578,4 +2609,232 @@ input:-webkit-autofill:active {
 
 .protected-ghost span:nth-child(4) {
 	width: 50%;
+}
+
+/* View Transitions */
+::view-transition-old(card-*),
+::view-transition-new(card-*) {
+	animation-duration: 450ms;
+	animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+	overflow: hidden;
+	will-change: transform, opacity;
+}
+
+html.transition-back ::view-transition-old(card-*),
+html.transition-back ::view-transition-new(card-*) {
+	animation-duration: 400ms;
+	animation-timing-function: cubic-bezier(.33, 1, .68, 1);
+}
+
+::view-transition-old(list-content),
+::view-transition-new(list-content) {
+	animation-duration: 380ms;
+	animation-timing-function: cubic-bezier(.25, .46, .45, .94);
+	height: 100%;
+	overflow: hidden;
+}
+
+html.transition-list-next::view-transition-old(list-content) {
+	animation-name: slide-out-left;
+}
+
+html.transition-list-next::view-transition-new(list-content) {
+	animation-name: slide-in-right;
+}
+
+html.transition-list-prev::view-transition-old(list-content) {
+	animation-name: slide-out-right;
+}
+
+html.transition-list-prev::view-transition-new(list-content) {
+	animation-name: slide-in-left;
+}
+
+::view-transition-old(main-content),
+::view-transition-new(main-content) {
+	animation-duration: 300ms;
+	animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+::view-transition-old(main-content) {
+	animation-name: fade-out-smooth;
+}
+
+::view-transition-new(main-content) {
+	animation-name: fade-in-smooth;
+}
+
+html.transition-back ::view-transition-old(main-content),
+html.transition-back ::view-transition-new(main-content) {
+	animation-duration: 280ms;
+}
+
+@keyframes slide-out-left {
+	to {
+		transform: translateX(-30%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-in-right {
+	from {
+		transform: translateX(30%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-out-right {
+	to {
+		transform: translateX(30%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-in-left {
+	from {
+		transform: translateX(-30%);
+		opacity: 0;
+	}
+}
+
+@keyframes fade-out-smooth {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes fade-in-smooth {
+	from {
+		opacity: 0;
+	}
+}
+
+@media (max-width: 768px) {
+
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation-duration: 250ms !important;
+	}
+
+	@keyframes slide-out-left {
+		to {
+			transform: none;
+			opacity: 0;
+		}
+	}
+
+	@keyframes slide-out-right {
+		to {
+			transform: none;
+			opacity: 0;
+		}
+	}
+
+	@keyframes slide-in-right {
+		from {
+			transform: none;
+			opacity: 0;
+		}
+	}
+
+	@keyframes slide-in-left {
+		from {
+			transform: none;
+			opacity: 0;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
+
+.post-inner,
+.site-main {
+	contain: layout style paint;
+}
+
+html.vt-transitioning .post-inner {
+	will-change: transform, opacity;
+}
+
+html.vt-transitioning .post-inner .post-title,
+html.vt-transitioning .post-inner .post-meta,
+html.vt-transitioning .post-inner .post-excerpt,
+html.vt-transitioning .post-inner .post-author,
+html.vt-transitioning .post-inner .post-content>* {
+	transition: none !important;
+	animation: none !important;
+}
+
+html.vt-transitioning.js-scroll-reveal .post-inner {
+	opacity: 1 !important;
+	transform: none !important;
+}
+
+.skeleton-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 200px;
+	color: var(--text2-color);
+	font-size: 0.9rem;
+	opacity: 0.6;
+	animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+
+	0%,
+	100% {
+		opacity: 0.6;
+	}
+
+	50% {
+		opacity: 0.4;
+	}
+}
+
+.render-error {
+	padding: 2rem;
+	text-align: center;
+	color: var(--text2-color);
+}
+
+.render-error button {
+	margin-top: 1rem;
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--border-color);
+	border-radius: 0.4rem;
+	background-color: var(--card-color);
+	color: var(--text-color);
+	cursor: pointer;
+	transition: background-color .3s ease, border-color .3s ease;
+}
+
+.render-error button:hover {
+	background-color: var(--hover-color);
+	border-color: var(--themecolor);
+}
+
+@media (min-resolution: 120dpi) {
+
+	::view-transition-old(card-*),
+	::view-transition-new(card-*) {
+		animation-timing-function: cubic-bezier(.25, .8, .25, 1);
+	}
+}
+
+/* 正文和评论区的链接样式 */
+.post-content a {
+	color: var(--themecolor);
+	transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.post-content a:hover {
+	color: var(--themehovercolor);
 }
