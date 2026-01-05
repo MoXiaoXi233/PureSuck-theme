@@ -7,6 +7,8 @@ const initializeTOC = (() => {
     let hashTimer = 0;
     let scrollEndTimer = 0;
     let scrollEndHandler = null;
+    let rafId = null; // 用于节流 IntersectionObserver 回调
+    let debounceTimer = null; // 用于防抖 IntersectionObserver 回调
 
     function reset() {
         if (!state) return;
@@ -87,33 +89,62 @@ const initializeTOC = (() => {
 
     function handleIntersect(entries) {
         if (!state) return;
-        let bestIndex = -1;
-        let bestDistance = Infinity;
-
-        entries.forEach(entry => {
-            const index = state.indexByElement.get(entry.target);
-            if (index == null) return;
-            if (entry.isIntersecting) {
-                state.intersecting.add(index);
-                state.topByIndex.set(index, entry.boundingClientRect.top);
-            } else {
-                state.intersecting.delete(index);
+        
+        // 添加防抖,减少频繁更新
+        if (debounceTimer) clearTimeout(debounceTimer);
+        
+        debounceTimer = setTimeout(() => {
+            // 双重检查 state，因为防抖期间可能已重置
+            if (!state || !state.indexByElement) {
+                debounceTimer = null;
+                return;
             }
-        });
+            
+            // 取消之前的 RAF,避免重复处理
+            if (rafId) cancelAnimationFrame(rafId);
+            
+            // 使用 requestAnimationFrame 批处理更新,减少频繁的 DOM 操作
+            rafId = requestAnimationFrame(() => {
+                // RAF 执行时再次检查 state
+                if (!state || !state.indexByElement) {
+                    rafId = null;
+                    return;
+                }
+                
+                let bestIndex = -1;
+                let bestDistance = Infinity;
 
-        state.intersecting.forEach(index => {
-            const top = state.topByIndex.get(index);
-            if (top == null) return;
-            const distance = Math.abs(top - state.activationOffset);
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestIndex = index;
-            }
-        });
+                entries.forEach(entry => {
+                    if (!entry || !entry.target) return;
+                    const index = state.indexByElement.get(entry.target);
+                    if (index == null) return;
+                    if (entry.isIntersecting) {
+                        state.intersecting.add(index);
+                        state.topByIndex.set(index, entry.boundingClientRect.top);
+                    } else {
+                        state.intersecting.delete(index);
+                    }
+                });
 
-        if (bestIndex >= 0) {
-            setActive(bestIndex);
-        }
+                state.intersecting.forEach(index => {
+                    const top = state.topByIndex.get(index);
+                    if (top == null) return;
+                    const distance = Math.abs(top - state.activationOffset);
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestIndex = index;
+                    }
+                });
+
+                if (bestIndex >= 0) {
+                    setActive(bestIndex);
+                }
+                
+                rafId = null;
+            });
+            
+            debounceTimer = null;
+        }, 16); // 约 1 帧的防抖时间
     }
 
     function setActive(index) {
@@ -538,18 +569,33 @@ function Comments_Submit() {
     }
 }
 
+// 保存 mediumZoom 实例引用，用于 PJAX 后重新初始化
+let mediumZoomInstance = null;
+
 function runShortcodes() {
-    history.scrollRestoration = 'auto'; // 不知道为什么总会回到顶端
+    history.scrollRestoration = 'auto';
     bindCollapsiblePanels();
     bindTabs();
     handleGoTopButton();
     initializeTOC();
-    mediumZoom('[data-zoomable]', {
-        background: 'var(--card-color)'
+
+    // mediumZoom 图片放大
+    if (mediumZoomInstance) {
+        mediumZoomInstance.detach();
+    }
+    mediumZoomInstance = mediumZoom('[data-zoomable]', {
+        background: 'rgba(0, 0, 0, 0.85)',
+        margin: 24
     });
+
     Comments_Submit()
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    runShortcodes();
+});
+
+// PJAX 完成后重新初始化
+document.addEventListener('pjax:success', function() {
     runShortcodes();
 });

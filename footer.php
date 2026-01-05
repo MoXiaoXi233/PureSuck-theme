@@ -14,10 +14,12 @@
 $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings;
 ?>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 确保代码块高亮
-    document.querySelectorAll('pre code').forEach((block) => {
+  // 代码高亮初始化函数
+  function initCodeHighlight() {
+    // 添加标记，避免重复高亮
+    document.querySelectorAll('pre code:not([data-highlighted])').forEach((block) => {
       hljs.highlightElement(block);
+      block.dataset.highlighted = 'true';
 
       // 显示行号
       <?php if (is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings)): ?>
@@ -29,7 +31,15 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
     <?php if (is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings)): ?>
       addCopyButtons();
     <?php endif; ?>
+  }
+
+  // 页面初次加载时执行
+  document.addEventListener('DOMContentLoaded', () => {
+    initCodeHighlight();
   });
+
+  // PJAX 完成后重新执行
+  document.addEventListener('pjax:success', initCodeHighlight);
 
   // 添加行号函数
   function addLineNumber(codeDom) {
@@ -42,13 +52,18 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
 
   // 添加复制按钮函数
   function addCopyButtons() {
+    // ✅ 检查是否已存在复制按钮，避免重复添加
     document.querySelectorAll('pre code').forEach((codeBlock) => {
+      if (codeBlock.parentElement.querySelector('.copy-button')) return;
+
       const button = document.createElement('button');
       button.className = 'copy-button';
       button.innerText = 'Copy';
       codeBlock.parentElement.appendChild(button);
     });
 
+    // ✅ 避免重复绑定事件
+    document.removeEventListener('click', handleButtonClick);
     document.addEventListener('click', handleButtonClick);
   }
 
@@ -79,7 +94,19 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
       button.innerText = 'Copied!';
     } catch (err) {
       console.error('复制文本失败:', err);
-      alert('复制文本失败，请重试。');
+      // 使用 MoxToast 显示错误提示
+      if (typeof MoxToast === 'function') {
+        MoxToast({
+          message: '复制文本失败，请重试',
+          duration: 3000,
+          position: 'bottom',
+          backgroundColor: 'rgba(255, 59, 48, 0.9)',
+          textColor: '#fff',
+          borderColor: 'rgba(255, 59, 48, 0.3)'
+        });
+      } else {
+        alert('复制文本失败，请重试。');
+      }
     }
 
     window.scrollTo(0, scrollY);
