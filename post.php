@@ -23,7 +23,7 @@
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
                     <img itemprop="image"
-                        src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                        src="<?php $this->fields->img(); ?>" alt="头图">
                 </figure>
             <?php endif; ?>
 
@@ -75,7 +75,7 @@
                                 <div class="protected-divider"></div>
                                 <form method="post"
                                     action="<?php echo Typecho_Widget::widget('Widget_Security')->getTokenUrl($this->permalink); ?>"
-                                    class="protected-form" no-pjax>
+                                    class="protected-form">
 
                                     <div class="search-container protected-search">
                                         <input type="password" name="protectPassword" class="protected-input"

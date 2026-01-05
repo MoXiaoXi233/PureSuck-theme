@@ -2,6 +2,12 @@
   const root = document.documentElement;
   const selector = ".post-inner";
   const revealedClass = "is-revealed";
+  
+  // 使用 WeakSet 缓存已处理的元素
+  const sequencedCards = new WeakSet();
+  
+  // ✅ VT 过渡期间暂停 ScrollReveal
+  let isPaused = false;
 
   const computedStyles = window.getComputedStyle(root);
 
@@ -29,28 +35,36 @@
   }
 
   function applyContentSequencing(elements) {
-    for (const card of elements) {
-      const wrapper = card.querySelector(".inner-post-wrapper");
-      if (wrapper) {
-        let index = 0;
-        const children = Array.from(wrapper.children);
-        for (const child of children) {
-          if (child.classList && child.classList.contains("post-meta")) continue;
-          child.style.setProperty("--content-index", String(index));
-          index += 1;
+    // 使用 requestAnimationFrame 批处理 DOM 操作以减少重排
+    requestAnimationFrame(() => {
+      for (const card of elements) {
+        // 跳过已处理的元素
+        if (sequencedCards.has(card)) continue;
+        sequencedCards.add(card);
+        
+        const wrapper = card.querySelector(".inner-post-wrapper");
+        if (wrapper) {
+          const children = Array.from(wrapper.children);
+          // 批量设置 CSS 变量，保留每个元素的独立延迟
+          children.forEach((child, index) => {
+            if (child.classList && child.classList.contains("post-meta")) return;
+            child.style.setProperty("--content-index", String(index));
+          });
         }
-      }
 
-      const content = card.querySelector(".post-content");
-      if (content) {
-        const blocks = Array.from(content.children);
-        const maxBlocks = 28;
-        for (let index = 0; index < blocks.length; index += 1) {
-          if (index >= maxBlocks) break;
-          blocks[index].style.setProperty("--content-child-index", String(index));
+        const content = card.querySelector(".post-content");
+        if (content) {
+          const blocks = Array.from(content.children);
+          const maxBlocks = 28;
+          
+          // 不使用分批处理，直接在一个 RAF 中完成
+          // 但保留每个元素的独立延迟设置，维持自然的层叠效果
+          for (let index = 0; index < blocks.length && index < maxBlocks; index++) {
+            blocks[index].style.setProperty("--content-child-index", String(index));
+          }
         }
       }
-    }
+    });
   }
 
   function revealAll() {
@@ -94,6 +108,9 @@
 
   const observer = new IntersectionObserver(
     (entries) => {
+      // ✅ 如果正在 VT 过渡，跳过处理
+      if (isPaused) return;
+      
       for (const entry of entries) {
         if (!shouldReveal(entry)) continue;
         entry.target.classList.add(revealedClass);
@@ -123,4 +140,16 @@
   }
 
   document.addEventListener("pjax:success", bind);
+  
+  // ✅ 暴露暂停/恢复接口给 VT Controller
+  window.scrollReveal = {
+    pause() {
+      isPaused = true;
+    },
+    resume() {
+      isPaused = false;
+      // 恢复后立即检查可见元素
+      bind();
+    }
+  };
 })();

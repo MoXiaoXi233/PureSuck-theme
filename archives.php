@@ -30,7 +30,7 @@ $this->need('header.php');
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
                     <img itemprop="image"
-                        src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                        src="<?php $this->fields->img(); ?>" alt="头图">
                 </figure>
             <?php endif; ?>
 

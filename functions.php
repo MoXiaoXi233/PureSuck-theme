@@ -16,6 +16,26 @@ function themeFields($layout)
 function themeInit($archive)
 {
     Helper::options()->commentsAntiSpam = false;
+
+    // ✅ 修复加密文章 PJAX 兼容性
+    // 只在 AJAX 请求时强制返回 200 状态码，避免 SEO 问题
+    if ($archive->is('single') && $archive->hidden && $archive->request->isAjax()) {
+        $archive->response->setStatus(200);
+    }
+
+    // AJAX 接口：获取 Token URL
+    if ($archive->is('post') && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['type'] === 'getTokenUrl') {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['tokenUrl' => Typecho_Widget::widget('Widget_Security')->getTokenUrl($archive->permalink)]);
+        exit;
+    }
+
+    // AJAX 接口：检查文章是否仍为加密状态
+    if ($archive->is('post') && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['type']) && $_POST['type'] === 'checkPassword') {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['hidden' => $archive->hidden]);
+        exit;
+    }
 }
 
 function parseOwOcodes($content)
