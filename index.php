@@ -19,8 +19,9 @@ $this->need('header.php');
     <?php while ($this->next()): ?>
         <?php
         $hasImg = $this->fields->img ? true : false;
+        $isProtected = isset($this->password) && $this->password !== Typecho_Cookie::get('protectPassword') && $this->authorId !== $this->user->uid && !$this->user->pass('editor', true);
         ?>
-        <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item">
+        <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item <?= $isProtected ? 'post-protected' : ''; ?>" data-protected="<?= $isProtected ? 'true' : 'false'; ?>">
             <div class="post-inner">
                 <?php
                 $showCardCategory = isset($this->options->showCardCategory)
@@ -56,7 +57,7 @@ $this->need('header.php');
                 <?php if ($hasImg): ?>
                     <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
                         <img itemprop="image"
-                            src="<?php $this->fields->img(); ?>" alt="头图" width="2000" height="800">
+                            src="<?php $this->fields->img(); ?>" alt="头图">
                     </figure>
                 <?php endif; ?>
 
