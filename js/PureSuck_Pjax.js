@@ -90,29 +90,14 @@
         }
 
         const targetUrl = window.location.href;
-
-        // ✅ 关键修复:检查是否只是 hash 变化(同页面锚点跳转)
-        const currentUrl = scrollPositions.keys().next().value || window.location.href.split('#')[0];
-        if (currentUrl) {
-            try {
-                const currentUrlObj = new URL(currentUrl);
-                const targetUrlObj = new URL(targetUrl);
-
-                // 如果只是 hash 不同,说明是同页面锚点跳转,不处理
-                if (currentUrlObj.origin === targetUrlObj.origin &&
-                    currentUrlObj.pathname === targetUrlObj.pathname &&
-                    currentUrlObj.search === targetUrlObj.search) {
-                    // 只是 hash 变化,让浏览器正常处理锚点跳转
-                    console.log('[onPopstate] 检测到同页面锚点跳转,不拦截');
-                    return;
-                }
-            } catch (e) {
-                // URL 解析失败,继续处理
-                console.warn('[onPopstate] URL 解析失败:', e);
-            }
-        }
-
         const direction = window.navigationStack.getDirection(targetUrl);
+
+        // 检查是否只是 hash 变化(同页面锚点跳转)
+        // 如果 direction 不是 'back' 或 'forward'，说明是同页面 hash 变化
+        if (direction !== 'back' && direction !== 'forward') {
+            // 让浏览器正常处理锚点跳转
+            return;
+        }
 
         // 阻止默认行为,手动控制
         event.preventDefault();
