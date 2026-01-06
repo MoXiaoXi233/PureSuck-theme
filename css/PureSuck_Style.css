@@ -105,8 +105,13 @@ html {
 body {
 	margin: 0;
 	background-color: var(--background-color);
+	/* ✅ VT 主题切换时禁用 CSS transition，避免冲突 */
 	transition: background-color .3s ease, color .3s ease;
+}
 
+/* View Transitions 主题切换时禁用所有 transition */
+html.vt-theme-switching * {
+	transition: none !important;
 }
 
 @keyframes theme-fade-out {
@@ -2620,6 +2625,20 @@ input:-webkit-autofill:active {
 	will-change: transform, opacity;
 }
 
+/* Header独立VT处理，0ms动画确保不闪烁 */
+::view-transition-old(header-static),
+::view-transition-new(header-static) {
+	animation-duration: 0ms;
+	animation-timing-function: linear;
+}
+
+/* Right-sidebar独立VT处理，0ms动画确保不闪烁 */
+::view-transition-old(sidebar-static),
+::view-transition-new(sidebar-static) {
+	animation-duration: 0ms;
+	animation-timing-function: linear;
+}
+
 html.transition-back ::view-transition-old(card-*),
 html.transition-back ::view-transition-new(card-*) {
 	animation-duration: 400ms;
@@ -2760,6 +2779,20 @@ html.transition-back ::view-transition-new(main-content) {
 
 html.vt-transitioning .post-inner {
 	will-change: transform, opacity;
+}
+
+/* VT过渡期间禁用header内的动画，防止头像闪烁 */
+html.vt-transitioning .header,
+html.vt-transitioning .header * {
+	transition: none !important;
+	animation: none !important;
+}
+
+/* VT过渡期间禁用sidebar内的动画，防止闪烁 */
+html.vt-transitioning .right-sidebar,
+html.vt-transitioning .right-sidebar * {
+	transition: none !important;
+	animation: none !important;
 }
 
 html.vt-transitioning .post-inner .post-title,

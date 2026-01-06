@@ -17,150 +17,28 @@
         <?= $this->options->title(); ?>
     </title>
     <?php generateDynamicCSS(); ?>
-    <!-- Initial Theme Script -->
+
+    <!-- 主题防闪烁脚本（立即执行，在 CSS 加载前设置主题） -->
     <script>
-        (function () {
-            const savedTheme = localStorage.getItem('theme');
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            const initialTheme = savedTheme === 'auto' || !savedTheme ? systemTheme : savedTheme;
-            document.documentElement.setAttribute('data-theme', initialTheme);
-        })();
-    </script>
+    (function() {
+        // 1. 优先读取 Cookie（跨站同步）
+        const cookieMatch = document.cookie.match(/(?:^|;)\s*theme=([^;]+)/);
+        const cookieTheme = cookieMatch ? cookieMatch[1] : null;
 
-    <script>
-        (function () {
-            // 读取 Cookie 中的 theme
-            const matches = document.cookie.match(/(?:^|;)\s*theme=([^;]+)/);
-            let mode = matches ? matches[1] : "auto";
+        // 2. 读取 localStorage
+        const localTheme = localStorage.getItem('theme');
 
-            // auto 模式下，根据系统主题提前决定 effective 主题
-            if (mode === "auto") {
-                mode = window.matchMedia("(prefers-color-scheme: dark)").matches ?
-                    "dark" :
-                    "light";
-            }
+        // 3. 决定初始主题
+        let initialTheme = cookieTheme || localTheme || 'auto';
 
-            // 提前设定 data-theme，避免闪烁
-            document.documentElement.setAttribute("data-theme", mode);
-        })();
-    </script>
-
-    <!-- Dark Mode -->
-    <script>
-        /* 自动获取根域名，例如 www.xxx.cn → .xxx.cn */
-        function getRootDomain() {
-            const host = window.location.hostname;
-            const parts = host.split(".");
-            if (parts.length <= 2) return host; // 如 localhost
-            return "." + parts.slice(-2).join(".");
+        // 4. auto 模式下，根据系统主题决定
+        if (initialTheme === 'auto') {
+            initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
 
-        /* 写入跨子域 Cookie，用于同步主题 */
-        function setThemeCookie(theme) {
-            const rootDomain = getRootDomain();
-            document.cookie = `theme=${theme}; path=/; domain=${rootDomain}; SameSite=Lax`;
-        }
-
-        /* 读取 Cookie */
-        function getCookie(name) {
-            const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-            return match ? match[2] : null;
-        }
-
-        function applyThemeAttribute(themeValue) {
-            const root = document.documentElement;
-            if (root.getAttribute("data-theme") === themeValue) {
-                return;
-            }
-            const apply = () => {
-                root.classList.add("theme-switching");
-                root.setAttribute("data-theme", themeValue);
-                window.requestAnimationFrame(() => {
-                    window.setTimeout(() => {
-                        root.classList.remove("theme-switching");
-                    }, 80);
-                });
-            };
-
-            if (document.startViewTransition) {
-                document.startViewTransition(() => {
-                    apply();
-                });
-            } else {
-                apply();
-            }
-        }
-
-        function setTheme(theme) {
-            // 自动模式 → 跟随系统
-            if (theme === "auto") {
-                const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                applyThemeAttribute(systemTheme);
-                localStorage.setItem("theme", "auto");
-                setThemeCookie("auto");
-            } else {
-                // 明暗模式
-                applyThemeAttribute(theme);
-                localStorage.setItem("theme", theme);
-                setThemeCookie(theme);
-            }
-
-            updateIcon(theme);
-        }
-
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem("theme") || "auto";
-            let newTheme;
-
-            if (currentTheme === "light") {
-                newTheme = "dark";
-                MoxToast({
-                    message: "已切换至深色模式"
-                });
-            } else if (currentTheme === "dark") {
-                newTheme = "auto";
-                MoxToast({
-                    message: "模式将跟随系统 ㆆᴗㆆ"
-                });
-            } else {
-                newTheme = "light";
-                MoxToast({
-                    message: "已切换至浅色模式"
-                });
-            }
-
-            setTheme(newTheme);
-        }
-
-        function updateIcon(theme) {
-            const iconElement = document.getElementById("theme-icon");
-            if (iconElement) {
-                iconElement.classList.remove("icon-sun-inv", "icon-moon-inv", "icon-auto");
-                if (theme === "light") {
-                    iconElement.classList.add("icon-sun-inv");
-                } else if (theme === "dark") {
-                    iconElement.classList.add("icon-moon-inv");
-                } else {
-                    iconElement.classList.add("icon-auto");
-                }
-            }
-        }
-
-        /* 初始化：优先读取 Cookie → 保证跨站同步 */
-        document.addEventListener("DOMContentLoaded", function () {
-            const cookieTheme = getCookie("theme");
-            const savedTheme = cookieTheme || localStorage.getItem("theme") || "auto";
-            setTheme(savedTheme);
-        });
-
-        /* 系统主题变化时（仅 auto 模式生效） */
-        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function (e) {
-            if (localStorage.getItem("theme") === "auto") {
-                const newTheme = e.matches ? "dark" : "light";
-                applyThemeAttribute(newTheme);
-                updateIcon("auto");
-            }
-        });
+        // 5. 立即设置主题，防止闪烁
+        document.documentElement.setAttribute('data-theme', initialTheme);
+    })();
     </script>
 
     <script>
@@ -224,32 +102,36 @@
     <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
-    <!-- JS引入 -->
-    <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
+
+    <!-- JS引入：按优先级分组加载 -->
+
+    <!-- 高优先级：核心功能（首屏必需） -->
     <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ScrollReveal.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
-
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
-    <!-- 史诗级重构: 智能预加载 + View Transitions + 分层渲染 -->
+
+    <!-- 低优先级：按需加载（评论区/图片交互） -->
+    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
+
+    <!-- PJAX 相关：按依赖顺序加载 -->
     <?php if ($this->options->enablepjax == '1'): ?>
+        <script defer src="<?php getStaticURL('pace.min.js'); ?>"></script>
+        <link rel="stylesheet" href="<?php getStaticURL('pace-theme-default.min.css'); ?>">
         <script defer src="<?php getStaticURL('pjax.min.js'); ?>"></script>
-        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Preloader.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ViewTransitions.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/PureSuck_LayeredRenderer.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Pjax.js'); ?>"></script>
 
         <?php if ($this->options->PjaxScript): ?>
-        <script type="text/javascript">
+        <script defer>
             // 注册用户自定义的 PJAX 回调
             window.pjaxCustomCallback = function() {
                 <?= $this->options->PjaxScript; ?>
             };
         </script>
         <?php endif; ?>
-        <script defer src="<?php getStaticURL('pace.min.js'); ?>"></script>
-        <link rel="stylesheet" href="<?php getStaticURL('pace-theme-default.min.css'); ?>">
     <?php else: ?>
         <!-- 是不是 Pjax 有 bug，哈哈哈 --kissablecho -->
         <!-- 没错我差点死在自己留的鬼判定了--MoXi -->

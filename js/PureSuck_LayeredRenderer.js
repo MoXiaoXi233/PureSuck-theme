@@ -27,8 +27,6 @@ class LayeredRenderer {
         // 性能监控
         this.stats = {
             total: 0,
-            cacheHits: 0,
-            cacheMisses: 0,
             avgL2Time: 0,
             avgL3Time: 0
         };
@@ -54,16 +52,9 @@ class LayeredRenderer {
         this.stats.total++;
 
         try {
-            // 检查是否有缓存(仅用于统计)
-            const cached = window.preloader?.getCache(url);
-            if (cached) {
-                this.stats.cacheHits++;
-            } else {
-                this.stats.cacheMisses++;
-            }
-
             // ⚠️ 重要: Pjax 已经完成 DOM 替换
             // 我们只需要在适当时机执行懒加载任务
+            // ✅ 浏览器缓存由预加载器管理，不需要在这里检查
 
             // Layer 4: 延迟执行懒加载任务
             this.scheduleLazyLoad(targetContainer);
