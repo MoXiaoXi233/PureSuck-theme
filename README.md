@@ -140,7 +140,6 @@ MoxToast({
 ```
 开发中····
 ## 引用库
-[aos](https://github.com/michalsnik/aos)  
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
 [OWO.JS](https://github.com/DIYgod/OwO)  
 [HighLight.JS](https://github.com/highlightjs/highlight.js)  

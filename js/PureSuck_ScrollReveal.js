@@ -2,10 +2,7 @@
   const root = document.documentElement;
   const selector = ".post-inner";
   const revealedClass = "is-revealed";
-  
-  // 使用 WeakSet 缓存已处理的元素
-  const sequencedCards = new WeakSet();
-  
+
   // ✅ VT 过渡期间暂停 ScrollReveal
   let isPaused = false;
 
@@ -38,10 +35,10 @@
     // 使用 requestAnimationFrame 批处理 DOM 操作以减少重排
     requestAnimationFrame(() => {
       for (const card of elements) {
-        // 跳过已处理的元素
-        if (sequencedCards.has(card)) continue;
-        sequencedCards.add(card);
-        
+        // 跳过已处理的元素（使用 classList 检查）
+        if (card.classList.contains('is-sequenced')) continue;
+        card.classList.add('is-sequenced');
+
         const wrapper = card.querySelector(".inner-post-wrapper");
         if (wrapper) {
           const children = Array.from(wrapper.children);
@@ -56,7 +53,7 @@
         if (content) {
           const blocks = Array.from(content.children);
           const maxBlocks = 28;
-          
+
           // 不使用分批处理，直接在一个 RAF 中完成
           // 但保留每个元素的独立延迟设置，维持自然的层叠效果
           for (let index = 0; index < blocks.length && index < maxBlocks; index++) {

@@ -599,3 +599,220 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('pjax:success', function() {
     runShortcodes();
 });
+
+/**
+ * ========================================
+ * 主题管理系统
+ * ========================================
+ */
+
+(function() {
+    'use strict';
+
+    /**
+     * 获取根域名（用于跨子域 Cookie）
+     * @returns {string} 根域名，如 .xxx.cn
+     */
+    function getRootDomain() {
+        const host = window.location.hostname;
+        const parts = host.split('.');
+        if (parts.length <= 2) return host; // localhost 或 xxx.com
+        return '.' + parts.slice(-2).join('.');
+    }
+
+    /**
+     * 写入跨子域 Cookie
+     * @param {string} theme - 主题值
+     */
+    function setThemeCookie(theme) {
+        const rootDomain = getRootDomain();
+        document.cookie = `theme=${theme}; path=/; domain=${rootDomain}; SameSite=Lax; max-age=31536000`;
+    }
+
+    /**
+     * 读取 Cookie
+     * @param {string} name - Cookie 名称
+     * @returns {string|null} Cookie 值
+     */
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    }
+
+    /**
+     * 应用主题属性
+     * @param {string} themeValue - 主题值
+     */
+    function applyThemeAttribute(themeValue) {
+        const root = document.documentElement;
+        if (root.getAttribute('data-theme') === themeValue) {
+            return;
+        }
+        root.setAttribute('data-theme', themeValue);
+    }
+
+    /**
+     * 更新主题图标
+     * @param {string} theme - 主题值
+     */
+    function updateIcon(theme) {
+        const iconElement = document.getElementById('theme-icon');
+        if (!iconElement) return;
+
+        iconElement.classList.remove('icon-sun-inv', 'icon-moon-inv', 'icon-auto');
+
+        if (theme === 'light') {
+            iconElement.classList.add('icon-sun-inv');
+        } else if (theme === 'dark') {
+            iconElement.classList.add('icon-moon-inv');
+        } else {
+            iconElement.classList.add('icon-auto');
+        }
+    }
+
+    /**
+     * 设置主题（使用 View Transitions 优化）
+     * @param {string} theme - 主题值 ('light' | 'dark' | 'auto')
+     */
+    function setTheme(theme) {
+        // 计算实际要应用的主题色
+        const targetTheme = theme === 'auto'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : theme;
+
+        // 获取当前主题色
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+
+        // ✅ 如果颜色没变，直接跳过（避免不必要的闪烁）
+        if (targetTheme === currentTheme) {
+            // 仍然需要更新存储，但不需要视觉切换
+            localStorage.setItem('theme', theme);
+            setThemeCookie(theme);
+            updateIcon(theme);
+            return;
+        }
+
+        // 检查是否支持 View Transitions API
+        const supportsVT = 'startViewTransition' in document;
+
+        if (supportsVT) {
+            // ✅ 使用 VT 实现整体切换（更干净、更统一）
+            document.documentElement.classList.add('vt-theme-switching');
+
+            document.startViewTransition(() => {
+                applyThemeInternal(theme);
+            }).finished.then(() => {
+                // VT 完成后移除 class，恢复 CSS transition
+                document.documentElement.classList.remove('vt-theme-switching');
+            });
+        } else {
+            // 降级：直接切换
+            applyThemeInternal(theme);
+        }
+    }
+
+    /**
+     * 应用主题（核心逻辑）
+     * @param {string} theme - 主题值
+     */
+    function applyThemeInternal(theme) {
+        if (theme === 'auto') {
+            // 自动模式：跟随系统
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            applyThemeAttribute(systemTheme);
+            localStorage.setItem('theme', 'auto');
+            setThemeCookie('auto');
+        } else {
+            // 明暗模式
+            applyThemeAttribute(theme);
+            localStorage.setItem('theme', theme);
+            setThemeCookie(theme);
+        }
+
+        updateIcon(theme);
+    }
+
+    /**
+     * 切换主题
+     */
+    function toggleTheme() {
+        const currentTheme = localStorage.getItem('theme') || 'auto';
+        let newTheme;
+
+        if (currentTheme === 'light') {
+            newTheme = 'dark';
+            if (typeof MoxToast === 'function') {
+                MoxToast({ message: '已切换至深色模式' });
+            }
+        } else if (currentTheme === 'dark') {
+            newTheme = 'auto';
+            if (typeof MoxToast === 'function') {
+                MoxToast({ message: '模式将跟随系统 ㆆᴗㆆ' });
+            }
+        } else {
+            newTheme = 'light';
+            if (typeof MoxToast === 'function') {
+                MoxToast({ message: '已切换至浅色模式' });
+            }
+        }
+
+        setTheme(newTheme);
+    }
+
+    /**
+     * 初始化主题系统
+     */
+    function initTheme() {
+        // 优先读取 Cookie（跨站同步）
+        const cookieTheme = getCookie('theme');
+        const savedTheme = cookieTheme || localStorage.getItem('theme') || 'auto';
+        setTheme(savedTheme);
+    }
+
+    /**
+     * 监听系统主题变化
+     */
+    function watchSystemTheme() {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (localStorage.getItem('theme') === 'auto') {
+                const newTheme = e.matches ? 'dark' : 'light';
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+
+                // ✅ 如果颜色没变，跳过（避免闪烁）
+                if (newTheme === currentTheme) {
+                    return;
+                }
+
+                // ✅ 颜色改变时使用 VT 过渡
+                if ('startViewTransition' in document) {
+                    document.documentElement.classList.add('vt-theme-switching');
+
+                    document.startViewTransition(() => {
+                        applyThemeAttribute(newTheme);
+                        updateIcon('auto');
+                    }).finished.then(() => {
+                        document.documentElement.classList.remove('vt-theme-switching');
+                    });
+                } else {
+                    applyThemeAttribute(newTheme);
+                    updateIcon('auto');
+                }
+            }
+        });
+    }
+
+    // 导出到全局
+    window.setTheme = setTheme;
+    window.toggleTheme = toggleTheme;
+
+    // 初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            watchSystemTheme();
+        });
+    } else {
+        initTheme();
+        watchSystemTheme();
+    }
+})();

@@ -13,7 +13,11 @@
                 <div class="wrapper post-wrapper">
                     <div class="avatar post-author">
                         <img src="<?= $this->options->authorAvatar ?: $this->options->themeUrl('images/avatar.webp'); ?>"
-                            alt="作者头像" class="avatar-item avatar-img">
+                            alt="作者头像"
+                            class="avatar-item avatar-img"
+                            loading="lazy"
+                            decoding="async"
+                            fetchpriority="low">
                         <span class="avatar-item"><?php $this->author(); ?></span>
                     </div>
                 </div>
@@ -23,7 +27,11 @@
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
                     <img itemprop="image"
-                        src="<?php $this->fields->img(); ?>" alt="头图">
+                        src="<?php $this->fields->img(); ?>"
+                        alt="头图"
+                        loading="lazy"
+                        decoding="async"
+                        fetchpriority="high">
                 </figure>
             <?php endif; ?>
 

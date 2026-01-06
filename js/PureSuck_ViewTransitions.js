@@ -1,6 +1,7 @@
 /**
  * PureSuck View Transitions Controller
- * 管理页面过渡动画，支持 View Transitions API 和 FLIP 降级
+ * 管理页面过渡动画
+ * 注：仅支持 View Transitions API，不支持降级方案
  */
 
 class NavigationStack {
@@ -9,31 +10,27 @@ class NavigationStack {
         this.currentIndex = -1;
         this.maxSize = maxSize;
     }
-    
+
     push(pageInfo) {
         if (this.currentIndex < this.stack.length - 1) {
             this.stack = this.stack.slice(0, this.currentIndex + 1);
         }
-        
-        if (this.currentIndex >= 0 && this.currentIndex < this.stack.length) {
-            this.stack[this.currentIndex].scrollY = window.scrollY || 0;
-        }
-        
+
         this.stack.push({
             url: pageInfo.url,
             type: pageInfo.type,
             timestamp: Date.now(),
-            scrollY: pageInfo.scrollY || 0,
+            // ✅ 不再需要保存 scrollY,浏览器会自动管理
             metadata: pageInfo.metadata || {}
         });
-        
+
         if (this.stack.length > this.maxSize) {
             this.stack.shift();
         } else {
             this.currentIndex++;
         }
     }
-    
+
     pop() {
         if (this.currentIndex > 0) {
             this.currentIndex--;
@@ -41,7 +38,7 @@ class NavigationStack {
         }
         return null;
     }
-    
+
     forward() {
         if (this.currentIndex < this.stack.length - 1) {
             this.currentIndex++;
@@ -49,25 +46,25 @@ class NavigationStack {
         }
         return null;
     }
-    
+
     getDirection(targetUrl) {
         if (this.currentIndex > 0) {
             const previousPage = this.stack[this.currentIndex - 1];
             if (previousPage?.url === targetUrl) return 'back';
         }
-        
+
         if (this.currentIndex < this.stack.length - 1) {
             const nextPage = this.stack[this.currentIndex + 1];
             if (nextPage?.url === targetUrl) return 'forward';
         }
-        
+
         return 'forward';
     }
-    
+
     getCurrent() {
         return this.stack[this.currentIndex] || null;
     }
-    
+
     getCurrentPage() {
         return this.getCurrent();
     }
@@ -122,16 +119,11 @@ class ViewTransitionController {
         this.transitionData = null;
         this.currentDirection = 'forward';
         this.config = {
-            duration: 450,
-            reverseDuration: 400,
-            timingFunction: 'cubic-bezier(.22, 1, .36, 1)',
-            reverseTimingFunction: 'cubic-bezier(.33, 1, .68, 1)',
             scrollRevealDelay: 150
         };
         this.stats = {
             total: 0,
             vtSuccesses: 0,
-            flipFallbacks: 0,
             reverseTransitions: 0,
             errors: 0
         };
@@ -158,23 +150,15 @@ class ViewTransitionController {
 
         this.currentDirection = 'forward';
         const cardInner = clickedCard.querySelector('.post-inner');
-        
+
         if (!cardInner) return;
 
         const transitionName = `card-${Date.now()}`;
-        
-        // 获取 .post 的实际位置（包含 margin）
-        const postRect = clickedCard.getBoundingClientRect();
-        const cardRect = cardInner.getBoundingClientRect();
-        
+
+        // ✅ FLIP 降级已移除，不需要保存 rect 数据
         this.transitionData = {
             transitionName,
-            oldCard: cardInner,
-            oldCardParent: clickedCard,
-            postRect,
-            cardRect,
-            direction: 'forward',
-            startTime: performance.now()
+            direction: 'forward'
         };
 
         cardInner.style.viewTransitionName = transitionName;
@@ -221,8 +205,11 @@ class ViewTransitionController {
 
         this.stats.total++;
 
+        // ✅ 不支持 VT 的浏览器直接执行回调，不做降级动画
         if (!this.supportsVT) {
-            return this.executeFLIPAnimation(updateCallback);
+            await updateCallback();
+            this.cleanup();
+            return Promise.resolve();
         }
 
         return this.executeViewTransition(updateCallback);
@@ -241,9 +228,8 @@ class ViewTransitionController {
                 this.stats.vtSuccesses++;
                 this.cleanup();
                 resolve();
-            }).catch((error) => {
+            }).catch(() => {
                 this.stats.errors++;
-                console.error('VT 失败:', error);
                 this.cleanup();
                 resolve();
             });
@@ -262,64 +248,12 @@ class ViewTransitionController {
             this.stats.reverseTransitions++;
             return;
         }
-        
+
         const newCard = document.querySelector('.post-inner');
         if (newCard) {
             newCard.style.viewTransitionName = this.transitionData.transitionName;
             newCard.style.willChange = 'transform, opacity';
         }
-    }
-
-    executeFLIPAnimation(updateCallback) {
-        this.stats.flipFallbacks++;
-
-        if (!this.transitionData?.oldCard) {
-            updateCallback();
-            this.cleanup();
-            return Promise.resolve();
-        }
-
-        const oldCard = this.transitionData.oldCard;
-        const oldParent = this.transitionData.oldCardParent;
-        
-        // 使用保存的rect，如果没有则实时获取
-        const first = this.transitionData.cardRect || oldCard.getBoundingClientRect();
-        const firstScroll = window.scrollY;
-
-        updateCallback();
-
-        const newCard = document.querySelector('.post-inner');
-        if (!newCard) {
-            this.cleanup();
-            return Promise.resolve();
-        }
-
-        const last = newCard.getBoundingClientRect();
-        const lastScroll = window.scrollY;
-
-        // 计算偏移时考虑父元素的margin
-        // 使用 offsetTop 而不是 getBoundingClientRect 可以更准确地获取位置
-        const deltaX = first.left - last.left;
-        const deltaY = first.top - last.top + (firstScroll - lastScroll);
-        const deltaW = first.width / last.width;
-        const deltaH = first.height / last.height;
-
-        newCard.style.transformOrigin = 'top left';
-        newCard.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${deltaW}, ${deltaH})`;
-
-        return new Promise((resolve) => {
-            requestAnimationFrame(() => {
-                newCard.style.transition = `transform ${this.config.duration}ms ${this.config.timingFunction}`;
-                newCard.style.transform = 'none';
-
-                setTimeout(() => {
-                    newCard.style.transition = '';
-                    newCard.style.transformOrigin = '';
-                    this.cleanup();
-                    resolve();
-                }, this.config.duration);
-            });
-        });
     }
 
     cleanup() {
@@ -388,16 +322,15 @@ if (typeof window !== 'undefined') {
     window.navigationStack = new NavigationStack();
     window.vtController = new ViewTransitionController();
     window.pageTypeDetector = PageTypeDetector;
-    
+
     const initVT = () => {
         window.vtController.init();
         window.navigationStack.push({
             url: window.location.href,
-            type: PageTypeDetector.detect(window.location.href),
-            scrollY: window.scrollY
+            type: PageTypeDetector.detect(window.location.href)
         });
     };
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initVT);
     } else {
