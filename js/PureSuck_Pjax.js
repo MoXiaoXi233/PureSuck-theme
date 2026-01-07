@@ -3,7 +3,7 @@
  * 处理 PJAX 导航、滚动位置恢复、加密文章等
  */
 
-(function() {
+(function () {
     'use strict';
 
     // 全局状态
@@ -19,8 +19,16 @@
             history: false,         // ✅ 手动管理 history,以便在返回时启动 VT
             cacheBust: false,
             timeout: 6500,
-            elements: `a[href^="${window.location.origin}"]:not(a[target="_blank"], a[no-pjax]), form[action]:not([no-pjax])`,
-            selectors: [
+            elements: `
+a[href^="${window.location.origin}"]
+:not(
+    a[target="_blank"],
+    a[no-pjax],
+    a[href*="#"]
+),
+form[action]:not([no-pjax])
+`
+            , selectors: [
                 "pjax",
                 "script[data-pjax]",
                 "title",
@@ -182,92 +190,92 @@
             },
             body: 'type=getTokenUrl'
         })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.tokenUrl) {
-                throw new Error('无法获取验证链接');
-            }
+            .then(response => response.json())
+            .then(data => {
+                if (!data.tokenUrl) {
+                    throw new Error('无法获取验证链接');
+                }
 
-            // 第二层：使用 Token URL 提交密码
-            return fetch(data.tokenUrl, {
-                method: 'POST',
-                body: formData
-            });
-        })
-        .then(() => {
-            // 第三层：检查文章是否已解锁
-            return fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'type=checkPassword'
-            });
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.hidden) {
-                // 文章仍为加密状态，密码错误
-                throw new Error('密码错误');
-            }
-
-            // 密码正确，显示成功提示
-            if (typeof MoxToast === 'function') {
-                MoxToast({
-                    message: '✓ 解锁成功',
-                    duration: 2000,
-                    position: 'bottom',
-                    backgroundColor: 'rgba(52, 199, 89, 0.9)',
-                    textColor: '#fff',
-                    borderColor: 'rgba(52, 199, 89, 0.3)'
+                // 第二层：使用 Token URL 提交密码
+                return fetch(data.tokenUrl, {
+                    method: 'POST',
+                    body: formData
                 });
-            }
+            })
+            .then(() => {
+                // 第三层：检查文章是否已解锁
+                return fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'type=checkPassword'
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.hidden) {
+                    // 文章仍为加密状态，密码错误
+                    throw new Error('密码错误');
+                }
 
-            // 使用 PJAX 重新加载页面
-            // ❌ 移除时间戳破坏缓存的行为，改用 PJAX 的缓存控制
-            const main = document.querySelector('.site-main');
-            if (main) {
-                main.style.viewTransitionName = 'main-content';
-                main.style.willChange = 'opacity';
-            }
-
-            return new Promise((resolve) => {
-                window.vtController?.executeTransition(async () => {
-                    await new Promise(resolve => {
-                        pjaxResolve = resolve;
-                        // 使用 replace 避免产生新的 history 记录
-                        // PJAX 会自动处理缓存
-                        window.pjax.loadUrl(currentUrl, {
-                            triggerElement: form,
-                            push: false,
-                            replace: true
-                        });
+                // 密码正确，显示成功提示
+                if (typeof MoxToast === 'function') {
+                    MoxToast({
+                        message: '✓ 解锁成功',
+                        duration: 2000,
+                        position: 'bottom',
+                        backgroundColor: 'rgba(52, 199, 89, 0.9)',
+                        textColor: '#fff',
+                        borderColor: 'rgba(52, 199, 89, 0.3)'
                     });
-                }).then(() => {
-                    resolve();
+                }
+
+                // 使用 PJAX 重新加载页面
+                // ❌ 移除时间戳破坏缓存的行为，改用 PJAX 的缓存控制
+                const main = document.querySelector('.site-main');
+                if (main) {
+                    main.style.viewTransitionName = 'main-content';
+                    main.style.willChange = 'opacity';
+                }
+
+                return new Promise((resolve) => {
+                    window.vtController?.executeTransition(async () => {
+                        await new Promise(resolve => {
+                            pjaxResolve = resolve;
+                            // 使用 replace 避免产生新的 history 记录
+                            // PJAX 会自动处理缓存
+                            window.pjax.loadUrl(currentUrl, {
+                                triggerElement: form,
+                                push: false,
+                                replace: true
+                            });
+                        });
+                    }).then(() => {
+                        resolve();
+                    });
                 });
+            })
+            .catch(() => {
+                // 使用 MoxToast 显示错误提示
+                if (typeof MoxToast === 'function') {
+                    MoxToast({
+                        message: '密码错误，请重试',
+                        duration: 3000,
+                        position: 'bottom',
+                        backgroundColor: 'rgba(255, 59, 48, 0.9)',
+                        textColor: '#fff',
+                        borderColor: 'rgba(255, 59, 48, 0.3)'
+                    });
+                } else {
+                    alert('密码错误，请重试');
+                }
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             });
-        })
-        .catch(() => {
-            // 使用 MoxToast 显示错误提示
-            if (typeof MoxToast === 'function') {
-                MoxToast({
-                    message: '密码错误，请重试',
-                    duration: 3000,
-                    position: 'bottom',
-                    backgroundColor: 'rgba(255, 59, 48, 0.9)',
-                    textColor: '#fff',
-                    borderColor: 'rgba(255, 59, 48, 0.3)'
-                });
-            } else {
-                alert('密码错误，请重试');
-            }
-        })
-        .finally(() => {
-            // 恢复按钮状态
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-        });
     }
 
     // 处理带锚点的链接点击
