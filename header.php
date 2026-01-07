@@ -103,39 +103,34 @@
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
 
+    <?php if ($this->options->enablepjax == '1'): ?>
+    <link href="<?php $this->options->themeUrl('/css/swup-transitions.css'); ?>" rel="stylesheet">
+    <?php endif; ?>
+
     <!-- JS引入：按优先级分组加载 -->
 
     <!-- 高优先级：核心功能（首屏必需） -->
     <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ScrollReveal.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
     <!-- 低优先级：按需加载（评论区/图片交互） -->
     <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
 
-    <!-- PJAX 相关：按依赖顺序加载 -->
+    <!-- Swup 4：页面过渡动画 -->
     <?php if ($this->options->enablepjax == '1'): ?>
-        <script defer src="<?php getStaticURL('pace.min.js'); ?>"></script>
-        <link rel="stylesheet" href="<?php getStaticURL('pace-theme-default.min.css'); ?>">
-        <script defer src="<?php getStaticURL('pjax.min.js'); ?>"></script>
-        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_ViewTransitions.js'); ?>"></script>
-        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_LayeredRenderer.js'); ?>"></script>
-        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Pjax.js'); ?>"></script>
+        <script src="https://unpkg.com/swup@4/dist/Swup.umd.js"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
         <?php if ($this->options->PjaxScript): ?>
         <script defer>
-            // 注册用户自定义的 PJAX 回调
+            // 注册用户自定义回调（Swup page:view 后执行）
             window.pjaxCustomCallback = function() {
                 <?= $this->options->PjaxScript; ?>
             };
         </script>
         <?php endif; ?>
-    <?php else: ?>
-        <!-- 是不是 Pjax 有 bug，哈哈哈 --kissablecho -->
-        <!-- 没错我差点死在自己留的鬼判定了--MoXi -->
-        <!-- 写这段 Pjax 代码的人猝死掉了，哈哈哈 --kissablecho -->
     <?php endif; ?>
 </head>
 
@@ -188,4 +183,5 @@
                 </div>
             </div>
         </header>
+        <div id="swup">
         <main class="main">

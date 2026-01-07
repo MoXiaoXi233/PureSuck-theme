@@ -2,6 +2,8 @@
   exit; ?>
 <?php $this->footer(); ?>
 
+</div><!-- 关闭 swup -->
+
 <!-- 回到顶端 -->
 
 <div class="go-top" id="go-top">

@@ -495,23 +495,14 @@ function getStaticURL($path)
         'local' => [
             'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
             'highlight.min.js' => $options->themeUrl . '/js/lib/highlight.min.js',
-            'pjax.min.js' => $options->themeUrl . '/js/lib/pjax.min.js',
-            'pace.min.js' => $options->themeUrl . '/js/lib/pace.min.js',
-            'pace-theme-default.min.css' => $options->themeUrl . '/css/lib/pace-theme-default.min.css'
         ],
         'bootcdn' => [
             'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
             'highlight.min.js' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
-            'pjax.min.js' => "https://cdn.bootcdn.net/ajax/libs/pjax/0.2.8/pjax.min.js",
-            'pace.min.js' => 'https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace.min.js',
-            'pace-theme-default.min.css' => "https://cdn.bootcdn.net/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
         ],
         "cdnjs" => [
             'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
             'highlight.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
-            'pjax.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/pjax/0.2.8/pjax.min.js",
-            'pace.min.js' => 'https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js',
-            'pace-theme-default.min.css' => "https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace-theme-default.min.css"
         ]
 
     ];

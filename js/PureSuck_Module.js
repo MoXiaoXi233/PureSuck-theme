@@ -595,8 +595,8 @@ document.addEventListener('DOMContentLoaded', function () {
     runShortcodes();
 });
 
-// PJAX 完成后重新初始化
-document.addEventListener('pjax:success', function() {
+// Turbo 渲染完成后重新初始化
+document.addEventListener('turbo:render', function() {
     runShortcodes();
 });
 
