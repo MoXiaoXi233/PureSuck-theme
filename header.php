@@ -55,6 +55,18 @@
         })();
     </script>
 
+    <?php if ($this->is('index') || $this->is('archive')): ?>
+    <!-- First paint: preload list enter state to avoid "flash then animate" -->
+    <script>
+    (function () {
+        try {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            document.documentElement.classList.add('ps-preload-list-enter');
+        } catch (e) {}
+    })();
+    </script>
+    <?php endif; ?>
+
     <!-- Style CSS -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">

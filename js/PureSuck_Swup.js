@@ -140,6 +140,342 @@
         );
     }
 
+    // ========== Light enter animation (post/page/list) (avoid View Transition conflicts) ==========
+    const LIGHT_ENTER = {
+        maxItemsPost: 24,
+        maxItemsPage: 18,
+        maxItemsList: 14,
+        duration: 320,
+        stagger: 28,
+        y: 10,
+        easing: 'cubic-bezier(.2,.8,.2,1)',
+        vtMs: 500,         // keep in sync with ensureSharedElementTransitionCSS()
+        vtLeadMs: 80,      // start a bit before VT ends (feels faster, still safe)
+        lastHref: '',
+        lastAt: 0,
+        // List cards: closer to animate.css `fadeInUp` (but in px, not 100%).
+        listDuration: 680,
+        listStagger: 46,
+        listY: 48,
+        // animate.css default easing: cubic-bezier(0.215, 0.61, 0.355, 1)
+        listEasing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+        // Track last navigation direction (so we can avoid stacking animations).
+        lastFromType: null,
+        lastToType: null,
+        lastToUrl: '',
+        lastIsSwup: false
+    };
+
+    function prefersReducedMotion() {
+        return typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function isHomeUrl(urlString) {
+        try {
+            const url = new URL(urlString, window.location.origin);
+            const path = url.pathname || '/';
+            return path === '/'
+                || path === '/index.php'
+                || path === '/index.html'
+                || path === '/index.htm';
+        } catch {
+            return false;
+        }
+    }
+
+    function isAnimatableElement(el) {
+        return el && el.nodeType === 1 && el.matches && !el.matches('script, style, link, meta');
+    }
+
+    function isElementVisible(el) {
+        return el && el.getClientRects && el.getClientRects().length > 0;
+    }
+
+    function uniqElements(arr) {
+        const out = [];
+        const seen = new Set();
+        for (const el of arr || []) {
+            if (!el || seen.has(el)) continue;
+            seen.add(el);
+            out.push(el);
+        }
+        return out;
+    }
+
+    function getPostContentContainer() {
+        return document.querySelector('.post.post--single .post-content')
+            || document.querySelector('.post.post--single .post-body')
+            || document.querySelector('.post-content')
+            || document.querySelector('.post-body');
+    }
+
+    function resolvePostEnterRoot(container) {
+        if (!container) return null;
+        const children = Array.from(container.children || []).filter((el) => el && el.nodeType === 1);
+        if (children.length === 1) {
+            const only = children[0];
+            if (only && only.matches && only.matches('.post-body, .post-content, article, .entry-content')) return only;
+        }
+        return container;
+    }
+
+    function collectPostEnterTargets(container) {
+        // Prefer richer, "post-inner" ordering for post pages (title/meta/content/license...).
+        const postBody = document.querySelector('.post.post--single .post-body');
+        if (postBody) {
+            const selector = [
+                '.post-meta',
+                '.post-content > *',
+                '.protected-block',
+                '.license-info-card'
+            ].join(',');
+
+            const bodyTargets = uniqElements(Array.from(postBody.querySelectorAll(selector)))
+                .filter(isAnimatableElement)
+                .filter(isElementVisible);
+
+            const commentsRoot = document.querySelector('.post.post--single .post-comments')
+                || document.querySelector('.post-comments');
+            const belowTargets = [];
+
+            if (commentsRoot) {
+                const commentsSelector = [
+                    '#comments > .comment-title',
+                    '#comments > .comment-list > li',
+                    '#comments > .page-navigator',
+                    '#comments > .respond'
+                ].join(',');
+
+                belowTargets.push(
+                    ...uniqElements(Array.from(commentsRoot.querySelectorAll(commentsSelector)))
+                        .filter(isAnimatableElement)
+                        .filter(isElementVisible)
+                );
+
+                // Fallback (e.g. protected posts where comments are hidden)
+                if (!belowTargets.length) {
+                    belowTargets.push(
+                        ...uniqElements(Array.from(commentsRoot.querySelectorAll('.post-wrapper > *')))
+                            .filter(isAnimatableElement)
+                            .filter(isElementVisible)
+                            .slice(0, 6)
+                    );
+                }
+            }
+
+            const pager = document.querySelector('.main-pager');
+            if (pager && isElementVisible(pager)) belowTargets.push(pager);
+
+            if (bodyTargets.length || belowTargets.length) {
+                const maxItems = LIGHT_ENTER.maxItemsPost;
+                const reserveBelow = 8;
+                const belowUnique = uniqElements(belowTargets);
+                const belowCap = Math.min(reserveBelow, belowUnique.length);
+                const bodyCap = Math.max(0, maxItems - belowCap);
+
+                const picked = uniqElements([
+                    ...bodyTargets.slice(0, bodyCap),
+                    ...belowUnique
+                ]);
+
+                return picked.slice(0, maxItems);
+            }
+        }
+
+        const root = resolvePostEnterRoot(container);
+        if (!root) return [];
+        return Array.from(root.children || [])
+            .filter(isAnimatableElement)
+            .filter(isElementVisible)
+            .slice(0, LIGHT_ENTER.maxItemsPost);
+    }
+
+    function collectPageEnterTargets() {
+        const main = document.querySelector('main.main') || document.querySelector('#swup');
+        if (!main) return [];
+
+        // A Typecho "page" (about/links/archives...) uses `post--index` but not `post--single`.
+        const pageArticle = main.querySelector('.post.post--index.main-item:not(.post--single)');
+        if (!pageArticle) return [];
+
+        const postBody = pageArticle.querySelector('.post-body') || pageArticle;
+        const wrapper = postBody.querySelector('.post-wrapper') || postBody;
+
+        const inner = wrapper.querySelector('.inner-post-wrapper');
+        const targets = [];
+
+        const take = (els, limit = Infinity) => {
+            if (!els || !els.length) return;
+            for (const el of els) {
+                if (!isAnimatableElement(el) || !isElementVisible(el)) continue;
+                targets.push(el);
+                if (targets.length >= limit) return;
+            }
+        };
+
+        const title = wrapper.querySelector('.post-title');
+        if (title && isElementVisible(title)) targets.push(title);
+
+        // Prefer "block" level segments first (gives natural reading order).
+        if (inner && inner.children && inner.children.length) {
+            take(Array.from(inner.children));
+        } else if (wrapper.children && wrapper.children.length) {
+            take(Array.from(wrapper.children));
+        }
+
+        // If the page only has a few big blocks, refine into more granular items for a visible stagger:
+        // - tag clouds: `.cloud-item`
+        // - archives timeline: `.timeline-item`
+        // - generic section bodies: direct children
+        const unique = uniqElements(targets).filter(isAnimatableElement).filter(isElementVisible);
+        if (unique.length <= 4) {
+            const refined = [];
+            const cloudItems = Array.from(pageArticle.querySelectorAll('.cloud-container > .cloud-item')).slice(0, 10);
+            const timelineYears = Array.from(pageArticle.querySelectorAll('.timeline-year')).slice(0, 6);
+            const timelineItems = Array.from(pageArticle.querySelectorAll('#timeline .timeline-item')).slice(0, 12);
+            const sectionBodyChildren = Array.from(pageArticle.querySelectorAll('.section-body > *')).slice(0, 10);
+
+            refined.push(...cloudItems, ...timelineYears, ...timelineItems, ...sectionBodyChildren);
+            take(uniqElements(refined), LIGHT_ENTER.maxItemsPage);
+        }
+
+        return uniqElements(targets)
+            .filter(isAnimatableElement)
+            .filter(isElementVisible)
+            .slice(0, LIGHT_ENTER.maxItemsPage);
+    }
+
+    function collectListEnterTargets() {
+        const main = document.querySelector('main.main') || document.querySelector('#swup');
+        if (!main) return [];
+
+        const wrapper = main.querySelector('.wrapper') || main;
+
+        const targets = [];
+        const archiveTitle = wrapper.querySelector('.archive-title');
+        if (archiveTitle) targets.push(archiveTitle);
+
+        // Prefer animating the cards as a whole (avoid animating deep children).
+        if (wrapper.children && wrapper.children.length) {
+            for (const child of wrapper.children) {
+                if (!child || !child.classList) continue;
+                if (child.classList.contains('post') && child.classList.contains('post--index')) {
+                    targets.push(child);
+                }
+            }
+        } else {
+            targets.push(...Array.from(wrapper.querySelectorAll('.post.post--index')));
+        }
+
+        const pager = main.querySelector('.main-pager');
+        if (pager) targets.push(pager);
+        const lastInfo = main.querySelector('.main-lastinfo');
+        if (lastInfo) targets.push(lastInfo);
+
+        const vtMarker = main.querySelector(`[${VT.markerAttr}]`);
+        const vtEl = vtMarker ? vtMarker.closest('.post') : null;
+
+        return uniqElements(targets)
+            .filter(isAnimatableElement)
+            .filter(isElementVisible)
+            .filter((el) => !vtEl || el !== vtEl)
+            .slice(0, LIGHT_ENTER.maxItemsList);
+    }
+
+    function animateLightEnter(targets, baseDelay = 0, options = {}) {
+        if (!targets || !targets.length) return;
+
+        const duration = options.duration ?? LIGHT_ENTER.duration;
+        const stagger = options.stagger ?? LIGHT_ENTER.stagger;
+        const y = options.y ?? LIGHT_ENTER.y;
+        const easing = options.easing ?? LIGHT_ENTER.easing;
+
+        // Pre-apply initial state ASAP to avoid a "flash then animate" frame.
+        targets.forEach((el) => {
+            el.style.willChange = 'transform, opacity';
+            el.style.opacity = '0';
+            el.style.transform = `translate3d(0, ${y}px, 0)`;
+        });
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                targets.forEach((el, index) => {
+                    const anim = el.animate(
+                        [
+                            { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
+                            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+                        ],
+                        {
+                            duration,
+                            easing,
+                            delay: baseDelay + index * stagger,
+                            fill: 'both'
+                        }
+                    );
+
+                    const cleanup = () => {
+                        el.style.willChange = '';
+                        el.style.opacity = '';
+                        el.style.transform = '';
+                    };
+                    anim.onfinish = cleanup;
+                    anim.oncancel = cleanup;
+                });
+            });
+        });
+    }
+
+    function runLightEnterAnimation() {
+        if (prefersReducedMotion()) return;
+        if (typeof Element === 'undefined' || typeof Element.prototype.animate !== 'function') return;
+
+        const pageType = getPageType(window.location.href);
+        if (pageType !== 'post' && pageType !== 'list') return;
+
+        const href = window.location.href;
+        const now = Date.now();
+        if (LIGHT_ENTER.lastHref === href && now - LIGHT_ENTER.lastAt < 200) return;
+        LIGHT_ENTER.lastHref = href;
+        LIGHT_ENTER.lastAt = now;
+
+        let targets = [];
+        let baseDelay = 0;
+        let animOptions = {};
+
+        if (pageType === 'post' && document.querySelector('.post.post--single')) {
+            targets = collectPostEnterTargets(getPostContentContainer());
+            const hasSharedElement = supportsViewTransitions()
+                && Boolean(document.querySelector(`.post.post--single[${VT.markerAttr}]`));
+            baseDelay = hasSharedElement ? Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs) : 0;
+        } else if (pageType === 'post') {
+            targets = collectPageEnterTargets();
+            // Keep independent pages (about/links/archives...) feeling consistent with post enter timing.
+            baseDelay = Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs);
+        } else if (pageType === 'list') {
+            // Avoid stacking an extra list "enter" animation on top of post->list back/collapse feel.
+            const isPostToList = LIGHT_ENTER.lastIsSwup
+                && LIGHT_ENTER.lastFromType === 'post'
+                && LIGHT_ENTER.lastToType === 'list';
+            const isReturningHome = isPostToList && isHomeUrl(LIGHT_ENTER.lastToUrl || window.location.href);
+            if (isPostToList && !isReturningHome) {
+                return;
+            }
+            targets = collectListEnterTargets();
+            const hasSharedElement = supportsViewTransitions()
+                && Boolean(document.querySelector(`[${VT.markerAttr}]`));
+            baseDelay = hasSharedElement ? Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs) : 0;
+            animOptions = {
+                duration: LIGHT_ENTER.listDuration,
+                stagger: LIGHT_ENTER.listStagger,
+                y: LIGHT_ENTER.listY,
+                easing: LIGHT_ENTER.listEasing
+            };
+        }
+
+        animateLightEnter(targets, baseDelay, animOptions);
+    }
+
     // ========== 初始化 Swup ==========
     function initSwup() {
         if (typeof Swup === 'undefined') {
@@ -251,12 +587,17 @@
             clearMarkedViewTransitionNames();
         };
 
-        // Fallback for legacy naming: some setups dispatch this lifecycle event.
-        document.addEventListener('swup:contentReplaced', syncPostSharedElementFromLocation);
+        // Light enter animation: run strictly after content replaced.
+        document.addEventListener('swup:contentReplaced', runLightEnterAnimation);
 
         swup.hooks.on('visit:start', (visit) => {
             const fromType = getPageType(visit.from.url);
             const toType = getPageType(visit.to.url);
+
+            LIGHT_ENTER.lastFromType = fromType;
+            LIGHT_ENTER.lastToType = toType;
+            LIGHT_ENTER.lastToUrl = visit.to && visit.to.url ? visit.to.url : '';
+            LIGHT_ENTER.lastIsSwup = true;
 
             // For collapse animation: remember the post id we are leaving (post -> list)
             if (supportsViewTransitions() && fromType === 'post' && toType === 'list') {
@@ -307,6 +648,14 @@
             } else if (toType === 'post') {
                 document.documentElement.classList.add('transition-post-in');
             }
+
+            // Ensure `swup:contentReplaced` exists for light-enter animation timing.
+            Promise.resolve().then(() => {
+                const url = window.location.href;
+                document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
+                    detail: { emittedBy: 'ps-after-content-replace', url, pageType: getPageType(url) }
+                }));
+            });
         });
 
         // ========== 页面过渡完成 ==========
@@ -439,6 +788,20 @@
 
         // Initial load
         syncPostSharedElementFromLocation();
+
+        // Initial load doesn't trigger Swup hooks, so run a soft enter for list pages here.
+        LIGHT_ENTER.lastIsSwup = false;
+        if (getPageType(window.location.href) === 'list') {
+            runLightEnterAnimation();
+        }
+        // Remove first-paint preload class after the animation has taken over via inline styles.
+        if (document.documentElement.classList.contains('ps-preload-list-enter')) {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    document.documentElement.classList.remove('ps-preload-list-enter');
+                });
+            });
+        }
 
         console.log('[Swup] 已启用 Swup 4 (完整动画模式)');
     }

@@ -2385,6 +2385,27 @@ input:-webkit-autofill:active {
 	color: var(--themehovercolor);
 }
 
+/* First-paint preload state for list enter animation (prevents "flash then animate") */
+html.ps-preload-list-enter .post.post--index,
+html.ps-preload-list-enter .archive-title,
+html.ps-preload-list-enter .main-pager,
+html.ps-preload-list-enter .main-lastinfo {
+	opacity: 0 !important;
+	transform: translate3d(0, 48px, 0) !important;
+	will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.ps-preload-list-enter .post.post--index,
+	html.ps-preload-list-enter .archive-title,
+	html.ps-preload-list-enter .main-pager,
+	html.ps-preload-list-enter .main-lastinfo {
+		opacity: 1 !important;
+		transform: none !important;
+		will-change: auto;
+	}
+}
+
 /* View Transitions API (Swup native) */
 @view-transition {
 	navigation: auto;
