@@ -104,7 +104,7 @@
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
 
     <?php if ($this->options->enablepjax == '1'): ?>
-    <link href="<?php $this->options->themeUrl('/css/swup-transitions.css'); ?>" rel="stylesheet">
+        
     <?php endif; ?>
 
     <!-- JS引入：按优先级分组加载 -->
@@ -121,6 +121,7 @@
     <!-- Swup 4：页面过渡动画 -->
     <?php if ($this->options->enablepjax == '1'): ?>
         <script src="https://unpkg.com/swup@4/dist/Swup.umd.js"></script>
+        <script src="https://unpkg.com/@swup/scroll-plugin@4"></script>
         <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
         <?php if ($this->options->PjaxScript): ?>

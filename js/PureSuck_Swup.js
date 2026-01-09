@@ -6,6 +6,101 @@
 (function() {
     'use strict';
 
+    // ========== View Transitions: shared element (index card -> post container) ==========
+    const VT = {
+        styleId: 'ps-vt-shared-element-style',
+        markerAttr: 'data-ps-vt-name'
+    };
+
+    function supportsViewTransitions() {
+        return typeof document.startViewTransition === 'function'
+            && typeof CSS !== 'undefined'
+            && typeof CSS.supports === 'function'
+            && CSS.supports('view-transition-name: ps-test');
+    }
+
+    function getArchiveIdFromUrl(urlString) {
+        try {
+            const url = new URL(urlString, window.location.origin);
+            const match = url.pathname.match(/\/archives\/(\d+)(?:\/|\.html)?(?:$|[?#])/);
+            return match ? match[1] : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function getPostTransitionName(postId) {
+        return `ps-post-${postId}`;
+    }
+
+    function clearMarkedViewTransitionNames() {
+        document.querySelectorAll(`[${VT.markerAttr}]`).forEach((el) => {
+            el.style.viewTransitionName = '';
+            el.removeAttribute(VT.markerAttr);
+        });
+    }
+
+    function ensureSharedElementTransitionCSS(name) {
+        let style = document.getElementById(VT.styleId);
+        if (!style) {
+            style = document.createElement('style');
+            style.id = VT.styleId;
+            document.head.appendChild(style);
+        }
+
+        style.textContent = `
+/* PureSuck View Transitions: shared element morph */
+::view-transition-group(${name}) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(.2,.8,.2,1);
+  animation-fill-mode: both;
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+::view-transition-old(${name}),
+::view-transition-new(${name}) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(.2,.8,.2,1);
+  animation-fill-mode: both;
+}
+`;
+    }
+
+    function applyPostSharedElementName(el, postId) {
+        if (!supportsViewTransitions() || !el || !postId) return;
+
+        const name = getPostTransitionName(postId);
+        clearMarkedViewTransitionNames();
+        ensureSharedElementTransitionCSS(name);
+
+        el.style.viewTransitionName = name;
+        el.setAttribute(VT.markerAttr, name);
+    }
+
+    function shouldForceScrollToTop(urlString) {
+        try {
+            const url = new URL(urlString, window.location.origin);
+            if (url.hash) return false;
+            return getPageType(url.href) === 'post';
+        } catch {
+            return false;
+        }
+    }
+
+    function findIndexPostCardById(postId) {
+        if (!postId) return null;
+
+        const cards = document.querySelectorAll('.post.post--index');
+        for (const card of cards) {
+            const link = card.querySelector('a[href]');
+            if (!link) continue;
+            const linkPostId = getArchiveIdFromUrl(link.href);
+            if (linkPostId === postId) return card;
+        }
+
+        return null;
+    }
+
     // ========== 动画类型检测 ==========
     function getPageType(url) {
         // 判断是否为文章页
@@ -53,17 +148,122 @@
         }
 
         // ========== Swup 4 基础配置 ==========
+        const plugins = [];
+        const scrollPlugin = (typeof SwupScrollPlugin === 'function')
+            ? new SwupScrollPlugin({
+                // Ensure browser back/forward restores the exact previous position instantly.
+                doScrollingRightAway: true,
+                animateScroll: {
+                    betweenPages: false,
+                    samePageWithHash: true,
+                    samePage: true
+                }
+            })
+            : null;
+
+        if (scrollPlugin) plugins.push(scrollPlugin);
+
         const swup = new Swup({
             containers: ['#swup'],
-            animateHistoryBrowsing: false,
-            native: false,  // 关闭原生动画
-            animationSelector: false  // 禁用 Swup 的动画等待，使用自定义动画
+            // Important: browser back/forward is "history browsing". If disabled, VT won't run there.
+            animateHistoryBrowsing: supportsViewTransitions(),
+            native: supportsViewTransitions(),  // View Transitions API (supported browsers only)
+            animationSelector: false,  // 禁用 Swup 的动画等待，使用自定义动画
+            plugins
         });
 
+        // Used for "collapse" (post -> list) when there is no click target (e.g. browser back)
+        let pendingPostIdForList = null;
+
+        // ========== Index: set view-transition-name on clicked post card ==========
+        // Use capture to run before Swup intercepts the click.
+        document.addEventListener('click', (event) => {
+            if (!supportsViewTransitions()) return;
+            if (event.defaultPrevented) return;
+            if (event.button !== 0) return;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+            const link = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+            if (!link) return;
+            if (link.target && link.target !== '_self') return;
+            if (link.hasAttribute('download')) return;
+
+            let toUrl;
+            try {
+                toUrl = new URL(link.href, window.location.origin);
+            } catch {
+                return;
+            }
+            if (toUrl.origin !== window.location.origin) return;
+
+            const postId = getArchiveIdFromUrl(toUrl.href);
+            if (!postId) return;
+
+            const postCard = link.closest('.post.post--index');
+            if (!postCard) return;
+
+            applyPostSharedElementName(postCard, postId);
+        }, true);
+
         // ========== 页面过渡开始 ==========
+        const syncPostSharedElementFromLocation = () => {
+            const url = window.location.href;
+            const pageType = getPageType(url);
+
+            if (!supportsViewTransitions()) return;
+
+            if (pageType === 'post') {
+                const currentPostId = getArchiveIdFromUrl(url);
+                const postContainer = document.querySelector('.post.post--single');
+                applyPostSharedElementName(postContainer, currentPostId);
+                return;
+            }
+
+            // Collapse morph (post -> list): bind the matching card on the list page.
+            if (pageType === 'list' && pendingPostIdForList) {
+                // Snap to cached scroll position first (ScrollPlugin is the source of truth).
+                const cached = scrollPlugin?.getCachedScrollPositions
+                    ? scrollPlugin.getCachedScrollPositions(url)
+                    : null;
+                const cachedY = cached && cached.window && typeof cached.window.top === 'number'
+                    ? cached.window.top
+                    : null;
+                if (typeof cachedY === 'number') {
+                    window.scrollTo(0, cachedY);
+                    queueMicrotask(() => window.scrollTo(0, cachedY));
+                }
+
+                const card = findIndexPostCardById(pendingPostIdForList);
+                if (card) {
+                    // If layout changed and the card isn't visible, ensure it's within viewport for the morph.
+                    const rect = card.getBoundingClientRect();
+                    if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                        card.scrollIntoView({ block: 'center', inline: 'nearest' });
+                    }
+                    applyPostSharedElementName(card, pendingPostIdForList);
+                } else {
+                    clearMarkedViewTransitionNames();
+                }
+                pendingPostIdForList = null;
+                return;
+            }
+
+            clearMarkedViewTransitionNames();
+        };
+
+        // Fallback for legacy naming: some setups dispatch this lifecycle event.
+        document.addEventListener('swup:contentReplaced', syncPostSharedElementFromLocation);
+
         swup.hooks.on('visit:start', (visit) => {
             const fromType = getPageType(visit.from.url);
             const toType = getPageType(visit.to.url);
+
+            // For collapse animation: remember the post id we are leaving (post -> list)
+            if (supportsViewTransitions() && fromType === 'post' && toType === 'list') {
+                pendingPostIdForList = getArchiveIdFromUrl(visit.from.url);
+            } else {
+                pendingPostIdForList = null;
+            }
 
             // 添加动画状态类
             document.documentElement.classList.add('is-animating');
@@ -89,8 +289,16 @@
             // 保持动画状态
             document.documentElement.classList.add('is-animating');
 
+            // 确保进入文章页时立即在顶部（避免 scroll-behavior:smooth 导致“滑上去”的鬼畜）
+            if (shouldForceScrollToTop(window.location.href)) {
+                window.scrollTo(0, 0);
+            }
+
             // 标记新页面元素
             markAnimationElements();
+
+            // View Transitions shared element: apply to the new page as well
+            syncPostSharedElementFromLocation();
 
             // 根据目标页面类型应用进入动画
             const toType = getPageType(window.location.href);
@@ -228,6 +436,9 @@
 
         // ========== 初始加载时标记元素 ==========
         markAnimationElements();
+
+        // Initial load
+        syncPostSharedElementFromLocation();
 
         console.log('[Swup] 已启用 Swup 4 (完整动画模式)');
     }
