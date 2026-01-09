@@ -494,14 +494,17 @@ function getStaticURL($path)
         // 本地资源（主题目录）
         'local' => [
             'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
+            'Swup.umd.min.js' => $options->themeUrl . '/js/lib/Swup/Swup.umd.min.js',
             'highlight.min.js' => $options->themeUrl . '/js/lib/highlight.min.js',
         ],
         'bootcdn' => [
             'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
+            'Swup.modern.min.js' => "https://cdn.bootcdn.net/ajax/libs/swup/4.8.2/Swup.umd.min.js",
             'highlight.min.js' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
         ],
         "cdnjs" => [
             'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
+            'Swup.modern.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/swup/4.8.2/Swup.umd.min.js",
             'highlight.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
         ]
 

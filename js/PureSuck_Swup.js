@@ -116,29 +116,160 @@
     }
 
     // ========== 添加动画属性到元素 ==========
-    function markAnimationElements() {
+    function markAnimationElements(root = document) {
+        const scope = root && root.querySelector ? root : document;
         // 标记文章卡片
-        document.querySelectorAll('.post').forEach(el => {
+        scope.querySelectorAll('.post:not([data-swup-animation])').forEach(el => {
             el.setAttribute('data-swup-animation', '');
         });
 
         // 标记分页器
-        const pager = document.querySelector('.main-pager');
-        if (pager) {
+        const pager = scope.querySelector('.main-pager');
+        if (pager && !pager.hasAttribute('data-swup-animation')) {
             pager.setAttribute('data-swup-animation', '');
         }
     }
 
     // ========== 清理动画类 ==========
-    function cleanupAnimationClasses() {
-        document.documentElement.classList.remove(
-            'transition-list-in',
-            'transition-list-out',
-            'transition-post-in',
-            'transition-post-out',
-            'is-animating'
-        );
-    }
+	    function cleanupAnimationClasses() {
+	        document.documentElement.classList.remove(
+	            'transition-list-in',
+	            'transition-list-out',
+	            'transition-post-in',
+	            'transition-post-out',
+	            'is-animating'
+	        );
+	    }
+
+	    function psToast(message, variant) {
+	        if (typeof MoxToast === 'function') {
+	            const isSuccess = variant === 'success';
+	            const isError = variant === 'error';
+	            MoxToast({
+	                message: String(message || ''),
+	                duration: isError ? 3500 : 2200,
+	                position: 'bottom',
+	                backgroundColor: isSuccess
+	                    ? 'rgba(52, 199, 89, 0.9)'
+	                    : isError
+	                        ? 'rgba(255, 59, 48, 0.9)'
+	                        : 'rgba(0, 0, 0, 0.75)',
+	                textColor: '#fff',
+	                borderColor: isSuccess
+	                    ? 'rgba(52, 199, 89, 0.3)'
+	                    : isError
+	                        ? 'rgba(255, 59, 48, 0.3)'
+	                        : 'rgba(255, 255, 255, 0.12)'
+	            });
+	            return;
+	        }
+	        alert(String(message || ''));
+	    }
+
+	    function isSameOriginUrl(urlString) {
+	        try {
+	            const url = new URL(urlString, window.location.origin);
+	            return url.origin === window.location.origin;
+	        } catch {
+	            return false;
+	        }
+	    }
+
+	    function buildGetUrlFromForm(form) {
+	        const action = form.getAttribute('action') || window.location.href;
+	        const url = new URL(action, window.location.origin);
+	        const params = new URLSearchParams(url.search);
+
+	        const formData = new FormData(form);
+	        for (const [key, value] of formData.entries()) {
+	            if (typeof value !== 'string') continue;
+	            if (params.has(key)) params.delete(key);
+	            params.append(key, value);
+	        }
+	        url.search = params.toString();
+	        return url;
+	    }
+
+	    function isSearchForm(form) {
+	        if (!form || form.nodeName !== 'FORM') return false;
+	        if (form.matches('form.search-container, form[role=\"search\"], form[data-ps-search]')) return true;
+	        return Boolean(form.querySelector('input[name=\"s\"]'));
+	    }
+
+	    function isTypechoCommentForm(form) {
+	        if (!form || form.nodeName !== 'FORM') return false;
+	        if (form.id === 'cf') return true;
+	        if (form.matches('form[no-pjax]') && form.querySelector('textarea[name=\"text\"]')) return true;
+	        return false;
+	    }
+
+	    function setFormBusyState(form, busy, label) {
+	        const submit = form.querySelector('button[type=\"submit\"], input[type=\"submit\"], button.submit, #submit');
+	        if (!submit) return () => {};
+
+	        const prev = {
+	            disabled: submit.disabled,
+	            text: submit.tagName === 'INPUT' ? submit.value : submit.textContent
+	        };
+
+	        submit.disabled = Boolean(busy);
+	        if (label) {
+	            if (submit.tagName === 'INPUT') submit.value = label;
+	            else submit.textContent = label;
+	        }
+
+	        return () => {
+	            submit.disabled = prev.disabled;
+	            if (submit.tagName === 'INPUT') submit.value = prev.text;
+	            else submit.textContent = prev.text;
+	        };
+	    }
+
+	    async function refreshCommentsFromUrl(urlString) {
+	        const current = document.getElementById('comments');
+	        if (!current) return false;
+
+	        if (!isSameOriginUrl(urlString)) return false;
+
+	        // Preserve current scroll + focus (stay in place).
+	        const prevScrollY = window.scrollY;
+	        const active = document.activeElement;
+	        const activeId = active && active.id ? active.id : null;
+
+	        const res = await fetch(urlString, {
+	            method: 'GET',
+	            credentials: 'same-origin',
+	            headers: {
+	                'X-Requested-With': 'XMLHttpRequest',
+	                'Accept': 'text/html,*/*;q=0.8'
+	            }
+	        });
+	        if (!res.ok) return false;
+
+	        const html = await res.text();
+	        const doc = new DOMParser().parseFromString(html, 'text/html');
+	        const next = doc.getElementById('comments');
+	        if (!next) return false;
+
+	        current.replaceWith(next);
+
+	        // Restore scroll position and try to keep focus (preventScroll to avoid jumps).
+	        window.scrollTo(0, prevScrollY);
+	        if (activeId) {
+	            const el = document.getElementById(activeId);
+	            if (el && typeof el.focus === 'function') {
+	                try { el.focus({ preventScroll: true }); } catch { el.focus(); }
+	            }
+	        }
+
+	        // Re-init comment widgets after DOM replacement.
+	        const commentTextarea = document.querySelector('.OwO-textarea');
+	        if (commentTextarea && typeof initializeCommentsOwO === 'function') {
+	            initializeCommentsOwO();
+	        }
+
+	        return true;
+	    }
 
     // ========== Light enter animation (post/page/list) (avoid View Transition conflicts) ==========
     const LIGHT_ENTER = {
@@ -501,12 +632,98 @@
 
         const swup = new Swup({
             containers: ['#swup'],
+            plugins,
             // Important: browser back/forward is "history browsing". If disabled, VT won't run there.
             animateHistoryBrowsing: supportsViewTransitions(),
             native: supportsViewTransitions(),  // View Transitions API (supported browsers only)
             animationSelector: false,  // 禁用 Swup 的动画等待，使用自定义动画
             plugins
         });
+
+        // ========== Forms: search + comments (Typecho) ==========
+        // Delegate on document so it works after Swup replaces content.
+        document.addEventListener('submit', async (event) => {
+            const form = event.target && event.target.closest ? event.target.closest('form') : null;
+            if (!form) return;
+
+            // Search (GET) -> Swup navigate
+            const method = (form.getAttribute('method') || 'get').toLowerCase();
+            if (method === 'get' && isSearchForm(form)) {
+                const url = buildGetUrlFromForm(form);
+                if (isSameOriginUrl(url.href)) {
+                    event.preventDefault();
+                    swup.navigate(url.href);
+                }
+                return;
+            }
+
+            // Comment submit -> AJAX + Swup refresh
+            if (isTypechoCommentForm(form)) {
+                const action = form.getAttribute('action') || '';
+                if (!isSameOriginUrl(action)) return;
+
+                event.preventDefault();
+
+                const restore = setFormBusyState(form, true, '提交中...');
+                try {
+	                    const response = await fetch(action, {
+	                        method: 'POST',
+	                        body: new FormData(form),
+	                        credentials: 'same-origin',
+	                        headers: {
+	                            'X-Requested-With': 'XMLHttpRequest',
+	                            'Accept': 'application/json, text/html;q=0.9,*/*;q=0.8'
+	                        }
+	                    });
+
+	                    if (!response.ok) {
+	                        psToast('评论提交失败，请稍后重试', 'error');
+	                        return;
+	                    }
+
+	                    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+	                    const fallbackPage = window.location.href.split('#')[0];
+	                    let refreshUrl = fallbackPage;
+
+	                    if (contentType.includes('application/json')) {
+	                        const data = await response.json();
+	                        const ok = Boolean(
+	                            data?.success === true
+	                            || data?.success === 1
+	                            || data?.status === 'success'
+	                            || data?.status === 1
+	                        );
+	                        if (!ok) {
+	                            psToast(data?.message || data?.error || '评论提交失败，请检查内容后重试', 'error');
+	                            return;
+	                        }
+
+	                        psToast(data?.message || '评论已提交', 'success');
+
+	                        const redirectUrl = data?.redirect
+	                            || data?.url
+	                            || data?.permalink
+	                            || data?.comment?.permalink
+	                            || fallbackPage;
+	                        refreshUrl = isSameOriginUrl(redirectUrl) ? redirectUrl : fallbackPage;
+	                    } else {
+	                        // HTML fallback: most Typecho installs redirect after success; `response.url` is final URL.
+	                        psToast('评论已提交', 'success');
+	                        refreshUrl = (response.url && isSameOriginUrl(response.url)) ? response.url : fallbackPage;
+	                    }
+
+	                    const refreshed = await refreshCommentsFromUrl(refreshUrl);
+	                    if (!refreshed) swup.navigate(fallbackPage + '#comments');
+
+	                    const textarea = document.querySelector('#textarea, textarea[name=\"text\"]');
+	                    if (textarea) textarea.value = '';
+                } catch (e) {
+                    psToast('评论提交失败，请稍后重试', 'error');
+                } finally {
+                    restore();
+                }
+            }
+        }, true);
 
         // Used for "collapse" (post -> list) when there is no click target (e.g. browser back)
         let pendingPostIdForList = null;
@@ -609,8 +826,8 @@
             // 添加动画状态类
             document.documentElement.classList.add('is-animating');
 
-            // 标记当前页面元素
-            markAnimationElements();
+            // 标记当前页面元素（仅扫描 swup 容器，减少 DOM 遍历）
+            markAnimationElements(document.getElementById('swup') || document);
 
             // 根据页面类型应用退出动画
             if (fromType === 'list') {
@@ -635,8 +852,8 @@
                 window.scrollTo(0, 0);
             }
 
-            // 标记新页面元素
-            markAnimationElements();
+            // 标记新页面元素（仅扫描 swup 容器，减少 DOM 遍历）
+            markAnimationElements(document.getElementById('swup') || document);
 
             // View Transitions shared element: apply to the new page as well
             syncPostSharedElementFromLocation();
@@ -668,6 +885,16 @@
 
         // ========== 页面完全加载后的回调 ==========
         swup.hooks.on('page:view', () => {
+            const swupRoot = document.getElementById('swup') || document;
+            const pageType = getPageType(window.location.href);
+            const runIdle = (fn) => {
+                if (typeof window.requestIdleCallback === 'function') {
+                    window.requestIdleCallback(fn, { timeout: 800 });
+                } else {
+                    setTimeout(fn, 0);
+                }
+            };
+
             // 更新导航栏指示器
             if (typeof window.NavIndicator === 'object' && typeof window.NavIndicator.update === 'function') {
                 window.NavIndicator.update();
@@ -683,36 +910,41 @@
                 }
             });
 
-            // 代码高亮
-            if (typeof hljs !== 'undefined') {
-                document.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
-            }
+            // 标记新页面元素（确保 PJAX 渲染后的元素也被标记）
+            markAnimationElements(swupRoot);
 
-            // TOC 目录
-            if (typeof initializeStickyTOC === 'function') {
-                initializeStickyTOC();
-            }
+            // 非关键逻辑放到 idle/next tick，减少切换时的主线程阻塞
+            runIdle(() => {
+                // 代码高亮（只在文章/页面类内容上做）
+                if (pageType === 'post' && typeof hljs !== 'undefined') {
+                    swupRoot.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                }
 
-            // Shortcodes
-            if (typeof runShortcodes === 'function') {
-                runShortcodes();
-            }
+                // TOC 目录（存在 TOC 时才初始化）
+                if (pageType === 'post' && typeof initializeStickyTOC === 'function') {
+                    if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
+                        initializeStickyTOC();
+                    }
+                }
 
-            // 评论 OwO
-            const commentTextarea = document.querySelector('.OwO-textarea');
-            if (commentTextarea && typeof initializeCommentsOwO === 'function') {
-                initializeCommentsOwO();
-            }
+                // Shortcodes（保持原行为，但延后执行）
+                if (typeof runShortcodes === 'function') {
+                    runShortcodes();
+                }
 
-            // 用户自定义回调
+                // 评论 OwO
+                const commentTextarea = swupRoot.querySelector('.OwO-textarea');
+                if (commentTextarea && typeof initializeCommentsOwO === 'function') {
+                    initializeCommentsOwO();
+                }
+            });
+
+            // 用户自定义回调（可能依赖 DOM，放最后）
             if (typeof window.pjaxCustomCallback === 'function') {
                 window.pjaxCustomCallback();
             }
-
-            // 标记新页面元素（确保 PJAX 渲染后的元素也被标记）
-            markAnimationElements();
         });
 
         // ========== 加密文章表单处理 ==========
@@ -784,7 +1016,7 @@
         });
 
         // ========== 初始加载时标记元素 ==========
-        markAnimationElements();
+        markAnimationElements(document.getElementById('swup') || document);
 
         // Initial load
         syncPostSharedElementFromLocation();

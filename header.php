@@ -20,25 +20,25 @@
 
     <!-- 主题防闪烁脚本（立即执行，在 CSS 加载前设置主题） -->
     <script>
-    (function() {
-        // 1. 优先读取 Cookie（跨站同步）
-        const cookieMatch = document.cookie.match(/(?:^|;)\s*theme=([^;]+)/);
-        const cookieTheme = cookieMatch ? cookieMatch[1] : null;
+        (function () {
+            // 1. 优先读取 Cookie（跨站同步）
+            const cookieMatch = document.cookie.match(/(?:^|;)\s*theme=([^;]+)/);
+            const cookieTheme = cookieMatch ? cookieMatch[1] : null;
 
-        // 2. 读取 localStorage
-        const localTheme = localStorage.getItem('theme');
+            // 2. 读取 localStorage
+            const localTheme = localStorage.getItem('theme');
 
-        // 3. 决定初始主题
-        let initialTheme = cookieTheme || localTheme || 'auto';
+            // 3. 决定初始主题
+            let initialTheme = cookieTheme || localTheme || 'auto';
 
-        // 4. auto 模式下，根据系统主题决定
-        if (initialTheme === 'auto') {
-            initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
+            // 4. auto 模式下，根据系统主题决定
+            if (initialTheme === 'auto') {
+                initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
 
-        // 5. 立即设置主题，防止闪烁
-        document.documentElement.setAttribute('data-theme', initialTheme);
-    })();
+            // 5. 立即设置主题，防止闪烁
+            document.documentElement.setAttribute('data-theme', initialTheme);
+        })();
     </script>
 
     <script>
@@ -56,15 +56,15 @@
     </script>
 
     <?php if ($this->is('index') || $this->is('archive')): ?>
-    <!-- First paint: preload list enter state to avoid "flash then animate" -->
-    <script>
-    (function () {
-        try {
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            document.documentElement.classList.add('ps-preload-list-enter');
-        } catch (e) {}
-    })();
-    </script>
+        <!-- First paint: preload list enter state to avoid "flash then animate" -->
+        <script>
+            (function () {
+                try {
+                    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    document.documentElement.classList.add('ps-preload-list-enter');
+                } catch (e) { }
+            })();
+        </script>
     <?php endif; ?>
 
     <!-- Style CSS -->
@@ -116,7 +116,7 @@
     <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
 
     <?php if ($this->options->enablepjax == '1'): ?>
-        
+
     <?php endif; ?>
 
     <!-- JS引入：按优先级分组加载 -->
@@ -132,17 +132,17 @@
 
     <!-- Swup 4：页面过渡动画 -->
     <?php if ($this->options->enablepjax == '1'): ?>
-        <script src="https://unpkg.com/swup@4/dist/Swup.umd.js"></script>
-        <script src="https://unpkg.com/@swup/scroll-plugin@4"></script>
+        <script defer src="<?php getStaticURL(path: 'Swup.umd.min.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
         <?php if ($this->options->PjaxScript): ?>
-        <script defer>
-            // 注册用户自定义回调（Swup page:view 后执行）
-            window.pjaxCustomCallback = function() {
-                <?= $this->options->PjaxScript; ?>
-            };
-        </script>
+            <script defer>
+                // 注册用户自定义回调（Swup page:view 后执行）
+                window.pjaxCustomCallback = function () {
+                    <?= $this->options->PjaxScript; ?>
+                };
+            </script>
         <?php endif; ?>
     <?php endif; ?>
 </head>
@@ -197,4 +197,4 @@
             </div>
         </header>
         <div id="swup">
-        <main class="main">
+            <main class="main">
