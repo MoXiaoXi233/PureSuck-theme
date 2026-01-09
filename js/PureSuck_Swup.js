@@ -1,11 +1,51 @@
 /**
  * PureSuck Swup 4 配置
- * 仅实现基础 Pjax 功能，无动画
+ * 包含完整的页面过渡动画逻辑
  */
 
 (function() {
     'use strict';
 
+    // ========== 动画类型检测 ==========
+    function getPageType(url) {
+        // 判断是否为文章页
+        if (url.includes('/archives/') || url.match(/\/\d+\.html/)) {
+            return 'post';
+        }
+        // 判断是否为独立页面
+        if (url.includes('/about.html') || url.includes('/links.html') || url.match(/\/[^/]+\.html$/)) {
+            return 'post';
+        }
+        // 默认为列表页
+        return 'list';
+    }
+
+    // ========== 添加动画属性到元素 ==========
+    function markAnimationElements() {
+        // 标记文章卡片
+        document.querySelectorAll('.post').forEach(el => {
+            el.setAttribute('data-swup-animation', '');
+        });
+
+        // 标记分页器
+        const pager = document.querySelector('.main-pager');
+        if (pager) {
+            pager.setAttribute('data-swup-animation', '');
+        }
+    }
+
+    // ========== 清理动画类 ==========
+    function cleanupAnimationClasses() {
+        document.documentElement.classList.remove(
+            'transition-list-in',
+            'transition-list-out',
+            'transition-post-in',
+            'transition-post-out',
+            'is-animating'
+        );
+    }
+
+    // ========== 初始化 Swup ==========
     function initSwup() {
         if (typeof Swup === 'undefined') {
             console.error('[Swup] Swup 对象未定义');
@@ -16,10 +56,60 @@
         const swup = new Swup({
             containers: ['#swup'],
             animateHistoryBrowsing: false,
-            native: false  // 关闭原生动画
+            native: false,  // 关闭原生动画
+            animationSelector: false  // 禁用 Swup 的动画等待，使用自定义动画
         });
 
-        // ========== 页面加载完成后的回调 ==========
+        // ========== 页面过渡开始 ==========
+        swup.hooks.on('visit:start', (visit) => {
+            const fromType = getPageType(visit.from.url);
+            const toType = getPageType(visit.to.url);
+
+            // 添加动画状态类
+            document.documentElement.classList.add('is-animating');
+
+            // 标记当前页面元素
+            markAnimationElements();
+
+            // 根据页面类型应用退出动画
+            if (fromType === 'list') {
+                document.documentElement.classList.add('transition-list-out');
+            } else if (fromType === 'post') {
+                document.documentElement.classList.add('transition-post-out');
+            }
+
+            console.log(`[Swup] 页面过渡: ${fromType} → ${toType}`);
+        });
+
+        // ========== 新内容已替换，准备进入动画 ==========
+        swup.hooks.on('content:replace', () => {
+            // 清理旧的动画类
+            cleanupAnimationClasses();
+
+            // 保持动画状态
+            document.documentElement.classList.add('is-animating');
+
+            // 标记新页面元素
+            markAnimationElements();
+
+            // 根据目标页面类型应用进入动画
+            const toType = getPageType(window.location.href);
+            if (toType === 'list') {
+                document.documentElement.classList.add('transition-list-in');
+            } else if (toType === 'post') {
+                document.documentElement.classList.add('transition-post-in');
+            }
+        });
+
+        // ========== 页面过渡完成 ==========
+        swup.hooks.on('visit:end', () => {
+            // 延迟清理动画类，确保动画完成（0.6s + 360ms延迟 = 960ms）
+            setTimeout(() => {
+                cleanupAnimationClasses();
+            }, 1000);
+        });
+
+        // ========== 页面完全加载后的回调 ==========
         swup.hooks.on('page:view', () => {
             // 更新导航栏高亮
             const currentPath = window.location.pathname;
@@ -58,6 +148,9 @@
             if (typeof window.pjaxCustomCallback === 'function') {
                 window.pjaxCustomCallback();
             }
+
+            // 标记新页面元素（确保 PJAX 渲染后的元素也被标记）
+            markAnimationElements();
         });
 
         // ========== 加密文章表单处理 ==========
@@ -128,7 +221,10 @@
             });
         });
 
-        console.log('[Swup] 已启用 Swup 4 (基础模式)');
+        // ========== 初始加载时标记元素 ==========
+        markAnimationElements();
+
+        console.log('[Swup] 已启用 Swup 4 (完整动画模式)');
     }
 
     // 页面加载完成后初始化

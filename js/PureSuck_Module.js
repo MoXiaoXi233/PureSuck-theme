@@ -595,11 +595,6 @@ document.addEventListener('DOMContentLoaded', function () {
     runShortcodes();
 });
 
-// Turbo 渲染完成后重新初始化
-document.addEventListener('turbo:render', function() {
-    runShortcodes();
-});
-
 /**
  * ========================================
  * 主题管理系统
