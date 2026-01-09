@@ -111,6 +111,11 @@
 
         // ========== 页面完全加载后的回调 ==========
         swup.hooks.on('page:view', () => {
+            // 更新导航栏指示器
+            if (typeof window.NavIndicator === 'object' && typeof window.NavIndicator.update === 'function') {
+                window.NavIndicator.update();
+            }
+
             // 更新导航栏高亮
             const currentPath = window.location.pathname;
             document.querySelectorAll('.header-nav .nav-item').forEach(item => {

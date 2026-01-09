@@ -811,3 +811,147 @@ document.addEventListener('DOMContentLoaded', function () {
         watchSystemTheme();
     }
 })();
+
+/**
+ * 导航指示器 - 动态控制导航高亮
+ */
+const NavIndicator = (() => {
+    let indicator = null;
+    let navContainer = null;
+    let navItems = [];
+
+    /**
+     * 创建指示器元素
+     */
+    function createIndicator() {
+        const el = document.createElement('div');
+        el.className = 'nav-indicator';
+        return el;
+    }
+
+    /**
+     * 更新指示器位置和大小
+     */
+    function updateIndicator(targetItem) {
+        if (!indicator || !targetItem) return;
+
+        const itemRect = targetItem.getBoundingClientRect();
+        const containerRect = navContainer.getBoundingClientRect();
+
+        // 计算相对于容器的位置
+        const left = itemRect.left - containerRect.left;
+        const top = itemRect.top - containerRect.top;
+
+        // 使用 transform 代替 left/top，性能更好（GPU加速）
+        indicator.style.width = `${itemRect.width}px`;
+        indicator.style.height = `${itemRect.height}px`;
+        indicator.style.transform = `translate(${left}px, ${top}px) scale(1)`;
+
+        // 添加激活状态
+        requestAnimationFrame(() => {
+            indicator.classList.add('active');
+        });
+    }
+
+    /**
+     * 隐藏指示器
+     */
+    function hideIndicator() {
+        if (!indicator) return;
+        indicator.classList.remove('active');
+    }
+
+    /**
+     * 获取当前激活的导航项
+     */
+    function getActiveNavItem() {
+        const currentPath = window.location.pathname;
+
+        for (const item of navItems) {
+            const link = item.querySelector('a');
+            if (link) {
+                const linkPath = new URL(link.href).pathname;
+                if (linkPath === currentPath) {
+                    return item;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 初始化导航指示器
+     */
+    function init() {
+        navContainer = document.querySelector('.header-nav');
+        if (!navContainer) return;
+
+        // 检查是否已存在指示器
+        if (navContainer.querySelector('.nav-indicator')) {
+            return;
+        }
+
+        // 创建并添加指示器
+        indicator = createIndicator();
+        navContainer.appendChild(indicator);
+
+        // 获取所有导航项
+        navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
+
+        // 初始定位
+        const activeItem = getActiveNavItem();
+        if (activeItem) {
+            // 使用 requestAnimationFrame 确保元素已渲染
+            requestAnimationFrame(() => {
+                updateIndicator(activeItem);
+            });
+        }
+
+        // 监听窗口大小变化
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const activeItem = getActiveNavItem();
+                if (activeItem) {
+                    updateIndicator(activeItem);
+                }
+            }, 100);
+        });
+    }
+
+    /**
+     * 更新指示器（供 Swup 调用）
+     */
+    function update() {
+        if (!navContainer) {
+            init();
+            return;
+        }
+
+        // 重新获取导航项（Swup 可能会替换内容）
+        navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
+
+        const activeItem = getActiveNavItem();
+        if (activeItem) {
+            requestAnimationFrame(() => {
+                updateIndicator(activeItem);
+            });
+        } else {
+            hideIndicator();
+        }
+    }
+
+    // 导出到全局
+    window.NavIndicator = {
+        init,
+        update
+    };
+
+    // 自动初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

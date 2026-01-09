@@ -855,7 +855,27 @@ body>.wrapper {
 
 
 .header-nav {
-	padding-top: 16px
+	padding-top: 16px;
+	position: relative
+}
+
+/* 导航指示器 */
+.nav-indicator {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: var(--nav-color);
+	border: 1px solid var(--border-color);
+	border-radius: 0.4rem;
+	pointer-events: none;
+	transition: opacity .2s ease, transform .2s cubic-bezier(.33, 0, .15, 1), width .2s ease, height .2s ease;
+	opacity: 0;
+	transform: translate(0, 0) scale(1);
+	z-index: -1
+}
+
+.nav-indicator.active {
+	opacity: 1
 }
 
 .header-credit {
@@ -1459,14 +1479,13 @@ strong {
 .nav-item {
 	color: inherit;
 	position: relative;
-	border: 1px solid var(--background-color);
+	border: none;
+	transition: color .2s ease;
+	z-index: 2
 }
 
-.nav-item-current,
 .nav-item:hover {
-	background: var(--nav-color);
-	color: var(--nav-text-color);
-	border: 1px solid var(--border-color);
+	color: var(--nav-text-color)
 }
 
 .nav-item:active {
