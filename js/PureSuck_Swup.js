@@ -25,18 +25,22 @@
 
     const HAS_VT = supportsViewTransitions();
 
-    function getArchiveIdFromUrl(urlString) {
-        try {
-            const url = new URL(urlString, window.location.origin);
-            const match = url.pathname.match(/\/archives\/(\d+)(?:\/|\.html)?(?:$|[?#])/);
-            return match ? match[1] : null;
-        } catch {
-            return null;
-        }
+    function getPostTransitionName(postKey) {
+        const safeKey = encodeURIComponent(String(postKey || '')).replace(/%/g, '_');
+        return `ps-post-${safeKey}`;
     }
 
-    function getPostTransitionName(postId) {
-        return `ps-post-${postId}`;
+    function getPostKeyFromElement(el) {
+        if (!el) return null;
+        if (el.dataset && el.dataset.psPostKey) return el.dataset.psPostKey;
+        return el.getAttribute('data-ps-post-key') || null;
+    }
+
+    function rememberLastPostKey(postKey) {
+        if (!postKey) return;
+        const state = (history.state && typeof history.state === 'object') ? history.state : {};
+        if (state.lastPostKey === postKey) return;
+        history.replaceState({ ...state, lastPostKey: postKey }, document.title);
     }
 
     function clearMarkedViewTransitionNames() {
@@ -72,10 +76,10 @@
 `;
     }
 
-    function applyPostSharedElementName(el, postId) {
-        if (!HAS_VT || !el || !postId) return;
+    function applyPostSharedElementName(el, postKey) {
+        if (!HAS_VT || !el || !postKey) return;
 
-        const name = getPostTransitionName(postId);
+        const name = getPostTransitionName(postKey);
         clearMarkedViewTransitionNames();
         ensureSharedElementTransitionCSS(name);
 
@@ -93,15 +97,13 @@
         }
     }
 
-    function findIndexPostCardById(postId) {
-        if (!postId) return null;
+    function findIndexPostCardById(postKey) {
+        if (!postKey) return null;
 
         const cards = document.querySelectorAll('.post.post--index');
         for (const card of cards) {
-            const link = card.querySelector('a[href]');
-            if (!link) continue;
-            const linkPostId = getArchiveIdFromUrl(link.href);
-            if (linkPostId === postId) return card;
+            const cardKey = getPostKeyFromElement(card);
+            if (cardKey === postKey) return card;
         }
 
         return null;
@@ -109,34 +111,24 @@
 
     // ========== 动画类型检测 ==========
     function getPageType(url) {
-        const href = url || window.location.href;
         const swupRoot = document.getElementById('swup');
-        let isCurrent = false;
-
-        try {
-            const resolved = new URL(href, window.location.origin);
-            isCurrent = resolved.href === window.location.href;
-        } catch {
-            isCurrent = true;
-        }
-
-        // Prefer Typecho's server-side `is()` via data attribute (current page only).
-        if (isCurrent && !NAV_STATE.isSwupNavigating && swupRoot && swupRoot.dataset) {
-            const dataType = swupRoot.dataset.psPageType || '';
-            if (dataType === 'post') return 'post';
-            if (dataType === 'page') return 'post';
-            if (dataType === 'list') return 'list';
-        }
-
-        // Fallback: URL heuristics (for visit:to before DOM replacement).
-        // Treat only archive detail URLs as posts. `/archives/` (list) should stay list.
-        if (getArchiveIdFromUrl(href) || href.match(/\/\d+\.html(?:$|[?#])/)) {
-            return 'post';
-        }
-        if (href.includes('/about.html') || href.includes('/links.html') || href.match(/\/[^/]+\.html(?:$|[?#])/)) {
-            return 'post';
-        }
+        const dataType = swupRoot && swupRoot.dataset ? swupRoot.dataset.psPageType : '';
+        if (dataType === 'post') return 'post';
+        if (dataType === 'page') return 'post';
+        if (dataType === 'list') return 'list';
         return 'list';
+    }
+
+    function waitForViewTransition() {
+        if (!HAS_VT || typeof document.getAnimations !== 'function') return Promise.resolve();
+        const animations = document.getAnimations({ subtree: true });
+        const vtAnimations = animations.filter((anim) => {
+            const target = anim && anim.effect ? anim.effect.target : null;
+            const text = target && typeof target.toString === 'function' ? target.toString() : '';
+            return text.includes('view-transition');
+        });
+        if (!vtAnimations.length) return Promise.resolve();
+        return Promise.allSettled(vtAnimations.map((anim) => anim.finished));
     }
     // ========== 添加动画属性到元素 ==========
     function markAnimationElements(root = document) {
@@ -648,6 +640,10 @@
         const swup = new Swup({
             containers: ['#swup'],
             plugins,
+            resolveUrl: (url) => {
+                const resolved = new URL(url, window.location.origin);
+                return resolved.pathname + resolved.search + resolved.hash;
+            },
             // Important: browser back/forward is "history browsing". If disabled, VT won't run there.
             animateHistoryBrowsing: HAS_VT,
             native: HAS_VT,  // View Transitions API (supported browsers only)
@@ -740,9 +736,6 @@
             }
         }, true);
 
-        // Used for "collapse" (post -> list) when there is no click target (e.g. browser back)
-        let pendingPostIdForList = null;
-
         // ========== Index: set view-transition-name on clicked post card ==========
         // Use capture to run before Swup intercepts the click.
         document.addEventListener('click', (event) => {
@@ -764,13 +757,14 @@
             }
             if (toUrl.origin !== window.location.origin) return;
 
-            const postId = getArchiveIdFromUrl(toUrl.href);
-            if (!postId) return;
-
             const postCard = link.closest('.post.post--index');
             if (!postCard) return;
 
-            applyPostSharedElementName(postCard, postId);
+            const postKey = getPostKeyFromElement(postCard);
+            if (!postKey) return;
+
+            rememberLastPostKey(postKey);
+            applyPostSharedElementName(postCard, postKey);
         }, true);
 
         // ========== 页面过渡开始 ==========
@@ -781,14 +775,19 @@
             if (!HAS_VT) return;
 
             if (pageType === 'post') {
-                const currentPostId = getArchiveIdFromUrl(url);
                 const postContainer = document.querySelector('.post.post--single');
-                applyPostSharedElementName(postContainer, currentPostId);
+                const postKey = getPostKeyFromElement(postContainer);
+                rememberLastPostKey(postKey);
+                applyPostSharedElementName(postContainer, postKey);
                 return;
             }
 
             // Collapse morph (post -> list): bind the matching card on the list page.
-            if (pageType === 'list' && pendingPostIdForList) {
+            const listPostKey = (history.state && typeof history.state === 'object')
+                ? history.state.lastPostKey
+                : null;
+
+            if (pageType === 'list' && listPostKey) {
                 // Snap to cached scroll position first (ScrollPlugin is the source of truth).
                 const cached = scrollPlugin?.getCachedScrollPositions
                     ? scrollPlugin.getCachedScrollPositions(url)
@@ -801,18 +800,17 @@
                     queueMicrotask(() => window.scrollTo(0, cachedY));
                 }
 
-                const card = findIndexPostCardById(pendingPostIdForList);
+                const card = findIndexPostCardById(listPostKey);
                 if (card) {
                     // If layout changed and the card isn't visible, ensure it's within viewport for the morph.
                     const rect = card.getBoundingClientRect();
                     if (rect.bottom < 0 || rect.top > window.innerHeight) {
                         card.scrollIntoView({ block: 'center', inline: 'nearest' });
                     }
-                    applyPostSharedElementName(card, pendingPostIdForList);
+                    applyPostSharedElementName(card, listPostKey);
                 } else {
                     clearMarkedViewTransitionNames();
                 }
-                pendingPostIdForList = null;
                 return;
             }
 
@@ -820,24 +818,23 @@
         };
 
         // Light enter animation: run strictly after content replaced.
-        document.addEventListener('swup:contentReplaced', runLightEnterAnimation);
+        document.addEventListener('swup:contentReplaced', () => {
+            if (!HAS_VT) {
+                runLightEnterAnimation();
+                return;
+            }
+            waitForViewTransition().then(runLightEnterAnimation);
+        });
 
         swup.hooks.on('visit:start', (visit) => {
             NAV_STATE.isSwupNavigating = true;
-            const fromType = getPageType(visit.from.url);
-            const toType = getPageType(visit.to.url);
+            const fromType = getPageType();
+            const toType = null;
 
             LIGHT_ENTER.lastFromType = fromType;
             LIGHT_ENTER.lastToType = toType;
             LIGHT_ENTER.lastToUrl = visit.to && visit.to.url ? visit.to.url : '';
             LIGHT_ENTER.lastIsSwup = true;
-
-            // For collapse animation: remember the post id we are leaving (post -> list)
-            if (HAS_VT && fromType === 'post' && toType === 'list') {
-                pendingPostIdForList = getArchiveIdFromUrl(visit.from.url);
-            } else {
-                pendingPostIdForList = null;
-            }
 
             // 添加动画状态类
             document.documentElement.classList.add('is-animating');

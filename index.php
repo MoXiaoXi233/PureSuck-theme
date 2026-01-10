@@ -21,7 +21,7 @@ $this->need('header.php');
         $hasImg = $this->fields->img ? true : false;
         $isProtected = isset($this->password) && $this->password !== Typecho_Cookie::get('protectPassword') && $this->authorId !== $this->user->uid && !$this->user->pass('editor', true);
         ?>
-        <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item <?= $isProtected ? 'post-protected' : ''; ?>" data-protected="<?= $isProtected ? 'true' : 'false'; ?>">
+        <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item <?= $isProtected ? 'post-protected' : ''; ?>" data-protected="<?= $isProtected ? 'true' : 'false'; ?>" data-ps-post-key="<?= $this->cid; ?>">
             <div class="post-inner">
                 <?php
                 $showCardCategory = isset($this->options->showCardCategory)

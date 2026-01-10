@@ -7,7 +7,7 @@
     <?php
     $hasImg = $this->fields->img ? true : false;
     ?>
-    <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index post--single main-item">
+    <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index post--single main-item" data-ps-post-key="<?= $this->cid; ?>">
         <div class="post-inner">
             <header class="post-item post-header  <?= $hasImg ? 'no-bg' : ''; ?>">
                 <div class="wrapper post-wrapper">

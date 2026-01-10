@@ -16,7 +16,7 @@
             <?php
             $hasImg = $this->fields->img ? true : false;
             ?>
-            <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item">
+            <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-ps-post-key="<?= $this->cid; ?>">
                 <div class="post-inner">
                     <?php
                     $showCardCategory = isset($this->options->showCardCategory)
