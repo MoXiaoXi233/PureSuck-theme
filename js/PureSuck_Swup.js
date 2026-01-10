@@ -6,6 +6,10 @@
 (function() {
     'use strict';
 
+    const NAV_STATE = {
+        isSwupNavigating: false
+    };
+
     // ========== View Transitions: shared element (index card -> post container) ==========
     const VT = {
         styleId: 'ps-vt-shared-element-style',
@@ -18,6 +22,8 @@
             && typeof CSS.supports === 'function'
             && CSS.supports('view-transition-name: ps-test');
     }
+
+    const HAS_VT = supportsViewTransitions();
 
     function getArchiveIdFromUrl(urlString) {
         try {
@@ -67,7 +73,7 @@
     }
 
     function applyPostSharedElementName(el, postId) {
-        if (!supportsViewTransitions() || !el || !postId) return;
+        if (!HAS_VT || !el || !postId) return;
 
         const name = getPostTransitionName(postId);
         clearMarkedViewTransitionNames();
@@ -103,18 +109,35 @@
 
     // ========== 动画类型检测 ==========
     function getPageType(url) {
-        // 判断是否为文章页
-        if (url.includes('/archives/') || url.match(/\/\d+\.html/)) {
+        const href = url || window.location.href;
+        const swupRoot = document.getElementById('swup');
+        let isCurrent = false;
+
+        try {
+            const resolved = new URL(href, window.location.origin);
+            isCurrent = resolved.href === window.location.href;
+        } catch {
+            isCurrent = true;
+        }
+
+        // Prefer Typecho's server-side `is()` via data attribute (current page only).
+        if (isCurrent && !NAV_STATE.isSwupNavigating && swupRoot && swupRoot.dataset) {
+            const dataType = swupRoot.dataset.psPageType || '';
+            if (dataType === 'post') return 'post';
+            if (dataType === 'page') return 'post';
+            if (dataType === 'list') return 'list';
+        }
+
+        // Fallback: URL heuristics (for visit:to before DOM replacement).
+        // Treat only archive detail URLs as posts. `/archives/` (list) should stay list.
+        if (getArchiveIdFromUrl(href) || href.match(/\/\d+\.html(?:$|[?#])/)) {
             return 'post';
         }
-        // 判断是否为独立页面
-        if (url.includes('/about.html') || url.includes('/links.html') || url.match(/\/[^/]+\.html$/)) {
+        if (href.includes('/about.html') || href.includes('/links.html') || href.match(/\/[^/]+\.html(?:$|[?#])/)) {
             return 'post';
         }
-        // 默认为列表页
         return 'list';
     }
-
     // ========== 添加动画属性到元素 ==========
     function markAnimationElements(root = document) {
         const scope = root && root.querySelector ? root : document;
@@ -285,9 +308,9 @@
         lastHref: '',
         lastAt: 0,
         // List cards: closer to animate.css `fadeInUp` (but in px, not 100%).
-        listDuration: 680,
-        listStagger: 46,
-        listY: 48,
+        listDuration: 500,
+        listStagger: 80,
+        listY: 60,
         // animate.css default easing: cubic-bezier(0.215, 0.61, 0.355, 1)
         listEasing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
         // Track last navigation direction (so we can avoid stacking animations).
@@ -576,7 +599,7 @@
 
         if (pageType === 'post' && document.querySelector('.post.post--single')) {
             targets = collectPostEnterTargets(getPostContentContainer());
-            const hasSharedElement = supportsViewTransitions()
+            const hasSharedElement = HAS_VT
                 && Boolean(document.querySelector(`.post.post--single[${VT.markerAttr}]`));
             baseDelay = hasSharedElement ? Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs) : 0;
         } else if (pageType === 'post') {
@@ -584,16 +607,8 @@
             // Keep independent pages (about/links/archives...) feeling consistent with post enter timing.
             baseDelay = Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs);
         } else if (pageType === 'list') {
-            // Avoid stacking an extra list "enter" animation on top of post->list back/collapse feel.
-            const isPostToList = LIGHT_ENTER.lastIsSwup
-                && LIGHT_ENTER.lastFromType === 'post'
-                && LIGHT_ENTER.lastToType === 'list';
-            const isReturningHome = isPostToList && isHomeUrl(LIGHT_ENTER.lastToUrl || window.location.href);
-            if (isPostToList && !isReturningHome) {
-                return;
-            }
             targets = collectListEnterTargets();
-            const hasSharedElement = supportsViewTransitions()
+            const hasSharedElement = HAS_VT
                 && Boolean(document.querySelector(`[${VT.markerAttr}]`));
             baseDelay = hasSharedElement ? Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs) : 0;
             animOptions = {
@@ -634,8 +649,8 @@
             containers: ['#swup'],
             plugins,
             // Important: browser back/forward is "history browsing". If disabled, VT won't run there.
-            animateHistoryBrowsing: supportsViewTransitions(),
-            native: supportsViewTransitions(),  // View Transitions API (supported browsers only)
+            animateHistoryBrowsing: HAS_VT,
+            native: HAS_VT,  // View Transitions API (supported browsers only)
             animationSelector: false,  // 禁用 Swup 的动画等待，使用自定义动画
             plugins
         });
@@ -731,7 +746,7 @@
         // ========== Index: set view-transition-name on clicked post card ==========
         // Use capture to run before Swup intercepts the click.
         document.addEventListener('click', (event) => {
-            if (!supportsViewTransitions()) return;
+            if (!HAS_VT) return;
             if (event.defaultPrevented) return;
             if (event.button !== 0) return;
             if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -763,7 +778,7 @@
             const url = window.location.href;
             const pageType = getPageType(url);
 
-            if (!supportsViewTransitions()) return;
+            if (!HAS_VT) return;
 
             if (pageType === 'post') {
                 const currentPostId = getArchiveIdFromUrl(url);
@@ -808,6 +823,7 @@
         document.addEventListener('swup:contentReplaced', runLightEnterAnimation);
 
         swup.hooks.on('visit:start', (visit) => {
+            NAV_STATE.isSwupNavigating = true;
             const fromType = getPageType(visit.from.url);
             const toType = getPageType(visit.to.url);
 
@@ -817,7 +833,7 @@
             LIGHT_ENTER.lastIsSwup = true;
 
             // For collapse animation: remember the post id we are leaving (post -> list)
-            if (supportsViewTransitions() && fromType === 'post' && toType === 'list') {
+            if (HAS_VT && fromType === 'post' && toType === 'list') {
                 pendingPostIdForList = getArchiveIdFromUrl(visit.from.url);
             } else {
                 pendingPostIdForList = null;
@@ -836,11 +852,11 @@
                 document.documentElement.classList.add('transition-post-out');
             }
 
-            console.log(`[Swup] 页面过渡: ${fromType} → ${toType}`);
         });
 
         // ========== 新内容已替换，准备进入动画 ==========
         swup.hooks.on('content:replace', () => {
+            NAV_STATE.isSwupNavigating = false;
             // 清理旧的动画类
             cleanupAnimationClasses();
 
@@ -877,6 +893,7 @@
 
         // ========== 页面过渡完成 ==========
         swup.hooks.on('visit:end', () => {
+            NAV_STATE.isSwupNavigating = false;
             // 延迟清理动画类，确保动画完成（0.6s + 360ms延迟 = 960ms）
             setTimeout(() => {
                 cleanupAnimationClasses();
@@ -1035,7 +1052,6 @@
             });
         }
 
-        console.log('[Swup] 已启用 Swup 4 (完整动画模式)');
     }
 
     // 页面加载完成后初始化

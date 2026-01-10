@@ -196,5 +196,15 @@
                 </div>
             </div>
         </header>
-        <div id="swup">
+        <?php
+        $psPageType = 'list';
+        if ($this->is('post')) {
+            $psPageType = 'post';
+        } elseif ($this->is('page')) {
+            $psPageType = 'page';
+        } elseif ($this->is('index') || $this->is('archive')) {
+            $psPageType = 'list';
+        }
+        ?>
+        <div id="swup" data-ps-page-type="<?= $psPageType; ?>">
             <main class="main">
