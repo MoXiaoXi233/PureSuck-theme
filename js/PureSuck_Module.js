@@ -9,6 +9,7 @@ const initializeTOC = (() => {
     let scrollEndHandler = null;
     let rafId = null; // 用于节流 IntersectionObserver 回调
     let debounceTimer = null; // 用于防抖 IntersectionObserver 回调
+    let refreshRaf = 0;
 
     function reset() {
         if (!state) return;
@@ -26,6 +27,11 @@ const initializeTOC = (() => {
         if (scrollEndTimer) {
             clearTimeout(scrollEndTimer);
             scrollEndTimer = 0;
+        }
+
+        if (refreshRaf) {
+            cancelAnimationFrame(refreshRaf);
+            refreshRaf = 0;
         }
 
         if (state.observer) {
@@ -50,16 +56,27 @@ const initializeTOC = (() => {
         setActive(getInitialActiveIndex());
     }
 
+    function scheduleRefreshLayout() {
+        if (refreshRaf) cancelAnimationFrame(refreshRaf);
+        refreshRaf = requestAnimationFrame(() => {
+            refreshRaf = 0;
+            refreshLayout();
+        });
+    }
+
     function getInitialActiveIndex() {
         if (!state) return 0;
         const activationOffset = state.activationOffset;
         let activeIndex = 0;
 
-        state.elements.forEach((element, index) => {
+        for (let index = 0; index < state.elements.length; index++) {
+            const element = state.elements[index];
             if (element.getBoundingClientRect().top <= activationOffset) {
                 activeIndex = index;
+            } else {
+                break;
             }
-        });
+        }
 
         return activeIndex;
     }
@@ -321,41 +338,84 @@ const initializeTOC = (() => {
 
         if (!listenersBound) {
             listenersBound = true;
-            window.addEventListener("resize", refreshLayout, { passive: true });
-            window.addEventListener("orientationchange", refreshLayout);
-            window.addEventListener("load", refreshLayout, { once: true });
+            window.addEventListener("resize", scheduleRefreshLayout, { passive: true });
+            window.addEventListener("orientationchange", scheduleRefreshLayout);
+            window.addEventListener("load", scheduleRefreshLayout, { once: true });
         }
 
         refreshLayout();
     };
 })();
 
-function handleGoTopButton() {
-    const goTopBtn = document.getElementById('go-top'); // 按钮容器
-    const goTopAnchor = document.querySelector('#go-top .go');
+const GoTopButton = (() => {
+    let bound = false;
+    let button = null;
+    let anchor = null;
+    let ticking = false;
 
-    window.addEventListener('scroll', () => {
+    function sync(root) {
+        const scope = root && root.querySelector ? root : document;
+        button = scope.querySelector('#go-top') || document.querySelector('#go-top');
+        anchor = button ? button.querySelector('.go') : null;
+    }
+
+    function updateVisibility() {
+        if (!button) return;
         if (window.scrollY > 100) {
-            goTopBtn.classList.add('visible'); // 显示按钮
+            button.classList.add('visible');
         } else {
-            goTopBtn.classList.remove('visible'); // 隐藏按钮
+            button.classList.remove('visible');
         }
-    });
+    }
 
-    goTopAnchor.addEventListener('click', function (e) {
-        e.preventDefault();
+    function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            updateVisibility();
+        });
+    }
+
+    function onClick(event) {
+        const target = event.target instanceof Element
+            ? event.target.closest('#go-top .go')
+            : null;
+        if (!target) return;
+
+        event.preventDefault();
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
+
         setTimeout(() => {
-            goTopBtn.classList.remove('visible'); // 隐藏
-        }, 400); // 等待滚动完成
-    });
+            const current = document.querySelector('#go-top');
+            if (current) current.classList.remove('visible');
+        }, 400);
+    }
+
+    return function init(root) {
+        sync(root);
+        if (!button || !anchor) return;
+
+        if (!bound) {
+            bound = true;
+            window.addEventListener('scroll', onScroll, { passive: true });
+            document.addEventListener('click', onClick, true);
+        }
+
+        updateVisibility();
+    };
+})();
+
+function handleGoTopButton(root) {
+    GoTopButton(root);
 }
 
-function bindCollapsiblePanels() {
-    const panels = document.querySelectorAll('.collapsible-panel');
+function bindCollapsiblePanels(root) {
+    const scope = root && root.querySelector ? root : document;
+    const panels = scope.querySelectorAll('.collapsible-panel');
 
     panels.forEach(panel => {
         if (panel.dataset.binded === "1") return;
@@ -387,8 +447,9 @@ function bindCollapsiblePanels() {
     });
 }
 
-function bindTabs() {
-    const tabContainers = document.querySelectorAll('.tab-container');
+function bindTabs(root) {
+    const scope = root && root.querySelector ? root : document;
+    const tabContainers = scope.querySelectorAll('.tab-container');
 
     tabContainers.forEach(container => {
         if (container.dataset.binded === "1") return;
@@ -513,6 +574,30 @@ const initializeStickyTOC = (() => {
 })();
 
 
+let commentResetBound = false;
+
+function resetCommentForm(form) {
+    if (!form) return;
+    const submitButton = form.querySelector("#submit");
+    if (!submitButton) return;
+    const originalText = form.dataset.psSubmitText || submitButton.textContent;
+
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
+    form.dataset.psSubmitting = "0";
+}
+
+function bindCommentReset() {
+    if (commentResetBound) return;
+    commentResetBound = true;
+
+    window.addEventListener("pageshow", function () {
+        const form = document.getElementById("cf");
+        if (!form || form.dataset.psSubmitting !== "1") return;
+        resetCommentForm(form);
+    });
+}
+
 function Comments_Submit() {
     const form = document.getElementById("cf");
     if (!form) return;
@@ -526,13 +611,16 @@ function Comments_Submit() {
 
     if (!submitButton || !textarea) return;
 
-    let isSubmitting = false;
-    const originalText = submitButton.textContent;
+    if (!form.dataset.psSubmitText) {
+        form.dataset.psSubmitText = submitButton.textContent;
+    }
+    form.dataset.psSubmitting = "0";
+    bindCommentReset();
 
     // 只监听 submit（关键）
     form.addEventListener("submit", function (e) {
         // 防止重复提交
-        if (isSubmitting) {
+        if (form.dataset.psSubmitting === "1") {
             e.preventDefault();
             return;
         }
@@ -542,7 +630,7 @@ function Comments_Submit() {
             return;
         }
 
-        isSubmitting = true;
+        form.dataset.psSubmitting = "1";
 
         submitButton.disabled = true;
         submitButton.textContent = "提交中…";
@@ -552,31 +640,20 @@ function Comments_Submit() {
     form.addEventListener(
         "invalid",
         function () {
-            reset();
+            resetCommentForm(form);
         },
         true
     );
-
-    // 页面未跳转（例如 Typecho 校验失败）
-    window.addEventListener("pageshow", function () {
-        reset();
-    });
-
-    function reset() {
-        isSubmitting = false;
-        submitButton.disabled = false;
-        submitButton.textContent = originalText;
-    }
 }
 
 // 保存 mediumZoom 实例引用，用于 PJAX 后重新初始化
 let mediumZoomInstance = null;
 
-function runShortcodes() {
+function runShortcodes(root) {
     history.scrollRestoration = 'auto';
-    bindCollapsiblePanels();
-    bindTabs();
-    handleGoTopButton();
+    bindCollapsiblePanels(root);
+    bindTabs(root);
+    handleGoTopButton(root);
     initializeTOC();
 
     // mediumZoom 图片放大
@@ -588,7 +665,7 @@ function runShortcodes() {
         margin: 24
     });
 
-    Comments_Submit()
+    Comments_Submit();
 }
 
 document.addEventListener('DOMContentLoaded', function () {

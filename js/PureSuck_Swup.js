@@ -1146,7 +1146,7 @@
             if (typeof runShortcodes === 'function') {
                 scheduleIdleTask(() => {
                     if (!isCurrent()) return;
-                    runShortcodes();
+                    runShortcodes(swupRoot);
                 });
             }
 
