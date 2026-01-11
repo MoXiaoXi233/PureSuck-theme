@@ -8,7 +8,6 @@ const initializeTOC = (() => {
     let scrollEndTimer = 0;
     let scrollEndHandler = null;
     let rafId = null; // 用于节流 IntersectionObserver 回调
-    let debounceTimer = null; // 用于防抖 IntersectionObserver 回调
     let refreshRaf = 0;
 
     function reset() {
@@ -69,9 +68,11 @@ const initializeTOC = (() => {
         const activationOffset = state.activationOffset;
         let activeIndex = 0;
 
-        for (let index = 0; index < state.elements.length; index++) {
-            const element = state.elements[index];
-            if (element.getBoundingClientRect().top <= activationOffset) {
+        // ✅ 一次性获取所有 boundingClientRect，避免循环中多次触发 reflow
+        const rects = state.elements.map(el => el.getBoundingClientRect().top);
+
+        for (let index = 0; index < rects.length; index++) {
+            if (rects[index] <= activationOffset) {
                 activeIndex = index;
             } else {
                 break;
@@ -105,63 +106,49 @@ const initializeTOC = (() => {
     }
 
     function handleIntersect(entries) {
-        if (!state) return;
-        
-        // 添加防抖,减少频繁更新
-        if (debounceTimer) clearTimeout(debounceTimer);
-        
-        debounceTimer = setTimeout(() => {
-            // 双重检查 state，因为防抖期间可能已重置
+        if (!state || !state.indexByElement) return;
+
+        // 取消之前的 RAF，避免重复处理
+        if (rafId) cancelAnimationFrame(rafId);
+
+        // IntersectionObserver 已经是异步批量回调，直接用 RAF 优化即可
+        rafId = requestAnimationFrame(() => {
             if (!state || !state.indexByElement) {
-                debounceTimer = null;
+                rafId = null;
                 return;
             }
-            
-            // 取消之前的 RAF,避免重复处理
-            if (rafId) cancelAnimationFrame(rafId);
-            
-            // 使用 requestAnimationFrame 批处理更新,减少频繁的 DOM 操作
-            rafId = requestAnimationFrame(() => {
-                // RAF 执行时再次检查 state
-                if (!state || !state.indexByElement) {
-                    rafId = null;
-                    return;
+
+            let bestIndex = -1;
+            let bestDistance = Infinity;
+
+            entries.forEach(entry => {
+                if (!entry || !entry.target) return;
+                const index = state.indexByElement.get(entry.target);
+                if (index == null) return;
+                if (entry.isIntersecting) {
+                    state.intersecting.add(index);
+                    state.topByIndex.set(index, entry.boundingClientRect.top);
+                } else {
+                    state.intersecting.delete(index);
                 }
-                
-                let bestIndex = -1;
-                let bestDistance = Infinity;
-
-                entries.forEach(entry => {
-                    if (!entry || !entry.target) return;
-                    const index = state.indexByElement.get(entry.target);
-                    if (index == null) return;
-                    if (entry.isIntersecting) {
-                        state.intersecting.add(index);
-                        state.topByIndex.set(index, entry.boundingClientRect.top);
-                    } else {
-                        state.intersecting.delete(index);
-                    }
-                });
-
-                state.intersecting.forEach(index => {
-                    const top = state.topByIndex.get(index);
-                    if (top == null) return;
-                    const distance = Math.abs(top - state.activationOffset);
-                    if (distance < bestDistance) {
-                        bestDistance = distance;
-                        bestIndex = index;
-                    }
-                });
-
-                if (bestIndex >= 0) {
-                    setActive(bestIndex);
-                }
-                
-                rafId = null;
             });
-            
-            debounceTimer = null;
-        }, 16); // 约 1 帧的防抖时间
+
+            state.intersecting.forEach(index => {
+                const top = state.topByIndex.get(index);
+                if (top == null) return;
+                const distance = Math.abs(top - state.activationOffset);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestIndex = index;
+                }
+            });
+
+            if (bestIndex >= 0) {
+                setActive(bestIndex);
+            }
+
+            rafId = null;
+        });
     }
 
     function setActive(index) {
@@ -526,29 +513,69 @@ const initializeStickyTOC = (() => {
         section: null,
         sidebar: null,
         threshold: 0,
-        raf: 0,
+        observer: null,
         bound: false
     };
 
     function updateThreshold() {
         if (!state.section || !state.sidebar) return;
+        // 计算 TOC 上方所有元素的高度和
         const tocAboveElements = Array.from(state.sidebar.children).filter(element => element !== state.section);
         state.threshold = tocAboveElements.reduce((total, element) => total + element.offsetHeight, 0) + 50;
     }
 
-    function requestUpdate() {
-        if (state.raf) return;
-        state.raf = window.requestAnimationFrame(() => {
-            state.raf = 0;
-            if (!state.section) return;
-            const shouldStick = window.scrollY >= state.threshold;
-            state.section.classList.toggle("sticky", shouldStick);
-        });
+    function handleIntersection(entries) {
+        if (!state.section || entries.length === 0) return;
+
+        const [entry] = entries;
+        // 当哨兵元素（位于阈值位置）离开视口顶部时，TOC 应该变为 sticky
+        const shouldStick = !entry.isIntersecting;
+        state.section.classList.toggle("sticky", shouldStick);
+    }
+
+    function createOrUpdateSentinel() {
+        if (!state.section || !state.sidebar) return;
+
+        // 先断开旧观察
+        if (state.observer) {
+            state.observer.disconnect();
+        }
+
+        // 更新阈值
+        updateThreshold();
+
+        // 创建或更新哨兵元素
+        let sentinel = document.getElementById('toc-sticky-sentinel');
+        if (!sentinel) {
+            sentinel = document.createElement('div');
+            sentinel.id = 'toc-sticky-sentinel';
+            // 固定在阈值位置（从页面顶部算起）
+            sentinel.style.position = 'absolute';
+            sentinel.style.top = state.threshold + 'px';
+            sentinel.style.left = '0';
+            sentinel.style.width = '1px';
+            sentinel.style.height = '1px';
+            sentinel.style.pointerEvents = 'none';
+            sentinel.style.visibility = 'hidden';
+            document.body.appendChild(sentinel);
+        } else {
+            sentinel.style.top = state.threshold + 'px';
+        }
+
+        // 重新观察哨兵
+        if (typeof IntersectionObserver !== 'undefined') {
+            state.observer = new IntersectionObserver(handleIntersection, {
+                root: null,
+                threshold: 0,
+                rootMargin: '0px 0px 0px 0px'
+            });
+            state.observer.observe(sentinel);
+        }
     }
 
     function handleResize() {
-        updateThreshold();
-        requestUpdate();
+        // Resize 时更新哨兵位置
+        createOrUpdateSentinel();
     }
 
     return function initializeStickyTOC() {
@@ -558,15 +585,29 @@ const initializeStickyTOC = (() => {
 
         state.section = tocSection;
         state.sidebar = rightSidebar;
-        state.threshold = 0;
-
-        updateThreshold();
-        requestUpdate();
 
         if (state.bound) return;
         state.bound = true;
 
-        window.addEventListener("scroll", requestUpdate, { passive: true });
+        if (typeof IntersectionObserver !== 'undefined') {
+            // ✅ 使用 IntersectionObserver + 哨兵元素
+            createOrUpdateSentinel();
+        } else {
+            // 降级：使用 scroll 事件
+            let raf = 0;
+            updateThreshold();
+            const requestUpdate = () => {
+                if (raf) return;
+                raf = window.requestAnimationFrame(() => {
+                    raf = 0;
+                    const shouldStick = window.scrollY >= state.threshold;
+                    tocSection.classList.toggle("sticky", shouldStick);
+                });
+            };
+            requestUpdate();
+            window.addEventListener("scroll", requestUpdate, { passive: true });
+        }
+
         window.addEventListener("resize", handleResize);
         window.addEventListener("orientationchange", handleResize);
         window.addEventListener("load", handleResize, { once: true });
@@ -646,8 +687,9 @@ function Comments_Submit() {
     );
 }
 
-// 保存 mediumZoom 实例引用，用于 PJAX 后重新初始化
+// 保存 mediumZoom 实例引用，用于 PJAX 后增量更新
 let mediumZoomInstance = null;
+let trackedZoomImages = new WeakSet(); // 追踪已绑定的图片
 
 function runShortcodes(root) {
     history.scrollRestoration = 'auto';
@@ -656,14 +698,25 @@ function runShortcodes(root) {
     handleGoTopButton(root);
     initializeTOC();
 
-    // mediumZoom 图片放大
+    // ✅ mediumZoom 增量更新：只对新图片添加 zoom
+    const scope = root && root.querySelector ? root : document;
+    const newImages = Array.from(scope.querySelectorAll('[data-zoomable]'));
+
     if (mediumZoomInstance) {
-        mediumZoomInstance.detach();
+        // 只为新图片添加 zoom
+        const untrackedImages = newImages.filter(img => !trackedZoomImages.has(img));
+        if (untrackedImages.length > 0) {
+            mediumZoomInstance.attach(untrackedImages);
+            untrackedImages.forEach(img => trackedZoomImages.add(img));
+        }
+    } else {
+        // 首次初始化
+        mediumZoomInstance = mediumZoom('[data-zoomable]', {
+            background: 'rgba(0, 0, 0, 0.85)',
+            margin: 24
+        });
+        newImages.forEach(img => trackedZoomImages.add(img));
     }
-    mediumZoomInstance = mediumZoom('[data-zoomable]', {
-        background: 'rgba(0, 0, 0, 0.85)',
-        margin: 24
-    });
 
     Comments_Submit();
 }
@@ -743,51 +796,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 设置主题（使用 View Transitions 优化）
+     * 设置主题
      * @param {string} theme - 主题值 ('light' | 'dark' | 'auto')
      */
     function setTheme(theme) {
-        // 计算实际要应用的主题色
-        const targetTheme = theme === 'auto'
-            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-            : theme;
-
-        // 获取当前主题色
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-
-        // ✅ 如果颜色没变，直接跳过（避免不必要的闪烁）
-        if (targetTheme === currentTheme) {
-            // 仍然需要更新存储，但不需要视觉切换
-            localStorage.setItem('theme', theme);
-            setThemeCookie(theme);
-            updateIcon(theme);
-            return;
-        }
-
-        // 检查是否支持 View Transitions API
-        const supportsVT = 'startViewTransition' in document;
-
-        if (supportsVT) {
-            // ✅ 使用 VT 实现整体切换（更干净、更统一）
-            document.documentElement.classList.add('vt-theme-switching');
-
-            document.startViewTransition(() => {
-                applyThemeInternal(theme);
-            }).finished.then(() => {
-                // VT 完成后移除 class，恢复 CSS transition
-                document.documentElement.classList.remove('vt-theme-switching');
-            });
-        } else {
-            // 降级：直接切换
-            applyThemeInternal(theme);
-        }
-    }
-
-    /**
-     * 应用主题（核心逻辑）
-     * @param {string} theme - 主题值
-     */
-    function applyThemeInternal(theme) {
         if (theme === 'auto') {
             // 自动模式：跟随系统
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -848,27 +860,8 @@ document.addEventListener('DOMContentLoaded', function () {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
             if (localStorage.getItem('theme') === 'auto') {
                 const newTheme = e.matches ? 'dark' : 'light';
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-
-                // ✅ 如果颜色没变，跳过（避免闪烁）
-                if (newTheme === currentTheme) {
-                    return;
-                }
-
-                // ✅ 颜色改变时使用 VT 过渡
-                if ('startViewTransition' in document) {
-                    document.documentElement.classList.add('vt-theme-switching');
-
-                    document.startViewTransition(() => {
-                        applyThemeAttribute(newTheme);
-                        updateIcon('auto');
-                    }).finished.then(() => {
-                        document.documentElement.classList.remove('vt-theme-switching');
-                    });
-                } else {
-                    applyThemeAttribute(newTheme);
-                    updateIcon('auto');
-                }
+                applyThemeAttribute(newTheme);
+                updateIcon('auto');
             }
         });
     }
@@ -984,7 +977,7 @@ const NavIndicator = (() => {
             });
         }
 
-        // 监听窗口大小变化
+        // ✅ 监听窗口大小变化 - 使用 200ms 防抖
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
@@ -993,7 +986,7 @@ const NavIndicator = (() => {
                 if (activeItem) {
                     updateIndicator(activeItem);
                 }
-            }, 100);
+            }, 200); // ✅ 从 100ms 增加到 200ms，减少频繁计算
         });
     }
 

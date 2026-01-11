@@ -122,12 +122,12 @@
             if (!this.seen.has(el)) return null;
             return this.visible.has(el);
         },
+        // ✅ 优化：只断开观察，不重建 WeakSet（GC 会自动清理）
         reset() {
             if (!this.io) return;
             this.io.disconnect();
-            this.observed = new WeakSet();
-            this.seen = new WeakSet();
-            this.visible = new WeakSet();
+            // WeakSet 会被 GC 自动清理，无需手动重建
+            // 只需重新初始化 IO
             this.init();
         }
     };
@@ -718,44 +718,43 @@
             el.style.transform = `translate3d(0, ${y}px, 0)`;
         });
 
+        // ✅ 移除双重 RAF，直接批处理
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                const batchSize = targets.length > 16 ? 10 : targets.length;
-                let index = 0;
+            const batchSize = targets.length > 16 ? 10 : targets.length;
+            let index = 0;
 
-                const startBatch = () => {
-                    const end = Math.min(targets.length, index + batchSize);
-                    for (; index < end; index++) {
-                        const el = targets[index];
-                        const anim = el.animate(
-                            [
-                                { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
-                                { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-                            ],
-                            {
-                                duration,
-                                easing,
-                                delay: baseDelay + index * stagger,
-                                fill: 'both'
-                            }
-                        );
+            const startBatch = () => {
+                const end = Math.min(targets.length, index + batchSize);
+                for (; index < end; index++) {
+                    const el = targets[index];
+                    const anim = el.animate(
+                        [
+                            { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
+                            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+                        ],
+                        {
+                            duration,
+                            easing,
+                            delay: baseDelay + index * stagger,
+                            fill: 'both'
+                        }
+                    );
 
-                        const cleanup = () => {
-                            el.style.willChange = '';
-                            el.style.opacity = '';
-                            el.style.transform = '';
-                        };
-                        anim.onfinish = cleanup;
-                        anim.oncancel = cleanup;
-                    }
+                    const cleanup = () => {
+                        el.style.willChange = '';
+                        el.style.opacity = '';
+                        el.style.transform = '';
+                    };
+                    anim.onfinish = cleanup;
+                    anim.oncancel = cleanup;
+                }
 
-                    if (index < targets.length) {
-                        requestAnimationFrame(startBatch);
-                    }
-                };
+                if (index < targets.length) {
+                    requestAnimationFrame(startBatch);
+                }
+            };
 
-                startBatch();
-            });
+            startBatch();
         });
     }
 

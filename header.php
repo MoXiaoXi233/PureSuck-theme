@@ -45,16 +45,6 @@
         window.THEME_URL = "<?php $this->options->themeUrl(); ?>";
     </script>
 
-    <script>
-        (function () {
-            var root = document.documentElement;
-            root.classList.add("js-scroll-reveal");
-            window.__scrollRevealFailSafe = window.setTimeout(function () {
-                root.classList.remove("js-scroll-reveal");
-            }, 2500);
-        })();
-    </script>
-
     <?php if ($this->is('index') || $this->is('archive')): ?>
         <!-- First paint: preload list enter state to avoid "flash then animate" -->
         <script>
