@@ -487,11 +487,22 @@
     }
 
     function isElementVisible(el) {
-        if (!el || !el.getClientRects) return false;
+        if (!el) return false;
+
+        // ✅ 优先使用 IntersectionObserver 缓存（异步，不触发布局）
         const cached = VISIBILITY.get(el);
         if (cached !== null) return cached;
+
+        // ✅ 添加到观察器（异步，不会立即阻塞）
         VISIBILITY.observe(el);
-        return el.getClientRects().length > 0;
+
+        // ✅ 只有在真正需要时才同步检查（减少 getClientRects 调用）
+        // 使用更轻量的 offsetParent 检查作为快速判断
+        if (el.offsetParent === null && el.getClientRects().length === 0) {
+            return false;
+        }
+
+        return true;
     }
 
     function uniqElements(arr) {
@@ -718,43 +729,29 @@
             el.style.transform = `translate3d(0, ${y}px, 0)`;
         });
 
-        // ✅ 移除双重 RAF，直接批处理
         requestAnimationFrame(() => {
-            const batchSize = targets.length > 16 ? 10 : targets.length;
-            let index = 0;
+            targets.forEach((el, index) => {
+                const anim = el.animate(
+                    [
+                        { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
+                        { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+                    ],
+                    {
+                        duration,
+                        easing,
+                        delay: baseDelay + index * stagger,
+                        fill: 'both'
+                    }
+                );
 
-            const startBatch = () => {
-                const end = Math.min(targets.length, index + batchSize);
-                for (; index < end; index++) {
-                    const el = targets[index];
-                    const anim = el.animate(
-                        [
-                            { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
-                            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-                        ],
-                        {
-                            duration,
-                            easing,
-                            delay: baseDelay + index * stagger,
-                            fill: 'both'
-                        }
-                    );
-
-                    const cleanup = () => {
-                        el.style.willChange = '';
-                        el.style.opacity = '';
-                        el.style.transform = '';
-                    };
-                    anim.onfinish = cleanup;
-                    anim.oncancel = cleanup;
-                }
-
-                if (index < targets.length) {
-                    requestAnimationFrame(startBatch);
-                }
-            };
-
-            startBatch();
+                const cleanup = () => {
+                    el.style.willChange = '';
+                    el.style.opacity = '';
+                    el.style.transform = '';
+                };
+                anim.onfinish = cleanup;
+                anim.oncancel = cleanup;
+            });
         });
     }
 

@@ -31,6 +31,9 @@
 
 	img {
 		filter: brightness(0.8);
+		transform: translateZ(0);
+		backface-visibility: hidden;
+		will-change: filter;
 	}
 
 	#ZaiJPG {
@@ -62,9 +65,16 @@ html {
 	/* After Chrome 140+++ */
 }
 
-/* Swup 导航期间禁止平滑滚动（避免 scrollTo/锚点触发“滑动上去”） */
+/* Swup 导航期间禁止平滑滚动（避免 scrollTo/锚点触发"滑动上去"） */
 html.is-animating {
 	scroll-behavior: auto !important;
+}
+
+html.is-animating *,
+html.is-animating *::before,
+html.is-animating *::after {
+	transition: none !important;
+	animation-play-state: paused !important;
 }
 
 
@@ -838,6 +848,7 @@ body>.wrapper {
 	padding-bottom: 12px;
 	text-align: center;
 	display: flex;
+	z-index: 10;
 }
 
 .header-wrapper.header-title {
@@ -983,7 +994,8 @@ body>.wrapper {
 	float: left;
 	width: 100%;
 	padding-top: 12px;
-	padding-bottom: 24px
+	padding-bottom: 24px;
+	contain: layout style paint;
 }
 
 .main-pager {
@@ -1568,7 +1580,9 @@ strong {
 .comment-list {
 	margin: 0;
 	padding-left: 0;
-	list-style-type: none
+	list-style-type: none;
+	content-visibility: auto;
+	contain-intrinsic-size: auto 150px;
 }
 
 .avatarcc {
@@ -2380,7 +2394,6 @@ input:-webkit-autofill:active {
 	width: 50%;
 }
 
-/* 正文和评论区的链接样式 */
 .post-content a {
 	color: var(--themecolor);
 	transition: color 0.2s ease, text-decoration 0.2s ease;
