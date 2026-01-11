@@ -10,6 +10,12 @@
         isSwupNavigating: false
     };
 
+    let PAGE_VIEW_TOKEN = 0;
+    const LAST_POST = {
+        key: null,
+        fromSingle: false
+    };
+
     // ========== View Transitions: shared element (index card -> post container) ==========
     const VT = {
         styleId: 'ps-vt-shared-element-style',
@@ -24,6 +30,109 @@
     }
 
     const HAS_VT = supportsViewTransitions();
+
+    const IDLE = {
+        scheduled: false,
+        queue: [],
+        timeout: 800,
+        budgetMs: 12
+    };
+
+    function scheduleIdleDrain() {
+        if (IDLE.scheduled) return;
+        IDLE.scheduled = true;
+
+        const run = (deadline) => {
+            const start = Date.now();
+
+            while (IDLE.queue.length) {
+                const task = IDLE.queue.shift();
+                try {
+                    task();
+                } catch (err) {
+                    console.error('[Swup] Idle task error:', err);
+                }
+
+                if (deadline && typeof deadline.timeRemaining === 'function') {
+                    if (deadline.timeRemaining() < 8) break;
+                } else if (Date.now() - start > IDLE.budgetMs) {
+                    break;
+                }
+            }
+
+            IDLE.scheduled = false;
+            if (IDLE.queue.length) scheduleIdleDrain();
+        };
+
+        if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(run, { timeout: IDLE.timeout });
+        } else {
+            setTimeout(run, 0);
+        }
+    }
+
+    function scheduleIdleTask(task) {
+        if (typeof task !== 'function') return;
+        IDLE.queue.push(task);
+        scheduleIdleDrain();
+    }
+
+    function scheduleIdleBatched(items, batchSize, handler, shouldContinue) {
+        if (!items || !items.length || typeof handler !== 'function') return;
+        let index = 0;
+        const total = items.length;
+
+        const runBatch = () => {
+            if (typeof shouldContinue === 'function' && !shouldContinue()) return;
+            const end = Math.min(total, index + batchSize);
+            for (; index < end; index++) {
+                handler(items[index], index);
+            }
+            if (index < total) {
+                scheduleIdleTask(runBatch);
+            }
+        };
+
+        scheduleIdleTask(runBatch);
+    }
+
+    const VISIBILITY = {
+        io: null,
+        observed: new WeakSet(),
+        seen: new WeakSet(),
+        visible: new WeakSet(),
+        init() {
+            if (this.io || typeof IntersectionObserver !== 'function') return;
+            this.io = new IntersectionObserver((entries) => {
+                for (const entry of entries) {
+                    const el = entry.target;
+                    this.seen.add(el);
+                    if (entry.isIntersecting) this.visible.add(el);
+                    else this.visible.delete(el);
+                }
+            }, { rootMargin: '200px 0px', threshold: 0.01 });
+        },
+        observe(el) {
+            if (!this.io || !el || this.observed.has(el)) return;
+            this.observed.add(el);
+            this.io.observe(el);
+        },
+        get(el) {
+            if (!this.io || !el) return null;
+            if (!this.seen.has(el)) return null;
+            return this.visible.has(el);
+        },
+        reset() {
+            if (!this.io) return;
+            this.io.disconnect();
+            this.observed = new WeakSet();
+            this.seen = new WeakSet();
+            this.visible = new WeakSet();
+            this.init();
+        }
+    };
+
+    VISIBILITY.init();
 
     function getPostTransitionName(postKey) {
         const safeKey = encodeURIComponent(String(postKey || '')).replace(/%/g, '_');
@@ -41,6 +150,7 @@
         const state = (history.state && typeof history.state === 'object') ? history.state : {};
         if (state.lastPostKey === postKey) return;
         history.replaceState({ ...state, lastPostKey: postKey }, document.title);
+        LAST_POST.key = postKey;
     }
 
     function clearMarkedViewTransitionNames() {
@@ -136,12 +246,14 @@
         // 标记文章卡片
         scope.querySelectorAll('.post:not([data-swup-animation])').forEach(el => {
             el.setAttribute('data-swup-animation', '');
+            VISIBILITY.observe(el);
         });
 
         // 标记分页器
         const pager = scope.querySelector('.main-pager');
         if (pager && !pager.hasAttribute('data-swup-animation')) {
             pager.setAttribute('data-swup-animation', '');
+            VISIBILITY.observe(pager);
         }
     }
 
@@ -240,9 +352,9 @@
 	        };
 	    }
 
-	    async function refreshCommentsFromUrl(urlString) {
-	        const current = document.getElementById('comments');
-	        if (!current) return false;
+    async function refreshCommentsFromUrl(urlString) {
+        const current = document.getElementById('comments');
+        if (!current) return false;
 
 	        if (!isSameOriginUrl(urlString)) return false;
 
@@ -277,14 +389,54 @@
 	            }
 	        }
 
-	        // Re-init comment widgets after DOM replacement.
-	        const commentTextarea = document.querySelector('.OwO-textarea');
-	        if (commentTextarea && typeof initializeCommentsOwO === 'function') {
-	            initializeCommentsOwO();
-	        }
+        // Re-init comment widgets after DOM replacement.
+        scheduleCommentsInit(document, { eager: true });
 
-	        return true;
-	    }
+        return true;
+    }
+
+    function scheduleCommentsInit(root, options = {}) {
+        if (typeof initializeCommentsOwO !== 'function') return;
+        const scope = root && root.querySelector ? root : document;
+        const commentTextarea = scope.querySelector('.OwO-textarea');
+        if (!commentTextarea) return;
+
+        const commentsRoot = commentTextarea.closest('#comments')
+            || commentTextarea.closest('.post-comments')
+            || commentTextarea;
+
+        if (!commentsRoot || commentsRoot.dataset.psOwoInit) return;
+        commentsRoot.dataset.psOwoInit = 'pending';
+
+        const runInit = () => {
+            if (!commentsRoot.isConnected) return;
+            if (commentsRoot.dataset.psOwoInit === 'done') return;
+            commentsRoot.dataset.psOwoInit = 'done';
+            initializeCommentsOwO();
+        };
+
+        if (options.eager || window.location.hash === '#comments' || document.activeElement === commentTextarea) {
+            scheduleIdleTask(runInit);
+            return;
+        }
+
+        if (typeof IntersectionObserver !== 'function') {
+            scheduleIdleTask(runInit);
+            return;
+        }
+
+        const io = new IntersectionObserver((entries, observer) => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    observer.disconnect();
+                    scheduleIdleTask(runInit);
+                    break;
+                }
+            }
+        }, { rootMargin: '200px 0px', threshold: 0.01 });
+
+        io.observe(commentsRoot);
+    }
 
     // ========== Light enter animation (post/page/list) (avoid View Transition conflicts) ==========
     const LIGHT_ENTER = {
@@ -335,7 +487,11 @@
     }
 
     function isElementVisible(el) {
-        return el && el.getClientRects && el.getClientRects().length > 0;
+        if (!el || !el.getClientRects) return false;
+        const cached = VISIBILITY.get(el);
+        if (cached !== null) return cached;
+        VISIBILITY.observe(el);
+        return el.getClientRects().length > 0;
     }
 
     function uniqElements(arr) {
@@ -347,6 +503,23 @@
             out.push(el);
         }
         return out;
+    }
+
+    function takeVisibleElements(elements, limit, out, seen, skipEl) {
+        const max = typeof limit === 'number' ? limit : Infinity;
+        const target = out || [];
+        const used = seen || new Set();
+
+        for (const el of elements || []) {
+            if (!el || el === skipEl || used.has(el)) continue;
+            used.add(el);
+            if (!isAnimatableElement(el)) continue;
+            if (!isElementVisible(el)) continue;
+            target.push(el);
+            if (target.length >= max) break;
+        }
+
+        return { items: target, seen: used };
     }
 
     function getPostContentContainer() {
@@ -377,9 +550,13 @@
                 '.license-info-card'
             ].join(',');
 
-            const bodyTargets = uniqElements(Array.from(postBody.querySelectorAll(selector)))
-                .filter(isAnimatableElement)
-                .filter(isElementVisible);
+            const maxItems = LIGHT_ENTER.maxItemsPost;
+            const reserveBelow = 8;
+
+            const bodyTargets = takeVisibleElements(
+                postBody.querySelectorAll(selector),
+                maxItems
+            ).items;
 
             const commentsRoot = document.querySelector('.post.post--single .post-comments')
                 || document.querySelector('.post-comments');
@@ -393,19 +570,18 @@
                     '#comments > .respond'
                 ].join(',');
 
-                belowTargets.push(
-                    ...uniqElements(Array.from(commentsRoot.querySelectorAll(commentsSelector)))
-                        .filter(isAnimatableElement)
-                        .filter(isElementVisible)
+                takeVisibleElements(
+                    commentsRoot.querySelectorAll(commentsSelector),
+                    reserveBelow,
+                    belowTargets
                 );
 
                 // Fallback (e.g. protected posts where comments are hidden)
                 if (!belowTargets.length) {
-                    belowTargets.push(
-                        ...uniqElements(Array.from(commentsRoot.querySelectorAll('.post-wrapper > *')))
-                            .filter(isAnimatableElement)
-                            .filter(isElementVisible)
-                            .slice(0, 6)
+                    takeVisibleElements(
+                        commentsRoot.querySelectorAll('.post-wrapper > *'),
+                        6,
+                        belowTargets
                     );
                 }
             }
@@ -414,8 +590,6 @@
             if (pager && isElementVisible(pager)) belowTargets.push(pager);
 
             if (bodyTargets.length || belowTargets.length) {
-                const maxItems = LIGHT_ENTER.maxItemsPost;
-                const reserveBelow = 8;
                 const belowUnique = uniqElements(belowTargets);
                 const belowCap = Math.min(reserveBelow, belowUnique.length);
                 const bodyCap = Math.max(0, maxItems - belowCap);
@@ -431,10 +605,10 @@
 
         const root = resolvePostEnterRoot(container);
         if (!root) return [];
-        return Array.from(root.children || [])
-            .filter(isAnimatableElement)
-            .filter(isElementVisible)
-            .slice(0, LIGHT_ENTER.maxItemsPost);
+        return takeVisibleElements(
+            Array.from(root.children || []),
+            LIGHT_ENTER.maxItemsPost
+        ).items;
     }
 
     function collectPageEnterTargets() {
@@ -474,7 +648,7 @@
         // - tag clouds: `.cloud-item`
         // - archives timeline: `.timeline-item`
         // - generic section bodies: direct children
-        const unique = uniqElements(targets).filter(isAnimatableElement).filter(isElementVisible);
+        const unique = uniqElements(targets);
         if (unique.length <= 4) {
             const refined = [];
             const cloudItems = Array.from(pageArticle.querySelectorAll('.cloud-container > .cloud-item')).slice(0, 10);
@@ -487,8 +661,6 @@
         }
 
         return uniqElements(targets)
-            .filter(isAnimatableElement)
-            .filter(isElementVisible)
             .slice(0, LIGHT_ENTER.maxItemsPage);
     }
 
@@ -522,11 +694,13 @@
         const vtMarker = main.querySelector(`[${VT.markerAttr}]`);
         const vtEl = vtMarker ? vtMarker.closest('.post') : null;
 
-        return uniqElements(targets)
-            .filter(isAnimatableElement)
-            .filter(isElementVisible)
-            .filter((el) => !vtEl || el !== vtEl)
-            .slice(0, LIGHT_ENTER.maxItemsList);
+        return takeVisibleElements(
+            uniqElements(targets),
+            LIGHT_ENTER.maxItemsList,
+            [],
+            new Set(),
+            vtEl
+        ).items;
     }
 
     function animateLightEnter(targets, baseDelay = 0, options = {}) {
@@ -546,28 +720,41 @@
 
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                targets.forEach((el, index) => {
-                    const anim = el.animate(
-                        [
-                            { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
-                            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-                        ],
-                        {
-                            duration,
-                            easing,
-                            delay: baseDelay + index * stagger,
-                            fill: 'both'
-                        }
-                    );
+                const batchSize = targets.length > 16 ? 10 : targets.length;
+                let index = 0;
 
-                    const cleanup = () => {
-                        el.style.willChange = '';
-                        el.style.opacity = '';
-                        el.style.transform = '';
-                    };
-                    anim.onfinish = cleanup;
-                    anim.oncancel = cleanup;
-                });
+                const startBatch = () => {
+                    const end = Math.min(targets.length, index + batchSize);
+                    for (; index < end; index++) {
+                        const el = targets[index];
+                        const anim = el.animate(
+                            [
+                                { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
+                                { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+                            ],
+                            {
+                                duration,
+                                easing,
+                                delay: baseDelay + index * stagger,
+                                fill: 'both'
+                            }
+                        );
+
+                        const cleanup = () => {
+                            el.style.willChange = '';
+                            el.style.opacity = '';
+                            el.style.transform = '';
+                        };
+                        anim.onfinish = cleanup;
+                        anim.oncancel = cleanup;
+                    }
+
+                    if (index < targets.length) {
+                        requestAnimationFrame(startBatch);
+                    }
+                };
+
+                startBatch();
             });
         });
     }
@@ -783,9 +970,13 @@
             }
 
             // Collapse morph (post -> list): bind the matching card on the list page.
-            const listPostKey = (history.state && typeof history.state === 'object')
+            let listPostKey = (history.state && typeof history.state === 'object')
                 ? history.state.lastPostKey
                 : null;
+
+            if (!listPostKey && LAST_POST.fromSingle) {
+                listPostKey = LAST_POST.key;
+            }
 
             if (pageType === 'list' && listPostKey) {
                 // Snap to cached scroll position first (ScrollPlugin is the source of truth).
@@ -802,12 +993,16 @@
 
                 const card = findIndexPostCardById(listPostKey);
                 if (card) {
-                    // If layout changed and the card isn't visible, ensure it's within viewport for the morph.
-                    const rect = card.getBoundingClientRect();
-                    if (rect.bottom < 0 || rect.top > window.innerHeight) {
-                        card.scrollIntoView({ block: 'center', inline: 'nearest' });
-                    }
                     applyPostSharedElementName(card, listPostKey);
+                    // If layout changed and the card isn't visible, ensure it's within viewport for the morph.
+                    requestAnimationFrame(() => {
+                        const rect = card.getBoundingClientRect();
+                        if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                            requestAnimationFrame(() => {
+                                card.scrollIntoView({ block: 'center', inline: 'nearest' });
+                            });
+                        }
+                    });
                 } else {
                     clearMarkedViewTransitionNames();
                 }
@@ -828,6 +1023,7 @@
 
         swup.hooks.on('visit:start', (visit) => {
             NAV_STATE.isSwupNavigating = true;
+            LAST_POST.fromSingle = Boolean(document.querySelector('.post.post--single'));
             const fromType = getPageType();
             const toType = null;
 
@@ -859,6 +1055,8 @@
 
             // 保持动画状态
             document.documentElement.classList.add('is-animating');
+
+            VISIBILITY.reset();
 
             // 确保进入文章页时立即在顶部（避免 scroll-behavior:smooth 导致“滑上去”的鬼畜）
             if (shouldForceScrollToTop(window.location.href)) {
@@ -901,13 +1099,8 @@
         swup.hooks.on('page:view', () => {
             const swupRoot = document.getElementById('swup') || document;
             const pageType = getPageType(window.location.href);
-            const runIdle = (fn) => {
-                if (typeof window.requestIdleCallback === 'function') {
-                    window.requestIdleCallback(fn, { timeout: 800 });
-                } else {
-                    setTimeout(fn, 0);
-                }
-            };
+            const token = ++PAGE_VIEW_TOKEN;
+            const isCurrent = () => token === PAGE_VIEW_TOKEN;
 
             // 更新导航栏指示器
             if (typeof window.NavIndicator === 'object' && typeof window.NavIndicator.update === 'function') {
@@ -927,33 +1120,39 @@
             // 标记新页面元素（确保 PJAX 渲染后的元素也被标记）
             markAnimationElements(swupRoot);
 
-            // 非关键逻辑放到 idle/next tick，减少切换时的主线程阻塞
-            runIdle(() => {
-                // 代码高亮（只在文章/页面类内容上做）
-                if (pageType === 'post' && typeof hljs !== 'undefined') {
-                    swupRoot.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
+            // 非关键逻辑放到 idle 队列，减少切换时的主线程阻塞
+            if (pageType === 'post' && typeof hljs !== 'undefined') {
+                const blocks = Array.from(swupRoot.querySelectorAll('pre code:not(.hljs)'));
+                scheduleIdleBatched(
+                    blocks,
+                    6,
+                    (block) => {
+                        if (!isCurrent()) return;
                         hljs.highlightElement(block);
-                    });
-                }
+                    },
+                    isCurrent
+                );
+            }
 
-                // TOC 目录（存在 TOC 时才初始化）
-                if (pageType === 'post' && typeof initializeStickyTOC === 'function') {
+            if (pageType === 'post' && typeof initializeStickyTOC === 'function') {
+                scheduleIdleTask(() => {
+                    if (!isCurrent()) return;
                     if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
                         initializeStickyTOC();
                     }
-                }
+                });
+            }
 
-                // Shortcodes（保持原行为，但延后执行）
-                if (typeof runShortcodes === 'function') {
+            if (typeof runShortcodes === 'function') {
+                scheduleIdleTask(() => {
+                    if (!isCurrent()) return;
                     runShortcodes();
-                }
+                });
+            }
 
-                // 评论 OwO
-                const commentTextarea = swupRoot.querySelector('.OwO-textarea');
-                if (commentTextarea && typeof initializeCommentsOwO === 'function') {
-                    initializeCommentsOwO();
-                }
-            });
+            if (isCurrent()) {
+                scheduleCommentsInit(swupRoot);
+            }
 
             // 用户自定义回调（可能依赖 DOM，放最后）
             if (typeof window.pjaxCustomCallback === 'function') {
