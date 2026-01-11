@@ -75,6 +75,11 @@ body {
 	transition: background-color .3s ease, color .3s ease;
 }
 
+html.ps-theme-vt,
+html.ps-theme-vt * {
+	transition: none !important;
+}
+
 
 a {
 	text-decoration: none;
@@ -2415,4 +2420,30 @@ html.ps-preload-list-enter .main-lastinfo {
 ::view-transition-old(root),
 ::view-transition-new(root) {
 	animation: none;
+}
+
+@keyframes ps-theme-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes ps-theme-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+html.ps-theme-vt::view-transition-old(root) {
+	animation: ps-theme-fade-out 280ms ease;
+}
+
+html.ps-theme-vt::view-transition-new(root) {
+	animation: ps-theme-fade-in 320ms ease;
 }

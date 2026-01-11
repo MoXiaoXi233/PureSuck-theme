@@ -726,13 +726,51 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * ========================================
- * 主题管理系统
- * ========================================
+ * 主题切换 - 控制深色、浅色模式，带个跨域联动
  */
 
 (function() {
     'use strict';
+
+    function supportsViewTransition() {
+        return typeof document.startViewTransition === 'function';
+    }
+
+    function prefersReducedMotion() {
+        return typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function runThemeViewTransition(update) {
+        if (!supportsViewTransition() || prefersReducedMotion()) {
+            update();
+            return;
+        }
+
+        const root = document.documentElement;
+        root.classList.add('ps-theme-vt');
+
+        let transition;
+        try {
+            transition = document.startViewTransition(() => {
+                update();
+            });
+        } catch (e) {
+            root.classList.remove('ps-theme-vt');
+            update();
+            return;
+        }
+
+        if (transition && transition.finished) {
+            transition.finished.finally(() => {
+                root.classList.remove('ps-theme-vt');
+            });
+        } else {
+            setTimeout(() => {
+                root.classList.remove('ps-theme-vt');
+            }, 300);
+        }
+    }
 
     /**
      * 获取根域名（用于跨子域 Cookie）
@@ -776,6 +814,13 @@ document.addEventListener('DOMContentLoaded', function () {
         root.setAttribute('data-theme', themeValue);
     }
 
+    function getEffectiveTheme(theme) {
+        if (theme === 'auto') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return theme;
+    }
+
     /**
      * 更新主题图标
      * @param {string} theme - 主题值
@@ -799,7 +844,7 @@ document.addEventListener('DOMContentLoaded', function () {
      * 设置主题
      * @param {string} theme - 主题值 ('light' | 'dark' | 'auto')
      */
-    function setTheme(theme) {
+    function applyTheme(theme) {
         if (theme === 'auto') {
             // 自动模式：跟随系统
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -814,6 +859,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         updateIcon(theme);
+    }
+
+    function setTheme(theme) {
+        const root = document.documentElement;
+        const currentApplied = root.getAttribute('data-theme');
+        const nextApplied = getEffectiveTheme(theme);
+
+        if (currentApplied === nextApplied) {
+            applyTheme(theme);
+            return;
+        }
+
+        runThemeViewTransition(() => {
+            applyTheme(theme);
+        });
     }
 
     /**
@@ -850,7 +910,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 优先读取 Cookie（跨站同步）
         const cookieTheme = getCookie('theme');
         const savedTheme = cookieTheme || localStorage.getItem('theme') || 'auto';
-        setTheme(savedTheme);
+        applyTheme(savedTheme);
     }
 
     /**
