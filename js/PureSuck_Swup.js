@@ -37,6 +37,10 @@
         timeout: 800,
         budgetMs: 12
     };
+    const BREATH = {
+        phaseGapMs: 140,
+        batchGapMs: 90
+    };
 
     function scheduleIdleDrain() {
         if (IDLE.scheduled) return;
@@ -75,6 +79,24 @@
         if (typeof task !== 'function') return;
         IDLE.queue.push(task);
         scheduleIdleDrain();
+    }
+
+    function schedulePhasedTasks(phases, shouldContinue, gapMs = BREATH.phaseGapMs) {
+        if (!Array.isArray(phases) || !phases.length) return;
+        let index = 0;
+        const runNext = () => {
+            if (typeof shouldContinue === 'function' && !shouldContinue()) return;
+            const phase = phases[index++];
+            if (typeof phase !== 'function') return;
+            scheduleIdleTask(() => {
+                if (typeof shouldContinue === 'function' && !shouldContinue()) return;
+                phase();
+                if (index < phases.length) {
+                    setTimeout(runNext, gapMs);
+                }
+            });
+        };
+        runNext();
     }
 
     function scheduleIdleBatched(items, batchSize, handler, shouldContinue) {
@@ -137,6 +159,10 @@
     function getPostTransitionName(postKey) {
         const safeKey = encodeURIComponent(String(postKey || '')).replace(/%/g, '_');
         return `ps-post-${safeKey}`;
+    }
+
+    function getSwupRoot() {
+        return document.getElementById('swup') || document;
     }
 
     function getPostKeyFromElement(el) {
@@ -210,7 +236,7 @@
     function findIndexPostCardById(postKey) {
         if (!postKey) return null;
 
-        const cards = document.querySelectorAll('.post.post--index');
+        const cards = getSwupRoot().querySelectorAll('.post.post--index');
         for (const card of cards) {
             const cardKey = getPostKeyFromElement(card);
             if (cardKey === postKey) return card;
@@ -457,6 +483,10 @@
         listY: 60,
         // animate.css default easing: cubic-bezier(0.215, 0.61, 0.355, 1)
         listEasing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+        batchSize: 8,
+        batchGap: 90,
+        listBatchSize: 6,
+        listBatchGap: 120,
         // Track last navigation direction (so we can avoid stacking animations).
         lastFromType: null,
         lastToType: null,
@@ -496,12 +526,7 @@
         // ✅ 添加到观察器（异步，不会立即阻塞）
         VISIBILITY.observe(el);
 
-        // ✅ 只有在真正需要时才同步检查（减少 getClientRects 调用）
-        // 使用更轻量的 offsetParent 检查作为快速判断
-        if (el.offsetParent === null && el.getClientRects().length === 0) {
-            return false;
-        }
-
+        // ✅ 避免同步布局读取（让浏览器喘气），先保留动画目标
         return true;
     }
 
@@ -534,10 +559,11 @@
     }
 
     function getPostContentContainer() {
-        return document.querySelector('.post.post--single .post-content')
-            || document.querySelector('.post.post--single .post-body')
-            || document.querySelector('.post-content')
-            || document.querySelector('.post-body');
+        const scope = getSwupRoot();
+        return scope.querySelector('.post.post--single .post-content')
+            || scope.querySelector('.post.post--single .post-body')
+            || scope.querySelector('.post-content')
+            || scope.querySelector('.post-body');
     }
 
     function resolvePostEnterRoot(container) {
@@ -552,7 +578,8 @@
 
     function collectPostEnterTargets(container) {
         // Prefer richer, "post-inner" ordering for post pages (title/meta/content/license...).
-        const postBody = document.querySelector('.post.post--single .post-body');
+        const scope = getSwupRoot();
+        const postBody = scope.querySelector('.post.post--single .post-body');
         if (postBody) {
             const selector = [
                 '.post-meta',
@@ -569,8 +596,8 @@
                 maxItems
             ).items;
 
-            const commentsRoot = document.querySelector('.post.post--single .post-comments')
-                || document.querySelector('.post-comments');
+            const commentsRoot = scope.querySelector('.post.post--single .post-comments')
+                || scope.querySelector('.post-comments');
             const belowTargets = [];
 
             if (commentsRoot) {
@@ -597,7 +624,7 @@
                 }
             }
 
-            const pager = document.querySelector('.main-pager');
+            const pager = scope.querySelector('.main-pager');
             if (pager && isElementVisible(pager)) belowTargets.push(pager);
 
             if (bodyTargets.length || belowTargets.length) {
@@ -623,7 +650,8 @@
     }
 
     function collectPageEnterTargets() {
-        const main = document.querySelector('main.main') || document.querySelector('#swup');
+        const scope = getSwupRoot();
+        const main = scope.querySelector('main.main') || scope.querySelector('#swup');
         if (!main) return [];
 
         // A Typecho "page" (about/links/archives...) uses `post--index` but not `post--single`.
@@ -676,7 +704,8 @@
     }
 
     function collectListEnterTargets() {
-        const main = document.querySelector('main.main') || document.querySelector('#swup');
+        const scope = getSwupRoot();
+        const main = scope.querySelector('main.main') || scope.querySelector('#swup');
         if (!main) return [];
 
         const wrapper = main.querySelector('.wrapper') || main;
@@ -721,38 +750,55 @@
         const stagger = options.stagger ?? LIGHT_ENTER.stagger;
         const y = options.y ?? LIGHT_ENTER.y;
         const easing = options.easing ?? LIGHT_ENTER.easing;
+        const batchSize = options.batchSize ?? 8;
+        const batchGap = options.batchGap ?? BREATH.batchGapMs;
 
-        // Pre-apply initial state ASAP to avoid a "flash then animate" frame.
-        targets.forEach((el) => {
-            el.style.willChange = 'transform, opacity';
-            el.style.opacity = '0';
-            el.style.transform = `translate3d(0, ${y}px, 0)`;
-        });
+        let index = 0;
+        const total = targets.length;
 
-        requestAnimationFrame(() => {
-            targets.forEach((el, index) => {
-                const anim = el.animate(
-                    [
-                        { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
-                        { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-                    ],
-                    {
-                        duration,
-                        easing,
-                        delay: baseDelay + index * stagger,
-                        fill: 'both'
-                    }
-                );
+        const runBatch = () => {
+            const batch = targets.slice(index, index + batchSize);
+            if (!batch.length) return;
 
-                const cleanup = () => {
-                    el.style.willChange = '';
-                    el.style.opacity = '';
-                    el.style.transform = '';
-                };
-                anim.onfinish = cleanup;
-                anim.oncancel = cleanup;
+            batch.forEach((el) => {
+                el.style.willChange = 'transform, opacity';
+                el.style.opacity = '0';
+                el.style.transform = `translate3d(0, ${y}px, 0)`;
             });
-        });
+
+            requestAnimationFrame(() => {
+                batch.forEach((el, batchIndex) => {
+                    const absoluteIndex = index + batchIndex;
+                    const anim = el.animate(
+                        [
+                            { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
+                            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
+                        ],
+                        {
+                            duration,
+                            easing,
+                            delay: baseDelay + absoluteIndex * stagger,
+                            fill: 'both'
+                        }
+                    );
+
+                    const cleanup = () => {
+                        el.style.willChange = '';
+                        el.style.opacity = '';
+                        el.style.transform = '';
+                    };
+                    anim.onfinish = cleanup;
+                    anim.oncancel = cleanup;
+                });
+            });
+
+            index += batchSize;
+            if (index < total) {
+                setTimeout(runBatch, batchGap);
+            }
+        };
+
+        runBatch();
     }
 
     function runLightEnterAnimation() {
@@ -777,10 +823,18 @@
             const hasSharedElement = HAS_VT
                 && Boolean(document.querySelector(`.post.post--single[${VT.markerAttr}]`));
             baseDelay = hasSharedElement ? Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs) : 0;
+            animOptions = {
+                batchSize: LIGHT_ENTER.batchSize,
+                batchGap: LIGHT_ENTER.batchGap
+            };
         } else if (pageType === 'post') {
             targets = collectPageEnterTargets();
             // Keep independent pages (about/links/archives...) feeling consistent with post enter timing.
             baseDelay = Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs);
+            animOptions = {
+                batchSize: LIGHT_ENTER.batchSize,
+                batchGap: LIGHT_ENTER.batchGap
+            };
         } else if (pageType === 'list') {
             targets = collectListEnterTargets();
             const hasSharedElement = HAS_VT
@@ -790,7 +844,9 @@
                 duration: LIGHT_ENTER.listDuration,
                 stagger: LIGHT_ENTER.listStagger,
                 y: LIGHT_ENTER.listY,
-                easing: LIGHT_ENTER.listEasing
+                easing: LIGHT_ENTER.listEasing,
+                batchSize: LIGHT_ENTER.listBatchSize,
+                batchGap: LIGHT_ENTER.listBatchGap
             };
         }
 
@@ -1010,11 +1066,15 @@
 
         // Light enter animation: run strictly after content replaced.
         document.addEventListener('swup:contentReplaced', () => {
-            if (!HAS_VT) {
-                runLightEnterAnimation();
-                return;
-            }
-            waitForViewTransition().then(runLightEnterAnimation);
+            scheduleIdleTask(() => {
+                if (!HAS_VT) {
+                    runLightEnterAnimation();
+                    return;
+                }
+                waitForViewTransition().then(() => {
+                    scheduleIdleTask(runLightEnterAnimation);
+                });
+            });
         });
 
         swup.hooks.on('visit:start', (visit) => {
@@ -1032,7 +1092,9 @@
             document.documentElement.classList.add('is-animating');
 
             // 标记当前页面元素（仅扫描 swup 容器，减少 DOM 遍历）
-            markAnimationElements(document.getElementById('swup') || document);
+            scheduleIdleTask(() => {
+                markAnimationElements(document.getElementById('swup') || document);
+            });
 
             // 根据页面类型应用退出动画
             if (fromType === 'list') {
@@ -1060,7 +1122,9 @@
             }
 
             // 标记新页面元素（仅扫描 swup 容器，减少 DOM 遍历）
-            markAnimationElements(document.getElementById('swup') || document);
+            scheduleIdleTask(() => {
+                markAnimationElements(document.getElementById('swup') || document);
+            });
 
             // View Transitions shared element: apply to the new page as well
             syncPostSharedElementFromLocation();
@@ -1114,24 +1178,30 @@
             });
 
             // 标记新页面元素（确保 PJAX 渲染后的元素也被标记）
-            markAnimationElements(swupRoot);
+            scheduleIdleTask(() => {
+                markAnimationElements(swupRoot);
+            });
 
-            // 非关键逻辑放到 idle 队列，减少切换时的主线程阻塞
+            const phases = [];
+
+            // 非关键逻辑放到分段 idle 队列，减少切换时的主线程阻塞
             if (pageType === 'post' && typeof hljs !== 'undefined') {
-                const blocks = Array.from(swupRoot.querySelectorAll('pre code:not(.hljs)'));
-                scheduleIdleBatched(
-                    blocks,
-                    6,
-                    (block) => {
-                        if (!isCurrent()) return;
-                        hljs.highlightElement(block);
-                    },
-                    isCurrent
-                );
+                phases.push(() => {
+                    const blocks = Array.from(swupRoot.querySelectorAll('pre code:not(.hljs)'));
+                    scheduleIdleBatched(
+                        blocks,
+                        6,
+                        (block) => {
+                            if (!isCurrent()) return;
+                            hljs.highlightElement(block);
+                        },
+                        isCurrent
+                    );
+                });
             }
 
             if (pageType === 'post' && typeof initializeStickyTOC === 'function') {
-                scheduleIdleTask(() => {
+                phases.push(() => {
                     if (!isCurrent()) return;
                     if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
                         initializeStickyTOC();
@@ -1140,15 +1210,19 @@
             }
 
             if (typeof runShortcodes === 'function') {
-                scheduleIdleTask(() => {
+                phases.push(() => {
                     if (!isCurrent()) return;
                     runShortcodes(swupRoot);
                 });
             }
 
-            if (isCurrent()) {
-                scheduleCommentsInit(swupRoot);
-            }
+            phases.push(() => {
+                if (isCurrent()) {
+                    scheduleCommentsInit(swupRoot);
+                }
+            });
+
+            schedulePhasedTasks(phases, isCurrent);
 
             // 用户自定义回调（可能依赖 DOM，放最后）
             if (typeof window.pjaxCustomCallback === 'function') {
@@ -1225,7 +1299,9 @@
         });
 
         // ========== 初始加载时标记元素 ==========
-        markAnimationElements(document.getElementById('swup') || document);
+        scheduleIdleTask(() => {
+            markAnimationElements(document.getElementById('swup') || document);
+        });
 
         // Initial load
         syncPostSharedElementFromLocation();
