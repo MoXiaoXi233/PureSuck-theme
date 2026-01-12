@@ -699,6 +699,26 @@
             take(uniqElements(refined), LIGHT_ENTER.maxItemsPage);
         }
 
+        // Include comments area (match post page behavior).
+        const commentsRoot = scope.querySelector('.post.post--single .post-comments')
+            || scope.querySelector('.post-comments');
+        if (commentsRoot) {
+            const commentsSelector = [
+                '#comments > .comment-title',
+                '#comments > .comment-list > li',
+                '#comments > .page-navigator',
+                '#comments > .respond'
+            ].join(',');
+            takeVisibleElements(
+                commentsRoot.querySelectorAll(commentsSelector),
+                8,
+                targets
+            );
+        }
+
+        const pager = scope.querySelector('.main-pager');
+        if (pager && isElementVisible(pager)) targets.push(pager);
+
         return uniqElements(targets)
             .slice(0, LIGHT_ENTER.maxItemsPage);
     }
@@ -829,11 +849,15 @@
             };
         } else if (pageType === 'post') {
             targets = collectPageEnterTargets();
-            // Keep independent pages (about/links/archives...) feeling consistent with post enter timing.
+            // Independent pages: use list-style card enter to match home list feel.
             baseDelay = Math.max(0, LIGHT_ENTER.vtMs - LIGHT_ENTER.vtLeadMs);
             animOptions = {
-                batchSize: LIGHT_ENTER.batchSize,
-                batchGap: LIGHT_ENTER.batchGap
+                duration: LIGHT_ENTER.listDuration,
+                stagger: LIGHT_ENTER.listStagger,
+                y: LIGHT_ENTER.listY,
+                easing: LIGHT_ENTER.listEasing,
+                batchSize: LIGHT_ENTER.listBatchSize,
+                batchGap: LIGHT_ENTER.listBatchGap
             };
         } else if (pageType === 'list') {
             targets = collectListEnterTargets();
