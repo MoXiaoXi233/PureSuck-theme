@@ -306,61 +306,81 @@
         return Promise.allSettled(vtAnimations.map((anim) => anim.finished));
     }
 
-    // ==================== 动画配置 ====================
+    // ==================== 动画配置（重构版） ====================
     const ANIM = {
         // 退出动画配置
         exit: {
-            duration: 280,
-            pageCardDuration: 380,
-            listCardDuration: 200,
-            easing: 'cubic-bezier(.4,0,.2,1)',
-            pageY: -20,
-            listY: -15,
-            listFade: 0.6
+            // 列表页退出
+            list: {
+                duration: 240,
+                stagger: 25,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+            },
+            // 文章页退出
+            post: {
+                duration: 320,
+                contentStagger: 30,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+            },
+            // 独立页退出
+            page: {
+                duration: 320,
+                innerStagger: 20,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+            }
         },
         // 进入动画配置
         enter: {
             // 文章页内容渐入
-            postDuration: 320,
-            postStagger: 28,
-            postY: 10,
-            postEasing: 'cubic-bezier(.2,.8,.2,1)',
-            postMaxItems: 24,
-            postBatchSize: 8,
-            postBatchGap: 90,
-
+            post: {
+                duration: 380,
+                stagger: 32,
+                y: 16,
+                easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                maxItems: 24,
+                batchSize: 8,
+                batchGap: 80
+            },
             // 列表页卡片渐入
-            listDuration: 500,
-            listStagger: 80,
-            listY: 60,
-            listEasing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-            listMaxItems: 14,
-            listBatchSize: 6,
-            listBatchGap: 120,
-
-            // 独立页面渐入（第一层：整个卡片，与列表卡片同步）
-            pageCardDuration: 500,
-            pageCardStagger: 80,
-            pageCardY: 60,
-            pageCardEasing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-
-            // 独立页面内部内容渐入（第二层：细分内容，与文章页同步）
-            pageDuration: 320,
-            pageStagger: 28,
-            pageY: 10,
-            pageEasing: 'cubic-bezier(.2,.8,.2,1)',
-            pageMaxItems: 18,
-            pageBatchSize: 8,
-            pageBatchGap: 90,
-
-            // VT 同步延迟
-            vtMs: VT.duration,
-            vtLeadMs: 80
+            list: {
+                duration: 520,
+                stagger: 65,
+                y: 48,
+                easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)',
+                maxItems: 14,
+                batchSize: 6,
+                batchGap: 100
+            },
+            // 独立页渐入
+            page: {
+                // 第一层：整个卡片
+                card: {
+                    duration: 520,
+                    y: 40,
+                    scale: 0.98,
+                    easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)'
+                },
+                // 第二层：内部内容
+                inner: {
+                    duration: 360,
+                    stagger: 28,
+                    y: 12,
+                    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                    maxItems: 16,
+                    batchSize: 6,
+                    batchGap: 70
+                }
+            },
+            // VT 同步配置
+            vt: {
+                duration: VT.duration,
+                leadMs: 100 // VT完成后提前多久开始进入动画
+            }
         },
         // 滚动动画
         scroll: {
-            duration: 600,
-            easing: 'cubic-bezier(.2,.8,.2,1)'
+            duration: 550,
+            easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
         }
     };
 
@@ -448,9 +468,10 @@
 
         /**
          * 打断所有正在进行的动画
+         * 包括 Web Animations API 动画和 CSS 动画
          */
         abort() {
-            // 打断所有 Web Animations API 动画
+            // 1. 打断所有 Web Animations API 动画
             for (const anim of this.activeAnimations) {
                 try {
                     if (anim && typeof anim.cancel === 'function') {
@@ -462,29 +483,42 @@
             }
             this.activeAnimations = [];
 
-            // 清理所有可能残留的样式
+            // 2. 清理所有正在进行的 CSS 动画
+            // 移除动画类以停止 CSS 动画
+            document.documentElement.classList.remove(
+                'ps-page-exit',
+                'ps-post-exit',
+                'ps-list-exit'
+            );
+
+            // 3. 清理所有可能残留的样式
             document.querySelectorAll('[data-ps-animating]').forEach(el => {
-                el.style.willChange = '';
-                el.style.opacity = '';
-                el.style.transform = '';
+                const computed = window.getComputedStyle(el);
+                // 只有当元素确实在动画中时才强制清理
+                if (computed.opacity !== '1' || computed.transform !== 'none') {
+                    el.style.willChange = '';
+                    el.style.opacity = '';
+                    el.style.transform = '';
+                }
                 el.removeAttribute('data-ps-animating');
             });
+
+            // 4. 强制重绘以应用更改
+            void document.documentElement.offsetHeight;
         },
 
         /**
-         * 注册一个动画，返回可取消的函数
+         * 注册一个动画
          */
         register(anim) {
             if (anim) {
                 this.activeAnimations.push(anim);
-                anim.onfinish = () => {
+                const onEnd = () => {
                     const idx = this.activeAnimations.indexOf(anim);
                     if (idx > -1) this.activeAnimations.splice(idx, 1);
                 };
-                anim.oncancel = () => {
-                    const idx = this.activeAnimations.indexOf(anim);
-                    if (idx > -1) this.activeAnimations.splice(idx, 1);
-                };
+                anim.onfinish = onEnd;
+                anim.oncancel = onEnd;
             }
         }
     };
@@ -499,18 +533,18 @@
         if (prefersReducedMotion()) return;
 
         const baseDelay = hasSharedElement
-            ? Math.max(0, ANIM.enter.vtMs - ANIM.enter.vtLeadMs)
+            ? Math.max(0, ANIM.enter.vt.duration - ANIM.enter.vt.leadMs)
             : 0;
 
         if (toType === PageType.POST) {
             const targets = collectPostEnterTargets();
             animateLightEnter(targets, baseDelay, {
-                duration: ANIM.enter.postDuration,
-                stagger: ANIM.enter.postStagger,
-                y: ANIM.enter.postY,
-                easing: ANIM.enter.postEasing,
-                batchSize: ANIM.enter.postBatchSize,
-                batchGap: ANIM.enter.postBatchGap
+                duration: ANIM.enter.post.duration,
+                stagger: ANIM.enter.post.stagger,
+                y: ANIM.enter.post.y,
+                easing: ANIM.enter.post.easing,
+                batchSize: ANIM.enter.post.batchSize,
+                batchGap: ANIM.enter.post.batchGap
             });
         } else if (toType === PageType.PAGE) {
             // 独立页面：两层动画
@@ -519,36 +553,37 @@
             // 第一层：整个卡片动画（与列表卡片同步）
             if (pageTargets.card) {
                 animateLightEnter([pageTargets.card], baseDelay, {
-                    duration: ANIM.enter.pageCardDuration,
-                    stagger: ANIM.enter.pageCardStagger,
-                    y: ANIM.enter.pageCardY,
-                    easing: ANIM.enter.pageCardEasing,
+                    duration: ANIM.enter.page.card.duration,
+                    stagger: 0,
+                    y: ANIM.enter.page.card.y,
+                    scale: ANIM.enter.page.card.scale,
+                    easing: ANIM.enter.page.card.easing,
                     batchSize: 1,
                     batchGap: 0
                 });
             }
 
-            // 第二层：内部内容动画（与文章页同步，在卡片动画完成后开始）
+            // 第二层：内部内容动画（在卡片动画完成后开始）
             if (pageTargets.inner.length > 0) {
-                const innerDelay = baseDelay + ANIM.enter.pageCardDuration + 50;
+                const innerDelay = baseDelay + ANIM.enter.page.card.duration + 60;
                 animateLightEnter(pageTargets.inner, innerDelay, {
-                    duration: ANIM.enter.pageDuration,
-                    stagger: ANIM.enter.pageStagger,
-                    y: ANIM.enter.pageY,
-                    easing: ANIM.enter.pageEasing,
-                    batchSize: ANIM.enter.pageBatchSize,
-                    batchGap: ANIM.enter.pageBatchGap
+                    duration: ANIM.enter.page.inner.duration,
+                    stagger: ANIM.enter.page.inner.stagger,
+                    y: ANIM.enter.page.inner.y,
+                    easing: ANIM.enter.page.inner.easing,
+                    batchSize: ANIM.enter.page.inner.batchSize,
+                    batchGap: ANIM.enter.page.inner.batchGap
                 });
             }
         } else if (toType === PageType.LIST) {
             const targets = collectListEnterTargets();
             animateLightEnter(targets, baseDelay, {
-                duration: ANIM.enter.listDuration,
-                stagger: ANIM.enter.listStagger,
-                y: ANIM.enter.listY,
-                easing: ANIM.enter.listEasing,
-                batchSize: ANIM.enter.listBatchSize,
-                batchGap: ANIM.enter.listBatchGap
+                duration: ANIM.enter.list.duration,
+                stagger: ANIM.enter.list.stagger,
+                y: ANIM.enter.list.y,
+                easing: ANIM.enter.list.easing,
+                batchSize: ANIM.enter.list.batchSize,
+                batchGap: ANIM.enter.list.batchGap
             });
         }
     }
@@ -569,7 +604,7 @@
             '.license-info-card'
         ].join(',');
 
-        const maxItems = ANIM.enter.postMaxItems;
+        const maxItems = ANIM.enter.post.maxItems;
         const reserveBelow = 8;
 
         const bodyTargets = takeVisibleElements(
@@ -684,7 +719,7 @@
 
         return {
             card: pageArticle,
-            inner: uniqElements(innerTargets).slice(0, ANIM.enter.pageMaxItems)
+            inner: uniqElements(innerTargets).slice(0, ANIM.enter.page.inner.maxItems)
         };
     }
 
@@ -723,7 +758,7 @@
 
         return takeVisibleElements(
             uniqElements(targets),
-            ANIM.enter.listMaxItems,
+            ANIM.enter.list.maxItems,
             [],
             new Set(),
             vtEl
@@ -732,14 +767,18 @@
 
     /**
      * 执行轻量级进入动画
+     * @param {Array} targets - 目标元素数组
+     * @param {number} baseDelay - 基础延迟（毫秒）
+     * @param {Object} options - 动画配置
      */
     function animateLightEnter(targets, baseDelay = 0, options = {}) {
         if (!targets?.length) return;
 
-        const duration = options.duration ?? ANIM.enter.postDuration;
-        const stagger = options.stagger ?? ANIM.enter.postStagger;
-        const y = options.y ?? ANIM.enter.postY;
-        const easing = options.easing ?? ANIM.enter.postEasing;
+        const duration = options.duration ?? 380;
+        const stagger = options.stagger ?? 32;
+        const y = options.y ?? 16;
+        const scale = options.scale ?? 1; // 支持缩放效果
+        const easing = options.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)';
         const batchSize = options.batchSize ?? 8;
         const batchGap = options.batchGap ?? BREATH.batchGapMs;
 
@@ -753,25 +792,31 @@
             batch.forEach((el) => {
                 el.style.willChange = 'transform, opacity';
                 el.style.opacity = '0';
-                el.style.transform = `translate3d(0, ${y}px, 0)`;
+                // 初始状态：从下方移动 + 可选缩放
+                const initialTransform = scale !== 1
+                    ? `translate3d(0, ${y}px, 0) scale(${scale})`
+                    : `translate3d(0, ${y}px, 0)`;
+                el.style.transform = initialTransform;
                 el.setAttribute('data-ps-animating', '');
             });
 
             requestAnimationFrame(() => {
                 batch.forEach((el, batchIndex) => {
                     const absoluteIndex = index + batchIndex;
-                    const anim = el.animate(
-                        [
-                            { opacity: 0, transform: `translate3d(0, ${y}px, 0)` },
-                            { opacity: 1, transform: 'translate3d(0, 0, 0)' }
-                        ],
-                        {
-                            duration,
-                            easing,
-                            delay: baseDelay + absoluteIndex * stagger,
-                            fill: 'both'
-                        }
-                    );
+                    const fromTransform = scale !== 1
+                        ? `translate3d(0, ${y}px, 0) scale(${scale})`
+                        : `translate3d(0, ${y}px, 0)`;
+                    const keyframes = [
+                        { opacity: 0, transform: fromTransform },
+                        { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }
+                    ];
+
+                    const anim = el.animate(keyframes, {
+                        duration,
+                        easing,
+                        delay: baseDelay + absoluteIndex * stagger,
+                        fill: 'both'
+                    });
 
                     AnimController.register(anim);
 
@@ -1257,15 +1302,12 @@
 
             if (useVT) {
                 document.documentElement.classList.add('ps-vt-mode');
-            }
-
-            // 标记元素
-            scheduleIdleTask(() => {
-                markAnimationElements(document.getElementById('swup') || document);
-            });
-
-            // 应用退出动画类（VT 模式下不应用，避免冲突）
-            if (!useVT) {
+                // VT模式下也要添加退出动画类，让非共享元素有退出效果
+                if (fromType === PageType.LIST) {
+                    document.documentElement.classList.add('ps-list-exit');
+                }
+            } else {
+                // 非 VT 模式：应用完整的退出动画
                 if (fromType === PageType.PAGE) {
                     document.documentElement.classList.add('ps-page-exit');
                 } else if (fromType === PageType.POST) {
