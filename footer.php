@@ -40,8 +40,9 @@ $codeBlockSettings = Typecho_Widget::widget('Widget_Options')->codeBlockSettings
     initCodeHighlight();
   });
 
-  // PJAX 完成后重新执行
-  document.addEventListener('pjax:success', initCodeHighlight);
+  // Swup 完成后重新执行（替代旧的 pjax:success）
+  // 注意：实际高亮逻辑已在 PureSuck_Swup.js 的 page:view 钩子中处理
+  // 这里保留作为后备兼容
 
   // 添加行号函数
   function addLineNumber(codeDom) {

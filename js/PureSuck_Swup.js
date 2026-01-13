@@ -1440,13 +1440,16 @@
             // 分段初始化
             const phases = [];
 
-            if (pageType === PageType.POST && typeof hljs !== 'undefined') {
+            // 代码高亮：支持文章页、独立页、列表页
+            if (typeof hljs !== 'undefined') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    const blocks = Array.from(swupRoot.querySelectorAll('pre code:not(.hljs)'));
+                    // 使用 :not([data-highlighted]) 避免 footter.php 中的重复
+                    const blocks = Array.from(swupRoot.querySelectorAll('pre code:not([data-highlighted])'));
                     scheduleIdleBatched(blocks, 6, (block) => {
                         if (!isCurrent()) return;
                         hljs.highlightElement(block);
+                        block.dataset.highlighted = 'true';
                     }, isCurrent);
                 });
             }
