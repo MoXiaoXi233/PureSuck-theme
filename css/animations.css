@@ -1,0 +1,156 @@
+/**
+ * PureSuck Animations CSS
+ * 所有动画定义,用于降级和基础动画
+ */
+
+/* ==================== 退出动画 ==================== */
+
+/* 列表页退出动画 */
+html.ps-list-exit .post {
+    animation: ps-list-exit-out 240ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+html.ps-list-exit .post:nth-child(1) { animation-delay: 0ms; }
+html.ps-list-exit .post:nth-child(2) { animation-delay: 25ms; }
+html.ps-list-exit .post:nth-child(3) { animation-delay: 50ms; }
+html.ps-list-exit .post:nth-child(4) { animation-delay: 75ms; }
+html.ps-list-exit .post:nth-child(5) { animation-delay: 100ms; }
+html.ps-list-exit .post:nth-child(6) { animation-delay: 125ms; }
+html.ps-list-exit .post:nth-child(7) { animation-delay: 150ms; }
+html.ps-list-exit .post:nth-child(8) { animation-delay: 175ms; }
+html.ps-list-exit .post:nth-child(9) { animation-delay: 200ms; }
+html.ps-list-exit .post:nth-child(10) { animation-delay: 225ms; }
+
+@keyframes ps-list-exit-out {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, -12px, 0) scale(0.96);
+    }
+}
+
+/* 文章页退出动画 */
+html.ps-post-exit .post-body > * {
+    animation: ps-post-exit-out 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+html.ps-post-exit .post-body > *:nth-child(1) { animation-delay: 0ms; }
+html.ps-post-exit .post-body > *:nth-child(2) { animation-delay: 30ms; }
+html.ps-post-exit .post-body > *:nth-child(3) { animation-delay: 60ms; }
+html.ps-post-exit .post-body > *:nth-child(4) { animation-delay: 90ms; }
+html.ps-post-exit .post-body > *:nth-child(5) { animation-delay: 120ms; }
+html.ps-post-exit .post-body > *:nth-child(6) { animation-delay: 150ms; }
+
+@keyframes ps-post-exit-out {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, -12px, 0);
+    }
+}
+
+/* 独立页退出动画 */
+html.ps-page-exit .post {
+    animation: ps-page-exit-out 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes ps-page-exit-out {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, -12px, 0) scale(0.96);
+    }
+}
+
+/* ==================== 进入动画初始状态(降级用) ==================== */
+
+/* 列表页进入初始状态 */
+html.ps-list-enter .post {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+}
+
+/* 文章页进入初始状态 */
+html.ps-post-enter .post-body > * {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0);
+}
+
+/* 独立页进入初始状态 */
+html.ps-page-enter .post {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0) scale(0.98);
+}
+
+html.ps-page-enter .post-body > * {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+}
+
+/* ==================== 动画状态类 ==================== */
+
+/* 动画中 */
+html.ps-animating {
+    pointer-events: none;
+}
+
+/* 退出动画激活 */
+html.ps-exit-active {
+    pointer-events: none;
+}
+
+/* 进入动画激活 */
+html.ps-enter-active {
+    pointer-events: auto;
+}
+
+/* ==================== View Transitions 模式 ==================== */
+
+html.ps-vt-mode {
+    /* View Transitions 激活时的样式 */
+}
+
+/* ==================== 通用动画 ==================== */
+
+/* 淡入动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 上滑淡入动画 */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* 缩放淡入动画 */
+@keyframes scaleFade {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

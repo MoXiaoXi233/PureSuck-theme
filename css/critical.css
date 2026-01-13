@@ -1,0 +1,106 @@
+/**
+ * PureSuck Critical CSS
+ * 首屏必需的样式,内联加载以减少FCP时间
+ * < 2KB
+ */
+
+:root {
+    --themecolor: #3498db;
+    --text-color: #333;
+    --bg-color: #fff;
+    --border-color: #e0e0e0;
+}
+
+[data-theme="dark"] {
+    --text-color: #e0e0e0;
+    --bg-color: #1a1a1a;
+    --border-color: #333;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 16px;
+}
+
+.wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 预加载状态 - 避免FOUC */
+html.ps-preload-list-enter .post {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+}
+
+html.ps-preload-post-enter .post-body > * {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0);
+}
+
+html.ps-preload-page-enter .post {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+}
+
+/* 基础链接样式 */
+a {
+    color: var(--themecolor);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 图片基础样式 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 按钮基础样式 */
+button,
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover,
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* 加载指示器 */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* 隐藏元素 */
+[hidden] {
+    display: none !important;
+}

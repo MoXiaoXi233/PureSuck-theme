@@ -18,7 +18,28 @@
     </title>
     <?php generateDynamicCSS(); ?>
 
-    <!-- 主题防闪烁脚本（立即执行，在 CSS 加载前设置主题） -->
+    <!-- 1. 预加载关键资源 -->
+    <link rel="preload" href="<?= $this->options->themeUrl('fonts/fontello.woff2'); ?>" as="font" type="font/woff2" crossorigin>
+    
+    <!-- 2. 预连接CDN -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <!-- 3. 内联关键CSS（首屏必需） -->
+    <style>
+        * { box-sizing: border-box; }
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        body { margin: 0; padding: 0; }
+        .wrapper { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        html.ps-preload-list-enter .post { opacity: 0; transform: translate3d(0, 48px, 0); }
+        html.ps-preload-post-enter .post-body > * { opacity: 0; transform: translate3d(0, 32px, 0); }
+        html.ps-preload-page-enter .post { opacity: 0; transform: translate3d(0, 48px, 0); }
+    </style>
+
+    <!-- 4. 主题防闪烁脚本 -->
     <script>
         (function () {
             // 1. 优先读取 Cookie（跨站同步）
@@ -41,12 +62,8 @@
         })();
     </script>
 
-    <script>
-        window.THEME_URL = "<?php $this->options->themeUrl(); ?>";
-    </script>
-
+    <!-- 5. 预加载状态脚本 -->
     <?php if ($this->is('index') || $this->is('archive')): ?>
-        <!-- First paint: preload list enter state to avoid "flash then animate" -->
         <script>
             (function () {
                 try {
@@ -77,9 +94,12 @@
         </script>
     <?php endif; ?>
 
-    <!-- Style CSS -->
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>">
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
+    <!-- 6. 异步加载非关键CSS -->
+    <!-- 暂时禁用新的CSS文件，避免样式冲突 -->
+    <!-- <link rel="stylesheet" href="<?= $this->options->themeUrl('css/critical.css'); ?>" media="print" onload="this.media='all'"> -->
+    <!-- <link rel="stylesheet" href="<?= $this->options->themeUrl('css/animations.css'); ?>" media="print" onload="this.media='all'"> -->
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>" media="print" onload="this.media='all'">
     <!-- 主题样式微调 -->
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter == 'off'): ?>
@@ -120,10 +140,10 @@
     <link rel="icon"
         href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>"
         type="image/x-icon">
-    <!-- CSS引入 -->
-    <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet">
-    <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet">
-    <link defer href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet">
+    <!-- 其他CSS异步加载 -->
+    <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
 
     <?php if ($this->options->enablepjax == '1'): ?>
 
@@ -131,14 +151,18 @@
 
     <!-- JS引入：按优先级分组加载 -->
 
-    <!-- 高优先级：核心功能（首屏必需） -->
-    <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
+    <!-- 高优先级：核心模块（首屏必需） -->
+    <!-- 暂时禁用新的ES6模块，避免样式冲突 -->
+    <!-- <script type="module" src="<?php $this->options->themeUrl('/js/PureSuck_Core.js'); ?>"></script> -->
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
+    <!-- 中优先级：代码高亮 -->
+    <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
+
     <!-- 低优先级：按需加载（评论区/图片交互） -->
-    <script defer src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
-    <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
+    <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
+    <script async src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
 
     <!-- Swup 4：页面过渡动画 -->
     <?php if ($this->options->enablepjax == '1'): ?>

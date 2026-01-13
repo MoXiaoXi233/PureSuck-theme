@@ -635,11 +635,11 @@ function add_zoomable_to_images($content)
         'friends-card-avatar', // 友链头像不参与放大
         // 可以在这里添加更多的排除规则
     );
-
+ 
     // 正则匹配所有图片
     $content = preg_replace_callback('/<img[^>]+>/', function ($matches) use ($exclude_elements) {
         $img = $matches[0];
-
+ 
         // 检查是否在排除列表中
         $should_exclude = false;
         foreach ($exclude_elements as $exclude) {
@@ -648,17 +648,23 @@ function add_zoomable_to_images($content)
                 break;
             }
         }
-
-        // 如果不在排除列表中，添加 data-zoomable 属性
+ 
+        // 如果不在排除列表中，添加 data-zoomable 属性和懒加载
         if (!$should_exclude) {
+            // 添加 data-zoomable 属性
             if (strpos($img, 'data-zoomable') === false) {
                 $img = preg_replace('/<img/', '<img data-zoomable', $img);
             }
+            
+            // 添加 loading="lazy" 属性(如果还没有)
+            if (strpos($img, 'loading=') === false) {
+                $img = preg_replace('/<img/', '<img loading="lazy"', $img);
+            }
         }
-
+ 
         return $img;
     }, $content);
-
+ 
     return $content;
 }
 
