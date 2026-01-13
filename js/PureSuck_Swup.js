@@ -766,7 +766,7 @@
     }
 
     /**
-     * 执行轻量级进入动画
+     * 执行轻量级进入动画（性能优化版）
      * @param {Array} targets - 目标元素数组
      * @param {number} baseDelay - 基础延迟（毫秒）
      * @param {Object} options - 动画配置
@@ -777,67 +777,69 @@
         const duration = options.duration ?? 380;
         const stagger = options.stagger ?? 32;
         const y = options.y ?? 16;
-        const scale = options.scale ?? 1; // 支持缩放效果
+        const scale = options.scale ?? 1;
         const easing = options.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)';
         const batchSize = options.batchSize ?? 8;
         const batchGap = options.batchGap ?? BREATH.batchGapMs;
 
+        // 性能优化：元素较少时一次性处理，避免setTimeout
+        const useSingleBatch = targets.length <= batchSize;
+
         let index = 0;
         const total = targets.length;
+
+        // 预先设置所有元素的初始状态（一次性）
+        targets.forEach((el) => {
+            el.style.opacity = '0';
+            const initialTransform = scale !== 1
+                ? `translate3d(0, ${y}px, 0) scale(${scale})`
+                : `translate3d(0, ${y}px, 0)`;
+            el.style.transform = initialTransform;
+            el.setAttribute('data-ps-animating', '');
+        });
+
+        // 强制重绘以确保初始状态生效
+        void document.documentElement.offsetHeight;
 
         const runBatch = () => {
             const batch = targets.slice(index, index + batchSize);
             if (!batch.length) return;
 
-            batch.forEach((el) => {
-                el.style.willChange = 'transform, opacity';
-                el.style.opacity = '0';
-                // 初始状态：从下方移动 + 可选缩放
-                const initialTransform = scale !== 1
+            batch.forEach((el, batchIndex) => {
+                const absoluteIndex = index + batchIndex;
+                const fromTransform = scale !== 1
                     ? `translate3d(0, ${y}px, 0) scale(${scale})`
                     : `translate3d(0, ${y}px, 0)`;
-                el.style.transform = initialTransform;
-                el.setAttribute('data-ps-animating', '');
-            });
+                const keyframes = [
+                    { opacity: 0, transform: fromTransform },
+                    { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }
+                ];
 
-            requestAnimationFrame(() => {
-                batch.forEach((el, batchIndex) => {
-                    const absoluteIndex = index + batchIndex;
-                    const fromTransform = scale !== 1
-                        ? `translate3d(0, ${y}px, 0) scale(${scale})`
-                        : `translate3d(0, ${y}px, 0)`;
-                    const keyframes = [
-                        { opacity: 0, transform: fromTransform },
-                        { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }
-                    ];
-
-                    const anim = el.animate(keyframes, {
-                        duration,
-                        easing,
-                        delay: baseDelay + absoluteIndex * stagger,
-                        fill: 'both'
-                    });
-
-                    AnimController.register(anim);
-
-                    const cleanup = () => {
-                        el.style.willChange = '';
-                        el.style.opacity = '';
-                        el.style.transform = '';
-                        el.removeAttribute('data-ps-animating');
-                    };
-                    anim.onfinish = cleanup;
-                    anim.oncancel = cleanup;
+                const anim = el.animate(keyframes, {
+                    duration,
+                    easing,
+                    delay: baseDelay + absoluteIndex * stagger,
+                    fill: 'both'
                 });
+
+                AnimController.register(anim);
+
+                const cleanup = () => {
+                    el.style.opacity = '';
+                    el.style.transform = '';
+                    el.removeAttribute('data-ps-animating');
+                };
+                anim.onfinish = cleanup;
+                anim.oncancel = cleanup;
             });
 
             index += batchSize;
-            if (index < total) {
+            if (index < total && !useSingleBatch) {
                 setTimeout(runBatch, batchGap);
             }
         };
 
-        runBatch();
+        requestAnimationFrame(runBatch);
     }
 
     // ==================== 滚动动画 ====================
@@ -1559,17 +1561,26 @@
 
         syncPostSharedElementFromLocation(scrollPlugin);
 
-        // 初始加载的进入动画
+        // 初始加载的进入动画（根据页面类型）
         STATE.lastNavigation.isSwup = false;
-        if (getPageType(window.location.href) === PageType.LIST) {
+        const initialPageType = getPageType(window.location.href);
+
+        if (initialPageType === PageType.LIST) {
             runEnterAnimation(PageType.LIST, false);
+        } else if (initialPageType === PageType.POST) {
+            runEnterAnimation(PageType.POST, false);
+        } else if (initialPageType === PageType.PAGE) {
+            runEnterAnimation(PageType.PAGE, false);
         }
 
-        // 移除预加载类
-        if (document.documentElement.classList.contains('ps-preload-list-enter')) {
+        // 移除预加载类（所有页面类型）
+        const preloadClasses = ['ps-preload-list-enter', 'ps-preload-post-enter', 'ps-preload-page-enter'];
+        const hasPreloadClass = preloadClasses.some(cls => document.documentElement.classList.contains(cls));
+
+        if (hasPreloadClass) {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    document.documentElement.classList.remove('ps-preload-list-enter');
+                    preloadClasses.forEach(cls => document.documentElement.classList.remove(cls));
                 });
             });
         }

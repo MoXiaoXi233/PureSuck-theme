@@ -55,6 +55,26 @@
                 } catch (e) { }
             })();
         </script>
+    <?php elseif ($this->is('post')): ?>
+        <!-- 文章页预加载状态 -->
+        <script>
+            (function () {
+                try {
+                    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    document.documentElement.classList.add('ps-preload-post-enter');
+                } catch (e) { }
+            })();
+        </script>
+    <?php elseif ($this->is('page')): ?>
+        <!-- 独立页预加载状态 -->
+        <script>
+            (function () {
+                try {
+                    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                    document.documentElement.classList.add('ps-preload-page-enter');
+                } catch (e) { }
+            })();
+        </script>
     <?php endif; ?>
 
     <!-- Style CSS -->

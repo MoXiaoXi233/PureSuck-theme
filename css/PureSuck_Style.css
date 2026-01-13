@@ -2403,24 +2403,63 @@ input:-webkit-autofill:active {
 	color: var(--themehovercolor);
 }
 
-/* First-paint preload state for list enter animation (prevents "flash then animate") */
+/* ==================== 预加载状态（防止首屏闪烁） ====================
+ * 这些类在CSS加载前通过内联脚本添加到html元素上
+ * 确保页面首次渲染时元素就处于动画初始状态
+ * 注意：不使用will-change，避免性能问题
+ */
+
+/* 列表页预加载状态 */
 html.ps-preload-list-enter .post.post--index,
 html.ps-preload-list-enter .archive-title,
 html.ps-preload-list-enter .main-pager,
 html.ps-preload-list-enter .main-lastinfo {
 	opacity: 0 !important;
 	transform: translate3d(0, 48px, 0) !important;
-	will-change: transform, opacity;
 }
 
+/* 文章页预加载状态 */
+html.ps-preload-post-enter .post.post--single .post-meta,
+html.ps-preload-post-enter .post.post--single .post-content > *,
+html.ps-preload-post-enter .post.post--single .protected-block,
+html.ps-preload-post-enter .post.post--single .license-info-card {
+	opacity: 0 !important;
+	transform: translate3d(0, 16px, 0) !important;
+}
+html.ps-preload-post-enter .post.post--single .post-comments {
+	opacity: 0 !important;
+	transform: translate3d(0, 24px, 0) !important;
+}
+
+/* 独立页预加载状态 */
+html.ps-preload-page-enter .post.post--index.main-item:not(.post--single) {
+	opacity: 0 !important;
+	transform: translate3d(0, 40px, 0) scale(0.98) !important;
+}
+html.ps-preload-page-enter .post.post--index.main-item .post-title,
+html.ps-preload-page-enter .post.post--index.main-item .post-meta,
+html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
+	opacity: 0 !important;
+	transform: translate3d(0, 12px, 0) !important;
+}
+
+/* 降级处理 */
 @media (prefers-reduced-motion: reduce) {
 	html.ps-preload-list-enter .post.post--index,
 	html.ps-preload-list-enter .archive-title,
 	html.ps-preload-list-enter .main-pager,
-	html.ps-preload-list-enter .main-lastinfo {
+	html.ps-preload-list-enter .main-lastinfo,
+	html.ps-preload-post-enter .post.post--single .post-meta,
+	html.ps-preload-post-enter .post.post--single .post-content > *,
+	html.ps-preload-post-enter .post.post--single .protected-block,
+	html.ps-preload-post-enter .post.post--single .license-info-card,
+	html.ps-preload-post-enter .post.post--single .post-comments,
+	html.ps-preload-page-enter .post.post--index.main-item:not(.post--single),
+	html.ps-preload-page-enter .post.post--index.main-item .post-title,
+	html.ps-preload-page-enter .post.post--index.main-item .post-meta,
+	html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 		opacity: 1 !important;
 		transform: none !important;
-		will-change: auto;
 	}
 }
 
