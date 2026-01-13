@@ -2460,3 +2460,125 @@ html.ps-theme-vt::view-transition-old(root) {
 html.ps-theme-vt::view-transition-new(root) {
 	animation: ps-theme-fade-in 320ms ease;
 }
+
+/* ==================== PureSuck 页面过渡动画系统 ==================== */
+
+/*
+ * 动画状态类说明：
+ * - ps-animating: 导航进行中的通用状态（禁用 transition 和平滑滚动）
+ * - ps-exit-active: 退出动画执行中
+ * - ps-enter-active: 进入动画执行中
+ * - ps-page-exit: 独立页面退出
+ * - ps-page-enter: 独立页面进入
+ * - ps-post-exit: 文章页退出
+ * - ps-post-enter: 文章页进入
+ * - ps-list-exit: 列表页退出
+ * - ps-list-enter: 列表页进入
+ * - ps-vt-mode: View Transitions 模式（由 VT API 接管）
+ */
+
+/* ========== 退出动画 ========== */
+
+/* 独立页面退出：整个卡片淡出 */
+html.ps-page-exit .post.post--index.main-item:not(.post--single) {
+	animation: ps-page-exit-out 380ms cubic-bezier(.4,0,.2,1) forwards;
+}
+
+@keyframes ps-page-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -20px, 0);
+	}
+}
+
+/* 文章页退出：整个文章容器淡出（非 VT 模式） */
+html.ps-post-exit .post.post--single {
+	animation: ps-post-exit-out 380ms cubic-bezier(.4,0,.2,1) forwards;
+}
+
+@keyframes ps-post-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -20px, 0);
+	}
+}
+
+/* 列表页退出：卡片逐个淡出（非 VT 模式） */
+/* VT 模式下完全不应用退出动画，由 View Transitions API 接管 */
+html:not(.ps-vt-mode).ps-list-exit .post.post--index {
+	animation: ps-list-exit-out 200ms cubic-bezier(.4,0,.2,1) forwards;
+}
+
+@keyframes ps-list-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -15px, 0);
+	}
+}
+
+/* 列表页退出时的延迟效果（非 VT 模式） */
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(1) { animation-delay: 0ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(2) { animation-delay: 30ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(3) { animation-delay: 60ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(4) { animation-delay: 90ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(5) { animation-delay: 120ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(6) { animation-delay: 150ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(7) { animation-delay: 180ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(8) { animation-delay: 210ms; }
+html:not(.ps-vt-mode).ps-list-exit .post.post--index:nth-child(n+9) { animation-delay: 240ms; }
+
+/* ========== 进入动画（CSS 辅助，主体由 JS 控制）========== */
+
+/* 独立页面进入：初始状态 */
+html.ps-page-enter .post.post--index.main-item:not(.post--single) {
+	opacity: 0;
+	transform: translate3d(0, 30px, 0);
+}
+
+/* 文章页进入：初始状态（内容元素由 JS 控制） */
+html.ps-post-enter .post.post--single .post-meta,
+html.ps-post-enter .post.post--single .post-content > *,
+html.ps-post-enter .post.post--single .protected-block,
+html.ps-post-enter .post.post--single .license-info-card {
+	opacity: 0;
+	transform: translate3d(0, 10px, 0);
+}
+
+/* 列表页进入：初始状态 */
+html.ps-list-enter .post.post--index,
+html.ps-list-enter .archive-title {
+	opacity: 0;
+	transform: translate3d(0, 60px, 0);
+}
+
+/* ========== 动画状态控制 ========== */
+
+/* 禁用动画时的降级处理 */
+@media (prefers-reduced-motion: reduce) {
+	html.ps-page-exit .post.post--index.main-item:not(.post--single),
+	html.ps-post-exit .post.post--single,
+	html.ps-list-exit .post.post--index {
+		animation: none !important;
+		opacity: 1 !important;
+		transform: none !important;
+	}
+
+	html.ps-page-enter .post.post--index.main-item:not(.post--single),
+	html.ps-list-enter .post.post--index,
+	html.ps-list-enter .archive-title {
+		opacity: 1 !important;
+		transform: none !important;
+	}
+}
