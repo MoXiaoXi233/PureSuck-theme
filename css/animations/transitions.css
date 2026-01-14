@@ -1,0 +1,132 @@
+/**
+ * PureSuck 主题动画基础设置
+ * 
+ * 包含：
+ * - CSS 动画变量定义
+ * - 动画基础设置
+ * - 预加载状态（防止首屏闪烁）
+ * - Swup 导航期间的状态控制
+ */
+
+/* ==================== 动画变量定义 ==================== */
+
+:root {
+	/* 动画时长变量 - 可在主题配置中覆盖 */
+	--ps-anim-duration-fast: 180ms;
+	--ps-anim-duration-normal: 240ms;
+	--ps-anim-duration-slow: 320ms;
+	--ps-anim-duration-vt: 280ms;
+	
+	/* 动画缓动函数 */
+	--ps-anim-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+	--ps-anim-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+	
+	/* 动画位移距离 */
+	--ps-anim-translate-small: 12px;
+	--ps-anim-translate-medium: 24px;
+	--ps-anim-translate-large: 48px;
+	
+	/* 动画缩放比例 */
+	--ps-anim-scale-exit: 0.96;
+	--ps-anim-scale-enter: 0.98;
+}
+
+/* ==================== Swup 导航期间的状态控制 ==================== */
+
+/* Swup 导航期间禁止平滑滚动（避免 scrollTo/锚点触发"滑动上去"） */
+html.is-animating {
+	scroll-behavior: auto !important;
+}
+
+/* 导航期间禁用所有过渡和动画 */
+html.is-animating *,
+html.is-animating *::before,
+html.is-animating *::after {
+	transition: none !important;
+	animation-play-state: paused !important;
+}
+
+/* 动画执行期间禁用页面过渡，避免冲突 */
+html.ps-animating * {
+	transition: none !important;
+}
+
+/* ==================== 预加载状态（防止首屏闪烁） ====================
+ * 这些类在CSS加载前通过内联脚本添加到html元素上
+ * 确保页面首次渲染时元素就处于动画初始状态
+ * 注意：不使用will-change，避免性能问题
+ */
+
+/* 列表页预加载状态 */
+html.ps-preload-list-enter .post.post--index,
+html.ps-preload-list-enter .archive-title,
+html.ps-preload-list-enter .main-pager,
+html.ps-preload-list-enter .main-lastinfo {
+	opacity: 0 !important;
+	transform: translate3d(0, var(--ps-anim-translate-large), 0) !important;
+}
+
+/* 文章页预加载状态 */
+html.ps-preload-post-enter .post.post--single .post-meta,
+html.ps-preload-post-enter .post.post--single .post-content > *,
+html.ps-preload-post-enter .post.post--single .protected-block,
+html.ps-preload-post-enter .post.post--single .license-info-card {
+	opacity: 0 !important;
+	transform: translate3d(0, var(--ps-anim-translate-small), 0) !important;
+}
+html.ps-preload-post-enter .post.post--single .post-comments {
+	opacity: 0 !important;
+	transform: translate3d(0, var(--ps-anim-translate-medium), 0) !important;
+}
+
+/* 独立页预加载状态 */
+html.ps-preload-page-enter .post.post--index.main-item:not(.post--single) {
+	opacity: 0 !important;
+	transform: translate3d(0, 40px, 0) scale(0.98) !important;
+}
+html.ps-preload-page-enter .post.post--index.main-item .post-title,
+html.ps-preload-page-enter .post.post--index.main-item .post-meta,
+html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
+	opacity: 0 !important;
+	transform: translate3d(0, 12px, 0) !important;
+}
+
+/* ==================== 降级处理 ==================== */
+
+/* 用户偏好减少动画时，禁用所有动画 */
+@media (prefers-reduced-motion: reduce) {
+	html.ps-preload-list-enter .post.post--index,
+	html.ps-preload-list-enter .archive-title,
+	html.ps-preload-list-enter .main-pager,
+	html.ps-preload-list-enter .main-lastinfo,
+	html.ps-preload-post-enter .post.post--single .post-meta,
+	html.ps-preload-post-enter .post.post--single .post-content > *,
+	html.ps-preload-post-enter .post.post--single .protected-block,
+	html.ps-preload-post-enter .post.post--single .license-info-card,
+	html.ps-preload-post-enter .post.post--single .post-comments,
+	html.ps-preload-page-enter .post.post--index.main-item:not(.post--single),
+	html.ps-preload-page-enter .post.post--index.main-item .post-title,
+	html.ps-preload-page-enter .post.post--index.main-item .post-meta,
+	html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
+		opacity: 1 !important;
+		transform: none !important;
+	}
+	
+	html.ps-animating {
+		scroll-behavior: auto !important;
+	}
+	
+	html.ps-animating *,
+	html.ps-animating *::before,
+	html.ps-animating *::after {
+		transition: none !important;
+		animation: none !important;
+	}
+}
+
+/* ==================== 滚动条控制 ==================== */
+
+/* 动画期间保持滚动条稳定 */
+html.ps-animating {
+	scrollbar-gutter: stable;
+}

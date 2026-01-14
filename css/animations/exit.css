@@ -1,0 +1,202 @@
+/**
+ * PureSuck 主题退出动画
+ * 
+ * 包含：
+ * - 列表页退出动画
+ * - 文章页退出动画
+ * - 独立页面退出动画
+ * - VT 模式下的特殊退出动画
+ * 
+ * 动画设计原则：
+ * 1. 退出动画：淡出 + 轻微缩小 + 方向性位移
+ * 2. 对称性：退出和进入形成视觉对称
+ * 3. 层次感：主要元素先动，次要元素后动
+ * 4. GPU 加速：使用 transform: translate3d 和 will-change
+ */
+
+/* ==================== 列表页退出动画 ==================== */
+
+/*
+ * 列表页退出动画
+ * 效果：卡片逐个淡出 + 缩小 + 轻微上移
+ * 使用 GPU 加速优化性能
+ */
+html.ps-list-exit .post.post--index {
+	animation: ps-list-exit-out var(--ps-anim-duration-normal) var(--ps-anim-ease-out) forwards;
+	animation-fill-mode: both;
+	will-change: opacity, transform;
+}
+
+/* VT模式下的列表卡片退出动画（用于非点击的卡片） */
+html.ps-vt-mode.ps-list-exit .post.post--index:not([data-ps-vt-name]) {
+	animation: ps-list-card-exit-for-vt var(--ps-anim-duration-vt) var(--ps-anim-ease-out) forwards;
+	will-change: opacity, transform;
+}
+
+/* 共享元素卡片（被点击的）：淡出 + 缩小 */
+html.ps-vt-mode.ps-list-exit .post.post--index[data-ps-vt-name] {
+	animation: ps-list-shared-exit var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
+	will-change: opacity, transform;
+}
+
+/* 列表页退出动画关键帧 */
+@keyframes ps-list-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -12px, 0) scale(var(--ps-anim-scale-exit));
+	}
+}
+
+@keyframes ps-list-card-exit-for-vt {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0.4;
+		transform: translate3d(0, -8px, 0) scale(0.98);
+	}
+}
+
+@keyframes ps-list-shared-exit {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -16px, 0) scale(0.94);
+	}
+}
+
+/* 列表页退出：卡片延迟效果（波浪式退出） */
+html.ps-list-exit .post.post--index:nth-child(1) { animation-delay: 0ms; }
+html.ps-list-exit .post.post--index:nth-child(2) { animation-delay: 25ms; }
+html.ps-list-exit .post.post--index:nth-child(3) { animation-delay: 50ms; }
+html.ps-list-exit .post.post--index:nth-child(4) { animation-delay: 75ms; }
+html.ps-list-exit .post.post--index:nth-child(5) { animation-delay: 100ms; }
+html.ps-list-exit .post.post--index:nth-child(6) { animation-delay: 120ms; }
+html.ps-list-exit .post.post--index:nth-child(7) { animation-delay: 140ms; }
+html.ps-list-exit .post.post--index:nth-child(8) { animation-delay: 160ms; }
+html.ps-list-exit .post.post--index:nth-child(n+9) { animation-delay: 180ms; }
+
+/* 列表页退出：辅助元素延迟更久 */
+html.ps-list-exit .archive-title {
+	animation: ps-list-exit-out 200ms var(--ps-anim-ease-out) forwards;
+	animation-delay: 40ms;
+	will-change: opacity, transform;
+}
+html.ps-list-exit .main-pager,
+html.ps-list-exit .main-lastinfo {
+	animation: ps-list-exit-out 180ms var(--ps-anim-ease-out) forwards;
+	animation-delay: 100ms;
+	will-change: opacity, transform;
+}
+
+/* ==================== 文章页退出动画 ==================== */
+
+/*
+ * 文章页退出动画
+ * 效果：整体淡出 + 轻微上移 + 缩小
+ */
+html.ps-post-exit .post.post--single {
+	animation: ps-post-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
+	will-change: opacity, transform;
+}
+
+/* 文章页内容分段退出 */
+html.ps-post-exit .post.post--single .post-meta {
+	animation: ps-post-exit-out calc(var(--ps-anim-duration-slow) - 40ms) var(--ps-anim-ease-out) forwards;
+	animation-delay: 0ms;
+	will-change: opacity, transform;
+}
+html.ps-post-exit .post.post--single .post-content > * {
+	animation: ps-post-exit-out calc(var(--ps-anim-duration-slow) - 40ms) var(--ps-anim-ease-out) forwards;
+	animation-delay: 30ms;
+	will-change: opacity, transform;
+}
+html.ps-post-exit .post.post--single .post-comments {
+	animation: ps-post-exit-out calc(var(--ps-anim-duration-slow) - 80ms) var(--ps-anim-ease-out) forwards;
+	animation-delay: 60ms;
+	will-change: opacity, transform;
+}
+
+/* 文章页退出动画关键帧 */
+@keyframes ps-post-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, var(--ps-anim-translate-medium), 0) scale(0.98);
+	}
+}
+
+/* ==================== 独立页面退出动画 ==================== */
+
+/*
+ * 独立页面退出动画
+ * 效果：卡片淡出 + 上移 + 缩小
+ */
+html.ps-page-exit .post.post--index.main-item:not(.post--single) {
+	animation: ps-page-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
+	will-change: opacity, transform;
+}
+
+/* 独立页面内部内容退出 */
+html.ps-page-exit .post.post--index.main-item .post-title,
+html.ps-page-exit .post.post--index.main-item .post-meta {
+	animation: ps-page-inner-exit-out 260ms var(--ps-anim-ease-out) forwards;
+	animation-delay: 40ms;
+	will-change: opacity, transform;
+}
+html.ps-page-exit .post.post--index.main-item .inner-post-wrapper > * {
+	animation: ps-page-inner-exit-out 240ms var(--ps-anim-ease-out) forwards;
+	animation-delay: 60ms;
+	will-change: opacity, transform;
+}
+
+/* 独立页面退出动画关键帧 */
+@keyframes ps-page-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -20px, 0) scale(0.97);
+	}
+}
+
+@keyframes ps-page-inner-exit-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -12px, 0);
+	}
+}
+
+/* ==================== 降级处理 ==================== */
+
+/* 用户偏好减少动画时，禁用所有退出动画 */
+@media (prefers-reduced-motion: reduce) {
+	html.ps-page-exit .post.post--index.main-item:not(.post--single),
+	html.ps-post-exit .post.post--single,
+	html.ps-list-exit .post.post--index,
+	html.ps-page-exit .post.post--index .post-title,
+	html.ps-page-exit .post.post--index .post-meta,
+	html.ps-page-exit .post.post--index .inner-post-wrapper > * {
+		animation: none !important;
+		opacity: 1 !important;
+		transform: none !important;
+		will-change: auto !important;
+	}
+}

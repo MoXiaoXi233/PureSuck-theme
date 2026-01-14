@@ -1,0 +1,149 @@
+/**
+ * PureSuck 主题 View Transitions 样式
+ * 
+ * 包含：
+ * - View Transitions API 基础配置
+ * - 主题切换动画
+ * - VT 模式下的页面过渡
+ * - VT 相关的降级处理
+ * 
+ * View Transitions API 说明：
+ * - 使用 ::view-transition-old 和 ::view-transition-new 伪元素
+ * - 支持共享元素动画（morphing）
+ * - 自动处理页面切换的视觉效果
+ */
+
+/* ==================== View Transitions API 基础配置 ==================== */
+
+/* 启用 View Transitions API 的自动导航 */
+@view-transition {
+	navigation: auto;
+}
+
+/* 保持 morph 聚焦于共享元素，避免全页面交叉淡入淡出 */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+}
+
+/* ==================== 主题切换动画 ==================== */
+
+/*
+ * 主题切换时的 View Transitions 动画
+ * 使用 ps-theme-vt 类标识主题切换过程
+ */
+
+/* 主题切换淡出动画 */
+@keyframes ps-theme-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+/* 主题切换淡入动画 */
+@keyframes ps-theme-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* 主题切换时的 VT 动画 */
+html.ps-theme-vt::view-transition-old(root) {
+	animation: ps-theme-fade-out var(--ps-anim-duration-vt) ease;
+}
+
+html.ps-theme-vt::view-transition-new(root) {
+	animation: ps-theme-fade-in calc(var(--ps-anim-duration-vt) + 40ms) ease;
+}
+
+/* ==================== VT 模式下的页面过渡 ==================== */
+
+/*
+ * VT 模式下的共享元素动画
+ * 使用 data-ps-vt-name 属性标识共享元素
+ */
+
+/* 共享元素的 VT 容器样式 */
+[data-ps-vt-name] {
+	view-transition-name: attr(data-ps-vt-name);
+	contain: layout style paint;
+}
+
+/* VT 模式下的页面过渡优化 */
+html.ps-vt-mode {
+	/* VT 期间禁用页面过渡，避免冲突 */
+	transition: none !important;
+}
+
+html.ps-vt-mode * {
+	transition: none !important;
+}
+
+/* ==================== VT 相关的降级处理 ==================== */
+
+/* 用户偏好减少动画时，禁用 VT 动画 */
+@media (prefers-reduced-motion: reduce) {
+	@view-transition {
+		navigation: auto;
+	}
+	
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none !important;
+	}
+	
+	html.ps-theme-vt::view-transition-old(root),
+	html.ps-theme-vt::view-transition-new(root) {
+		animation: none !important;
+	}
+}
+
+/* 不支持 View Transitions API 的浏览器降级处理 */
+@supports not (view-transition-name: none) {
+	/* 回退到传统的 CSS 动画 */
+	html.ps-vt-mode .post.post--index {
+		transition: opacity var(--ps-anim-duration-normal) ease,
+		            transform var(--ps-anim-duration-normal) ease;
+	}
+}
+
+/* ==================== VT 性能优化 ==================== */
+
+/* 使用 contain 属性优化 VT 性能 */
+::view-transition-image-pair(root) {
+	isolation: isolate;
+}
+
+/* 优化 VT 动画期间的渲染性能 */
+html.ps-vt-mode {
+	will-change: auto;
+}
+
+/* VT 期间的滚动行为优化 */
+html.ps-vt-mode {
+	scroll-behavior: auto !important;
+}
+
+/* ==================== VT 调试辅助（开发时使用） ==================== */
+
+/*
+ * 调试模式：高亮 VT 共享元素
+ * 取消注释以下 CSS 可以看到哪些元素参与了 VT 动画
+ */
+/*
+[data-ps-vt-name] {
+	outline: 2px dashed red !important;
+	outline-offset: 2px;
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+	outline: 2px solid blue !important;
+}
+*/

@@ -1,0 +1,26 @@
+/**
+ * PureSuck 主题动画样式统一入口
+ * 
+ * 本文件整合所有动画模块，提供统一的动画样式管理
+ * 
+ * 模块说明：
+ * - transitions.css: 页面过渡动画基础设置
+ * - exit.css: 页面退出动画（列表页、文章页、独立页）
+ * - enter.css: 页面进入动画（列表页、文章页、独立页）
+ * - vt.css: View Transitions API 样式
+ * 
+ * 使用说明：
+ * 在主样式文件顶部导入：@import 'animations/index.css';
+ */
+
+/* 导入动画变量和基础设置 */
+@import 'transitions.css';
+
+/* 导入退出动画 */
+@import 'exit.css';
+
+/* 导入进入动画 */
+@import 'enter.css';
+
+/* 导入 View Transitions 样式 */
+@import 'vt.css';

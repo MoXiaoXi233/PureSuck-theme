@@ -1,0 +1,153 @@
+/**
+ * PureSuck 主题进入动画
+ * 
+ * 包含：
+ * - 列表页进入动画（CSS辅助初始状态，主体动画由JS控制）
+ * - 文章页进入动画（CSS辅助初始状态）
+ * - 独立页面进入动画（CSS辅助初始状态）
+ * - VT 模式下的特殊进入动画
+ * 
+ * 动画设计原则：
+ * 1. 进入动画：淡入 + 轻微放大 + 反向位移
+ * 2. 对称性：退出和进入形成视觉对称
+ * 3. 层次感：主要元素先动，次要元素后动
+ * 4. GPU 加速：使用 transform: translate3d 和 will-change
+ */
+
+/* ==================== 列表页进入动画 ==================== */
+
+/*
+ * 列表页进入动画（CSS辅助初始状态，主体动画由JS控制）
+ * 设置初始状态，等待 JS 添加动画类
+ */
+html.ps-list-enter .post.post--index,
+html.ps-list-enter .archive-title {
+	opacity: 0;
+	transform: translate3d(0, var(--ps-anim-translate-large), 0);
+	will-change: opacity, transform;
+}
+html.ps-list-enter .main-pager,
+html.ps-list-enter .main-lastinfo {
+	opacity: 0;
+	transform: translate3d(0, var(--ps-anim-translate-medium), 0);
+	will-change: opacity, transform;
+}
+
+/* ==================== 文章页进入动画 ==================== */
+
+/*
+ * 文章页进入动画（CSS辅助初始状态）
+ * 设置初始状态，等待 JS 添加动画类
+ */
+html.ps-post-enter .post.post--single .post-meta,
+html.ps-post-enter .post.post--single .post-content > *,
+html.ps-post-enter .post.post--single .protected-block,
+html.ps-post-enter .post.post--single .license-info-card {
+	opacity: 0;
+	transform: translate3d(0, var(--ps-anim-translate-small), 0);
+	will-change: opacity, transform;
+}
+html.ps-post-enter .post.post--single .post-comments {
+	opacity: 0;
+	transform: translate3d(0, var(--ps-anim-translate-medium), 0);
+	will-change: opacity, transform;
+}
+
+/* ==================== 独立页面进入动画 ==================== */
+
+/*
+ * 独立页面进入动画（CSS辅助初始状态）
+ * 设置初始状态，等待 JS 添加动画类
+ */
+html.ps-page-enter .post.post--index.main-item:not(.post--single) {
+	opacity: 0;
+	transform: translate3d(0, 40px, 0) scale(0.98);
+	will-change: opacity, transform;
+}
+html.ps-page-enter .post.post--index.main-item .post-title,
+html.ps-page-enter .post.post--index.main-item .post-meta,
+html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
+	opacity: 0;
+	transform: translate3d(0, 12px, 0);
+	will-change: opacity, transform;
+}
+
+/* ==================== VT 模式特殊处理 ==================== */
+
+/* VT 完成后新内容的初始状态 */
+html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
+	opacity: 0;
+	transform: translate3d(0, 12px, 0);
+	will-change: opacity, transform;
+}
+
+/* ==================== 进入动画关键帧（JS控制使用） ==================== */
+
+/*
+ * 这些关键帧由 JS 动态添加到元素上
+ * CSS 只提供初始状态，JS 负责触发动画
+ */
+
+/* 列表页进入动画 */
+@keyframes ps-list-enter-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, var(--ps-anim-translate-large), 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+/* 文章页进入动画 */
+@keyframes ps-post-enter-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, var(--ps-anim-translate-small), 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+/* 独立页面进入动画 */
+@keyframes ps-page-enter-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 40px, 0) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+/* ==================== 降级处理 ==================== */
+
+/* 用户偏好减少动画时，禁用所有进入动画 */
+@media (prefers-reduced-motion: reduce) {
+	html.ps-page-enter .post.post--index.main-item:not(.post--single),
+	html.ps-page-enter .post.post--index .post-title,
+	html.ps-page-enter .post.post--index .post-meta,
+	html.ps-page-enter .post.post--index .inner-post-wrapper > *,
+	html.ps-list-enter .post.post--index,
+	html.ps-list-enter .archive-title,
+	html.ps-list-enter .main-pager,
+	html.ps-list-enter .main-lastinfo,
+	html.ps-post-enter .post.post--single .post-meta,
+	html.ps-post-enter .post.post--single .post-content > *,
+	html.ps-post-enter .post.post--single .protected-block,
+	html.ps-post-enter .post.post--single .license-info-card {
+		opacity: 1 !important;
+		transform: none !important;
+		will-change: auto !important;
+	}
+	
+	html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
+		opacity: 1 !important;
+		transform: none !important;
+		will-change: auto !important;
+	}
+}
