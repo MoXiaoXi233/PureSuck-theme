@@ -24,20 +24,6 @@
     <!-- 2. 预连接CDN -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
-    <!-- 3. 内联关键CSS（首屏必需） -->
-    <style>
-        * { box-sizing: border-box; }
-        html {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-        }
-        body { margin: 0; padding: 0; }
-        .wrapper { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        html.ps-preload-list-enter .post { opacity: 0; transform: translate3d(0, 48px, 0); }
-        html.ps-preload-post-enter .post-body > * { opacity: 0; transform: translate3d(0, 32px, 0); }
-        html.ps-preload-page-enter .post { opacity: 0; transform: translate3d(0, 48px, 0); }
-    </style>
 
     <!-- 4. 主题防闪烁脚本 -->
     <script>
@@ -94,48 +80,9 @@
         </script>
     <?php endif; ?>
 
-    <!-- 6. 异步加载非关键CSS -->
-    <!-- 暂时禁用新的CSS文件，避免样式冲突 -->
-    <!-- <link rel="stylesheet" href="<?= $this->options->themeUrl('css/critical.css'); ?>" media="print" onload="this.media='all'"> -->
-    <!-- <link rel="stylesheet" href="<?= $this->options->themeUrl('css/animations.css'); ?>" media="print" onload="this.media='all'"> -->
+    <!-- 6. 加载CSS文件 -->
+    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>" media="print" onload="this.media='all'">
-    <!-- 主题样式微调 -->
-    <!-- 标题线条 -->
-    <?php if ($this->options->postTitleAfter == 'off'): ?>
-        <style>
-            .post-title::after {
-                content: none !important;
-                display: none !important;
-            }
-
-            .post-title {
-                margin: 0;
-            }
-        </style>
-    <?php else: ?>
-        <style>
-            .post-title::after {
-                bottom:
-                    <?= $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>
-                ;
-                left: 0;
-                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>
-                    width: 58px;
-                    height: 13px;
-                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>
-                    width: 80px;
-                    height: 12px;
-                    mask:
-                        <?= "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>
-                    ;
-                    mask-size: 40px 12px;
-                <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
-                    /* handDrawn... */
-                <?php endif; ?>
-            }
-        </style>
-    <?php endif; ?>
     <!-- ICON Setting -->
     <link rel="icon"
         href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>"
@@ -144,6 +91,26 @@
     <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
+
+    <!-- 标题线条 -->
+    <?php if ($this->options->postTitleAfter != 'off'): ?>
+        <style>
+            .post-title::after {
+                bottom: <?php echo $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
+                left: <?php echo '0'; ?>;
+                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?php echo '58px'; ?>;
+                height: <?php echo '11px'; ?>;
+                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?php echo '106px'; ?>;
+                height: <?php echo '12px'; ?>;
+                mask: <?php echo "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
+                mask-size: <?php echo '40px 12px'; ?>;
+                <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
+                /* 添加手绘风格的样式 */
+                /* 这里可以添加具体的手绘风格的样式 */
+                <?php endif; ?>
+            }
+        </style>
+    <?php endif; ?>
 
     <?php if ($this->options->enablepjax == '1'): ?>
 
