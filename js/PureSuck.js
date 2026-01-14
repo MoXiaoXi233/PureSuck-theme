@@ -121,45 +121,83 @@ import {
 // 功能层模块导入
 // ============================================================================
 
-import { 
-    TOCModule, 
-    tocModule 
+import {
+    TOCModule,
+    tocModule
 } from './features/TOCModule.js';
 
-import { 
-    ThemeModule, 
-    themeModule 
+import {
+    ThemeModule,
+    themeModule
 } from './features/ThemeModule.js';
 
-import { 
-    CommentModule, 
-    commentModule 
+import {
+    CommentModule,
+    commentModule
 } from './features/CommentModule.js';
 
-import { 
-    NavIndicator, 
-    navIndicator 
+import {
+    NavIndicator,
+    navIndicator
 } from './features/NavIndicator.js';
 
-import { 
-    GoTopButton, 
-    goTopButton 
+import {
+    GoTopButton,
+    goTopButton
 } from './features/GoTopButton.js';
 
-import { 
-    TabModule, 
-    tabModule 
+import {
+    TabModule,
+    tabModule
 } from './features/TabModule.js';
 
-import { 
-    CollapsiblePanel, 
-    collapsiblePanel 
+import {
+    CollapsiblePanel,
+    collapsiblePanel
 } from './features/CollapsiblePanel.js';
 
-import { 
-    StickyTOC, 
-    stickyTOC 
+import {
+    StickyTOC,
+    stickyTOC
 } from './features/StickyTOC.js';
+
+// ============================================================================
+// 预加载层模块导入
+// ============================================================================
+
+import {
+    PreloadCoordinator,
+    preloadCoordinator,
+    CoordinatorState,
+    PreloadPhase
+} from './preload/PreloadCoordinator.js';
+
+import {
+    PagePreloader,
+    pagePreloader,
+    PreloadState
+} from './preload/PagePreloader.js';
+
+import {
+    SequentialTaskQueue,
+    sequentialTaskQueue,
+    PredefinedTasks,
+    TaskPriority,
+    TaskExecutionState,
+    QueueState
+} from './preload/SequentialTaskQueue.js';
+
+import {
+    PageStabilityMonitor,
+    pageStabilityMonitor,
+    MonitorState
+} from './preload/PageStabilityMonitor.js';
+
+import {
+    AnimationGatekeeper,
+    animationGatekeeper,
+    LockState
+} from './preload/AnimationGatekeeper.js';
 
 // ============================================================================
 // 版本信息
@@ -205,6 +243,28 @@ class PureSuck {
             debug: false,
             defer: false,
             modules: {},
+            preload: {
+                enabled: true,
+                debug: false,
+                preload: {
+                    enabled: true,
+                    cacheSize: 5,
+                    timeout: 5000
+                },
+                taskQueue: {
+                    enabled: true,
+                    timeout: 15000
+                },
+                stability: {
+                    enabled: true,
+                    minScore: 80,
+                    timeout: 5000
+                },
+                animation: {
+                    enabled: true,
+                    timeout: 10000
+                }
+            },
             ...options
         };
 
@@ -270,10 +330,13 @@ class PureSuck {
             // 5. 初始化功能层模块
             await this._initFeatureLayer();
 
-            // 6. 设置全局事件监听
+            // 6. 初始化预加载协调器
+            await this._initPreloadLayer();
+
+            // 7. 设置全局事件监听
             this._setupGlobalEventListeners();
 
-            // 7. 标记为已初始化
+            // 8. 标记为已初始化
             this._isInitialized = true;
 
             this._log('PureSuck initialization completed', {
@@ -460,6 +523,46 @@ class PureSuck {
     }
 
     /**
+     * 初始化预加载层模块
+     * @private
+     * @returns {Promise<void>}
+     */
+    async _initPreloadLayer() {
+        this._log('Initializing preload layer...');
+
+        try {
+            // 检查是否启用预加载
+            if (this._options.preload.enabled === false) {
+                this._log('Preload layer disabled by configuration');
+                return;
+            }
+
+            // 初始化预加载协调器
+            const initialized = await preloadCoordinator.init(this._options.preload);
+            
+            if (initialized) {
+                this._log('Preload coordinator initialized successfully');
+            } else {
+                this._log('Preload coordinator initialization failed', 'warn');
+            }
+
+            this._log('Preload layer initialized');
+        } catch (error) {
+            this._log('Preload layer initialization error:', error);
+            
+            // 使用错误边界处理初始化错误
+            ErrorBoundary.handle(error, {
+                type: ErrorType.RENDERING,
+                severity: ErrorSeverity.MEDIUM,
+                message: '预加载层初始化失败，部分预加载功能可能不可用',
+                metadata: { phase: 'preload-initialization' }
+            });
+
+            // 不抛出错误，允许系统继续运行
+        }
+    }
+
+    /**
      * 设置核心事件监听
      * @private
      */
@@ -569,6 +672,13 @@ class PureSuck {
             this._log('Error cleaning up navigation layer:', error);
         }
 
+        // 清理预加载层
+        try {
+            preloadCoordinator.destroy();
+        } catch (error) {
+            this._log('Error cleaning up preload layer:', error);
+        }
+
         // 清理核心层
         try {
             stateManager.destroy();
@@ -633,6 +743,73 @@ class PureSuck {
     disableDebug() {
         DEBUG = false;
         this._log('Debug mode disabled');
+    }
+
+    /**
+     * 获取预加载状态
+     * @returns {Object} 预加载状态信息
+     */
+    getPreloadStatus() {
+        return preloadCoordinator.getCoordinatorStatus();
+    }
+
+    /**
+     * 获取详细预加载状态
+     * @returns {Object} 详细预加载状态信息
+     */
+    getDetailedPreloadStatus() {
+        return preloadCoordinator.getDetailedStatus();
+    }
+
+    /**
+     * 启用预加载
+     */
+    enablePreload() {
+        preloadCoordinator.enable();
+        this._log('Preload enabled');
+    }
+
+    /**
+     * 禁用预加载
+     */
+    disablePreload() {
+        preloadCoordinator.disable();
+        this._log('Preload disabled');
+    }
+
+    /**
+     * 准备页面导航（预加载）
+     * @param {string} url - 目标URL
+     * @returns {Promise<Object|null>} 预加载结果
+     */
+    async preparePageNavigation(url) {
+        return await preloadCoordinator.preparePageNavigation(url);
+    }
+
+    /**
+     * 执行导航后任务
+     * @returns {Promise<Object|null>} 执行结果
+     */
+    async executePostNavigationTasks() {
+        return await preloadCoordinator.executePostNavigationTasks();
+    }
+
+    /**
+     * 等待页面稳定
+     * @param {Object} [options] - 选项
+     * @returns {Promise<Object|null>} 稳定性指标
+     */
+    async waitForPageStability(options) {
+        return await preloadCoordinator.waitForPageStability(options);
+    }
+
+    /**
+     * 请求进入动画
+     * @param {Object} animationConfig - 动画配置
+     * @returns {Promise<boolean>} 是否成功执行动画
+     */
+    async requestEnterAnimation(animationConfig) {
+        return await preloadCoordinator.requestEnterAnimation(animationConfig);
     }
 
     /**
@@ -748,6 +925,29 @@ window.PureSuck = {
         stickyTOC
     },
 
+    // 预加载层模块
+    preload: {
+        PreloadCoordinator,
+        preloadCoordinator,
+        CoordinatorState,
+        PreloadPhase,
+        PagePreloader,
+        pagePreloader,
+        PreloadState,
+        SequentialTaskQueue,
+        sequentialTaskQueue,
+        PredefinedTasks,
+        TaskPriority,
+        TaskExecutionState,
+        QueueState,
+        PageStabilityMonitor,
+        pageStabilityMonitor,
+        MonitorState,
+        AnimationGatekeeper,
+        animationGatekeeper,
+        LockState
+    },
+
     // 所有模块的扁平化引用（向后兼容）
     modules: {
         // 核心层
@@ -813,7 +1013,27 @@ window.PureSuck = {
         CollapsiblePanel,
         collapsiblePanel,
         StickyTOC,
-        stickyTOC
+        stickyTOC,
+        // 预加载层
+        PreloadCoordinator,
+        preloadCoordinator,
+        CoordinatorState,
+        PreloadPhase,
+        PagePreloader,
+        pagePreloader,
+        PreloadState,
+        SequentialTaskQueue,
+        sequentialTaskQueue,
+        PredefinedTasks,
+        TaskPriority,
+        TaskExecutionState,
+        QueueState,
+        PageStabilityMonitor,
+        pageStabilityMonitor,
+        MonitorState,
+        AnimationGatekeeper,
+        animationGatekeeper,
+        LockState
     },
 
     // 初始化函数
@@ -936,7 +1156,27 @@ export {
     CollapsiblePanel,
     collapsiblePanel,
     StickyTOC,
-    stickyTOC
+    stickyTOC,
+    // 预加载层
+    PreloadCoordinator,
+    preloadCoordinator,
+    CoordinatorState,
+    PreloadPhase,
+    PagePreloader,
+    pagePreloader,
+    PreloadState,
+    SequentialTaskQueue,
+    sequentialTaskQueue,
+    PredefinedTasks,
+    TaskPriority,
+    TaskExecutionState,
+    QueueState,
+    PageStabilityMonitor,
+    pageStabilityMonitor,
+    MonitorState,
+    AnimationGatekeeper,
+    animationGatekeeper,
+    LockState
 };
 
 // 自动初始化（如果未禁用）

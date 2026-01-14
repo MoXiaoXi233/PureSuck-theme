@@ -1,7 +1,8 @@
 /**
  * PureSuck SwupManager - Swup实例管理器
  * 管理Swup实例的完整生命周期，集成状态管理和错误处理
- * 
+ * 集成后台预加载机制，实现延迟动画触发
+ *
  * @module navigation/SwupManager
  */
 
@@ -10,6 +11,11 @@ import { ErrorBoundary, ErrorType, ErrorSeverity } from '../core/ErrorBoundary.j
 import { eventBus } from '../core/EventBus.js';
 import { routeManager } from './RouteManager.js';
 import { historyManager } from './HistoryManager.js';
+import { pagePreloader } from '../preload/PagePreloader.js';
+import { sequentialTaskQueue, PredefinedTasks } from '../preload/SequentialTaskQueue.js';
+import { pageStabilityMonitor } from '../preload/PageStabilityMonitor.js';
+import { animationGatekeeper } from '../preload/AnimationGatekeeper.js';
+import { animationController } from '../animation/AnimationController.js';
 
 /**
  * 页面类型枚举
@@ -23,6 +29,20 @@ export const PageType = {
     POST: 'post',
     /** 独立页面（关于、友链、归档等） */
     PAGE: 'page'
+};
+
+/**
+ * 新增导航状态（扩展StateManager中的NavigationState）
+ * @readonly
+ * @enum {string}
+ */
+export const ExtendedNavigationState = {
+    /** 预加载中 */
+    PRELOADING: 'preloading',
+    /** 执行初始化任务 */
+    EXECUTING_TASKS: 'executing_tasks',
+    /** 等待页面稳定 */
+    WAITING_STABILITY: 'waiting_stability'
 };
 
 /**
@@ -58,6 +78,8 @@ export class SwupManager {
      * @param {Object} options - 配置选项
      * @param {boolean} [options.enableVT=true] - 是否启用View Transitions
      * @param {boolean} [options.enableAnimation=true] - 是否启用动画
+     * @param {boolean} [options.enablePreload=true] - 是否启用页面预加载
+     * @param {boolean} [options.enableDelayedAnimation=true] - 是否启用延迟动画触发
      * @param {Object} [options.swupOptions] - Swup配置选项
      */
     constructor(options = {}) {
@@ -67,6 +89,8 @@ export class SwupManager {
         this._isDestroyed = false;
         this._enableVT = options.enableVT !== false && this._supportsViewTransitions();
         this._enableAnimation = options.enableAnimation !== false;
+        this._enablePreload = options.enablePreload !== false;
+        this._enableDelayedAnimation = options.enableDelayedAnimation !== false;
         this._swupOptions = options.swupOptions || {};
         this._currentPageToken = 0;
         this._lastNavigation = {
@@ -76,14 +100,33 @@ export class SwupManager {
             isSwup: false,
             fromTypeDetail: null,
             predictedToType: null,
-            useVT: false
+            useVT: false,
+            preloadResult: null
         };
         this._lastPost = {
             key: null,
             fromSingle: false
         };
 
+        // 初始化新模块引用
+        this._pagePreloader = pagePreloader;
+        this._taskQueue = sequentialTaskQueue;
+        this._stabilityMonitor = pageStabilityMonitor;
+        this._animationGatekeeper = animationGatekeeper;
+        this._animationController = animationController;
+
+        // 性能统计
+        this._performanceStats = {
+            navigationStartTime: 0,
+            preloadTime: 0,
+            taskExecutionTime: 0,
+            stabilityWaitTime: 0,
+            animationTime: 0,
+            totalTime: 0
+        };
+
         this._setupEventListeners();
+        this._setupPreloadModules();
     }
 
     /**
@@ -214,7 +257,10 @@ export class SwupManager {
      * @private
      * @param {Object} visit - 访问对象
      */
-    _onVisitStart(visit) {
+    async _onVisitStart(visit) {
+        const startTime = performance.now();
+        this._performanceStats.navigationStartTime = startTime;
+
         stateManager.setState(NavigationState.NAVIGATING, { url: visit.to?.url });
 
         // 检测源页面类型
@@ -232,6 +278,40 @@ export class SwupManager {
         // 检测是否使用VT
         const useVT = this._shouldUseVT(fromType, toUrl);
         this._lastNavigation.useVT = useVT;
+
+        // 预加载页面（如果启用）
+        if (this._enablePreload && toUrl) {
+            try {
+                stateManager.setState(ExtendedNavigationState.PRELOADING, { url: toUrl });
+                this._log('Starting page preload for:', toUrl);
+                
+                const preloadStart = performance.now();
+                const preloadResult = await this._pagePreloader.preload(toUrl);
+                this._performanceStats.preloadTime = performance.now() - preloadStart;
+                
+                this._lastNavigation.preloadResult = preloadResult;
+                
+                if (preloadResult) {
+                    this._log(`Page preloaded successfully in ${this._performanceStats.preloadTime.toFixed(2)}ms`);
+                    eventBus.emit('swup:preload:complete', {
+                        url: toUrl,
+                        result: preloadResult,
+                        duration: this._performanceStats.preloadTime
+                    });
+                } else {
+                    this._log('Page preload failed or returned null, continuing with normal navigation', 'warn');
+                }
+            } catch (error) {
+                this._log('Page preload error, falling back to normal navigation', 'warn', error);
+                ErrorBoundary.handle(error, {
+                    type: ErrorType.NETWORK,
+                    severity: ErrorSeverity.MEDIUM,
+                    message: '页面预加载失败，使用正常导航流程',
+                    metadata: { url: toUrl }
+                });
+                this._lastNavigation.preloadResult = null;
+            }
+        }
 
         // 更新状态
         stateManager.setState(NavigationState.ANIMATING_EXIT, {
@@ -251,7 +331,8 @@ export class SwupManager {
             fromType,
             toType: predictedToType,
             toUrl,
-            useVT
+            useVT,
+            preloadResult: this._lastNavigation.preloadResult
         });
     }
 
@@ -259,20 +340,14 @@ export class SwupManager {
      * 处理content:replace事件
      * @private
      */
-    _onContentReplace() {
+    async _onContentReplace() {
         const toType = routeManager.getCurrentPageType();
         this._lastNavigation.toType = toType;
-
-        // 更新状态
-        stateManager.setState(NavigationState.ANIMATING_ENTER, {
-            toType,
-            fromType: this._lastNavigation.fromType
-        });
 
         // 清理动画类
         this._cleanupAnimationClasses();
 
-        // 应用进入动画类
+        // 应用进入动画类（但不立即执行动画）
         const hasSharedElement = this._hasSharedElement();
         this._applyEnterClasses(toType, hasSharedElement);
 
@@ -289,6 +364,17 @@ export class SwupManager {
             toType,
             hasSharedElement
         });
+
+        // 如果启用了延迟动画触发，执行新的流程
+        if (this._enableDelayedAnimation) {
+            await this._executeDelayedAnimationFlow(toType);
+        } else {
+            // 降级方案：使用原有流程
+            stateManager.setState(NavigationState.ANIMATING_ENTER, {
+                toType,
+                fromType: this._lastNavigation.fromType
+            });
+        }
     }
 
     /**
@@ -296,6 +382,20 @@ export class SwupManager {
      * @private
      */
     _onVisitEnd() {
+        // 停止稳定性监控
+        if (this._stabilityMonitor) {
+            this._stabilityMonitor.stop();
+        }
+
+        // 计算总耗时
+        this._performanceStats.totalTime = performance.now() - this._performanceStats.navigationStartTime;
+        this._log(`Navigation completed in ${this._performanceStats.totalTime.toFixed(2)}ms`, {
+            preload: this._performanceStats.preloadTime.toFixed(2),
+            tasks: this._performanceStats.taskExecutionTime.toFixed(2),
+            stability: this._performanceStats.stabilityWaitTime.toFixed(2),
+            animation: this._performanceStats.animationTime.toFixed(2)
+        });
+
         stateManager.setState(NavigationState.IDLE, { reason: 'navigation_complete' });
 
         // 延迟清理动画类
@@ -306,7 +406,8 @@ export class SwupManager {
         // 发布事件
         eventBus.emit(NAVIGATION_EVENTS.VISIT_END, {
             fromType: this._lastNavigation.fromType,
-            toType: this._lastNavigation.toType
+            toType: this._lastNavigation.toType,
+            performanceStats: this._performanceStats
         });
     }
 
@@ -319,11 +420,14 @@ export class SwupManager {
         const token = ++this._currentPageToken;
         const isCurrent = () => token === this._currentPageToken;
 
-        // 更新导航栏
+        // 更新导航栏（轻量级操作）
         this._updateNavigation();
 
-        // 初始化页面内容
-        this._initializePageContent(pageType, isCurrent);
+        // 如果启用了延迟动画触发，初始化任务已在_onContentReplace中执行
+        // 否则，执行原有的初始化流程
+        if (!this._enableDelayedAnimation) {
+            this._initializePageContent(pageType, isCurrent);
+        }
 
         // 发布事件
         eventBus.emit(NAVIGATION_EVENTS.PAGE_VIEW, {
@@ -357,6 +461,228 @@ export class SwupManager {
         if (this._enableVT) {
             this._syncSharedElements();
         }
+    }
+
+    /**
+     * 设置预加载模块
+     * @private
+     */
+    _setupPreloadModules() {
+        // 配置预加载模块
+        if (this._pagePreloader) {
+            this._pagePreloader._debug = this._swupOptions.debug || false;
+        }
+        
+        if (this._taskQueue) {
+            this._taskQueue._debug = this._swupOptions.debug || false;
+        }
+        
+        if (this._stabilityMonitor) {
+            this._stabilityMonitor._debug = this._swupOptions.debug || false;
+        }
+        
+        if (this._animationGatekeeper) {
+            this._animationGatekeeper._debug = this._swupOptions.debug || false;
+        }
+
+        this._log('Preload modules configured');
+    }
+
+    /**
+     * 执行延迟动画流程
+     * @private
+     * @param {string} toType - 目标页面类型
+     */
+    async _executeDelayedAnimationFlow(toType) {
+        const token = ++this._currentPageToken;
+        const isCurrent = () => token === this._currentPageToken;
+
+        try {
+            // 1. 执行初始化任务
+            stateManager.setState(ExtendedNavigationState.EXECUTING_TASKS, { toType });
+            this._animationGatekeeper.lock('task-execution');
+            
+            this._log('Starting task execution');
+            const taskStart = performance.now();
+            
+            await this._buildAndExecuteTaskQueue(toType, isCurrent);
+            
+            this._performanceStats.taskExecutionTime = performance.now() - taskStart;
+            this._log(`Task execution completed in ${this._performanceStats.taskExecutionTime.toFixed(2)}ms`);
+            
+            this._animationGatekeeper.unlock('task-execution');
+
+            // 2. 等待页面稳定
+            stateManager.setState(ExtendedNavigationState.WAITING_STABILITY, { toType });
+            this._animationGatekeeper.lock('stability-waiting');
+            
+            this._log('Waiting for page stability');
+            const stabilityStart = performance.now();
+            
+            const stabilityMetrics = await this._stabilityMonitor.waitForStability({
+                timeout: 5000
+            });
+            
+            this._performanceStats.stabilityWaitTime = performance.now() - stabilityStart;
+            this._log(`Page stability achieved in ${this._performanceStats.stabilityWaitTime.toFixed(2)}ms`, stabilityMetrics);
+            
+            this._animationGatekeeper.unlock('stability-waiting');
+
+            // 3. 触发进入动画
+            stateManager.setState(NavigationState.ANIMATING_ENTER, {
+                toType,
+                fromType: this._lastNavigation.fromType
+            });
+            
+            await this._executeEnterAnimation(toType);
+
+        } catch (error) {
+            this._log('Delayed animation flow failed, falling back to immediate animation', 'warn', error);
+            
+            // 错误处理：降级到立即显示内容
+            ErrorBoundary.handle(error, {
+                type: ErrorType.RENDERING,
+                severity: ErrorSeverity.MEDIUM,
+                message: '延迟动画流程失败，降级到立即显示',
+                metadata: { toType }
+            });
+            
+            // 强制解锁
+            this._animationGatekeeper.forceUnlock();
+            
+            // 立即显示内容
+            this._showContentImmediately();
+        }
+    }
+
+    /**
+     * 构建并执行任务队列
+     * @private
+     * @param {string} pageType - 页面类型
+     * @param {Function} isCurrent - 是否当前页面的检查函数
+     */
+    async _buildAndExecuteTaskQueue(pageType, isCurrent) {
+        // 清空现有队列
+        this._taskQueue.clear();
+
+        // 添加预定义任务
+        const predefinedTasks = PredefinedTasks.getAllTasks();
+        for (const task of predefinedTasks) {
+            this._taskQueue.addTask(task);
+        }
+
+        // 执行队列
+        const result = await this._taskQueue.execute();
+        
+        if (!result.success) {
+            this._log(`Task queue execution failed: ${result.message}`, 'warn', {
+                failedTasks: result.failedTasks,
+                skippedTasks: result.skippedTasks
+            });
+        } else {
+            this._log(`Task queue completed: ${result.completedTasks}/${result.totalTasks} tasks`);
+        }
+    }
+
+    /**
+     * 执行进入动画
+     * @private
+     * @param {string} toType - 目标页面类型
+     */
+    async _executeEnterAnimation(toType) {
+        if (!this._enableAnimation) {
+            this._showContentImmediately();
+            return;
+        }
+
+        const animationStart = performance.now();
+        
+        try {
+            // 获取进入动画元素
+            const elements = this._getEnterElements(toType);
+            
+            if (!elements || elements.length === 0) {
+                this._log('No enter animation elements found, showing content immediately');
+                this._showContentImmediately();
+                return;
+            }
+
+            // 通过AnimationGatekeeper请求动画
+            const success = await this._animationGatekeeper.requestAnimation({
+                type: 'enter',
+                elements,
+                options: {
+                    pageType: toType,
+                    duration: 600,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                }
+            });
+
+            this._performanceStats.animationTime = performance.now() - animationStart;
+            
+            if (success) {
+                this._log(`Enter animation completed in ${this._performanceStats.animationTime.toFixed(2)}ms`);
+            } else {
+                this._log('Enter animation failed or skipped, showing content immediately', 'warn');
+                this._showContentImmediately();
+            }
+
+        } catch (error) {
+            this._log('Enter animation error, showing content immediately', 'error', error);
+            this._showContentImmediately();
+        }
+    }
+
+    /**
+     * 立即显示内容（跳过动画）
+     * @private
+     */
+    _showContentImmediately() {
+        // 移除动画类，使内容立即可见
+        document.documentElement.classList.remove('ps-enter-active');
+        
+        // 确保所有元素可见
+        const swupRoot = document.getElementById('swup');
+        if (swupRoot) {
+            const elements = swupRoot.querySelectorAll('.ps-animating-element');
+            elements.forEach(el => {
+                el.style.opacity = '1';
+                el.style.transform = '';
+            });
+        }
+        
+        this._log('Content shown immediately (animation skipped)');
+    }
+
+    /**
+     * 获取进入动画元素
+     * @private
+     * @param {string} pageType - 页面类型
+     * @returns {Array<Element>} 元素数组
+     */
+    _getEnterElements(pageType) {
+        const swupRoot = document.getElementById('swup');
+        if (!swupRoot) return [];
+
+        // 根据页面类型选择不同的动画元素
+        let selector = '';
+        switch (pageType) {
+            case PageType.POST:
+                selector = '.post.post--single, .post-content';
+                break;
+            case PageType.PAGE:
+                selector = '.page-content, .post';
+                break;
+            case PageType.LIST:
+                selector = '.post.post--index, .post-list';
+                break;
+            default:
+                selector = '.post, .page-content';
+        }
+
+        const elements = Array.from(swupRoot.querySelectorAll(selector));
+        this._log(`Found ${elements.length} enter animation elements for ${pageType}`);
+        return elements;
     }
 
     /**
