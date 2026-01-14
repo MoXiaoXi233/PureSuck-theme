@@ -318,9 +318,9 @@ class PureSuck {
         // 2. 根据设备性能调整动画帧管理器
         animationFrameManager.adaptToPerformance(deviceLevel);
 
-        // 3. 启动性能监控
+        // 3. 启动性能监控（仅监控长任务和内存）
         performanceMonitor.start();
-        this._log('Performance monitoring started');
+        this._log('Performance monitoring started (long tasks & memory)');
 
         // 4. 初始化状态管理器（已在导入时创建）
         this._log('State manager initialized', {
@@ -464,21 +464,14 @@ class PureSuck {
      * @private
      */
     _setupCoreEventListeners() {
-        // 监听性能更新事件
-        eventBus.on('performance:update', (data) => {
-            if (DEBUG) {
-                this._log('Performance update:', data);
-            }
+        // 监听长任务事件
+        eventBus.on('performance:longtask', (data) => {
+            this._log('Long task detected:', data);
         });
 
-        // 监听性能下降事件
-        eventBus.on('performance:low', (data) => {
-            this._log('Performance low detected:', data);
-        });
-
-        // 监听性能恢复事件
-        eventBus.on('performance:recover', (data) => {
-            this._log('Performance recovered:', data);
+        // 监听内存高使用事件
+        eventBus.on('performance:memory-high', (data) => {
+            this._log('Memory usage high:', data);
         });
 
         // 监听状态变更事件

@@ -32,46 +32,6 @@ export class AnimationFrameManager {
     }
 
     /**
-     * 设置性能监听器
-     */
-    setupPerformanceListener() {
-        // 监听性能变化,自适应调整并发数
-        eventBus.on('performance:low', (data) => {
-            this.adaptToPerformance(data.level);
-        });
-
-        eventBus.on('performance:recover', (data) => {
-            this.adaptToPerformance(data.level);
-        });
-
-        eventBus.on('performance:update', (data) => {
-            this.adaptToPerformance(data.level);
-        });
-    }
-
-    /**
-     * 根据性能等级自适应调整
-     */
-    adaptToPerformance(level) {
-        const config = this.performanceConfig[level] || this.performanceConfig.medium;
-        
-        if (this.maxConcurrent !== config.maxConcurrent) {
-            const oldMax = this.maxConcurrent;
-            this.maxConcurrent = config.maxConcurrent;
-            
-            console.log(
-                `[AnimationFrameManager] Adapted to ${level} performance: ` +
-                `max concurrent ${oldMax} -> ${this.maxConcurrent}`
-            );
-            
-            eventBus.emit('animation:adapted', {
-                level,
-                maxConcurrent: this.maxConcurrent
-            });
-        }
-    }
-
-    /**
      * 注册动画
      * @param {string} id - 动画ID
      * @param {Animation} animation - Web Animations API动画对象
@@ -86,7 +46,8 @@ export class AnimationFrameManager {
 
         // 检查并发限制
         if (this.activeCount >= this.maxConcurrent) {
-            const config = this.performanceConfig[performanceMonitor.getPerformanceLevel()];
+            // 使用高性能配置
+            const config = this.performanceConfig.high;
             const currentPriority = this.priorityLevels[priority] || 0;
             const thresholdPriority = this.priorityLevels[config.priorityThreshold] || 0;
             
@@ -169,7 +130,8 @@ export class AnimationFrameManager {
      * 取消低优先级动画
      */
     cancelLowPriority() {
-        const config = this.performanceConfig[performanceMonitor.getPerformanceLevel()];
+        // 使用高性能配置
+        const config = this.performanceConfig.high;
         const thresholdPriority = this.priorityLevels[config.priorityThreshold] || 0;
 
         for (const [id, animData] of this.animations) {
@@ -260,7 +222,8 @@ export class AnimationFrameManager {
 
         if (this.activeCount < this.maxConcurrent) return true;
 
-        const config = this.performanceConfig[performanceMonitor.getPerformanceLevel()];
+        // 使用高性能配置
+        const config = this.performanceConfig.high;
         const currentPriority = this.priorityLevels[priority] || 0;
         const thresholdPriority = this.priorityLevels[config.priorityThreshold] || 0;
 
@@ -274,7 +237,7 @@ export class AnimationFrameManager {
     getConfig() {
         return {
             maxConcurrent: this.maxConcurrent,
-            performanceLevel: performanceMonitor.getPerformanceLevel(),
+            performanceLevel: 'high',
             isPaused: this.isPaused
         };
     }

@@ -1,6 +1,7 @@
 /**
  * PureSuck PerformanceMonitor - 性能监控器
- * 实时监控FPS、长任务和内存使用情况
+ * 监控长任务和内存使用情况
+ * 注意：已移除FPS监控，现代设备普遍为高刷，FPS监控意义不大且浪费资源
  */
 
 import { eventBus } from './EventBus.js';
@@ -8,15 +9,6 @@ import { eventBus } from './EventBus.js';
 export class PerformanceMonitor {
     constructor() {
         this.isMonitoring = false;
-        this.fps = 60;
-        this.frameCount = 0;
-        this.lastTime = performance.now();
-        this.fpsUpdateInterval = 1000; // 每秒更新一次FPS
-        this.lastFpsUpdate = 0;
-        
-        this.performanceLevel = 'high'; // high, medium, low
-        this.lowFpsThreshold = 45; // 低于此FPS视为低性能
-        this.recoverFpsThreshold = 55; // 高于此FPS视为性能恢复
         
         this.longTaskThreshold = 50; // 长任务阈值(ms)
         this.longTaskObserver = null;
@@ -25,7 +17,7 @@ export class PerformanceMonitor {
         this.memoryUpdateInterval = 2000; // 每2秒更新一次内存
         this.lastMemoryUpdate = 0;
         
-        this.rafId = null;
+        this.memoryCheckInterval = null;
     }
 
     /**
@@ -38,16 +30,13 @@ export class PerformanceMonitor {
         }
 
         this.isMonitoring = true;
-        this.lastTime = performance.now();
-        this.lastFpsUpdate = performance.now();
         this.lastMemoryUpdate = performance.now();
-        this.frameCount = 0;
-
-        // 开始FPS监控
-        this.startFpsMonitoring();
 
         // 开始长任务监控
         this.startLongTaskMonitoring();
+
+        // 开始内存监控
+        this.startMemoryMonitoring();
 
         console.log('[PerformanceMonitor] Started');
     }
@@ -60,53 +49,49 @@ export class PerformanceMonitor {
 
         this.isMonitoring = false;
 
-        if (this.rafId) {
-            cancelAnimationFrame(this.rafId);
-            this.rafId = null;
-        }
-
         if (this.longTaskObserver) {
             this.longTaskObserver.disconnect();
             this.longTaskObserver = null;
+        }
+
+        if (this.memoryCheckInterval) {
+            clearInterval(this.memoryCheckInterval);
+            this.memoryCheckInterval = null;
         }
 
         console.log('[PerformanceMonitor] Stopped');
     }
 
     /**
-     * FPS监控
+     * 内存监控
      */
-    startFpsMonitoring() {
-        const measureFps = (timestamp) => {
+    startMemoryMonitoring() {
+        const checkMemory = () => {
             if (!this.isMonitoring) return;
 
-            this.frameCount++;
-            const elapsed = timestamp - this.lastFpsUpdate;
+            // Chrome/Edge支持performance.memory
+            if (performance.memory) {
+                this.memory = {
+                    usedJSHeapSize: performance.memory.usedJSHeapSize,
+                    totalJSHeapSize: performance.memory.totalJSHeapSize,
+                    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+                    usedPercent: (performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit * 100).toFixed(2)
+                };
 
-            // 每秒更新一次FPS
-            if (elapsed >= this.fpsUpdateInterval) {
-                this.fps = Math.round((this.frameCount * 1000) / elapsed);
-                this.frameCount = 0;
-                this.lastFpsUpdate = timestamp;
-
-                // 检测性能等级变化
-                this.checkPerformanceLevel();
-
-                // 发布FPS更新事件
-                eventBus.emit('performance:update', {
-                    fps: this.fps,
-                    level: this.performanceLevel,
-                    timestamp
-                });
+                // 内存使用率过高
+                if (parseFloat(this.memory.usedPercent) > 80) {
+                    eventBus.emit('performance:memory-high', this.memory);
+                }
             }
 
-            // 更新内存信息
-            this.updateMemory(timestamp);
-
-            this.rafId = requestAnimationFrame(measureFps);
+            this.lastMemoryUpdate = performance.now();
         };
 
-        this.rafId = requestAnimationFrame(measureFps);
+        // 立即执行一次
+        checkMemory();
+
+        // 定时检查
+        this.memoryCheckInterval = setInterval(checkMemory, this.memoryUpdateInterval);
     }
 
     /**
@@ -155,91 +140,13 @@ export class PerformanceMonitor {
     }
 
     /**
-     * 更新内存信息
-     */
-    updateMemory(timestamp) {
-        if (timestamp - this.lastMemoryUpdate < this.memoryUpdateInterval) return;
-
-        this.lastMemoryUpdate = timestamp;
-
-        // Chrome/Edge支持performance.memory
-        if (performance.memory) {
-            this.memory = {
-                usedJSHeapSize: performance.memory.usedJSHeapSize,
-                totalJSHeapSize: performance.memory.totalJSHeapSize,
-                jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-                usedPercent: (performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit * 100).toFixed(2)
-            };
-
-            // 内存使用率过高
-            if (parseFloat(this.memory.usedPercent) > 80) {
-                eventBus.emit('performance:memory-high', this.memory);
-            }
-        }
-    }
-
-    /**
-     * 检查性能等级
-     */
-    checkPerformanceLevel() {
-        const previousLevel = this.performanceLevel;
-
-        if (this.fps < this.lowFpsThreshold) {
-            this.performanceLevel = 'low';
-        } else if (this.fps >= this.recoverFpsThreshold) {
-            this.performanceLevel = 'high';
-        } else {
-            this.performanceLevel = 'medium';
-        }
-
-        // 性能等级变化时发布事件
-        if (previousLevel !== this.performanceLevel) {
-            if (this.performanceLevel === 'low') {
-                eventBus.emit('performance:low', {
-                    reason: 'fps',
-                    fps: this.fps,
-                    level: this.performanceLevel
-                });
-            } else if (previousLevel === 'low' && this.performanceLevel !== 'low') {
-                eventBus.emit('performance:recover', {
-                    fps: this.fps,
-                    level: this.performanceLevel
-                });
-            }
-        }
-    }
-
-    /**
      * 获取当前性能状态
      */
     getStatus() {
         return {
-            fps: this.fps,
-            level: this.performanceLevel,
             memory: this.memory,
             isMonitoring: this.isMonitoring
         };
-    }
-
-    /**
-     * 获取性能等级
-     */
-    getPerformanceLevel() {
-        return this.performanceLevel;
-    }
-
-    /**
-     * 是否是低性能设备
-     */
-    isLowPerformance() {
-        return this.performanceLevel === 'low';
-    }
-
-    /**
-     * 是否是高性能设备
-     */
-    isHighPerformance() {
-        return this.performanceLevel === 'high';
     }
 }
 

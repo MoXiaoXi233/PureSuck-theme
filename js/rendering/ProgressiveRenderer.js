@@ -129,14 +129,9 @@ export class ProgressiveRenderer {
      * 设置性能监听器
      */
     setupPerformanceListener() {
-        // 监听性能变化，自适应调整渲染参数
-        eventBus.on('performance:low', (data) => {
-            console.log(`[ProgressiveRenderer] Performance low detected: ${data.level}`);
-        });
-
-        eventBus.on('performance:recover', (data) => {
-            console.log(`[ProgressiveRenderer] Performance recovered: ${data.level}`);
-        });
+        // FPS监控已移除，不再需要动态调整渲染参数
+        // 默认使用高性能配置
+        console.log('[ProgressiveRenderer] Using high performance configuration');
     }
 
     /**
@@ -144,8 +139,8 @@ export class ProgressiveRenderer {
      * @returns {Object} 性能配置
      */
     getPerformanceConfig() {
-        const level = performanceMonitor.getPerformanceLevel();
-        return this.performanceConfig[level] || this.performanceConfig.medium;
+        // 默认使用高性能配置
+        return this.performanceConfig.high;
     }
 
     /**

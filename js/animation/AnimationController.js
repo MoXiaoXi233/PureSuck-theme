@@ -111,7 +111,7 @@ export class AnimationController {
                 if (this.prefersReducedMotion) {
                     this.performanceLevel = PerformanceLevel.REDUCED;
                 } else {
-                    this.performanceLevel = this._getPerformanceLevelFromFPS();
+                    this._updatePerformanceLevel();
                 }
                 console.log(`[AnimationController] Reduced motion changed: ${this.prefersReducedMotion}`);
             });
@@ -123,22 +123,8 @@ export class AnimationController {
      * @private
      */
     _setupPerformanceMonitoring() {
-        // 监听性能更新事件
-        eventBus.on('performance:update', (data) => {
-            this._updatePerformanceLevel(data.fps);
-        });
-
-        // 监听性能下降事件
-        eventBus.on('performance:low', (data) => {
-            console.warn('[AnimationController] Performance low detected:', data);
-            this._adjustConcurrencyLimit();
-        });
-
-        // 监听性能恢复事件
-        eventBus.on('performance:recover', (data) => {
-            console.log('[AnimationController] Performance recovered:', data);
-            this._adjustConcurrencyLimit();
-        });
+        // FPS监控已移除，性能等级现在基于设备能力检测
+        // 不再需要监听性能更新事件
     }
 
     /**
@@ -174,41 +160,21 @@ export class AnimationController {
     /**
      * 更新性能等级
      * @private
-     * @param {number} fps - 当前FPS
      */
-    _updatePerformanceLevel(fps) {
+    _updatePerformanceLevel() {
         const previousLevel = this.performanceLevel;
 
         if (this.prefersReducedMotion) {
             this.performanceLevel = PerformanceLevel.REDUCED;
         } else {
-            this.performanceLevel = this._getPerformanceLevelFromFPS(fps);
+            // 默认高性能，现代设备普遍为高刷
+            this.performanceLevel = PerformanceLevel.HIGH;
         }
 
         // 性能等级变化时调整并发限制
         if (previousLevel !== this.performanceLevel) {
             this._adjustConcurrencyLimit();
             console.log(`[AnimationController] Performance level: ${previousLevel} -> ${this.performanceLevel}`);
-        }
-    }
-
-    /**
-     * 根据FPS获取性能等级
-     * @private
-     * @param {number} fps - FPS
-     * @returns {string} 性能等级
-     */
-    _getPerformanceLevelFromFPS(fps) {
-        if (!fps) {
-            fps = performanceMonitor.getPerformanceLevel() === 'low' ? 30 : 60;
-        }
-
-        if (fps >= 55) {
-            return PerformanceLevel.HIGH;
-        } else if (fps >= 30) {
-            return PerformanceLevel.MEDIUM;
-        } else {
-            return PerformanceLevel.LOW;
         }
     }
 

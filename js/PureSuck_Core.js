@@ -31,28 +31,21 @@ function initPureSuckCore() {
     // 2. 根据设备性能调整动画帧管理器
     animationFrameManager.adaptToPerformance(deviceLevel);
 
-    // 3. 启动性能监控
+    // 3. 启动性能监控（仅监控长任务和内存）
     performanceMonitor.start();
-    console.log('[PureSuck Core] Performance monitoring started');
+    console.log('[PureSuck Core] Performance monitoring started (long tasks & memory)');
 
-    // 4. 监听性能事件
-    eventBus.on('performance:update', (data) => {
-        // 可选: 在控制台显示性能信息
-        if (window.PureSuck.DEBUG) {
-            console.log(`[PureSuck Core] Performance update: FPS=${data.fps}, Level=${data.level}`);
-        }
-    });
-
-    eventBus.on('performance:low', (data) => {
+    // 4. 监听长任务事件
+    eventBus.on('performance:longtask', (data) => {
         console.warn(
-            `[PureSuck Core] Performance degraded: ${data.reason}, ` +
-            `FPS=${performanceMonitor.fps}, Level=${data.level}`
+            `[PureSuck Core] Long task detected: ${data.duration.toFixed(2)}ms`
         );
     });
 
-    eventBus.on('performance:recover', (data) => {
-        console.log(
-            `[PureSuck Core] Performance recovered: FPS=${data.fps}, Level=${data.level}`
+    // 5. 监听内存高使用事件
+    eventBus.on('performance:memory-high', (data) => {
+        console.warn(
+            `[PureSuck Core] Memory usage high: ${data.usedPercent}%`
         );
     });
 

@@ -121,30 +121,9 @@ export class DOMScheduler {
      * 设置性能监听器
      */
     setupPerformanceListener() {
-        // 监听性能变化，自适应调整处理参数
-        eventBus.on('performance:low', (data) => {
-            const level = data.level;
-            if (level === 'low') {
-                this.maxTasksPerFrame = 2;
-                this.budgetMs = 8;
-            } else if (level === 'medium') {
-                this.maxTasksPerFrame = 3;
-                this.budgetMs = 12;
-            } else {
-                this.maxTasksPerFrame = 4;
-                this.budgetMs = 16;
-            }
-            console.log(`[DOMScheduler] Adapted to ${level} performance`);
-        });
-
-        eventBus.on('performance:recover', (data) => {
-            const level = data.level;
-            if (level === 'high') {
-                this.maxTasksPerFrame = 4;
-                this.budgetMs = 16;
-            }
-            console.log(`[DOMScheduler] Performance recovered to ${level}`);
-        });
+        // FPS监控已移除，不再需要动态调整处理参数
+        // 保持默认的高性能配置
+        console.log('[DOMScheduler] Using high performance configuration');
     }
 
     /**

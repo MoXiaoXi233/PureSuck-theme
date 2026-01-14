@@ -170,66 +170,11 @@ export class AnimationConfigManager {
      * @private
      */
     _init() {
-        // 监听性能更新事件
-        eventBus.on('performance:update', (data) => {
-            this._handlePerformanceUpdate(data);
-        });
-
-        // 监听性能下降事件
-        eventBus.on('performance:low', (data) => {
-            this.adaptToLevel(PerformanceLevel.LOW);
-        });
-
-        // 监听性能恢复事件
-        eventBus.on('performance:recover', (data) => {
-            this.adaptToLevel(PerformanceLevel.HIGH);
-        });
-
+        // FPS监控已移除，性能等级现在基于设备能力检测
+        // 默认使用高性能配置
+        this.currentLevel = PerformanceLevel.HIGH;
+        
         console.log('[AnimationConfig] Initialized');
-    }
-
-    /**
-     * 处理性能更新
-     * @private
-     * @param {Object} data - 性能数据
-     */
-    _handlePerformanceUpdate(data) {
-        const now = Date.now();
-
-        // 限制更新频率
-        if (now - this.lastUpdateTime < this.updateInterval) {
-            return;
-        }
-
-        this.lastUpdateTime = now;
-        this.currentFPS = data.fps || 60;
-
-        // 根据FPS动态调整配置
-        this._adaptToFPS(this.currentFPS);
-    }
-
-    /**
-     * 根据FPS自适应配置
-     * @private
-     * @param {number} fps - 当前FPS
-     */
-    _adaptToFPS(fps) {
-        let targetLevel;
-
-        if (fps >= 55) {
-            targetLevel = PerformanceLevel.HIGH;
-        } else if (fps >= 30) {
-            targetLevel = PerformanceLevel.MEDIUM;
-        } else if (fps >= 15) {
-            targetLevel = PerformanceLevel.LOW;
-        } else {
-            targetLevel = PerformanceLevel.REDUCED;
-        }
-
-        // 如果性能等级变化，更新配置
-        if (targetLevel !== this.currentLevel) {
-            this.adaptToLevel(targetLevel);
-        }
     }
 
     /**
@@ -375,8 +320,7 @@ export class AnimationConfigManager {
         // 发布配置更新事件
         eventBus.emit('animation:config:updated', {
             level,
-            previousLevel,
-            fps: this.currentFPS
+            previousLevel
         });
     }
 

@@ -179,10 +179,8 @@ export class LazyLoader {
     processPreloadQueue() {
         if (this.preloadQueue.size === 0) return;
 
-        // 根据性能决定预加载策略
-        const performanceLevel = performanceMonitor.getPerformanceLevel();
-        const maxPreloadPerFrame = performanceLevel === 'high' ? 3 : 
-                                   performanceLevel === 'medium' ? 2 : 1;
+        // 使用高性能配置，现代设备普遍为高刷
+        const maxPreloadPerFrame = 3;
 
         let count = 0;
         for (const id of this.preloadQueue) {
