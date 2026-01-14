@@ -985,6 +985,16 @@ export class SwupManager {
             }, isCurrent);
         }
 
+        // 图片懒加载
+        if (typeof imageLazyLoader !== 'undefined') {
+            imageLazyLoader.autoInit({ eagerCount: 3 });
+        }
+
+        // 回到顶部按钮
+        if (typeof initGoTopButton === 'function') {
+            initGoTopButton(swupRoot);
+        }
+
         // TOC
         if (pageType === PageType.POST && typeof initializeStickyTOC === 'function') {
             if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
@@ -1061,38 +1071,56 @@ export class SwupManager {
 
         if (!this._isSameOriginUrl(urlString)) return false;
 
+        // 保存并禁用滚动恢复，防止DOM替换后浏览器自动恢复滚动位置
+        const prevScrollRestoration = history.scrollRestoration;
+        history.scrollRestoration = 'manual';
+
         const prevScrollY = window.scrollY;
         const active = document.activeElement;
         const activeId = active?.id;
 
-        const res = await fetch(urlString, {
-            method: 'GET',
-            credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html,*/*;q=0.8'
-            }
-        });
-        if (!res.ok) return false;
+        try {
+            const res = await fetch(urlString, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html,*/*;q=0.8'
+                }
+            });
+            if (!res.ok) return false;
 
-        const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const next = doc.getElementById('comments');
-        if (!next) return false;
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const next = doc.getElementById('comments');
+            if (!next) return false;
 
-        current.replaceWith(next);
+            current.replaceWith(next);
 
-        window.scrollTo(0, prevScrollY);
-        if (activeId) {
-            const el = document.getElementById(activeId);
-            if (el?.focus) {
-                try { el.focus({ preventScroll: true }); } catch { el.focus(); }
-            }
+            // 使用 requestAnimationFrame 确保滚动和焦点恢复在正确的时机执行
+            requestAnimationFrame(() => {
+                window.scrollTo(0, prevScrollY);
+                if (activeId) {
+                    const el = document.getElementById(activeId);
+                    if (el?.focus) {
+                        try { el.focus({ preventScroll: true }); } catch { el.focus(); }
+                    }
+                }
+            });
+
+            this._scheduleCommentsInit(document, { eager: true });
+
+            // 延迟恢复滚动恢复设置，确保DOM操作完成
+            setTimeout(() => {
+                history.scrollRestoration = prevScrollRestoration;
+            }, 100);
+
+            return true;
+        } catch (error) {
+            // 发生错误时立即恢复滚动恢复设置
+            history.scrollRestoration = prevScrollRestoration;
+            return false;
         }
-
-        this._scheduleCommentsInit(document, { eager: true });
-
-        return true;
     }
 
     /**

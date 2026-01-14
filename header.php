@@ -18,6 +18,10 @@
     </title>
     <?php generateDynamicCSS(); ?>
 
+    <script>
+        window.THEME_URL = '<?= $this->options->themeUrl; ?>';
+    </script>
+
     <!-- 1. 预加载关键资源 -->
     <link rel="preload" href="<?= $this->options->themeUrl('fonts/fontello.woff2'); ?>" as="font" type="font/woff2" crossorigin>
     
