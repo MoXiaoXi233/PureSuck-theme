@@ -46,9 +46,9 @@
     <div id="comments" class="cf">
         <?php $this->comments()->to($comments); ?>
         <?php if ($comments->have()): ?>
-            <div class="comment-title">
+            <h1 class="comment-title">
                 <?php $this->commentsNum(_t('暂无评论'), _t('仅有 1 条评论'), _t('已有 %d 条评论')); ?>
-            </div>
+            </h1>
             <?php $comments->listComments(); ?>
             <div class="page-navigator">
                 <?php $comments->pageNav('上一页', '下一页', 10, '...', array('wrapTag' => 'ul', 'wrapClass' => 'pagination', 'itemTag' => 'li', 'currentClass' => 'active')); ?>
