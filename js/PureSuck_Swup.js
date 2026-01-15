@@ -7,6 +7,177 @@
 (function() {
     'use strict';
 
+    // ==================== AnimationFrameManager ====================
+    /**
+     * 统一管理所有 requestAnimationFrame 调用
+     * 解决多个动画同时执行时的冲突问题
+     */
+    const AnimationFrameManager = {
+        // 存储所有活动的动画帧ID
+        frameIds: new Set(),
+        // 存储元素到动画帧的映射，用于防止同一元素被多个动画同时操作
+        elementToFrameId: new WeakMap(),
+        // 存储优先级队列（数字越大优先级越高）
+        priorityQueue: [],
+        // 当前正在执行的帧ID
+        currentFrameId: null,
+        // 最大并发动画数
+        maxConcurrentAnimations: 10,
+        // 统计信息
+        stats: {
+            totalScheduled: 0,
+            totalCancelled: 0,
+            totalCompleted: 0
+        },
+
+        /**
+         * 调度一个动画帧任务
+         * @param {Function} callback - 要执行的回调函数
+         * @param {Object} options - 选项
+         * @param {Element} options.element - 关联的DOM元素（用于冲突检测）
+         * @param {number} options.priority - 优先级（默认0，范围-10到10）
+         * @param {string} options.group - 动画组标识（用于批量取消）
+         * @returns {number} 动画帧ID
+         */
+        schedule(callback, options = {}) {
+            if (typeof callback !== 'function') {
+                console.warn('[AnimationFrameManager] Invalid callback');
+                return null;
+            }
+
+            const { element = null, priority = 0, group = null } = options;
+
+            // 检查元素是否已经在动画中
+            if (element && this.elementToFrameId.has(element)) {
+                const existingFrameId = this.elementToFrameId.get(element);
+                // 取消旧动画（新动画优先级更高或相同）
+                this.cancel(existingFrameId);
+                this.stats.totalCancelled++;
+            }
+
+            // 创建包装回调
+            const frameId = ++this.stats.totalScheduled;
+            const wrappedCallback = (timestamp) => {
+                // 检查是否已被取消
+                if (!this.frameIds.has(frameId)) {
+                    return;
+                }
+
+                // 移除元素映射
+                if (element) {
+                    this.elementToFrameId.delete(element);
+                }
+
+                // 执行回调
+                try {
+                    callback(timestamp);
+                } catch (error) {
+                    console.error('[AnimationFrameManager] Animation callback error:', error);
+                }
+
+                // 标记完成
+                this.frameIds.delete(frameId);
+                this.stats.totalCompleted++;
+            };
+
+            // 存储帧ID和元数据
+            this.frameIds.add(frameId);
+            if (element) {
+                this.elementToFrameId.set(element, frameId);
+            }
+
+            // 添加到优先级队列
+            if (priority !== 0) {
+                this.priorityQueue.push({ frameId, priority, group });
+                this.priorityQueue.sort((a, b) => b.priority - a.priority);
+            }
+
+            // 调度动画帧
+            const rafId = requestAnimationFrame(wrappedCallback);
+            
+            // 存储 rafId 以便取消
+            this.frameIds.add(rafId);
+
+            return frameId;
+        },
+
+        /**
+         * 取消指定的动画帧
+         * @param {number} frameId - 要取消的帧ID
+         */
+        cancel(frameId) {
+            if (!frameId) return;
+
+            // 从集合中移除
+            if (this.frameIds.has(frameId)) {
+                this.frameIds.delete(frameId);
+                this.stats.totalCancelled++;
+            }
+
+            // 从优先级队列中移除
+            const queueIndex = this.priorityQueue.findIndex(item => item.frameId === frameId);
+            if (queueIndex > -1) {
+                this.priorityQueue.splice(queueIndex, 1);
+            }
+        },
+
+        /**
+         * 取消所有指定组的动画
+         * @param {string} group - 组标识
+         */
+        cancelGroup(group) {
+            if (!group) return;
+
+            const toCancel = this.priorityQueue
+                .filter(item => item.group === group)
+                .map(item => item.frameId);
+
+            toCancel.forEach(frameId => this.cancel(frameId));
+        },
+
+        /**
+         * 取消所有动画
+         */
+        cancelAll() {
+            const count = this.frameIds.size;
+            this.frameIds.clear();
+            this.priorityQueue = [];
+            this.stats.totalCancelled += count;
+            console.log(`[AnimationFrameManager] Cancelled ${count} animations`);
+        },
+
+        /**
+         * 获取当前活动动画数量
+         * @returns {number}
+         */
+        getActiveCount() {
+            return this.frameIds.size;
+        },
+
+        /**
+         * 获取统计信息
+         * @returns {Object}
+         */
+        getStats() {
+            return {
+                ...this.stats,
+                active: this.frameIds.size,
+                queued: this.priorityQueue.length
+            };
+        },
+
+        /**
+         * 清理统计信息
+         */
+        resetStats() {
+            this.stats = {
+                totalScheduled: 0,
+                totalCancelled: 0,
+                totalCompleted: 0
+            };
+        }
+    };
+
     // ==================== 全局状态 ====================
     const STATE = {
         isAnimating: false,
@@ -128,7 +299,9 @@
         scheduled: false,
         queue: [],
         timeout: 800,
-        budgetMs: 12
+        budgetMs: 12,
+        // 队列大小限制，防止内存泄漏
+        maxQueueSize: 100
     };
 
     const BREATH = {
@@ -171,6 +344,13 @@
 
     function scheduleIdleTask(task) {
         if (typeof task !== 'function') return;
+        
+        // 检查队列是否已满，防止内存泄漏
+        if (IDLE.queue.length >= IDLE.maxQueueSize) {
+            console.warn('[Swup] Idle queue is full (max: ' + IDLE.maxQueueSize + '), dropping task');
+            return;
+        }
+        
         IDLE.queue.push(task);
         scheduleIdleDrain();
     }
@@ -873,7 +1053,10 @@
             }
         };
 
-        requestAnimationFrame(runBatch);
+        AnimationFrameManager.schedule(runBatch, {
+            priority: 3,
+            group: 'enter-animation'
+        });
     }
 
     // ==================== 滚动动画 ====================
@@ -897,11 +1080,17 @@
             window.scrollTo(0, startY * (1 - eased));
 
             if (progress < 1) {
-                requestAnimationFrame(animateScroll);
+                AnimationFrameManager.schedule(animateScroll, {
+                    priority: 5,
+                    group: 'scroll'
+                });
             }
         }
 
-        requestAnimationFrame(animateScroll);
+        AnimationFrameManager.schedule(animateScroll, {
+            priority: 5,
+            group: 'scroll'
+        });
     }
 
     /**
@@ -1043,8 +1232,8 @@
 
             current.replaceWith(next);
 
-            // 使用 requestAnimationFrame 确保滚动和焦点恢复在正确的时机执行
-            requestAnimationFrame(() => {
+            // 使用 AnimationFrameManager 确保滚动和焦点恢复在正确的时机执行
+            AnimationFrameManager.schedule(() => {
                 if (restoreScroll) {
                     window.scrollTo(0, prevScrollY);
                 }
@@ -1054,7 +1243,7 @@
                         try { el.focus({ preventScroll: true }); } catch { el.focus(); }
                     }
                 }
-            });
+            }, { priority: 3, group: 'comment-refresh' });
 
             scheduleCommentsInit(document, { eager: true });
 
@@ -1155,14 +1344,14 @@
             const card = findIndexPostCardById(listPostKey);
             if (card) {
                 applyPostSharedElementName(card, listPostKey);
-                requestAnimationFrame(() => {
+                AnimationFrameManager.schedule(() => {
                     const rect = card.getBoundingClientRect();
                     if (rect.bottom < 0 || rect.top > window.innerHeight) {
-                        requestAnimationFrame(() => {
+                        AnimationFrameManager.schedule(() => {
                             card.scrollIntoView({ block: 'center', inline: 'nearest' });
-                        });
+                        }, { priority: 4, group: 'vt-scroll' });
                     }
-                });
+                }, { priority: 4, group: 'vt-check' });
             } else {
                 clearMarkedViewTransitionNames();
             }
@@ -1398,8 +1587,9 @@
         swup.hooks.on('visit:start', (visit) => {
             STATE.isSwupNavigating = true;
 
-            // 打断之前的动画
+            // 打断之前的动画（包括 AnimationFrameManager 中的动画）
             AnimController.abort();
+            AnimationFrameManager.cancelAll();
 
             // 检测源页面类型
             let fromType = getPageType();
@@ -1502,7 +1692,8 @@
             // 检测是否有 VT 共享元素
             const hasSharedElement = HAS_VT && Boolean(document.querySelector(`[${VT.markerAttr}]`));
 
-            // 应用进入动画类（VT 模式下不添加，避免干扰共享元素变形）
+            // 修复内容闪烁：在 DOM 替换后立即添加进入动画类，确保元素初始状态正确
+            // 这样可以避免"内容显示 → 隐藏 → 动画"的闪烁问题
             if (!hasSharedElement) {
                 if (toType === PageType.PAGE) {
                     document.documentElement.classList.add('ps-page-enter');
@@ -1724,28 +1915,52 @@
 
         syncPostSharedElementFromLocation(scrollPlugin);
 
-        // 初始加载的进入动画（根据页面类型）
+        // 修复初始加载闪烁：先添加进入动画类，再执行动画，最后移除预加载类
+        // 这样可以避免"预加载类移除 → 内容显示 → 动画隐藏 → 动画进入"的闪烁问题
         STATE.lastNavigation.isSwup = false;
         const initialPageType = getPageType(window.location.href);
-
-        if (initialPageType === PageType.LIST) {
-            runEnterAnimation(PageType.LIST, false);
-        } else if (initialPageType === PageType.POST) {
-            runEnterAnimation(PageType.POST, false);
-        } else if (initialPageType === PageType.PAGE) {
-            runEnterAnimation(PageType.PAGE, false);
-        }
 
         // 移除预加载类（所有页面类型）
         const preloadClasses = ['ps-preload-list-enter', 'ps-preload-post-enter', 'ps-preload-page-enter'];
         const hasPreloadClass = preloadClasses.some(cls => document.documentElement.classList.contains(cls));
 
         if (hasPreloadClass) {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    preloadClasses.forEach(cls => document.documentElement.classList.remove(cls));
-                });
-            });
+            // 先移除预加载类，同时添加对应的进入动画类
+            preloadClasses.forEach(cls => document.documentElement.classList.remove(cls));
+            
+            // 添加进入动画类，确保元素初始状态正确
+            if (initialPageType === PageType.LIST) {
+                document.documentElement.classList.add('ps-list-enter');
+            } else if (initialPageType === PageType.POST) {
+                document.documentElement.classList.add('ps-post-enter');
+            } else if (initialPageType === PageType.PAGE) {
+                document.documentElement.classList.add('ps-page-enter');
+            }
+
+            // 然后执行进入动画
+            if (initialPageType === PageType.LIST) {
+                runEnterAnimation(PageType.LIST, false);
+            } else if (initialPageType === PageType.POST) {
+                runEnterAnimation(PageType.POST, false);
+            } else if (initialPageType === PageType.PAGE) {
+                runEnterAnimation(PageType.PAGE, false);
+            }
+
+            // 延迟清理动画类，确保动画完成
+            AnimationFrameManager.schedule(() => {
+                setTimeout(() => {
+                    cleanupAnimationClasses();
+                }, 1000);
+            }, { priority: 2, group: 'preload' });
+        } else {
+            // 没有预加载类，直接执行动画
+            if (initialPageType === PageType.LIST) {
+                runEnterAnimation(PageType.LIST, false);
+            } else if (initialPageType === PageType.POST) {
+                runEnterAnimation(PageType.POST, false);
+            } else if (initialPageType === PageType.PAGE) {
+                runEnterAnimation(PageType.PAGE, false);
+            }
         }
     }
 
