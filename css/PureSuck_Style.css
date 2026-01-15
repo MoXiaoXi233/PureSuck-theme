@@ -1722,6 +1722,31 @@ strong {
 /* comments*/
 .page-navigator {
 	margin: 24px 0;
+	position: relative;
+}
+
+/* 评论分页加载状态 */
+.page-navigator.loading {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.page-navigator.loading::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	margin: -10px 0 0 -10px;
+	border: 2px solid var(--themecolor);
+	border-top-color: transparent;
+	border-radius: 50%;
+	animation: ps-spin 0.8s linear infinite;
+}
+
+@keyframes ps-spin {
+	to { transform: rotate(360deg); }
 }
 
 .pagination {

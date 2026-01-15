@@ -970,7 +970,14 @@
         };
     }
 
-    async function refreshCommentsFromUrl(urlString) {
+    /**
+     * 从指定 URL 刷新评论区
+     * @param {string} urlString - 要获取的 URL
+     * @param {Object} options - 选项
+     * @param {boolean} options.restoreScroll - 是否恢复滚动位置，默认 true
+     */
+    async function refreshCommentsFromUrl(urlString, options = {}) {
+        const { restoreScroll = true } = options;
         const current = document.getElementById('comments');
         if (!current) return false;
 
@@ -1004,7 +1011,9 @@
 
             // 使用 requestAnimationFrame 确保滚动和焦点恢复在正确的时机执行
             requestAnimationFrame(() => {
-                window.scrollTo(0, prevScrollY);
+                if (restoreScroll) {
+                    window.scrollTo(0, prevScrollY);
+                }
                 if (activeId) {
                     const el = document.getElementById(activeId);
                     if (el?.focus) {
@@ -1158,10 +1167,84 @@
                 const resolved = new URL(url, window.location.origin);
                 return resolved.pathname + resolved.search + resolved.hash;
             },
+            // 排除评论区的链接，让它们保持原生行为
+            // 通过 data-no-swup 属性或在捕获阶段阻止来处理
+            linkSelector: 'a[href]:not([data-no-swup]):not(.page-navigator a):not(#comments a)',
             animateHistoryBrowsing: HAS_VT,
             native: HAS_VT,
             animationSelector: false
         });
+
+        // ========== 评论区本地交互处理 ==========
+        // 阻止评论区的链接被 Swup 拦截，保持原生行为
+
+        /**
+         * 处理评论分页点击 - 使用 AJAX 局部刷新
+         */
+        async function handleCommentPaginationClick(link, event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const url = link.getAttribute('href');
+            if (!url) return;
+
+            // 显示加载状态
+            const pageNavigator = link.closest('.page-navigator');
+            if (pageNavigator) {
+                pageNavigator.classList.add('loading');
+            }
+
+            try {
+                // 不恢复滚动位置，稍后手动滚动到评论区顶部
+                const refreshed = await refreshCommentsFromUrl(url, { restoreScroll: false });
+                if (refreshed) {
+                    // 刷新成功后，滚动到评论区顶部
+                    const commentsSection = document.getElementById('comments');
+                    if (commentsSection) {
+                        // 获取第一个评论
+                        const firstComment = commentsSection.querySelector('.comment-list > li');
+                        if (firstComment) {
+                            firstComment.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } else {
+                            // 如果没有评论，滚动到评论区标题
+                            const title = commentsSection.querySelector('.comment-title');
+                            if (title) {
+                                title.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                    }
+                } else {
+                    // 如果刷新失败，回退到 swup 导航
+                    swup.navigate(url);
+                }
+            } catch (error) {
+                console.error('评论分页加载失败:', error);
+                // 出错时回退到 swup 导航
+                swup.navigate(url);
+            } finally {
+                if (pageNavigator) {
+                    pageNavigator.classList.remove('loading');
+                }
+            }
+        }
+
+        // 在捕获阶段拦截评论分页链接
+        // 回复按钮和取消回复保持原生行为，让 Typecho 自己处理
+        document.addEventListener('click', (event) => {
+            const link = event.target?.closest('a[href]');
+            if (!link) return;
+
+            // 只处理评论分页
+            const pageNavigator = link.closest('.page-navigator');
+            if (!pageNavigator) return;
+
+            // 已被阻止或修饰键点击，不处理
+            if (event.defaultPrevented) return;
+            if (event.button !== 0) return;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+            handleCommentPaginationClick(link, event);
+        }, true);
 
         // ========== 表单提交处理 ==========
         document.addEventListener('submit', async (event) => {
