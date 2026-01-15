@@ -1474,7 +1474,7 @@
                 });
             }
 
-            if (pageType === PageType.POST && typeof initializeStickyTOC === 'function') {
+            if ((pageType === PageType.POST || pageType === PageType.PAGE) && typeof initializeStickyTOC === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
                     if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
