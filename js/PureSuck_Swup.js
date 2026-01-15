@@ -1633,6 +1633,8 @@
                     });
                 }
 
+                // 清除 Swup 缓存，确保从服务器获取解锁后的内容
+                swup.cache.clear();
                 swup.navigate(window.location.href);
             })
             .catch(() => {
