@@ -79,6 +79,50 @@
         return Boolean(document.querySelector('.post.post--single'));
     }
 
+    // ==================== 代码高亮懒加载 ====================
+    // 用于视口外代码块的按需高亮
+    function setupLazyHighlighting(blocks, isCurrent) {
+        if (!blocks.length || typeof IntersectionObserver !== 'function') {
+            // 降级：直接延迟处理
+            setTimeout(() => {
+                if (!isCurrent()) return;
+                scheduleIdleBatched(blocks, 2, (block) => {
+                    if (!isCurrent()) return;
+                    hljs.highlightElement(block);
+                    block.dataset.highlighted = 'true';
+                }, isCurrent);
+            }, 500);
+            return;
+        }
+
+        let highlighted = 0;
+        const total = blocks.length;
+
+        const io = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                const block = entry.target;
+                io.unobserve(block);
+                if (block.dataset.highlighted === 'true') continue;
+
+                // 使用 requestIdleCallback 延迟执行
+                scheduleIdleTask(() => {
+                    if (!isCurrent()) return;
+                    hljs.highlightElement(block);
+                    block.dataset.highlighted = 'true';
+                    highlighted++;
+
+                    // 全部完成后断开观察
+                    if (highlighted >= total) {
+                        io.disconnect();
+                    }
+                });
+            }
+        }, { rootMargin: '100px 0px', threshold: 0.01 });
+
+        blocks.forEach(block => io.observe(block));
+    }
+
     // ==================== 空闲任务调度 ====================
     const IDLE = {
         scheduled: false,
@@ -170,48 +214,34 @@
         scheduleIdleTask(runBatch);
     }
 
-    // ==================== 可见性追踪 ====================
-    const VISIBILITY = {
-        io: null,
-        observed: new WeakSet(),
-        seen: new WeakSet(),
-        visible: new WeakSet(),
+    // ==================== 可见性检查 ====================
+    // 简化版：仅用于进入动画时过滤视口外元素
+    // 使用同步的 getBoundingClientRect，避免 IO 开销
+    const VIEWPORT = {
+        top: 0,
+        bottom: 0,
+        buffer: 150, // 视口下方缓冲区(px)
+
+        update() {
+            this.top = 0;
+            this.bottom = window.innerHeight + this.buffer;
+        },
+
+        isVisible(el) {
+            if (!el) return false;
+            const rect = el.getBoundingClientRect();
+            // 元素顶部在视口缓冲区内可见
+            return rect.top < this.bottom && rect.bottom > this.top;
+        },
 
         init() {
-            if (this.io || typeof IntersectionObserver !== 'function') return;
-            this.io = new IntersectionObserver((entries) => {
-                for (const entry of entries) {
-                    const el = entry.target;
-                    this.seen.add(el);
-                    if (entry.isIntersecting) {
-                        this.visible.add(el);
-                    } else {
-                        this.visible.delete(el);
-                    }
-                }
-            }, { rootMargin: '200px 0px', threshold: 0.01 });
-        },
-
-        observe(el) {
-            if (!this.io || !el || this.observed.has(el)) return;
-            this.observed.add(el);
-            this.io.observe(el);
-        },
-
-        get(el) {
-            if (!this.io || !el) return null;
-            if (!this.seen.has(el)) return null;
-            return this.visible.has(el);
-        },
-
-        reset() {
-            if (!this.io) return;
-            this.io.disconnect();
-            this.init();
+            this.update();
+            // 窗口大小变化时更新视口信息
+            window.addEventListener('resize', () => this.update(), { passive: true });
         }
     };
 
-    VISIBILITY.init();
+    VIEWPORT.init();
 
     // ==================== View Transitions 辅助函数 ====================
     function getPostTransitionName(postKey) {
@@ -395,13 +425,7 @@
     }
 
     function isElementVisible(el) {
-        if (!el) return false;
-
-        const cached = VISIBILITY.get(el);
-        if (cached !== null) return cached;
-
-        VISIBILITY.observe(el);
-        return true;
+        return VIEWPORT.isVisible(el);
     }
 
     function uniqElements(arr) {
@@ -435,15 +459,14 @@
     function markAnimationElements(root = document) {
         const scope = root?.querySelector ? root : document;
 
+        // 仅标记元素，不再进行 observe（已移除 VISIBILITY 系统）
         scope.querySelectorAll('.post:not([data-swup-animation])').forEach(el => {
             el.setAttribute('data-swup-animation', '');
-            VISIBILITY.observe(el);
         });
 
         const pager = scope.querySelector('.main-pager');
         if (pager && !pager.hasAttribute('data-swup-animation')) {
             pager.setAttribute('data-swup-animation', '');
-            VISIBILITY.observe(pager);
         }
     }
 
@@ -465,6 +488,7 @@
     // ==================== 动画控制器 ====================
     const AnimController = {
         activeAnimations: [],
+        animatingElements: new WeakSet(), // 追踪正在动画的元素
 
         /**
          * 打断所有正在进行的动画
@@ -483,24 +507,16 @@
             }
             this.activeAnimations = [];
 
-            // 2. 清理所有正在进行的 CSS 动画
-            // 移除动画类以停止 CSS 动画
+            // 2. 清理 CSS 动画类
             document.documentElement.classList.remove(
                 'ps-page-exit',
                 'ps-post-exit',
                 'ps-list-exit'
             );
 
-            // 3. 清理所有可能残留的样式
+            // 3. 清理所有动画中的元素样式
             document.querySelectorAll('[data-ps-animating]').forEach(el => {
-                const computed = window.getComputedStyle(el);
-                // 只有当元素确实在动画中时才强制清理
-                if (computed.opacity !== '1' || computed.transform !== 'none') {
-                    el.style.willChange = '';
-                    el.style.opacity = '';
-                    el.style.transform = '';
-                }
-                el.removeAttribute('data-ps-animating');
+                this.cleanupElement(el);
             });
 
             // 4. 强制重绘以应用更改
@@ -508,18 +524,41 @@
         },
 
         /**
+         * 清理单个元素的动画相关样式
+         */
+        cleanupElement(el) {
+            if (!el) return;
+            el.style.willChange = '';
+            el.style.opacity = '';
+            el.style.transform = '';
+            el.removeAttribute('data-ps-animating');
+            this.animatingElements.delete(el);
+        },
+
+        /**
          * 注册一个动画
          */
-        register(anim) {
-            if (anim) {
-                this.activeAnimations.push(anim);
-                const onEnd = () => {
-                    const idx = this.activeAnimations.indexOf(anim);
-                    if (idx > -1) this.activeAnimations.splice(idx, 1);
-                };
-                anim.onfinish = onEnd;
-                anim.oncancel = onEnd;
+        register(anim, element = null) {
+            if (!anim) return;
+
+            // 追踪正在动画的元素，用于后续清理
+            if (element) {
+                this.animatingElements.add(element);
             }
+
+            this.activeAnimations.push(anim);
+
+            const onEnd = () => {
+                const idx = this.activeAnimations.indexOf(anim);
+                if (idx > -1) this.activeAnimations.splice(idx, 1);
+                // 动画结束后立即清理元素
+                if (element) {
+                    this.cleanupElement(element);
+                }
+            };
+
+            anim.onfinish = onEnd;
+            anim.oncancel = onEnd;
         }
     };
 
@@ -790,6 +829,8 @@
 
         // 预先设置所有元素的初始状态（一次性）
         targets.forEach((el) => {
+            // 动画开始前添加 will-change 提示浏览器优化
+            el.style.willChange = 'opacity, transform';
             el.style.opacity = '0';
             const initialTransform = scale !== 1
                 ? `translate3d(0, ${y}px, 0) scale(${scale})`
@@ -822,15 +863,8 @@
                     fill: 'both'
                 });
 
-                AnimController.register(anim);
-
-                const cleanup = () => {
-                    el.style.opacity = '';
-                    el.style.transform = '';
-                    el.removeAttribute('data-ps-animating');
-                };
-                anim.onfinish = cleanup;
-                anim.oncancel = cleanup;
+                // 使用新的 register API，传入元素以便自动清理
+                AnimController.register(anim, el);
             });
 
             index += batchSize;
@@ -1441,8 +1475,8 @@
             document.documentElement.classList.add('ps-animating');
             document.documentElement.classList.add('ps-enter-active');
 
-            // 重置可见性追踪
-            VISIBILITY.reset();
+            // 更新视口信息（窗口大小可能变化）
+            VIEWPORT.update();
 
             // 滚动处理：列表分页平滑滚动，其他页面立即到顶部
             const shouldScroll = shouldForceScrollToTop(window.location.href);
@@ -1547,13 +1581,39 @@
             if (typeof hljs !== 'undefined') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    // 使用 :not([data-highlighted]) 避免 footter.php 中的重复
-                    const blocks = Array.from(swupRoot.querySelectorAll('pre code:not([data-highlighted])'));
-                    scheduleIdleBatched(blocks, 6, (block) => {
+
+                    // 延迟执行，让进入动画先完成
+                    setTimeout(() => {
                         if (!isCurrent()) return;
-                        hljs.highlightElement(block);
-                        block.dataset.highlighted = 'true';
-                    }, isCurrent);
+
+                        // 使用 :not([data-highlighted]) 避免重复
+                        const allBlocks = Array.from(swupRoot.querySelectorAll('pre code:not([data-highlighted])'));
+
+                        // 优先处理视口内的代码块（用户可见的）
+                        const viewportBlocks = [];
+                        const offscreenBlocks = [];
+
+                        VIEWPORT.update(); // 确保视口信息是最新的
+                        for (const block of allBlocks) {
+                            if (VIEWPORT.isVisible(block)) {
+                                viewportBlocks.push(block);
+                            } else {
+                                offscreenBlocks.push(block);
+                            }
+                        }
+
+                        // 先高亮视口内的，批次更小避免阻塞
+                        scheduleIdleBatched(viewportBlocks, 3, (block) => {
+                            if (!isCurrent()) return;
+                            hljs.highlightElement(block);
+                            block.dataset.highlighted = 'true';
+                        }, isCurrent);
+
+                        // 视口外的延迟更久处理（用 IntersectionObserver 按需触发）
+                        if (offscreenBlocks.length > 0) {
+                            setupLazyHighlighting(offscreenBlocks, isCurrent);
+                        }
+                    }, 200); // 延迟 200ms，让进入动画先跑
                 });
             }
 
