@@ -109,10 +109,6 @@
         </style>
     <?php endif; ?>
 
-    <?php if ($this->options->enablepjax == '1'): ?>
-
-    <?php endif; ?>
-
     <!-- JS引入：按优先级分组加载 -->
 
     <!-- 高优先级：核心模块（首屏必需） -->
@@ -126,20 +122,18 @@
     <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
     <script async src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
 
-    <!-- Swup 4：页面过渡动画 -->
-    <?php if ($this->options->enablepjax == '1'): ?>
-        <script defer src="<?php getStaticURL(path: 'Swup.umd.min.js'); ?>"></script>
-        <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
-        <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
+    <!-- Swup 4：页面过渡动画（强制启用） -->
+    <script defer src="<?php getStaticURL(path: 'Swup.umd.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
-        <?php if ($this->options->PjaxScript): ?>
-            <script defer>
-                // 注册用户自定义回调（Swup page:view 后执行）
-                window.pjaxCustomCallback = function () {
-                    <?= $this->options->PjaxScript; ?>
-                };
-            </script>
-        <?php endif; ?>
+    <?php if ($this->options->PjaxScript): ?>
+        <script defer>
+            // 注册用户自定义回调（Swup page:view 后执行）
+            window.pjaxCustomCallback = function () {
+                <?= $this->options->PjaxScript; ?>
+            };
+        </script>
     <?php endif; ?>
 </head>
 
