@@ -347,7 +347,7 @@
                 stagger: 65,
                 y: 48,
                 easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)',
-                maxItems: 14,
+                maxItems: 20,  // 覆盖常见的一页文章数
                 batchSize: 6,
                 batchGap: 100
             },
@@ -756,13 +756,13 @@
         const vtMarker = main.querySelector(`[${VT.markerAttr}]`);
         const vtEl = vtMarker?.closest('.post');
 
-        return takeVisibleElements(
-            uniqElements(targets),
-            ANIM.enter.list.maxItems,
-            [],
-            new Set(),
-            vtEl
-        ).items;
+        // 列表页：直接返回所有卡片，不过滤可见性（透明度归动画管）
+        const allTargets = uniqElements(targets);
+        if (vtEl) {
+            const idx = allTargets.indexOf(vtEl);
+            if (idx > -1) allTargets.splice(idx, 1);
+        }
+        return allTargets.slice(0, ANIM.enter.list.maxItems);
     }
 
     /**
