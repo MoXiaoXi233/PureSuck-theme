@@ -2422,11 +2422,21 @@ input:-webkit-autofill:active {
 	width: 50%;
 }
 
+/** 超链接颜色 **/
+
 .post-content a {
 	color: var(--themecolor);
-	transition: color 0.2s ease, text-decoration 0.2s ease;
 }
 
 .post-content a:hover {
 	color: var(--themehovercolor);
+}
+
+/* Timeline 链接颜色覆盖 */
+#timeline .timeline-title a {
+	color: var(--text-color) !important;
+}
+
+#timeline .timeline-title a:hover {
+	color: var(--themehovercolor) !important;
 }
