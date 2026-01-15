@@ -22,13 +22,7 @@
         window.THEME_URL = '<?= $this->options->themeUrl; ?>';
     </script>
 
-    <!-- 1. 预加载关键资源 -->
-    <link rel="preload" href="<?= $this->options->themeUrl('fonts/fontello.woff2'); ?>" as="font" type="font/woff2" crossorigin>
-    
-    <!-- 2. 预连接CDN -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-
-    <!-- 4. 主题防闪烁脚本 -->
+    <!-- 主题防闪烁脚本 -->
     <script>
         (function () {
             // 1. 优先读取 Cookie（跨站同步）
@@ -83,7 +77,7 @@
         </script>
     <?php endif; ?>
 
-    <!-- 6. 加载CSS文件 -->
+    <!-- 加载CSS文件 -->
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/PureSuck_Style.css'); ?>">
     <link rel="stylesheet" href="<?= $this->options->themeUrl('css/fontello.css'); ?>" media="print" onload="this.media='all'">
     <!-- ICON Setting -->
@@ -122,8 +116,6 @@
     <!-- JS引入：按优先级分组加载 -->
 
     <!-- 高优先级：核心模块（首屏必需） -->
-    <!-- 暂时禁用新的ES6模块，避免样式冲突 -->
-    <!-- <script type="module" src="<?php $this->options->themeUrl('/js/PureSuck_Core.js'); ?>"></script> -->
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
