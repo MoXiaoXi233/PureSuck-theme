@@ -743,6 +743,45 @@
     };
 
     // ==================== 进入动画 ====================
+
+    /**
+     * 提前设置元素的初始动画状态（内联样式）
+     * 这样可以避免依赖CSS类的样式计算延迟，立即隐藏元素
+     * @param {string} pageType - 页面类型
+     */
+    function setInitialAnimationState(pageType) {
+        if (prefersReducedMotion()) return;
+
+        let targets = [];
+        let y = 12; // 默认位移
+
+        if (pageType === PageType.POST) {
+            targets = collectPostEnterTargets();
+            y = ANIM.enter.post.y;
+        } else if (pageType === PageType.PAGE) {
+            const pageTargets = collectPageEnterTargets();
+            if (pageTargets.card) targets.push(pageTargets.card);
+            targets.push(...pageTargets.inner);
+            y = ANIM.enter.page.card.y;
+        } else if (pageType === PageType.LIST) {
+            targets = collectListEnterTargets();
+            y = ANIM.enter.list.y;
+        }
+
+        // 立即设置所有元素的初始状态（内联样式优先级最高）
+        targets.forEach(el => {
+            if (!el) return;
+            el.style.opacity = '0';
+            el.style.transform = `translate3d(0, ${y}px, 0)`;
+            el.style.willChange = 'opacity, transform';
+        });
+
+        // 强制重绘以确保样式立即生效
+        if (targets.length > 0) {
+            void document.documentElement.offsetHeight;
+        }
+    }
+
     /**
      * 执行页面进入动画
      * @param {string} toType - 目标页面类型
@@ -755,6 +794,10 @@
             ? Math.max(0, ANIM.enter.vt.duration - ANIM.enter.vt.leadMs)
             : 0;
 
+        // 注意：由于已经通过 setInitialAnimationState 设置过初始状态，
+        // 这里传递 skipInitialState = true 避免重复DOM操作
+        const skipInitialState = true;
+
         if (toType === PageType.POST) {
             const targets = collectPostEnterTargets();
             animateLightEnter(targets, baseDelay, {
@@ -764,7 +807,7 @@
                 easing: ANIM.enter.post.easing,
                 batchSize: ANIM.enter.post.batchSize,
                 batchGap: ANIM.enter.post.batchGap
-            });
+            }, skipInitialState);
         } else if (toType === PageType.PAGE) {
             // 独立页面：两层动画
             const pageTargets = collectPageEnterTargets();
@@ -779,7 +822,7 @@
                     easing: ANIM.enter.page.card.easing,
                     batchSize: 1,
                     batchGap: 0
-                });
+                }, skipInitialState);
             }
 
             // 第二层：内部内容动画（在卡片动画完成后开始）
@@ -792,7 +835,7 @@
                     easing: ANIM.enter.page.inner.easing,
                     batchSize: ANIM.enter.page.inner.batchSize,
                     batchGap: ANIM.enter.page.inner.batchGap
-                });
+                }, skipInitialState);
             }
         } else if (toType === PageType.LIST) {
             const targets = collectListEnterTargets();
@@ -803,7 +846,7 @@
                 easing: ANIM.enter.list.easing,
                 batchSize: ANIM.enter.list.batchSize,
                 batchGap: ANIM.enter.list.batchGap
-            });
+            }, skipInitialState);
         }
     }
 
@@ -989,8 +1032,9 @@
      * @param {Array} targets - 目标元素数组
      * @param {number} baseDelay - 基础延迟（毫秒）
      * @param {Object} options - 动画配置
+     * @param {boolean} skipInitialState - 是否跳过初始状态设置（如果已经通过setInitialAnimationState设置）
      */
-    function animateLightEnter(targets, baseDelay = 0, options = {}) {
+    function animateLightEnter(targets, baseDelay = 0, options = {}, skipInitialState = false) {
         if (!targets?.length) return;
 
         const duration = options.duration ?? 380;
@@ -1007,20 +1051,27 @@
         let index = 0;
         const total = targets.length;
 
-        // 预先设置所有元素的初始状态（一次性）
-        targets.forEach((el) => {
-            // 动画开始前添加 will-change 提示浏览器优化
-            el.style.willChange = 'opacity, transform';
-            el.style.opacity = '0';
-            const initialTransform = scale !== 1
-                ? `translate3d(0, ${y}px, 0) scale(${scale})`
-                : `translate3d(0, ${y}px, 0)`;
-            el.style.transform = initialTransform;
-            el.setAttribute('data-ps-animating', '');
-        });
+        // 只在未提前设置初始状态时才设置（避免重复DOM操作）
+        if (!skipInitialState) {
+            targets.forEach((el) => {
+                // 动画开始前添加 will-change 提示浏览器优化
+                el.style.willChange = 'opacity, transform';
+                el.style.opacity = '0';
+                const initialTransform = scale !== 1
+                    ? `translate3d(0, ${y}px, 0) scale(${scale})`
+                    : `translate3d(0, ${y}px, 0)`;
+                el.style.transform = initialTransform;
+                el.setAttribute('data-ps-animating', '');
+            });
 
-        // 强制重绘以确保初始状态生效
-        void document.documentElement.offsetHeight;
+            // 强制重绘以确保初始状态生效
+            void document.documentElement.offsetHeight;
+        } else {
+            // 已经设置过初始状态，只需添加动画标记
+            targets.forEach((el) => {
+                el.setAttribute('data-ps-animating', '');
+            });
+        }
 
         const runBatch = () => {
             const batch = targets.slice(index, index + batchSize);
@@ -1692,8 +1743,11 @@
             // 检测是否有 VT 共享元素
             const hasSharedElement = HAS_VT && Boolean(document.querySelector(`[${VT.markerAttr}]`));
 
-            // 修复内容闪烁：在 DOM 替换后立即添加进入动画类，确保元素初始状态正确
-            // 这样可以避免"内容显示 → 隐藏 → 动画"的闪烁问题
+            // 方案2+3+4：提前设置内联样式 + 原子化类切换 + 减少异步层级
+            // 1. 立即设置内联样式（在DOM替换后第一时间隐藏元素）
+            setInitialAnimationState(toType);
+
+            // 2. 添加进入动画类（在同一帧内完成）
             if (!hasSharedElement) {
                 if (toType === PageType.PAGE) {
                     document.documentElement.classList.add('ps-page-enter');
@@ -1704,29 +1758,31 @@
                 }
             }
 
-            // 触发进入动画
-            Promise.resolve().then(() => {
+            // 3. 简化异步调用链，尽快执行动画
+            // 发送自定义事件
+            document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
+                detail: {
+                    emittedBy: 'ps-after-content-replace',
+                    url: window.location.href,
+                    pageType: toType,
+                    hasSharedElement
+                }
+            }));
 
-                document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
-                    detail: {
-                        emittedBy: 'ps-after-content-replace',
-                        url: window.location.href,
-                        pageType: toType,
-                        hasSharedElement
-                    }
-                }));
-
-                // 在 VT 完成后执行进入动画
-                scheduleIdleTask(() => {
-                    if (!HAS_VT) {
-                        runEnterAnimation(toType, false);
-                        return;
-                    }
-                    waitForViewTransition().then(() => {
-                        scheduleIdleTask(() => runEnterAnimation(toType, hasSharedElement));
+            // 根据是否有VT选择执行路径
+            if (!HAS_VT) {
+                // 无VT：直接在下一帧执行动画
+                requestAnimationFrame(() => {
+                    runEnterAnimation(toType, false);
+                });
+            } else {
+                // 有VT：等待VT完成后执行动画
+                waitForViewTransition().then(() => {
+                    requestAnimationFrame(() => {
+                        runEnterAnimation(toType, hasSharedElement);
                     });
                 });
-            });
+            }
         });
 
         // ========== 动画流程：visit:end ==========
@@ -1915,8 +1971,7 @@
 
         syncPostSharedElementFromLocation(scrollPlugin);
 
-        // 修复初始加载闪烁：先添加进入动画类，再执行动画，最后移除预加载类
-        // 这样可以避免"预加载类移除 → 内容显示 → 动画隐藏 → 动画进入"的闪烁问题
+        // 修复初始加载闪烁：使用原子化类切换 + 提前设置内联样式
         STATE.lastNavigation.isSwup = false;
         const initialPageType = getPageType(window.location.href);
 
@@ -1925,42 +1980,38 @@
         const hasPreloadClass = preloadClasses.some(cls => document.documentElement.classList.contains(cls));
 
         if (hasPreloadClass) {
-            // 先移除预加载类，同时添加对应的进入动画类
-            preloadClasses.forEach(cls => document.documentElement.classList.remove(cls));
-            
-            // 添加进入动画类，确保元素初始状态正确
-            if (initialPageType === PageType.LIST) {
-                document.documentElement.classList.add('ps-list-enter');
-            } else if (initialPageType === PageType.POST) {
-                document.documentElement.classList.add('ps-post-enter');
-            } else if (initialPageType === PageType.PAGE) {
-                document.documentElement.classList.add('ps-page-enter');
-            }
+            // 方案2+3：使用 requestAnimationFrame 确保原子化类切换 + 提前设置内联样式
+            requestAnimationFrame(() => {
+                // 1. 提前设置内联样式（立即隐藏元素，不依赖CSS类）
+                setInitialAnimationState(initialPageType);
 
-            // 然后执行进入动画
-            if (initialPageType === PageType.LIST) {
-                runEnterAnimation(PageType.LIST, false);
-            } else if (initialPageType === PageType.POST) {
-                runEnterAnimation(PageType.POST, false);
-            } else if (initialPageType === PageType.PAGE) {
-                runEnterAnimation(PageType.PAGE, false);
-            }
+                // 2. 原子化类切换（在同一帧内完成）
+                preloadClasses.forEach(cls => document.documentElement.classList.remove(cls));
+
+                if (initialPageType === PageType.LIST) {
+                    document.documentElement.classList.add('ps-list-enter');
+                } else if (initialPageType === PageType.POST) {
+                    document.documentElement.classList.add('ps-post-enter');
+                } else if (initialPageType === PageType.PAGE) {
+                    document.documentElement.classList.add('ps-page-enter');
+                }
+
+                // 3. 立即执行进入动画（减少异步层级）
+                requestAnimationFrame(() => {
+                    runEnterAnimation(initialPageType, false);
+                });
+            });
 
             // 延迟清理动画类，确保动画完成
-            AnimationFrameManager.schedule(() => {
-                setTimeout(() => {
-                    cleanupAnimationClasses();
-                }, 1000);
-            }, { priority: 2, group: 'preload' });
+            setTimeout(() => {
+                cleanupAnimationClasses();
+            }, 1000);
         } else {
             // 没有预加载类，直接执行动画
-            if (initialPageType === PageType.LIST) {
-                runEnterAnimation(PageType.LIST, false);
-            } else if (initialPageType === PageType.POST) {
-                runEnterAnimation(PageType.POST, false);
-            } else if (initialPageType === PageType.PAGE) {
-                runEnterAnimation(PageType.PAGE, false);
-            }
+            setInitialAnimationState(initialPageType);
+            requestAnimationFrame(() => {
+                runEnterAnimation(initialPageType, false);
+            });
         }
     }
 
