@@ -743,6 +743,168 @@
         }
     };
 
+    // ==================== 性能优化：初始渲染 ====================
+    /**
+     * 优化初始渲染性能
+     * 策略：使用 content-visibility 延迟渲染视口外内容，同时避免副作用
+     *
+     * @param {string} pageType - 页面类型
+     */
+    function optimizeInitialRender(pageType) {
+        const swupRoot = document.getElementById('swup');
+        if (!swupRoot) return;
+
+        if (pageType === PageType.POST) {
+            optimizePostPage(swupRoot);
+        } else if (pageType === PageType.PAGE) {
+            optimizeStandalonePage(swupRoot);
+        } else if (pageType === PageType.LIST) {
+            optimizeListPage(swupRoot);
+        }
+
+        // 优化图片加载
+        optimizeImageLoading(swupRoot, pageType);
+    }
+
+    /**
+     * 优化文章页渲染
+     */
+    function optimizePostPage(root) {
+        const postContent = root.querySelector('.post.post--single .post-content');
+        if (!postContent) return;
+
+        const children = Array.from(postContent.children);
+
+        children.forEach((child, index) => {
+            // 前5个元素立即渲染（首屏内容）
+            if (index < 5) return;
+
+            // 排除特殊元素，避免副作用
+            if (shouldSkipContentVisibility(child)) return;
+
+            // 应用 content-visibility 优化
+            child.style.contentVisibility = 'auto';
+            // 使用实际高度估算，保持滚动条准确
+            const estimatedHeight = estimateElementHeight(child);
+            child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
+        });
+
+        // 评论区整体延迟渲染（最安全的优化点）
+        const comments = root.querySelector('.post-comments');
+        if (comments) {
+            comments.style.contentVisibility = 'auto';
+            comments.style.containIntrinsicSize = 'auto 800px';
+        }
+    }
+
+    /**
+     * 优化独立页渲染
+     */
+    function optimizeStandalonePage(root) {
+        const innerWrapper = root.querySelector('.inner-post-wrapper');
+        if (!innerWrapper) return;
+
+        const children = Array.from(innerWrapper.children);
+
+        children.forEach((child, index) => {
+            // 前3个元素立即渲染
+            if (index < 3) return;
+
+            if (shouldSkipContentVisibility(child)) return;
+
+            child.style.contentVisibility = 'auto';
+            const estimatedHeight = estimateElementHeight(child);
+            child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
+        });
+    }
+
+    /**
+     * 优化列表页渲染
+     */
+    function optimizeListPage(root) {
+        const posts = root.querySelectorAll('.post.post--index');
+
+        posts.forEach((post, index) => {
+            // 前3个卡片立即渲染
+            if (index < 3) return;
+
+            // 列表卡片使用 contain 而不是 content-visibility
+            // 避免影响卡片内的列表标记等
+            post.style.contain = 'layout style paint';
+        });
+    }
+
+    /**
+     * 判断元素是否应该跳过 content-visibility 优化
+     * 避免影响关键功能和显示
+     */
+    function shouldSkipContentVisibility(element) {
+        // 有 id 的元素（锚点目标）
+        if (element.id) return true;
+
+        // 列表元素（避免 ::marker 问题）
+        if (element.tagName === 'UL' || element.tagName === 'OL') return true;
+
+        // 表格（可能有复杂的伪元素）
+        if (element.tagName === 'TABLE') return true;
+
+        // 包含表单的元素
+        if (element.querySelector('input, textarea, select, button')) return true;
+
+        // 包含 SVG 的元素（可能有复杂渲染）
+        if (element.querySelector('svg')) return true;
+
+        // 代码块（可能需要立即高亮）
+        if (element.tagName === 'PRE' && element.querySelector('code')) return true;
+
+        return false;
+    }
+
+    /**
+     * 估算元素高度
+     * 根据元素类型返回合理的高度估算值
+     */
+    function estimateElementHeight(element) {
+        const tagName = element.tagName;
+
+        // 根据标签类型估算高度
+        if (tagName === 'P') return 100;
+        if (tagName === 'H1' || tagName === 'H2') return 60;
+        if (tagName === 'H3' || tagName === 'H4') return 50;
+        if (tagName === 'BLOCKQUOTE') return 150;
+        if (tagName === 'PRE') return 300;
+        if (tagName === 'DIV') {
+            // DIV 根据内容估算
+            const textLength = element.textContent?.length || 0;
+            return Math.max(100, Math.min(500, textLength / 5));
+        }
+
+        return 200; // 默认值
+    }
+
+    /**
+     * 优化图片加载
+     * 添加原生懒加载和异步解码属性
+     */
+    function optimizeImageLoading(root, pageType) {
+        const images = root.querySelectorAll('img');
+
+        images.forEach((img, index) => {
+            // 首屏图片立即加载，其余懒加载
+            const isAboveFold = (pageType === PageType.POST && index < 3) ||
+                                (pageType === PageType.LIST && index < 2);
+
+            if (!isAboveFold && !img.hasAttribute('loading')) {
+                img.setAttribute('loading', 'lazy');
+            }
+
+            // 所有图片使用异步解码
+            if (!img.hasAttribute('decoding')) {
+                img.setAttribute('decoding', 'async');
+            }
+        });
+    }
+
     // ==================== 进入动画 ====================
 
     /**
@@ -1710,6 +1872,9 @@
             STATE.isSwupNavigating = false;
             STATE.lastNavigation.toType = toType;
 
+            // 性能优化：立即隐藏视口外的重内容，减少初始渲染压力
+            optimizeInitialRender(toType);
+
             // 清理旧类
             cleanupAnimationClasses();
 
@@ -1830,7 +1995,7 @@
                 phases.push(() => {
                     if (!isCurrent()) return;
 
-                    // 延迟执行，让进入动画先完成
+                    // 性能优化：延迟执行代码高亮，让页面先渲染和动画
                     setTimeout(() => {
                         if (!isCurrent()) return;
 
@@ -1851,7 +2016,7 @@
                         }
 
                         // 先高亮视口内的，批次更小避免阻塞
-                        scheduleIdleBatched(viewportBlocks, 3, (block) => {
+                        scheduleIdleBatched(viewportBlocks, 2, (block) => {
                             if (!isCurrent()) return;
                             hljs.highlightElement(block);
                             block.dataset.highlighted = 'true';
@@ -1861,29 +2026,42 @@
                         if (offscreenBlocks.length > 0) {
                             setupLazyHighlighting(offscreenBlocks, isCurrent);
                         }
-                    }, 200); // 延迟 200ms，让进入动画先跑
+                    }, 500); // 延迟 500ms，让页面先完全渲染
                 });
             }
 
+            // TOC 初始化延迟
             if ((pageType === PageType.POST || pageType === PageType.PAGE) && typeof initializeStickyTOC === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
-                        initializeStickyTOC();
-                    }
+                    // 延迟 TOC 初始化，避免阻塞渲染
+                    setTimeout(() => {
+                        if (!isCurrent()) return;
+                        if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
+                            initializeStickyTOC();
+                        }
+                    }, 300);
                 });
             }
 
+            // Shortcodes 延迟
             if (typeof runShortcodes === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    runShortcodes(swupRoot);
+                    setTimeout(() => {
+                        if (!isCurrent()) return;
+                        runShortcodes(swupRoot);
+                    }, 400);
                 });
             }
 
+            // 评论区延迟初始化
             phases.push(() => {
                 if (isCurrent()) {
-                    scheduleCommentsInit(swupRoot);
+                    setTimeout(() => {
+                        if (!isCurrent()) return;
+                        scheduleCommentsInit(swupRoot);
+                    }, 600);
                 }
             });
 
