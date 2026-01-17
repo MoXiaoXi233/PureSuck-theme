@@ -628,7 +628,8 @@
             if (!el || el === skipEl || used.has(el)) continue;
             used.add(el);
             if (!isAnimatableElement(el)) continue;
-            if (!isElementVisible(el)) continue;
+            // 移除视口过滤：确保所有元素都被收集，避免页面滚动时顶部元素不显示
+            // if (!isElementVisible(el)) continue;
             target.push(el);
             if (target.length >= max) break;
         }
@@ -902,7 +903,7 @@
         }
 
         const pager = scope.querySelector('.main-pager');
-        if (pager && isElementVisible(pager)) belowTargets.push(pager);
+        if (pager) belowTargets.push(pager);
 
         if (bodyTargets.length || belowTargets.length) {
             const belowUnique = uniqElements(belowTargets);
@@ -951,7 +952,7 @@
             if (innerWrapper) {
                 const children = Array.from(innerWrapper.children);
                 for (const child of children) {
-                    if (child !== meta && isAnimatableElement(child) && isElementVisible(child)) {
+                    if (child !== meta && isAnimatableElement(child)) {
                         innerTargets.push(child);
                     }
                 }
@@ -977,7 +978,7 @@
 
         // pager
         const pager = scope.querySelector('.main-pager');
-        if (pager && isElementVisible(pager)) innerTargets.push(pager);
+        if (pager) innerTargets.push(pager);
 
         return {
             card: pageArticle,
