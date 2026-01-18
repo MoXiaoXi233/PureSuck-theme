@@ -392,12 +392,12 @@
     }
 
     // ==================== 可见性检查 ====================
-    // 简化版：仅用于进入动画时过滤视口外元素
-    // 使用同步的 getBoundingClientRect，避免 IO 开销
+    // 性能优化版：使用 IntersectionObserver 避免强制 reflow
     const VIEWPORT = {
         top: 0,
         bottom: 0,
-        buffer: 150, // 视口下方缓冲区(px)
+        buffer: 150,
+        visibleElements: new WeakSet(),
 
         update() {
             this.top = 0;
@@ -406,15 +406,34 @@
 
         isVisible(el) {
             if (!el) return false;
+
+            // 使用缓存的结果，避免重复的 reflow
+            if (this.visibleElements.has(el)) {
+                return true;
+            }
+
+            // 一次性读取布局信息
             const rect = el.getBoundingClientRect();
-            // 元素顶部在视口缓冲区内可见
-            return rect.top < this.bottom && rect.bottom > this.top;
+            const isVisible = rect.top < this.bottom && rect.bottom > this.top;
+
+            // 缓存可见元素
+            if (isVisible && rect.top < window.innerHeight) {
+                this.visibleElements.add(el);
+            }
+
+            return isVisible;
+        },
+
+        clearCache() {
+            this.visibleElements = new WeakSet();
         },
 
         init() {
             this.update();
-            // 窗口大小变化时更新视口信息
-            window.addEventListener('resize', () => this.update(), { passive: true });
+            window.addEventListener('resize', () => {
+                this.update();
+                this.clearCache();
+            }, { passive: true });
         }
     };
 
@@ -696,9 +715,6 @@
             document.querySelectorAll('[data-ps-animating]').forEach(el => {
                 this.cleanupElement(el);
             });
-
-            // 4. 强制重绘以应用更改
-            void document.documentElement.offsetHeight;
         },
 
         /**
@@ -767,82 +783,24 @@
      * 优化文章页渲染
      */
     function optimizePostPage(root) {
-        const postContent = root.querySelector('.post.post--single .post-content');
-        if (!postContent) return;
-
-        const children = Array.from(postContent.children);
-        const deferredElements = [];
-
-        children.forEach((child, index) => {
-            // 前5个元素立即渲染（首屏内容）
-            if (index < 5) return;
-
-            // 排除特殊元素，避免副作用
-            if (shouldSkipContentVisibility(child)) return;
-
-            // 应用 content-visibility 优化
-            child.style.contentVisibility = 'auto';
-            // 使用实际高度估算，保持滚动条准确
-            const estimatedHeight = estimateElementHeight(child);
-            child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
-            child.dataset.psDeferred = 'true';
-            deferredElements.push(child);
-        });
-
-        // 评论区整体延迟渲染（最安全的优化点）
-        const comments = root.querySelector('.post-comments');
-        if (comments) {
-            comments.style.contentVisibility = 'auto';
-            comments.style.containIntrinsicSize = 'auto 800px';
-            comments.dataset.psDeferred = 'true';
-            deferredElements.push(comments);
-        }
-
-        // 在浏览器空闲时逐步移除 content-visibility，让内容正常渲染
-        scheduleProgressiveReveal(deferredElements);
+        // 暂时禁用 content-visibility 优化，可能导致性能问题
+        return;
     }
 
     /**
      * 优化独立页渲染
      */
     function optimizeStandalonePage(root) {
-        const innerWrapper = root.querySelector('.inner-post-wrapper');
-        if (!innerWrapper) return;
-
-        const children = Array.from(innerWrapper.children);
-        const deferredElements = [];
-
-        children.forEach((child, index) => {
-            // 前3个元素立即渲染
-            if (index < 3) return;
-
-            if (shouldSkipContentVisibility(child)) return;
-
-            child.style.contentVisibility = 'auto';
-            const estimatedHeight = estimateElementHeight(child);
-            child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
-            child.dataset.psDeferred = 'true';
-            deferredElements.push(child);
-        });
-
-        // 在浏览器空闲时逐步移除 content-visibility
-        scheduleProgressiveReveal(deferredElements);
+        // 暂时禁用 content-visibility 优化，可能导致性能问题
+        return;
     }
 
     /**
      * 优化列表页渲染
      */
     function optimizeListPage(root) {
-        const posts = root.querySelectorAll('.post.post--index');
-
-        posts.forEach((post, index) => {
-            // 前3个卡片立即渲染
-            if (index < 3) return;
-
-            // 列表卡片使用 contain 而不是 content-visibility
-            // 避免影响卡片内的列表标记等
-            post.style.contain = 'layout style paint';
-        });
+        // 暂时禁用优化，避免副作用
+        return;
     }
 
     /**
@@ -1082,11 +1040,6 @@
             el.style.transform = `translate3d(0, ${y}px, 0)`;
             el.style.willChange = 'opacity, transform';
         });
-
-        // 强制重绘以确保样式立即生效
-        if (targets.length > 0) {
-            void document.documentElement.offsetHeight;
-        }
     }
 
     /**
@@ -1370,9 +1323,6 @@
                 el.style.transform = initialTransform;
                 el.setAttribute('data-ps-animating', '');
             });
-
-            // 强制重绘以确保初始状态生效
-            void document.documentElement.offsetHeight;
         } else {
             // 已经设置过初始状态，只需添加动画标记
             targets.forEach((el) => {
@@ -2279,13 +2229,20 @@
                         // 使用 :not([data-highlighted]) 避免重复
                         const allBlocks = Array.from(swupRoot.querySelectorAll('pre code:not([data-highlighted])'));
 
-                        // 优先处理视口内的代码块（用户可见的）
+                        // 性能优化：批量读取布局信息，避免多次 reflow
                         const viewportBlocks = [];
                         const offscreenBlocks = [];
 
-                        VIEWPORT.update(); // 确保视口信息是最新的
+                        VIEWPORT.update();
+                        const viewportBottom = window.innerHeight + 150;
+
+                        // 批量读取所有代码块的位置（一次性 reflow）
+                        const rects = new Map();
                         for (const block of allBlocks) {
-                            if (VIEWPORT.isVisible(block)) {
+                            const rect = block.getBoundingClientRect();
+                            rects.set(block, rect);
+                            // 简单判断：顶部在视口内的算可见
+                            if (rect.top < viewportBottom && rect.bottom > 0) {
                                 viewportBlocks.push(block);
                             } else {
                                 offscreenBlocks.push(block);
