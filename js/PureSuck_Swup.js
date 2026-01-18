@@ -41,7 +41,6 @@
          */
         schedule(callback, options = {}) {
             if (typeof callback !== 'function') {
-                console.warn('[AnimationFrameManager] Invalid callback');
                 return null;
             }
 
@@ -72,7 +71,7 @@
                 try {
                     callback(timestamp);
                 } catch (error) {
-                    console.error('[AnimationFrameManager] Animation callback error:', error);
+                    // Animation callback error silently ignored
                 }
 
                 // 标记完成
@@ -143,7 +142,6 @@
             this.frameIds.clear();
             this.priorityQueue = [];
             this.stats.totalCancelled += count;
-            console.log(`[AnimationFrameManager] Cancelled ${count} animations`);
         },
 
         /**
@@ -321,7 +319,7 @@
                 try {
                     task();
                 } catch (err) {
-                    console.error('[Swup] Idle task error:', err);
+                    // Idle task error silently ignored
                 }
 
                 if (deadline?.timeRemaining) {
@@ -344,13 +342,12 @@
 
     function scheduleIdleTask(task) {
         if (typeof task !== 'function') return;
-        
+
         // 检查队列是否已满，防止内存泄漏
         if (IDLE.queue.length >= IDLE.maxQueueSize) {
-            console.warn('[Swup] Idle queue is full (max: ' + IDLE.maxQueueSize + '), dropping task');
             return;
         }
-        
+
         IDLE.queue.push(task);
         scheduleIdleDrain();
     }
@@ -1578,7 +1575,6 @@
     // ==================== Swup 初始化 ====================
     function initSwup() {
         if (typeof Swup === 'undefined') {
-            console.error('[Swup] Swup 未定义');
             return;
         }
 
@@ -1606,14 +1602,51 @@
             },
             // 排除评论区的链接，让它们保持原生行为
             // 通过 data-no-swup 属性或在捕获阶段阻止来处理
-            linkSelector: 'a[href]:not([data-no-swup]):not(.page-navigator a):not(#comments a)',
+            linkSelector: 'a[href]:not([data-no-swup]):not(.page-navigator a):not(#comments a):not(a[href^="#"])',
             animateHistoryBrowsing: HAS_VT,
             native: HAS_VT,
             animationSelector: false
         });
 
+        // 保存 swup 实例到全局，供拦截代码使用
+        window.swupInstance = swup;
+
         // ========== 评论区本地交互处理 ==========
         // 阻止评论区的链接被 Swup 拦截，保持原生行为
+
+        /**
+         * 在捕获阶段拦截评论回复链接，防止 Swup 处理
+         * 模仿 TOC 的实现方式（见 PureSuck_Module.js:216-217）
+         *
+         * 性能优化：
+         * - 使用事件委托，只在 document 上监听一次
+         * - 快速路径：非回复链接立即返回（99% 的点击）
+         * - 仅在点击回复按钮时才解析 onclick
+         */
+        document.addEventListener('click', (event) => {
+            // 快速路径：向上查找回复链接
+            const link = event.target?.closest('a[href*="replyTo"]');
+            if (!link) return;
+
+            // 快速过滤：已被阻止或非左键点击
+            if (event.defaultPrevented) return;
+            if (event.button !== 0) return;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+            // 阻止默认跳转和 Swup 拦截
+            event.preventDefault();
+            event.stopPropagation();
+
+            // 解析并调用 TypechoComment.reply
+            const onclickAttr = link.getAttribute('onclick') || '';
+            const match = onclickAttr.match(/TypechoComment\.reply\('([^']+)',\s*(\d+)\)/);
+
+            if (match && typeof TypechoComment !== 'undefined') {
+                const commentId = match[1];
+                const coid = parseInt(match[2], 10);
+                TypechoComment.reply(commentId, coid);
+            }
+        }, true);
 
         /**
          * 处理评论分页点击 - 使用 AJAX 局部刷新
@@ -1655,7 +1688,6 @@
                     swup.navigate(url);
                 }
             } catch (error) {
-                console.error('评论分页加载失败:', error);
                 // 出错时回退到 swup 导航
                 swup.navigate(url);
             } finally {

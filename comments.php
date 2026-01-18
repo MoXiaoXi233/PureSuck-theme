@@ -30,7 +30,7 @@
                         <?php endif; ?>
                         <?php $comments->date(); ?>
                         <span class="cr">
-                            <?php $comments->reply(); ?>
+                            <?php $comments->reply('回复'); ?>
                         </span>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
         <?php endif; ?>
         <div id="<?php $this->respondId(); ?>" class="respond">
             <div class="ccr">
-                <?php $comments->cancelReply(); ?>
+                <?php $comments->cancelReply('取消'); ?>
             </div>
             <div class="response comment-title icon-chat">发表新评论</div>
             <form method="post" action="<?php $this->commentUrl() ?>" id="cf" no-pjax>
