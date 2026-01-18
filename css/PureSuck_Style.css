@@ -2,11 +2,8 @@
  * PureSuck 主题主样式文件
  *
  * 本文件包含主题的核心样式，动画样式已分离到 animations/ 目录
- * 动画模块导入：@import 'animations/index.css';
+ * 动画样式已移至异步加载，避免阻塞渲染
  */
-
-/* 导入动画样式模块 */
-@import 'animations/index.css';
 
 :root {
 	--background-color: #f6f6F6F6;
