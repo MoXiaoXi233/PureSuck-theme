@@ -998,7 +998,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     overflow: hidden;
     padding: 40px 50px 50px 50px;
     position: fixed;
-    z-index: 1
+    z-index: 1;
 }
 
 /* 分类和标签模块 */
@@ -1123,7 +1123,6 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     overflow: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
-
 }
 
 .toc-section.sticky {
@@ -1131,6 +1130,19 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     padding: 35px 100px 50px 0px;
     width: 344px;
     top: 0;
+    z-index: 100;
+}
+
+/* ✅ TOC 固定时，隐藏 sidebar 中 TOC 之前的所有元素 */
+.toc-section.sticky ~ .cloud-section,
+.toc-section.sticky ~ .search-section {
+    display: none;
+}
+
+/* ✅ 或者使用相邻选择器 */
+.right-sidebar:has(.toc-section.sticky) .cloud-section,
+.right-sidebar:has(.toc-section.sticky) .search-section {
+    display: none;
 }
 
 .toc-section::-webkit-scrollbar {

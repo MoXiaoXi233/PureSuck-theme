@@ -508,74 +508,86 @@ function bindTabs(root) {
     });
 }
 
+/**
+ * TOC Sticky 控制器 - 性能优化版
+ */
 const initializeStickyTOC = (() => {
     let state = {
         section: null,
         sidebar: null,
         threshold: 0,
         observer: null,
-        bound: false
+        sentinel: null,
+        bound: false,
+        resizeTimer: 0  // ✅ 防抖定时器
     };
 
     function updateThreshold() {
         if (!state.section || !state.sidebar) return;
-        // 计算 TOC 上方所有元素的高度和
-        const tocAboveElements = Array.from(state.sidebar.children).filter(element => element !== state.section);
-        state.threshold = tocAboveElements.reduce((total, element) => total + element.offsetHeight, 0) + 50;
+
+        // ✅ 批量读取高度，避免 Layout Thrashing
+        const children = Array.from(state.sidebar.children);
+        const heights = children
+            .filter(el => el !== state.section)
+            .map(el => el.offsetHeight);
+
+        state.threshold = heights.reduce((sum, h) => sum + h, 0) + 50;
     }
 
     function handleIntersection(entries) {
         if (!state.section || entries.length === 0) return;
 
         const [entry] = entries;
-        // 当哨兵元素（位于阈值位置）离开视口顶部时，TOC 应该变为 sticky
         const shouldStick = !entry.isIntersecting;
+
+        // ✅ 直接切换，无需 RAF（IntersectionObserver 已经是异步的）
         state.section.classList.toggle("sticky", shouldStick);
     }
 
     function createOrUpdateSentinel() {
         if (!state.section || !state.sidebar) return;
 
-        // 先断开旧观察
         if (state.observer) {
             state.observer.disconnect();
         }
 
-        // 更新阈值
         updateThreshold();
 
-        // 创建或更新哨兵元素
-        let sentinel = document.getElementById('toc-sticky-sentinel');
-        if (!sentinel) {
-            sentinel = document.createElement('div');
-            sentinel.id = 'toc-sticky-sentinel';
-            // 固定在阈值位置（从页面顶部算起）
-            sentinel.style.position = 'absolute';
-            sentinel.style.top = state.threshold + 'px';
-            sentinel.style.left = '0';
-            sentinel.style.width = '1px';
-            sentinel.style.height = '1px';
-            sentinel.style.pointerEvents = 'none';
-            sentinel.style.visibility = 'hidden';
-            document.body.appendChild(sentinel);
-        } else {
-            sentinel.style.top = state.threshold + 'px';
+        if (!state.sentinel) {
+            state.sentinel = document.createElement('div');
+            state.sentinel.id = 'toc-sticky-sentinel';
+            state.sentinel.style.cssText = 'position:absolute;left:0;width:1px;height:1px;pointer-events:none;visibility:hidden';
+            document.body.appendChild(state.sentinel);
         }
 
-        // 重新观察哨兵
+        state.sentinel.style.top = state.threshold + 'px';
+
         if (typeof IntersectionObserver !== 'undefined') {
             state.observer = new IntersectionObserver(handleIntersection, {
                 root: null,
                 threshold: 0,
-                rootMargin: '0px 0px 0px 0px'
+                rootMargin: '0px'
             });
-            state.observer.observe(sentinel);
+            state.observer.observe(state.sentinel);
         }
     }
 
+    function syncState() {
+        if (!state.section) return;
+        const shouldStick = window.scrollY >= state.threshold;
+        state.section.classList.toggle("sticky", shouldStick);
+    }
+
+    // ✅ 防抖的 resize 处理
     function handleResize() {
-        // Resize 时更新哨兵位置
-        createOrUpdateSentinel();
+        if (state.resizeTimer) {
+            clearTimeout(state.resizeTimer);
+        }
+        state.resizeTimer = setTimeout(() => {
+            state.resizeTimer = 0;
+            createOrUpdateSentinel();
+            syncState();
+        }, 150);  // 150ms 防抖
     }
 
     return function initializeStickyTOC() {
@@ -586,31 +598,54 @@ const initializeStickyTOC = (() => {
         state.section = tocSection;
         state.sidebar = rightSidebar;
 
-        if (state.bound) return;
+        // ✅ PJAX 切换时只更新必要的部分
+        if (state.bound) {
+            createOrUpdateSentinel();
+            syncState();
+            // ✅ 只在 hash 跳转时延迟检查
+            if (window.location.hash) {
+                setTimeout(syncState, 100);
+            }
+            return;
+        }
+
         state.bound = true;
 
         if (typeof IntersectionObserver !== 'undefined') {
-            // ✅ 使用 IntersectionObserver + 哨兵元素
             createOrUpdateSentinel();
+            syncState();
+
+            // ✅ load 事件只绑定一次
+            window.addEventListener('load', () => {
+                syncState();
+                // ✅ 只在有 hash 时延迟检查
+                if (window.location.hash) {
+                    setTimeout(syncState, 100);
+                }
+            }, { once: true });
+
+            // ✅ hashchange 事件
+            window.addEventListener('hashchange', () => {
+                setTimeout(syncState, 100);
+            }, { passive: true });
         } else {
-            // 降级：使用 scroll 事件
-            let raf = 0;
+            // ✅ 降级方案：使用防抖的 scroll 监听
+            let scrollTimer = 0;
             updateThreshold();
-            const requestUpdate = () => {
-                if (raf) return;
-                raf = window.requestAnimationFrame(() => {
-                    raf = 0;
-                    const shouldStick = window.scrollY >= state.threshold;
-                    tocSection.classList.toggle("sticky", shouldStick);
-                });
+            const handleScroll = () => {
+                if (scrollTimer) return;
+                scrollTimer = setTimeout(() => {
+                    scrollTimer = 0;
+                    syncState();
+                }, 16);  // ~60fps
             };
-            requestUpdate();
-            window.addEventListener("scroll", requestUpdate, { passive: true });
+            handleScroll();
+            window.addEventListener("scroll", handleScroll, { passive: true });
         }
 
-        window.addEventListener("resize", handleResize);
-        window.addEventListener("orientationchange", handleResize);
-        window.addEventListener("load", handleResize, { once: true });
+        // ✅ 使用防抖的 resize 处理
+        window.addEventListener("resize", handleResize, { passive: true });
+        window.addEventListener("orientationchange", handleResize, { passive: true });
     };
 })();
 
