@@ -774,6 +774,7 @@
         if (!postContent) return;
 
         const children = Array.from(postContent.children);
+        const deferredElements = [];
 
         children.forEach((child, index) => {
             // 前5个元素立即渲染（首屏内容）
@@ -787,6 +788,8 @@
             // 使用实际高度估算，保持滚动条准确
             const estimatedHeight = estimateElementHeight(child);
             child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
+            child.dataset.psDeferred = 'true';
+            deferredElements.push(child);
         });
 
         // 评论区整体延迟渲染（最安全的优化点）
@@ -794,7 +797,12 @@
         if (comments) {
             comments.style.contentVisibility = 'auto';
             comments.style.containIntrinsicSize = 'auto 800px';
+            comments.dataset.psDeferred = 'true';
+            deferredElements.push(comments);
         }
+
+        // 在浏览器空闲时逐步移除 content-visibility，让内容正常渲染
+        scheduleProgressiveReveal(deferredElements);
     }
 
     /**
@@ -805,6 +813,7 @@
         if (!innerWrapper) return;
 
         const children = Array.from(innerWrapper.children);
+        const deferredElements = [];
 
         children.forEach((child, index) => {
             // 前3个元素立即渲染
@@ -815,7 +824,12 @@
             child.style.contentVisibility = 'auto';
             const estimatedHeight = estimateElementHeight(child);
             child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
+            child.dataset.psDeferred = 'true';
+            deferredElements.push(child);
         });
+
+        // 在浏览器空闲时逐步移除 content-visibility
+        scheduleProgressiveReveal(deferredElements);
     }
 
     /**
@@ -880,6 +894,45 @@
         }
 
         return 200; // 默认值
+    }
+
+    /**
+     * 在浏览器空闲时逐步移除 content-visibility
+     * 让内容正常渲染，避免布局问题
+     * @param {Array} elements - 需要渐进显示的元素数组
+     */
+    function scheduleProgressiveReveal(elements) {
+        if (!elements || elements.length === 0) return;
+
+        // 批次大小：每次处理的元素数量
+        const batchSize = 3;
+        let index = 0;
+
+        const revealBatch = () => {
+            const end = Math.min(index + batchSize, elements.length);
+
+            for (let i = index; i < end; i++) {
+                const el = elements[i];
+                if (!el || !el.isConnected) continue;
+
+                // 移除 content-visibility，让内容正常渲染
+                el.style.contentVisibility = '';
+                el.style.containIntrinsicSize = '';
+                el.removeAttribute('data-ps-deferred');
+            }
+
+            index = end;
+
+            // 如果还有剩余元素，继续调度
+            if (index < elements.length) {
+                scheduleIdleTask(revealBatch);
+            }
+        };
+
+        // 延迟启动，让首屏动画先完成
+        setTimeout(() => {
+            scheduleIdleTask(revealBatch);
+        }, 800);
     }
 
     /**
