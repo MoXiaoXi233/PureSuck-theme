@@ -1474,8 +1474,19 @@
         }
     }
 
+    /**
+     * 调度评论区 OwO 初始化
+     * 使用 IntersectionObserver 延迟加载，提升性能
+     * @param {Element} root - 根元素
+     * @param {Object} options - 配置选项
+     * @param {boolean} options.eager - 是否立即初始化
+     */
     function scheduleCommentsInit(root, options = {}) {
-        if (typeof initializeCommentsOwO !== 'function') return;
+        // 检查 OwO 管理器是否可用
+        if (typeof window.OwoManager === 'undefined' || typeof initializeCommentsOwO !== 'function') {
+            return;
+        }
+
         const scope = root?.querySelector ? root : document;
         const commentTextarea = scope.querySelector('.OwO-textarea');
         if (!commentTextarea) return;
@@ -1484,26 +1495,42 @@
             || commentTextarea.closest('.post-comments')
             || commentTextarea;
 
-        if (!commentsRoot || commentsRoot.dataset.psOwoInit) return;
+        if (!commentsRoot || commentsRoot.dataset.psOwoInit === 'done') return;
+
+        // 标记为待初始化
         commentsRoot.dataset.psOwoInit = 'pending';
 
         const runInit = () => {
+            // 检查元素是否仍在 DOM 中
             if (!commentsRoot.isConnected) return;
+
+            // 防止重复初始化
             if (commentsRoot.dataset.psOwoInit === 'done') return;
+
+            // 标记为已初始化
             commentsRoot.dataset.psOwoInit = 'done';
+
+            // 调用初始化函数
             initializeCommentsOwO();
         };
 
+        // 立即初始化的情况：
+        // 1. 明确要求 eager 模式
+        // 2. URL 包含 #comments 锚点
+        // 3. 评论框已获得焦点
         if (options.eager || window.location.hash === '#comments' || document.activeElement === commentTextarea) {
             scheduleIdleTask(runInit);
             return;
         }
 
+        // 降级处理：不支持 IntersectionObserver 时延迟初始化
         if (typeof IntersectionObserver !== 'function') {
             scheduleIdleTask(runInit);
             return;
         }
 
+        // 使用 IntersectionObserver 延迟加载
+        // 当评论区进入视口附近时才初始化
         const io = new IntersectionObserver((entries, observer) => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
@@ -1804,6 +1831,11 @@
             // 打断之前的动画（包括 AnimationFrameManager 中的动画）
             AnimController.abort();
             AnimationFrameManager.cancelAll();
+
+            // ✅ 清理 OwO 实例（页面切换时释放资源）
+            if (typeof window.OwoManager !== 'undefined' && window.OwoManager.destroy) {
+                window.OwoManager.destroy();
+            }
 
             // 检测源页面类型
             let fromType = getPageType();
