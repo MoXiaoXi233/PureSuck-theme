@@ -955,7 +955,101 @@
             if (!img.hasAttribute('decoding')) {
                 img.setAttribute('decoding', 'async');
             }
+
+            // 添加 fetchpriority 属性，优化加载优先级
+            if (isAboveFold && !img.hasAttribute('fetchpriority')) {
+                img.setAttribute('fetchpriority', 'high');
+            }
         });
+
+        // 在浏览器空闲时预加载即将进入视口的图片
+        scheduleProgressiveImagePreload(root, images);
+    }
+
+    /**
+     * 渐进式图片预加载
+     * 使用 IntersectionObserver 和 requestIdleCallback 优化图片加载
+     * @param {Element} root - 根元素
+     * @param {NodeList} images - 图片列表
+     */
+    function scheduleProgressiveImagePreload(root, images) {
+        if (!images || images.length === 0) return;
+        if (typeof IntersectionObserver !== 'function') return;
+
+        // 收集懒加载图片
+        const lazyImages = Array.from(images).filter(img =>
+            img.hasAttribute('loading') && img.getAttribute('loading') === 'lazy'
+        );
+
+        if (lazyImages.length === 0) return;
+
+        // 使用 IntersectionObserver 监听图片即将进入视口
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    observer.unobserve(img);
+
+                    // 在浏览器空闲时预加载图片
+                    scheduleIdleTask(() => {
+                        // 如果图片还没有加载，触发加载
+                        if (!img.complete && img.dataset.src) {
+                            img.src = img.dataset.src;
+                        }
+                    });
+                }
+            });
+        }, {
+            // 提前 300px 开始预加载
+            rootMargin: '300px 0px',
+            threshold: 0.01
+        });
+
+        // 观察所有懒加载图片
+        lazyImages.forEach(img => imageObserver.observe(img));
+    }
+
+    /**
+     * 优化字体加载
+     * 使用 Font Loading API 和 requestIdleCallback 优化字体加载
+     */
+    function optimizeFontLoading() {
+        // 检查 Font Loading API 是否可用
+        if (typeof document.fonts === 'undefined' || typeof document.fonts.load !== 'function') {
+            return;
+        }
+
+        // 在浏览器空闲时预加载关键字体
+        scheduleIdleTask(() => {
+            // 预加载常用字重的字体
+            const fontsToPreload = [
+                // 根据你的主题实际使用的字体调整
+                '400 16px system-ui',
+                '500 16px system-ui',
+                '600 16px system-ui',
+                '700 16px system-ui'
+            ];
+
+            fontsToPreload.forEach(font => {
+                try {
+                    document.fonts.load(font).catch(() => {
+                        // 忽略加载失败，使用系统字体降级
+                    });
+                } catch (e) {
+                    // 忽略错误
+                }
+            });
+        });
+
+        // 监听字体加载完成事件
+        if (document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                // 字体加载完成后，标记 body 以触发字体相关的 CSS 优化
+                document.body.classList.add('fonts-loaded');
+            }).catch(() => {
+                // 忽略错误
+            });
+        }
     }
 
     // ==================== 进入动画 ====================
@@ -2040,10 +2134,10 @@
         swup.hooks.on('visit:end', () => {
             STATE.isSwupNavigating = false;
 
-            // 延迟清理，确保动画完成
-            setTimeout(() => {
+            // 使用 requestIdleCallback 在浏览器空闲时清理，避免阻塞
+            scheduleIdleTask(() => {
                 cleanupAnimationClasses();
-            }, 1000);
+            });
         });
 
         // ========== 页面加载完成 ==========
@@ -2053,18 +2147,22 @@
             const token = ++STATE.currentPageToken;
             const isCurrent = () => token === STATE.currentPageToken;
 
-            // 更新导航栏
-            if (typeof window.NavIndicator?.update === 'function') {
-                window.NavIndicator.update();
-            }
+            // 更新导航栏（使用 requestIdleCallback 避免阻塞）
+            scheduleIdleTask(() => {
+                if (!isCurrent()) return;
 
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.header-nav .nav-item').forEach(item => {
-                const link = item.querySelector('a');
-                if (link) {
-                    const linkPath = new URL(link.href).pathname;
-                    item.classList.toggle('nav-item-current', linkPath === currentPath);
+                if (typeof window.NavIndicator?.update === 'function') {
+                    window.NavIndicator.update();
                 }
+
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('.header-nav .nav-item').forEach(item => {
+                    const link = item.querySelector('a');
+                    if (link) {
+                        const linkPath = new URL(link.href).pathname;
+                        item.classList.toggle('nav-item-current', linkPath === currentPath);
+                    }
+                });
             });
 
             // 标记元素
@@ -2115,28 +2213,28 @@
                 });
             }
 
-            // TOC 初始化延迟
+            // TOC 初始化延迟（使用 requestIdleCallback）
             if ((pageType === PageType.POST || pageType === PageType.PAGE) && typeof initializeStickyTOC === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    // 延迟 TOC 初始化，避免阻塞渲染
-                    setTimeout(() => {
+                    // 使用 requestIdleCallback 在浏览器空闲时初始化
+                    scheduleIdleTask(() => {
                         if (!isCurrent()) return;
                         if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
                             initializeStickyTOC();
                         }
-                    }, 300);
+                    });
                 });
             }
 
-            // Shortcodes 延迟
+            // Shortcodes 延迟（使用 requestIdleCallback）
             if (typeof runShortcodes === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    setTimeout(() => {
+                    scheduleIdleTask(() => {
                         if (!isCurrent()) return;
                         runShortcodes(swupRoot);
-                    }, 400);
+                    });
                 });
             }
 
@@ -2234,6 +2332,9 @@
         });
 
         syncPostSharedElementFromLocation(scrollPlugin);
+
+        // 优化字体加载（在浏览器空闲时）
+        optimizeFontLoading();
 
         // 修复初始加载闪烁：使用原子化类切换 + 提前设置内联样式
         STATE.lastNavigation.isSwup = false;
