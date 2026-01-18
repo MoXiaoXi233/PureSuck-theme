@@ -391,6 +391,116 @@
         scheduleIdleTask(runBatch);
     }
 
+    // ==================== 智能任务调度器 ====================
+    const TaskScheduler = {
+        _hasScheduler: typeof scheduler !== 'undefined' && typeof scheduler.yield === 'function',
+        _hasPostTask: typeof scheduler !== 'undefined' && typeof scheduler.postTask === 'function',
+        _frameTime: 16.67,
+        _targetFps: 60,
+        _adaptiveMetrics: {
+            samples: [],
+            avgTaskTime: 0,
+            optimalBatchSize: 8
+        },
+
+        async _measureFrameTime() {
+            const samples = [];
+            let last = performance.now();
+
+            for (let i = 0; i < 60; i++) {
+                await new Promise(resolve => requestAnimationFrame(() => {
+                    const now = performance.now();
+                    const delta = now - last;
+                    if (delta > 0 && delta < 50) samples.push(delta);
+                    last = now;
+                    resolve();
+                }));
+            }
+
+            if (samples.length > 0) {
+                this._frameTime = samples.reduce((a, b) => a + b) / samples.length;
+                this._targetFps = Math.round(1000 / this._frameTime);
+            }
+        },
+
+        yield() {
+            if (this._hasScheduler) return scheduler.yield();
+            if (typeof MessageChannel !== 'undefined') {
+                return new Promise(resolve => {
+                    const ch = new MessageChannel();
+                    ch.port1.onmessage = () => { ch.port1.close(); resolve(); };
+                    ch.port2.postMessage(null);
+                    ch.port2.close();
+                });
+            }
+            return new Promise(resolve => setTimeout(resolve, 0));
+        },
+
+        async postTask(callback, priority = 'user-visible') {
+            if (this._hasPostTask) {
+                return scheduler.postTask(callback, { priority });
+            }
+            return new Promise(resolve => {
+                requestAnimationFrame(async () => {
+                    const result = await callback();
+                    resolve(result);
+                });
+            });
+        },
+
+        _updateMetrics(taskTime, itemCount) {
+            const { samples } = this._adaptiveMetrics;
+            const timePerItem = taskTime / itemCount;
+
+            samples.push(timePerItem);
+            if (samples.length > 20) samples.shift();
+
+            this._adaptiveMetrics.avgTaskTime = samples.reduce((a, b) => a + b) / samples.length;
+
+            const targetTime = this._frameTime * 0.5;
+            this._adaptiveMetrics.optimalBatchSize = Math.max(2,
+                Math.floor(targetTime / this._adaptiveMetrics.avgTaskTime)
+            );
+        },
+
+        async run(items, handler, options = {}) {
+            if (!items?.length) return;
+
+            const {
+                priority = 'user-visible',
+                onProgress = null
+            } = options;
+
+            const batchSize = this._adaptiveMetrics.optimalBatchSize;
+            const budget = this._frameTime * 0.6;
+            let processed = 0;
+
+            for (let i = 0; i < items.length; i += batchSize) {
+                const start = performance.now();
+                const end = Math.min(i + batchSize, items.length);
+
+                await this.postTask(async () => {
+                    for (let j = i; j < end; j++) {
+                        try {
+                            await handler(items[j], j);
+                        } catch (e) {}
+                    }
+                }, priority);
+
+                processed = end;
+                this._updateMetrics(performance.now() - start, end - i);
+
+                if (onProgress) onProgress(processed, items.length);
+
+                if (processed < items.length && performance.now() - start > budget) {
+                    await this.yield();
+                }
+            }
+        }
+    };
+
+    TaskScheduler._measureFrameTime();
+
     // ==================== 可见性检查 ====================
     // 性能优化版：使用 IntersectionObserver 避免强制 reflow
     const VIEWPORT = {
@@ -1009,16 +1119,11 @@
 
     // ==================== 进入动画 ====================
 
-    /**
-     * 提前设置元素的初始动画状态（内联样式）
-     * 这样可以避免依赖CSS类的样式计算延迟，立即隐藏元素
-     * @param {string} pageType - 页面类型
-     */
     function setInitialAnimationState(pageType) {
         if (prefersReducedMotion()) return;
 
         let targets = [];
-        let y = 12; // 默认位移
+        let y = 12;
 
         if (pageType === PageType.POST) {
             targets = collectPostEnterTargets();
@@ -1033,21 +1138,22 @@
             y = ANIM.enter.list.y;
         }
 
-        // 立即设置所有元素的初始状态（内联样式优先级最高）
-        targets.forEach(el => {
-            if (!el) return;
-            el.style.opacity = '0';
-            el.style.transform = `translate3d(0, ${y}px, 0)`;
-            el.style.willChange = 'opacity, transform';
+        if (!targets.length) return;
+
+        requestAnimationFrame(() => {
+            const transform = `translate3d(0,${y}px,0)`;
+            targets.forEach(el => {
+                if (el) el.style.cssText += `opacity:0;transform:${transform};will-change:opacity,transform;contain:layout style paint;`;
+            });
         });
     }
 
     /**
-     * 执行页面进入动画
+     * 执行页面进入动画（异步版本，支持时间切片）
      * @param {string} toType - 目标页面类型
      * @param {boolean} hasSharedElement - 是否有共享元素（VT）
      */
-    function runEnterAnimation(toType, hasSharedElement) {
+    async function runEnterAnimation(toType, hasSharedElement) {
         if (prefersReducedMotion()) return;
 
         const baseDelay = hasSharedElement
@@ -1060,13 +1166,12 @@
 
         if (toType === PageType.POST) {
             const targets = collectPostEnterTargets();
-            animateLightEnter(targets, baseDelay, {
+            await animateLightEnter(targets, baseDelay, {
                 duration: ANIM.enter.post.duration,
                 stagger: ANIM.enter.post.stagger,
                 y: ANIM.enter.post.y,
                 easing: ANIM.enter.post.easing,
-                batchSize: ANIM.enter.post.batchSize,
-                batchGap: ANIM.enter.post.batchGap
+                batchSize: ANIM.enter.post.batchSize
             }, skipInitialState);
         } else if (toType === PageType.PAGE) {
             // 独立页面：两层动画
@@ -1074,38 +1179,35 @@
 
             // 第一层：整个卡片动画（与列表卡片同步）
             if (pageTargets.card) {
-                animateLightEnter([pageTargets.card], baseDelay, {
+                await animateLightEnter([pageTargets.card], baseDelay, {
                     duration: ANIM.enter.page.card.duration,
                     stagger: 0,
                     y: ANIM.enter.page.card.y,
                     scale: ANIM.enter.page.card.scale,
                     easing: ANIM.enter.page.card.easing,
-                    batchSize: 1,
-                    batchGap: 0
+                    batchSize: 1
                 }, skipInitialState);
             }
 
             // 第二层：内部内容动画（在卡片动画完成后开始）
             if (pageTargets.inner.length > 0) {
                 const innerDelay = baseDelay + ANIM.enter.page.card.duration + 60;
-                animateLightEnter(pageTargets.inner, innerDelay, {
+                await animateLightEnter(pageTargets.inner, innerDelay, {
                     duration: ANIM.enter.page.inner.duration,
                     stagger: ANIM.enter.page.inner.stagger,
                     y: ANIM.enter.page.inner.y,
                     easing: ANIM.enter.page.inner.easing,
-                    batchSize: ANIM.enter.page.inner.batchSize,
-                    batchGap: ANIM.enter.page.inner.batchGap
+                    batchSize: ANIM.enter.page.inner.batchSize
                 }, skipInitialState);
             }
         } else if (toType === PageType.LIST) {
             const targets = collectListEnterTargets();
-            animateLightEnter(targets, baseDelay, {
+            await animateLightEnter(targets, baseDelay, {
                 duration: ANIM.enter.list.duration,
                 stagger: ANIM.enter.list.stagger,
                 y: ANIM.enter.list.y,
                 easing: ANIM.enter.list.easing,
-                batchSize: ANIM.enter.list.batchSize,
-                batchGap: ANIM.enter.list.batchGap
+                batchSize: ANIM.enter.list.batchSize
             }, skipInitialState);
         }
     }
@@ -1287,84 +1389,30 @@
         return allTargets.slice(0, ANIM.enter.list.maxItems);
     }
 
-    /**
-     * 执行轻量级进入动画（性能优化版）
-     * @param {Array} targets - 目标元素数组
-     * @param {number} baseDelay - 基础延迟（毫秒）
-     * @param {Object} options - 动画配置
-     * @param {boolean} skipInitialState - 是否跳过初始状态设置（如果已经通过setInitialAnimationState设置）
-     */
-    function animateLightEnter(targets, baseDelay = 0, options = {}, skipInitialState = false) {
+    async function animateLightEnter(targets, baseDelay = 0, options = {}, skipInitialState = false) {
         if (!targets?.length) return;
 
-        const duration = options.duration ?? 380;
-        const stagger = options.stagger ?? 32;
-        const y = options.y ?? 16;
-        const scale = options.scale ?? 1;
-        const easing = options.easing ?? 'cubic-bezier(0.2, 0.8, 0.2, 1)';
-        const batchSize = options.batchSize ?? 8;
-        const batchGap = options.batchGap ?? BREATH.batchGapMs;
+        const { duration = 380, stagger = 32, y = 16, scale = 1, easing = 'cubic-bezier(0.2, 0.8, 0.2, 1)' } = options;
 
-        // 性能优化：元素较少时一次性处理，避免setTimeout
-        const useSingleBatch = targets.length <= batchSize;
-
-        let index = 0;
-        const total = targets.length;
-
-        // 只在未提前设置初始状态时才设置（避免重复DOM操作）
         if (!skipInitialState) {
-            targets.forEach((el) => {
-                // 动画开始前添加 will-change 提示浏览器优化
-                el.style.willChange = 'opacity, transform';
-                el.style.opacity = '0';
-                const initialTransform = scale !== 1
-                    ? `translate3d(0, ${y}px, 0) scale(${scale})`
-                    : `translate3d(0, ${y}px, 0)`;
-                el.style.transform = initialTransform;
-                el.setAttribute('data-ps-animating', '');
-            });
-        } else {
-            // 已经设置过初始状态，只需添加动画标记
-            targets.forEach((el) => {
-                el.setAttribute('data-ps-animating', '');
-            });
+            await TaskScheduler.run(targets, (el) => {
+                el.style.cssText += `opacity:0;transform:translate3d(0,${y}px,0)${scale !== 1 ? ` scale(${scale})` : ''};will-change:opacity,transform;contain:layout style paint;`;
+            }, { priority: 'user-blocking' });
         }
 
-        const runBatch = () => {
-            const batch = targets.slice(index, index + batchSize);
-            if (!batch.length) return;
-
-            batch.forEach((el, batchIndex) => {
-                const absoluteIndex = index + batchIndex;
-                const fromTransform = scale !== 1
-                    ? `translate3d(0, ${y}px, 0) scale(${scale})`
-                    : `translate3d(0, ${y}px, 0)`;
-                const keyframes = [
-                    { opacity: 0, transform: fromTransform },
-                    { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }
-                ];
-
-                const anim = el.animate(keyframes, {
-                    duration,
-                    easing,
-                    delay: baseDelay + absoluteIndex * stagger,
-                    fill: 'both'
-                });
-
-                // 使用新的 register API，传入元素以便自动清理
-                AnimController.register(anim, el);
+        await TaskScheduler.run(targets, (el, index) => {
+            const anim = el.animate([
+                { opacity: 0, transform: `translate3d(0,${y}px,0)${scale !== 1 ? ` scale(${scale})` : ''}` },
+                { opacity: 1, transform: 'translate3d(0,0,0) scale(1)' }
+            ], {
+                duration,
+                easing,
+                delay: baseDelay + index * stagger,
+                fill: 'both',
+                composite: 'replace'
             });
-
-            index += batchSize;
-            if (index < total && !useSingleBatch) {
-                setTimeout(runBatch, batchGap);
-            }
-        };
-
-        AnimationFrameManager.schedule(runBatch, {
-            priority: 3,
-            group: 'enter-animation'
-        });
+            AnimController.register(anim, el);
+        }, { priority: 'user-blocking' });
     }
 
     // ==================== 滚动动画 ====================
@@ -2249,12 +2297,11 @@
                             }
                         }
 
-                        // 先高亮视口内的，批次更小避免阻塞
-                        scheduleIdleBatched(viewportBlocks, 2, (block) => {
+                        TaskScheduler.run(viewportBlocks, (block) => {
                             if (!isCurrent()) return;
                             hljs.highlightElement(block);
                             block.dataset.highlighted = 'true';
-                        }, isCurrent);
+                        }, { priority: 'user-visible' }).catch(() => {});
 
                         // 视口外的延迟更久处理（用 IntersectionObserver 按需触发）
                         if (offscreenBlocks.length > 0) {
@@ -2430,6 +2477,99 @@
             });
         }
     }
+
+    // ==================== 性能监控 ====================
+    /**
+     * 性能监控模块 - 监测长任务和主线程阻塞
+     * 使用方法：在控制台设置 window.PS_PERF_DEBUG = true 后刷新页面
+     */
+    const PerformanceMonitor = {
+        enabled: false,
+        longTaskThreshold: 50, // 超过50ms的任务视为长任务
+        stats: {
+            longTasks: 0,
+            totalBlockingTime: 0,
+            maxTaskDuration: 0,
+            pageTransitions: 0
+        },
+
+        init() {
+            // 检查是否启用调试模式
+            this.enabled = window.PS_PERF_DEBUG === true;
+            if (!this.enabled) return;
+
+            console.log('[PureSuck Perf] 性能监控已启用');
+
+            // 监听长任务
+            if (typeof PerformanceObserver !== 'undefined') {
+                try {
+                    const observer = new PerformanceObserver((list) => {
+                        for (const entry of list.getEntries()) {
+                            if (entry.duration > this.longTaskThreshold) {
+                                this.stats.longTasks++;
+                                this.stats.totalBlockingTime += entry.duration;
+                                this.stats.maxTaskDuration = Math.max(
+                                    this.stats.maxTaskDuration,
+                                    entry.duration
+                                );
+
+                                console.warn(
+                                    `[PureSuck Perf] 长任务: ${entry.duration.toFixed(2)}ms`,
+                                    entry.name || entry.entryType
+                                );
+                            }
+                        }
+                    });
+
+                    observer.observe({ entryTypes: ['longtask'] });
+                } catch (e) {
+                    // longtask 不支持时静默失败
+                }
+            }
+
+            // 监听页面切换性能
+            if (typeof swup !== 'undefined') {
+                swup.hooks.on('visit:start', () => {
+                    this.stats.pageTransitions++;
+                    this._transitionStart = performance.now();
+                });
+
+                swup.hooks.on('visit:end', () => {
+                    if (this._transitionStart) {
+                        const duration = performance.now() - this._transitionStart;
+                        console.log(
+                            `[PureSuck Perf] 页面切换: ${duration.toFixed(2)}ms`
+                        );
+                        this._transitionStart = null;
+                    }
+                });
+            }
+
+            window.PS_PERF_STATS = () => {
+                const { _frameTime, _targetFps, _adaptiveMetrics } = TaskScheduler;
+                console.table({
+                    '长任务数量': this.stats.longTasks,
+                    '总阻塞时间(ms)': this.stats.totalBlockingTime.toFixed(2),
+                    '最长任务(ms)': this.stats.maxTaskDuration.toFixed(2),
+                    '页面切换次数': this.stats.pageTransitions,
+                    '平均阻塞(ms)': this.stats.longTasks > 0
+                        ? (this.stats.totalBlockingTime / this.stats.longTasks).toFixed(2)
+                        : 0
+                });
+                console.log(`\n[调度器配置]`);
+                console.log(`  目标帧率: ${_targetFps}fps`);
+                console.log(`  帧时间: ${_frameTime.toFixed(2)}ms`);
+                console.log(`  最优批次: ${_adaptiveMetrics.optimalBatchSize}`);
+                console.log(`  平均任务时间: ${_adaptiveMetrics.avgTaskTime.toFixed(3)}ms/项`);
+                return this.stats;
+            };
+
+            console.log('[PureSuck Perf] 使用 PS_PERF_STATS() 查看统计');
+        }
+    };
+
+    // 初始化性能监控
+    PerformanceMonitor.init();
 
     // 页面加载完成后初始化
     if (document.readyState === 'loading') {
