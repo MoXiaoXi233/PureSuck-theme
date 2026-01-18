@@ -1785,7 +1785,7 @@
         // 保存 swup 实例到全局，供拦截代码使用
         window.swupInstance = swup;
 
-        // ========== 评论区本地交互处理 ==========
+        // ========== 评论区链接拦截 ==========
         document.addEventListener('click', (event) => {
             const link = event.target?.closest('a[href*="replyTo"]');
             if (!link) return;
