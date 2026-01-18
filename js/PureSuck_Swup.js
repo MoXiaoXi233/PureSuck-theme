@@ -1785,6 +1785,93 @@
         // 保存 swup 实例到全局，供拦截代码使用
         window.swupInstance = swup;
 
+        // ========== Typecho 评论系统修复 ==========
+        // 重写 TypechoComment 方法，使其动态查找 DOM
+        // 解决 Swup 替换 DOM 后引用失效的问题
+        (function() {
+            const reply = function(cid, coid) {
+                const comment = document.getElementById(cid);
+                if (!comment) return false;
+
+                const parent = comment.parentNode;
+
+                // 动态查找 respond 元素
+                let respond = document.querySelector('.respond');
+                if (!respond) return false;
+
+                let input = document.getElementById('comment-parent');
+                const form = respond.tagName === 'FORM' ? respond : respond.querySelector('form');
+                const textarea = respond.querySelector('textarea');
+
+                // 创建 parent 字段（如果不存在）
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'parent';
+                    input.id = 'comment-parent';
+                    form.appendChild(input);
+                }
+
+                input.value = coid;
+
+                // 创建占位符并移动表单
+                let holder = document.getElementById('comment-form-place-holder');
+                if (!holder) {
+                    holder = document.createElement('div');
+                    holder.id = 'comment-form-place-holder';
+                    respond.parentNode.insertBefore(holder, respond);
+                }
+
+                comment.appendChild(respond);
+
+                // 显示取消按钮
+                const cancelBtn = document.getElementById('cancel-comment-reply-link');
+                if (cancelBtn) {
+                    cancelBtn.style.display = '';
+                }
+
+                // 聚焦输入框
+                if (textarea && textarea.name === 'text') {
+                    textarea.focus();
+                }
+
+                return false;
+            };
+
+            const cancelReply = function() {
+                let respond = document.querySelector('.respond');
+                if (!respond) return false;
+
+                const holder = document.getElementById('comment-form-place-holder');
+                const input = document.getElementById('comment-parent');
+                const cancelBtn = document.getElementById('cancel-comment-reply-link');
+
+                // 移除 parent 字段
+                if (input) {
+                    input.parentNode.removeChild(input);
+                }
+
+                if (!holder) return true;
+
+                // 恢复表单位置
+                cancelBtn.style.display = 'none';
+                holder.parentNode.insertBefore(respond, holder);
+
+                return false;
+            };
+
+            // 覆盖或创建 TypechoComment 对象
+            if (window.TypechoComment) {
+                window.TypechoComment.reply = reply;
+                window.TypechoComment.cancelReply = cancelReply;
+            } else {
+                window.TypechoComment = {
+                    reply: reply,
+                    cancelReply: cancelReply
+                };
+            }
+        })();
+
         // ========== 评论区链接拦截 ==========
         document.addEventListener('click', (event) => {
             const link = event.target?.closest('a[href*="replyTo"]');
