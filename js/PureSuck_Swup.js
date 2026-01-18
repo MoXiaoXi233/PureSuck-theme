@@ -771,6 +771,7 @@
         if (!postContent) return;
 
         const children = Array.from(postContent.children);
+        const deferredElements = [];
 
         children.forEach((child, index) => {
             // 前5个元素立即渲染（首屏内容）
@@ -784,6 +785,8 @@
             // 使用实际高度估算，保持滚动条准确
             const estimatedHeight = estimateElementHeight(child);
             child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
+            child.dataset.psDeferred = 'true';
+            deferredElements.push(child);
         });
 
         // 评论区整体延迟渲染（最安全的优化点）
@@ -791,7 +794,12 @@
         if (comments) {
             comments.style.contentVisibility = 'auto';
             comments.style.containIntrinsicSize = 'auto 800px';
+            comments.dataset.psDeferred = 'true';
+            deferredElements.push(comments);
         }
+
+        // 在浏览器空闲时逐步移除 content-visibility，让内容正常渲染
+        scheduleProgressiveReveal(deferredElements);
     }
 
     /**
@@ -802,6 +810,7 @@
         if (!innerWrapper) return;
 
         const children = Array.from(innerWrapper.children);
+        const deferredElements = [];
 
         children.forEach((child, index) => {
             // 前3个元素立即渲染
@@ -812,7 +821,12 @@
             child.style.contentVisibility = 'auto';
             const estimatedHeight = estimateElementHeight(child);
             child.style.containIntrinsicSize = `auto ${estimatedHeight}px`;
+            child.dataset.psDeferred = 'true';
+            deferredElements.push(child);
         });
+
+        // 在浏览器空闲时逐步移除 content-visibility
+        scheduleProgressiveReveal(deferredElements);
     }
 
     /**
@@ -880,6 +894,45 @@
     }
 
     /**
+     * 在浏览器空闲时逐步移除 content-visibility
+     * 让内容正常渲染，避免布局问题
+     * @param {Array} elements - 需要渐进显示的元素数组
+     */
+    function scheduleProgressiveReveal(elements) {
+        if (!elements || elements.length === 0) return;
+
+        // 批次大小：每次处理的元素数量
+        const batchSize = 3;
+        let index = 0;
+
+        const revealBatch = () => {
+            const end = Math.min(index + batchSize, elements.length);
+
+            for (let i = index; i < end; i++) {
+                const el = elements[i];
+                if (!el || !el.isConnected) continue;
+
+                // 移除 content-visibility，让内容正常渲染
+                el.style.contentVisibility = '';
+                el.style.containIntrinsicSize = '';
+                el.removeAttribute('data-ps-deferred');
+            }
+
+            index = end;
+
+            // 如果还有剩余元素，继续调度
+            if (index < elements.length) {
+                scheduleIdleTask(revealBatch);
+            }
+        };
+
+        // 延迟启动，让首屏动画先完成
+        setTimeout(() => {
+            scheduleIdleTask(revealBatch);
+        }, 800);
+    }
+
+    /**
      * 优化图片加载
      * 添加原生懒加载和异步解码属性
      */
@@ -899,7 +952,101 @@
             if (!img.hasAttribute('decoding')) {
                 img.setAttribute('decoding', 'async');
             }
+
+            // 添加 fetchpriority 属性，优化加载优先级
+            if (isAboveFold && !img.hasAttribute('fetchpriority')) {
+                img.setAttribute('fetchpriority', 'high');
+            }
         });
+
+        // 在浏览器空闲时预加载即将进入视口的图片
+        scheduleProgressiveImagePreload(root, images);
+    }
+
+    /**
+     * 渐进式图片预加载
+     * 使用 IntersectionObserver 和 requestIdleCallback 优化图片加载
+     * @param {Element} root - 根元素
+     * @param {NodeList} images - 图片列表
+     */
+    function scheduleProgressiveImagePreload(root, images) {
+        if (!images || images.length === 0) return;
+        if (typeof IntersectionObserver !== 'function') return;
+
+        // 收集懒加载图片
+        const lazyImages = Array.from(images).filter(img =>
+            img.hasAttribute('loading') && img.getAttribute('loading') === 'lazy'
+        );
+
+        if (lazyImages.length === 0) return;
+
+        // 使用 IntersectionObserver 监听图片即将进入视口
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    observer.unobserve(img);
+
+                    // 在浏览器空闲时预加载图片
+                    scheduleIdleTask(() => {
+                        // 如果图片还没有加载，触发加载
+                        if (!img.complete && img.dataset.src) {
+                            img.src = img.dataset.src;
+                        }
+                    });
+                }
+            });
+        }, {
+            // 提前 300px 开始预加载
+            rootMargin: '300px 0px',
+            threshold: 0.01
+        });
+
+        // 观察所有懒加载图片
+        lazyImages.forEach(img => imageObserver.observe(img));
+    }
+
+    /**
+     * 优化字体加载
+     * 使用 Font Loading API 和 requestIdleCallback 优化字体加载
+     */
+    function optimizeFontLoading() {
+        // 检查 Font Loading API 是否可用
+        if (typeof document.fonts === 'undefined' || typeof document.fonts.load !== 'function') {
+            return;
+        }
+
+        // 在浏览器空闲时预加载关键字体
+        scheduleIdleTask(() => {
+            // 预加载常用字重的字体
+            const fontsToPreload = [
+                // 根据你的主题实际使用的字体调整
+                '400 16px system-ui',
+                '500 16px system-ui',
+                '600 16px system-ui',
+                '700 16px system-ui'
+            ];
+
+            fontsToPreload.forEach(font => {
+                try {
+                    document.fonts.load(font).catch(() => {
+                        // 忽略加载失败，使用系统字体降级
+                    });
+                } catch (e) {
+                    // 忽略错误
+                }
+            });
+        });
+
+        // 监听字体加载完成事件
+        if (document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                // 字体加载完成后，标记 body 以触发字体相关的 CSS 优化
+                document.body.classList.add('fonts-loaded');
+            }).catch(() => {
+                // 忽略错误
+            });
+        }
     }
 
     // ==================== 进入动画 ====================
@@ -1471,8 +1618,19 @@
         }
     }
 
+    /**
+     * 调度评论区 OwO 初始化
+     * 使用 IntersectionObserver 延迟加载，提升性能
+     * @param {Element} root - 根元素
+     * @param {Object} options - 配置选项
+     * @param {boolean} options.eager - 是否立即初始化
+     */
     function scheduleCommentsInit(root, options = {}) {
-        if (typeof initializeCommentsOwO !== 'function') return;
+        // 检查 OwO 管理器是否可用
+        if (typeof window.OwoManager === 'undefined' || typeof initializeCommentsOwO !== 'function') {
+            return;
+        }
+
         const scope = root?.querySelector ? root : document;
         const commentTextarea = scope.querySelector('.OwO-textarea');
         if (!commentTextarea) return;
@@ -1481,26 +1639,42 @@
             || commentTextarea.closest('.post-comments')
             || commentTextarea;
 
-        if (!commentsRoot || commentsRoot.dataset.psOwoInit) return;
+        if (!commentsRoot || commentsRoot.dataset.psOwoInit === 'done') return;
+
+        // 标记为待初始化
         commentsRoot.dataset.psOwoInit = 'pending';
 
         const runInit = () => {
+            // 检查元素是否仍在 DOM 中
             if (!commentsRoot.isConnected) return;
+
+            // 防止重复初始化
             if (commentsRoot.dataset.psOwoInit === 'done') return;
+
+            // 标记为已初始化
             commentsRoot.dataset.psOwoInit = 'done';
+
+            // 调用初始化函数
             initializeCommentsOwO();
         };
 
+        // 立即初始化的情况：
+        // 1. 明确要求 eager 模式
+        // 2. URL 包含 #comments 锚点
+        // 3. 评论框已获得焦点
         if (options.eager || window.location.hash === '#comments' || document.activeElement === commentTextarea) {
             scheduleIdleTask(runInit);
             return;
         }
 
+        // 降级处理：不支持 IntersectionObserver 时延迟初始化
         if (typeof IntersectionObserver !== 'function') {
             scheduleIdleTask(runInit);
             return;
         }
 
+        // 使用 IntersectionObserver 延迟加载
+        // 当评论区进入视口附近时才初始化
         const io = new IntersectionObserver((entries, observer) => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
@@ -1837,6 +2011,11 @@
             AnimController.abort();
             AnimationFrameManager.cancelAll();
 
+            // ✅ 清理 OwO 实例（页面切换时释放资源）
+            if (typeof window.OwoManager !== 'undefined' && window.OwoManager.destroy) {
+                window.OwoManager.destroy();
+            }
+
             // 检测源页面类型
             let fromType = getPageType();
 
@@ -1987,10 +2166,10 @@
         swup.hooks.on('visit:end', () => {
             STATE.isSwupNavigating = false;
 
-            // 延迟清理，确保动画完成
-            setTimeout(() => {
+            // 使用 requestIdleCallback 在浏览器空闲时清理，避免阻塞
+            scheduleIdleTask(() => {
                 cleanupAnimationClasses();
-            }, 1000);
+            });
         });
 
         // ========== 页面加载完成 ==========
@@ -2000,18 +2179,22 @@
             const token = ++STATE.currentPageToken;
             const isCurrent = () => token === STATE.currentPageToken;
 
-            // 更新导航栏
-            if (typeof window.NavIndicator?.update === 'function') {
-                window.NavIndicator.update();
-            }
+            // 更新导航栏（使用 requestIdleCallback 避免阻塞）
+            scheduleIdleTask(() => {
+                if (!isCurrent()) return;
 
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.header-nav .nav-item').forEach(item => {
-                const link = item.querySelector('a');
-                if (link) {
-                    const linkPath = new URL(link.href).pathname;
-                    item.classList.toggle('nav-item-current', linkPath === currentPath);
+                if (typeof window.NavIndicator?.update === 'function') {
+                    window.NavIndicator.update();
                 }
+
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('.header-nav .nav-item').forEach(item => {
+                    const link = item.querySelector('a');
+                    if (link) {
+                        const linkPath = new URL(link.href).pathname;
+                        item.classList.toggle('nav-item-current', linkPath === currentPath);
+                    }
+                });
             });
 
             // 标记元素
@@ -2062,28 +2245,28 @@
                 });
             }
 
-            // TOC 初始化延迟
+            // TOC 初始化延迟（使用 requestIdleCallback）
             if ((pageType === PageType.POST || pageType === PageType.PAGE) && typeof initializeStickyTOC === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    // 延迟 TOC 初始化，避免阻塞渲染
-                    setTimeout(() => {
+                    // 使用 requestIdleCallback 在浏览器空闲时初始化
+                    scheduleIdleTask(() => {
                         if (!isCurrent()) return;
                         if (swupRoot.querySelector('#toc-section') || swupRoot.querySelector('.toc')) {
                             initializeStickyTOC();
                         }
-                    }, 300);
+                    });
                 });
             }
 
-            // Shortcodes 延迟
+            // Shortcodes 延迟（使用 requestIdleCallback）
             if (typeof runShortcodes === 'function') {
                 phases.push(() => {
                     if (!isCurrent()) return;
-                    setTimeout(() => {
+                    scheduleIdleTask(() => {
                         if (!isCurrent()) return;
                         runShortcodes(swupRoot);
-                    }, 400);
+                    });
                 });
             }
 
@@ -2181,6 +2364,9 @@
         });
 
         syncPostSharedElementFromLocation(scrollPlugin);
+
+        // 优化字体加载（在浏览器空闲时）
+        optimizeFontLoading();
 
         // 修复初始加载闪烁：使用原子化类切换 + 提前设置内联样式
         STATE.lastNavigation.isSwup = false;
