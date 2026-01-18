@@ -18,10 +18,6 @@
     </title>
     <?php generateDynamicCSS(); ?>
 
-    <!-- 性能优化：资源预加载提示 -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-
     <!-- 预加载关键图片（改善 LCP） -->
     <link rel="preload" href="<?= $this->options->logoIndex; ?>" as="image" imagesrcset="<?= $this->options->logoIndex; ?> 1x" imagesizes="120px">
 
@@ -96,6 +92,7 @@
     <!-- JS引入：按优先级分组加载（性能优化版） -->
 
     <!-- 高优先级：核心模块（首屏必需） -->
+    <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
@@ -107,9 +104,8 @@
     <!-- 代码高亮 -->
     <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
 
-    <!-- 低优先级：按需加载（评论区/图片交互） -->
+    <!-- 低优先级：按需加载（评论区） -->
     <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
-    <script async src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
 
     <?php if ($this->options->PjaxScript): ?>
         <script defer>
