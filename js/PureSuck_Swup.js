@@ -1626,8 +1626,8 @@
      * @param {boolean} options.eager - 是否立即初始化
      */
     function scheduleCommentsInit(root, options = {}) {
-        // 检查 OwO 管理器是否可用
-        if (typeof window.OwoManager === 'undefined' || typeof initializeCommentsOwO !== 'function') {
+        // 只检查初始化函数是否存在
+        if (typeof initializeCommentsOwO !== 'function') {
             return;
         }
 
