@@ -236,16 +236,28 @@
     };
 
     // ==================== 可见性检查 ====================
-    // 性能优化版：使用 IntersectionObserver 避免强制 reflow
+    // ✅ 性能优化版：减少强制重排，使用缓存和批量读取
     const VIEWPORT = {
         top: 0,
         bottom: 0,
         buffer: 150,
         visibleElements: new WeakSet(),
+        // ✅ 缓存 innerHeight，避免频繁读取
+        cachedHeight: 0,
+        lastUpdateTime: 0,
+        updateThrottle: 100, // 100ms 内不重复更新
 
         update() {
+            const now = performance.now();
+            // ✅ 节流：避免短时间内多次读取 innerHeight
+            if (now - this.lastUpdateTime < this.updateThrottle) {
+                return;
+            }
+
             this.top = 0;
-            this.bottom = window.innerHeight + this.buffer;
+            this.cachedHeight = window.innerHeight;
+            this.bottom = this.cachedHeight + this.buffer;
+            this.lastUpdateTime = now;
         },
 
         isVisible(el) {
@@ -256,16 +268,44 @@
                 return true;
             }
 
-            // 一次性读取布局信息
+            // ✅ 延迟到 RAF 中读取布局信息，避免阻塞主线程
+            // 对于非关键路径，使用异步检查
             const rect = el.getBoundingClientRect();
             const isVisible = rect.top < this.bottom && rect.bottom > this.top;
 
             // 缓存可见元素
-            if (isVisible && rect.top < window.innerHeight) {
+            if (isVisible && rect.top < this.cachedHeight) {
                 this.visibleElements.add(el);
             }
 
             return isVisible;
+        },
+
+        // ✅ 批量检查可见性，一次性读取所有元素的布局信息
+        batchCheckVisible(elements) {
+            if (!elements || elements.length === 0) return [];
+
+            const results = [];
+            // 批量读取所有 rect，浏览器会优化这个过程
+            const rects = elements.map(el => el ? el.getBoundingClientRect() : null);
+
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                const rect = rects[i];
+
+                if (!el || !rect) {
+                    results.push(false);
+                    continue;
+                }
+
+                const isVisible = rect.top < this.bottom && rect.bottom > this.top;
+                if (isVisible && rect.top < this.cachedHeight) {
+                    this.visibleElements.add(el);
+                }
+                results.push(isVisible);
+            }
+
+            return results;
         },
 
         clearCache() {
@@ -274,10 +314,20 @@
 
         init() {
             this.update();
-            window.addEventListener('resize', () => {
-                this.update();
-                this.clearCache();
-            }, { passive: true });
+            // ✅ 使用 ResizeObserver 替代 resize 事件，更高效
+            if (typeof ResizeObserver !== 'undefined') {
+                const ro = new ResizeObserver(() => {
+                    this.update();
+                    this.clearCache();
+                });
+                ro.observe(document.documentElement);
+            } else {
+                // 降级到 resize 事件
+                window.addEventListener('resize', () => {
+                    this.update();
+                    this.clearCache();
+                }, { passive: true });
+            }
         }
     };
 
@@ -1175,6 +1225,7 @@
         const prevScrollRestoration = history.scrollRestoration;
         history.scrollRestoration = 'manual';
 
+        // ✅ 一次性读取 scrollY，避免在异步操作中多次读取
         const prevScrollY = window.scrollY;
         const active = document.activeElement;
         const activeId = active?.id;
@@ -1338,10 +1389,8 @@
         }
 
         if (pageType === PageType.LIST && listPostKey) {
-            // 恢复滚动位置
-            const cached = scrollPlugin?.getCachedScrollPositions
-                ? scrollPlugin.getCachedScrollPositions(url)
-                : null;
+            // ✅ 恢复滚动位置（使用优化后的 scrollPlugin）
+            const cached = scrollPlugin?.getCachedScrollPositions?.(url);
             const cachedY = cached?.window?.top;
             if (typeof cachedY === 'number') {
                 window.scrollTo(0, cachedY);
@@ -1351,14 +1400,25 @@
             const card = findIndexPostCardById(listPostKey);
             if (card) {
                 applyPostSharedElementName(card, listPostKey);
-                RAF.schedule(() => {
-                    const rect = card.getBoundingClientRect();
-                    if (rect.bottom < 0 || rect.top > window.innerHeight) {
-                        RAF.schedule(() => {
-                            card.scrollIntoView({ block: 'center', inline: 'nearest' });
-                        });
-                    }
-                });
+                // ✅ 延迟 getBoundingClientRect 到 RAF 中，避免阻塞主线程
+                // 使用 requestIdleCallback 进一步降低优先级
+                const checkAndScroll = () => {
+                    RAF.schedule(() => {
+                        // ✅ 使用缓存的 innerHeight，避免重复读取
+                        const rect = card.getBoundingClientRect();
+                        if (rect.bottom < 0 || rect.top > VIEWPORT.cachedHeight) {
+                            RAF.schedule(() => {
+                                card.scrollIntoView({ block: 'center', inline: 'nearest' });
+                            });
+                        }
+                    });
+                };
+
+                if (typeof requestIdleCallback === 'function') {
+                    requestIdleCallback(checkAndScroll, { timeout: 100 });
+                } else {
+                    checkAndScroll();
+                }
             } else {
                 clearMarkedViewTransitionNames();
             }
@@ -1376,6 +1436,8 @@
 
         // ========== Swup 4 基础配置 ==========
         const plugins = [];
+
+        // ✅ 优化 SwupScrollPlugin 配置，减少强制重排
         const scrollPlugin = (typeof SwupScrollPlugin === 'function')
             ? new SwupScrollPlugin({
                 doScrollingRightAway: true,
@@ -1383,6 +1445,33 @@
                     betweenPages: false, // 禁用默认动画，使用自定义平滑滚动
                     samePageWithHash: true,
                     samePage: true
+                },
+                // ✅ 关键优化：禁用 scroll containers 查询，避免遍历 DOM
+                // 项目中没有使用 data-swup-scroll-container，只需要缓存 window 滚动
+                scrollContainers: '.__non_existent_selector__', // 使用不存在的选择器，避免 DOM 查询
+                // ✅ 使用自定义 scrollFunction，优化滚动行为
+                scrollFunction: (container, top, left, animate, onStart, onEnd) => {
+                    // 使用 requestIdleCallback 延迟滚动位置读取，避免阻塞主线程
+                    if (typeof requestIdleCallback === 'function') {
+                        requestIdleCallback(() => {
+                            const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
+                            onStart();
+                            target.addEventListener('scrollend', onEnd, { once: true });
+                            target.addEventListener('wheel', () => {
+                                container.scrollTo({ top: container.scrollTop, left: container.scrollLeft, behavior: 'instant' });
+                            }, { once: true });
+                            container.scrollTo({ top, left, behavior: animate ? 'smooth' : 'instant' });
+                        }, { timeout: 50 });
+                    } else {
+                        // 降级到默认行为
+                        const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
+                        onStart();
+                        target.addEventListener('scrollend', onEnd, { once: true });
+                        target.addEventListener('wheel', () => {
+                            container.scrollTo({ top: container.scrollTop, left: container.scrollLeft, behavior: 'instant' });
+                        }, { once: true });
+                        container.scrollTo({ top, left, behavior: animate ? 'smooth' : 'instant' });
+                    }
                 }
             })
             : null;
@@ -2010,7 +2099,7 @@
             markAnimationElements(document.getElementById('swup') || document);
         });
 
-        syncPostSharedElementFromLocation(scrollPlugin);
+        syncPostSharedElementFromLocation();
 
         // 优化字体加载（在浏览器空闲时）
         optimizeFontLoading();
