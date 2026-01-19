@@ -109,49 +109,6 @@
         return Boolean(document.querySelector('.post.post--single'));
     }
 
-    // ==================== 代码高亮懒加载 ====================
-    // 用于视口外代码块的按需高亮
-    function setupLazyHighlighting(blocks, isCurrent) {
-        if (!blocks.length || typeof IntersectionObserver !== 'function') {
-            // 降级：直接延迟处理
-            setTimeout(() => {
-                if (!isCurrent()) return;
-                scheduleIdleBatched(blocks, 2, (block) => {
-                    if (!isCurrent()) return;
-                    hljs.highlightElement(block);
-                    block.dataset.highlighted = 'true';
-                }, isCurrent);
-            }, 500);
-            return;
-        }
-
-        let highlighted = 0;
-        const total = blocks.length;
-
-        const io = new IntersectionObserver((entries) => {
-            for (const entry of entries) {
-                if (!entry.isIntersecting) continue;
-                const block = entry.target;
-                io.unobserve(block);
-                if (block.dataset.highlighted === 'true') continue;
-
-                // 使用 requestIdleCallback 延迟执行
-                scheduleIdleTask(() => {
-                    if (!isCurrent()) return;
-                    hljs.highlightElement(block);
-                    block.dataset.highlighted = 'true';
-                    highlighted++;
-
-                    // 全部完成后断开观察
-                    if (highlighted >= total) {
-                        io.disconnect();
-                    }
-                });
-            }
-        }, { rootMargin: '100px 0px', threshold: 0.01 });
-
-        blocks.forEach(block => io.observe(block));
-    }
 
     // ==================== 空闲任务调度 ====================
     const IDLE = {
@@ -252,115 +209,31 @@
         scheduleIdleTask(runBatch);
     }
 
-    // ==================== 智能任务调度器 ====================
+    // ==================== 简化的任务调度器 ====================
+    // 轻量级批量处理器，避免过度设计
     const TaskScheduler = {
-        _hasScheduler: typeof scheduler !== 'undefined' && typeof scheduler.yield === 'function',
-        _hasPostTask: typeof scheduler !== 'undefined' && typeof scheduler.postTask === 'function',
-        _frameTime: 16.67,
-        _targetFps: 60,
-        _adaptiveMetrics: {
-            samples: [],
-            avgTaskTime: 0,
-            optimalBatchSize: 8
-        },
-
-        async _measureFrameTime() {
-            const samples = [];
-            let last = performance.now();
-
-            for (let i = 0; i < 60; i++) {
-                await new Promise(resolve => requestAnimationFrame(() => {
-                    const now = performance.now();
-                    const delta = now - last;
-                    if (delta > 0 && delta < 50) samples.push(delta);
-                    last = now;
-                    resolve();
-                }));
-            }
-
-            if (samples.length > 0) {
-                this._frameTime = samples.reduce((a, b) => a + b) / samples.length;
-                this._targetFps = Math.round(1000 / this._frameTime);
-            }
-        },
-
-        yield() {
-            if (this._hasScheduler) return scheduler.yield();
-            if (typeof MessageChannel !== 'undefined') {
-                return new Promise(resolve => {
-                    const ch = new MessageChannel();
-                    ch.port1.onmessage = () => { ch.port1.close(); resolve(); };
-                    ch.port2.postMessage(null);
-                    ch.port2.close();
-                });
-            }
-            return new Promise(resolve => setTimeout(resolve, 0));
-        },
-
-        async postTask(callback, priority = 'user-visible') {
-            if (this._hasPostTask) {
-                return scheduler.postTask(callback, { priority });
-            }
-            return new Promise(resolve => {
-                requestAnimationFrame(async () => {
-                    const result = await callback();
-                    resolve(result);
-                });
-            });
-        },
-
-        _updateMetrics(taskTime, itemCount) {
-            const { samples } = this._adaptiveMetrics;
-            const timePerItem = taskTime / itemCount;
-
-            samples.push(timePerItem);
-            if (samples.length > 20) samples.shift();
-
-            this._adaptiveMetrics.avgTaskTime = samples.reduce((a, b) => a + b) / samples.length;
-
-            const targetTime = this._frameTime * 0.5;
-            this._adaptiveMetrics.optimalBatchSize = Math.max(2,
-                Math.floor(targetTime / this._adaptiveMetrics.avgTaskTime)
-            );
-        },
-
         async run(items, handler, options = {}) {
             if (!items?.length) return;
 
-            const {
-                priority = 'user-visible',
-                onProgress = null
-            } = options;
-
-            const batchSize = this._adaptiveMetrics.optimalBatchSize;
-            const budget = this._frameTime * 0.6;
-            let processed = 0;
+            const batchSize = 8; // 固定批次大小，避免复杂的自适应逻辑
 
             for (let i = 0; i < items.length; i += batchSize) {
-                const start = performance.now();
                 const end = Math.min(i + batchSize, items.length);
 
-                await this.postTask(async () => {
-                    for (let j = i; j < end; j++) {
-                        try {
-                            await handler(items[j], j);
-                        } catch (e) {}
-                    }
-                }, priority);
-
-                processed = end;
-                this._updateMetrics(performance.now() - start, end - i);
-
-                if (onProgress) onProgress(processed, items.length);
-
-                if (processed < items.length && performance.now() - start > budget) {
-                    await this.yield();
-                }
+                // 使用RAF批量处理，避免阻塞主线程
+                await new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        for (let j = i; j < end; j++) {
+                            try {
+                                handler(items[j], j);
+                            } catch (e) {}
+                        }
+                        resolve();
+                    });
+                });
             }
         }
     };
-
-    TaskScheduler._measureFrameTime();
 
     // ==================== 可见性检查 ====================
     // 性能优化版：使用 IntersectionObserver 避免强制 reflow
@@ -730,135 +603,14 @@
     // ==================== 性能优化：初始渲染 ====================
     /**
      * 优化初始渲染性能
-     * 策略：使用 content-visibility 延迟渲染视口外内容，同时避免副作用
-     *
-     * @param {string} pageType - 页面类型
+     * 主要优化图片加载策略
      */
     function optimizeInitialRender(pageType) {
         const swupRoot = document.getElementById('swup');
         if (!swupRoot) return;
 
-        if (pageType === PageType.POST) {
-            optimizePostPage(swupRoot);
-        } else if (pageType === PageType.PAGE) {
-            optimizeStandalonePage(swupRoot);
-        } else if (pageType === PageType.LIST) {
-            optimizeListPage(swupRoot);
-        }
-
         // 优化图片加载
         optimizeImageLoading(swupRoot, pageType);
-    }
-
-    /**
-     * 优化文章页渲染
-     */
-    function optimizePostPage(root) {
-        // 暂时禁用 content-visibility 优化，可能导致性能问题
-        return;
-    }
-
-    /**
-     * 优化独立页渲染
-     */
-    function optimizeStandalonePage(root) {
-        // 暂时禁用 content-visibility 优化，可能导致性能问题
-        return;
-    }
-
-    /**
-     * 优化列表页渲染
-     */
-    function optimizeListPage(root) {
-        // 暂时禁用优化，避免副作用
-        return;
-    }
-
-    /**
-     * 判断元素是否应该跳过 content-visibility 优化
-     * 避免影响关键功能和显示
-     */
-    function shouldSkipContentVisibility(element) {
-        // 有 id 的元素（锚点目标）
-        if (element.id) return true;
-
-        // 列表元素（避免 ::marker 问题）
-        if (element.tagName === 'UL' || element.tagName === 'OL') return true;
-
-        // 表格（可能有复杂的伪元素）
-        if (element.tagName === 'TABLE') return true;
-
-        // 包含表单的元素
-        if (element.querySelector('input, textarea, select, button')) return true;
-
-        // 包含 SVG 的元素（可能有复杂渲染）
-        if (element.querySelector('svg')) return true;
-
-        // 代码块（可能需要立即高亮）
-        if (element.tagName === 'PRE' && element.querySelector('code')) return true;
-
-        return false;
-    }
-
-    /**
-     * 估算元素高度
-     * 根据元素类型返回合理的高度估算值
-     */
-    function estimateElementHeight(element) {
-        const tagName = element.tagName;
-
-        // 根据标签类型估算高度
-        if (tagName === 'P') return 100;
-        if (tagName === 'H1' || tagName === 'H2') return 60;
-        if (tagName === 'H3' || tagName === 'H4') return 50;
-        if (tagName === 'BLOCKQUOTE') return 150;
-        if (tagName === 'PRE') return 300;
-        if (tagName === 'DIV') {
-            // DIV 根据内容估算
-            const textLength = element.textContent?.length || 0;
-            return Math.max(100, Math.min(500, textLength / 5));
-        }
-
-        return 200; // 默认值
-    }
-
-    /**
-     * 在浏览器空闲时逐步移除 content-visibility
-     * 让内容正常渲染，避免布局问题
-     * @param {Array} elements - 需要渐进显示的元素数组
-     */
-    function scheduleProgressiveReveal(elements) {
-        if (!elements || elements.length === 0) return;
-
-        // 批次大小：每次处理的元素数量
-        const batchSize = 3;
-        let index = 0;
-
-        const revealBatch = () => {
-            const end = Math.min(index + batchSize, elements.length);
-
-            for (let i = index; i < end; i++) {
-                const el = elements[i];
-                if (!el || !el.isConnected) continue;
-
-                // 移除 content-visibility，让内容正常渲染
-                el.style.contentVisibility = '';
-                el.style.containIntrinsicSize = '';
-                el.removeAttribute('data-ps-deferred');
-            }
-
-            index = end;
-
-            // 如果还有剩余元素，继续调度
-            if (index < elements.length) {
-                scheduleIdleTask(revealBatch);
-            }
-        };
-
-        // 延迟启动，让首屏动画先完成
-        setTimeout(() => {
-            scheduleIdleTask(revealBatch);
-        }, 800);
     }
 
     /**
@@ -2122,52 +1874,6 @@
 
             // 分段初始化
             const phases = [];
-
-            // 代码高亮：支持文章页、独立页、列表页
-            if (typeof hljs !== 'undefined') {
-                phases.push(() => {
-                    if (!isCurrent()) return;
-
-                    // 性能优化：延迟执行代码高亮，让页面先渲染和动画
-                    setTimeout(() => {
-                        if (!isCurrent()) return;
-
-                        // 使用 :not([data-highlighted]) 避免重复
-                        const allBlocks = Array.from(swupRoot.querySelectorAll('pre code:not([data-highlighted])'));
-
-                        // 性能优化：批量读取布局信息，避免多次 reflow
-                        const viewportBlocks = [];
-                        const offscreenBlocks = [];
-
-                        VIEWPORT.update();
-                        const viewportBottom = window.innerHeight + 150;
-
-                        // 批量读取所有代码块的位置（一次性 reflow）
-                        const rects = new Map();
-                        for (const block of allBlocks) {
-                            const rect = block.getBoundingClientRect();
-                            rects.set(block, rect);
-                            // 简单判断：顶部在视口内的算可见
-                            if (rect.top < viewportBottom && rect.bottom > 0) {
-                                viewportBlocks.push(block);
-                            } else {
-                                offscreenBlocks.push(block);
-                            }
-                        }
-
-                        TaskScheduler.run(viewportBlocks, (block) => {
-                            if (!isCurrent()) return;
-                            hljs.highlightElement(block);
-                            block.dataset.highlighted = 'true';
-                        }, { priority: 'user-visible' }).catch(() => {});
-
-                        // 视口外的延迟更久处理（用 IntersectionObserver 按需触发）
-                        if (offscreenBlocks.length > 0) {
-                            setupLazyHighlighting(offscreenBlocks, isCurrent);
-                        }
-                    }, 500); // 延迟 500ms，让页面先完全渲染
-                });
-            }
 
             // TOC 初始化延迟（使用 requestIdleCallback）
             if ((pageType === PageType.POST || pageType === PageType.PAGE) && typeof initializeStickyTOC === 'function') {

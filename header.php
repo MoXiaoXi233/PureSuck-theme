@@ -101,11 +101,6 @@
     <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
-    <!-- 代码高亮：仅在文章页加载（节省207KB） -->
-    <?php if ($this->is('post')): ?>
-        <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
-    <?php endif; ?>
-
     <!-- 低优先级：按需加载（评论区） -->
     <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
 
