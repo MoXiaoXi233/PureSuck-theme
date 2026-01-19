@@ -412,22 +412,6 @@
         return null;
     }
 
-    function waitForViewTransition() {
-        if (!HAS_VT || typeof document.getAnimations !== 'function') {
-            return Promise.resolve();
-        }
-        // ✅ 性能优化：移除 subtree: true，避免遍历整个DOM树（485个元素）
-        // View Transitions API 的动画都在根元素上，不需要遍历子树
-        const animations = document.getAnimations();
-        const vtAnimations = animations.filter((anim) => {
-            const target = anim?.effect?.target;
-            const text = target?.toString ? target.toString() : '';
-            return text.includes('view-transition');
-        });
-        if (!vtAnimations.length) return Promise.resolve();
-        return Promise.allSettled(vtAnimations.map((anim) => anim.finished));
-    }
-
     // ==================== 动画配置（重构版） ====================
     const ANIM = {
         // 退出动画配置
@@ -1922,20 +1906,11 @@
                 }
             }));
 
-            // 根据是否有VT选择执行路径
-            if (!HAS_VT) {
-                // 无VT：直接在下一帧执行动画
-                requestAnimationFrame(() => {
-                    runEnterAnimation(toType, false);
-                });
-            } else {
-                // 有VT：等待VT完成后执行动画
-                waitForViewTransition().then(() => {
-                    requestAnimationFrame(() => {
-                        runEnterAnimation(toType, hasSharedElement);
-                    });
-                });
-            }
+            // ✅ 性能优化：移除 waitForViewTransition，代码已经足够"纯"
+            // 直接在下一帧执行动画，不会干扰 View Transition
+            requestAnimationFrame(() => {
+                runEnterAnimation(toType, hasSharedElement);
+            });
         });
 
         // ========== 动画流程：visit:end ==========
