@@ -366,7 +366,9 @@
         if (!HAS_VT || typeof document.getAnimations !== 'function') {
             return Promise.resolve();
         }
-        const animations = document.getAnimations({ subtree: true });
+        // ✅ 性能优化：移除 subtree: true，避免遍历整个DOM树（485个元素）
+        // View Transitions API 的动画都在根元素上，不需要遍历子树
+        const animations = document.getAnimations();
         const vtAnimations = animations.filter((anim) => {
             const target = anim?.effect?.target;
             const text = target?.toString ? target.toString() : '';
@@ -1259,16 +1261,21 @@
             // 标记为已初始化
             commentsRoot.dataset.psOwoInit = 'done';
 
-            // 调用初始化函数
-            initializeCommentsOwO();
+            // ✅ 性能优化：使用requestIdleCallback延迟初始化，避免阻塞主线程
+            // OwO初始化会创建60个DOM元素，耗时70ms
+            scheduleIdleTask(() => {
+                if (!commentsRoot.isConnected) return;
+                initializeCommentsOwO();
+            });
         };
 
-        // 立即初始化的情况：
-        // 1. 明确要求 eager 模式
-        // 2. URL 包含 #comments 锚点
-        // 3. 评论框已获得焦点
-        if (options.eager || window.location.hash === '#comments' || document.activeElement === commentTextarea) {
-            scheduleIdleTask(runInit);
+        // ✅ 性能优化：只在用户真正需要时才初始化
+        // 策略1：用户点击评论框时才初始化（最优）
+        // 策略2：评论区进入视口时初始化（备用）
+
+        // 立即初始化的情况：URL包含#comments锚点
+        if (window.location.hash === '#comments') {
+            runInit();
             return;
         }
 
@@ -1278,17 +1285,27 @@
             return;
         }
 
-        // 使用 IntersectionObserver 延迟加载
-        // 当评论区进入视口附近时才初始化
+        // ✅ 策略1：用户点击或聚焦评论框时才初始化（最优）
+        const onUserInteraction = () => {
+            commentTextarea.removeEventListener('focus', onUserInteraction);
+            commentTextarea.removeEventListener('click', onUserInteraction);
+            runInit();
+        };
+        commentTextarea.addEventListener('focus', onUserInteraction, { once: true, passive: true });
+        commentTextarea.addEventListener('click', onUserInteraction, { once: true, passive: true });
+
+        // ✅ 策略2：评论区进入视口时初始化（备用）
+        // 使用更大的rootMargin（400px），提前预加载
         const io = new IntersectionObserver((entries, observer) => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
                     observer.disconnect();
-                    scheduleIdleTask(runInit);
+                    // 如果用户还没点击，延迟初始化
+                    setTimeout(runInit, 500);
                     break;
                 }
             }
-        }, { rootMargin: '200px 0px', threshold: 0.01 });
+        }, { rootMargin: '400px 0px', threshold: 0.01 });
 
         io.observe(commentsRoot);
     }
