@@ -61,13 +61,13 @@
         href="<?= isset($this->options->logoUrl) && $this->options->logoUrl ? $this->options->logoUrl : $this->options->themeUrl . '/images/avatar.ico'; ?>"
         type="image/x-icon">
 
-    <!-- 其他CSS异步加载 -->
-    <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
-    <link href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
-    <link href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
+    <!-- 关键CSS同步加载（避免FOUC） -->
+    <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>">
+    <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>">
+    <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/animations/index.css'); ?>">
 
-    <!-- 动画CSS异步加载（避免阻塞渲染，改善 LCP） -->
-    <link href="<?php $this->options->themeUrl('/css/animations/index.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
+    <!-- 非关键CSS异步加载（仅在有代码块时需要） -->
+    <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter != 'off'): ?>
@@ -101,8 +101,10 @@
     <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
-    <!-- 代码高亮 -->
-    <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
+    <!-- 代码高亮：仅在文章页加载（节省207KB） -->
+    <?php if ($this->is('post')): ?>
+        <script defer src="<?php getStaticURL(path: 'highlight.min.js'); ?>"></script>
+    <?php endif; ?>
 
     <!-- 低优先级：按需加载（评论区） -->
     <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
