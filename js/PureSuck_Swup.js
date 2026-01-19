@@ -7,172 +7,33 @@
 (function() {
     'use strict';
 
-    // ==================== AnimationFrameManager ====================
+    // ==================== 简化的RAF管理器 ====================
     /**
-     * 统一管理所有 requestAnimationFrame 调用
-     * 解决多个动画同时执行时的冲突问题
+     * 轻量级RAF管理器（替代177行的AnimationFrameManager）
+     * 只保留必要的取消功能，删除不必要的优先级、统计等复杂逻辑
      */
-    const AnimationFrameManager = {
-        // 存储所有活动的动画帧ID
-        frameIds: new Set(),
-        // 存储元素到动画帧的映射，用于防止同一元素被多个动画同时操作
-        elementToFrameId: new WeakMap(),
-        // 存储优先级队列（数字越大优先级越高）
-        priorityQueue: [],
-        // 当前正在执行的帧ID
-        currentFrameId: null,
-        // 最大并发动画数
-        maxConcurrentAnimations: 10,
-        // 统计信息
-        stats: {
-            totalScheduled: 0,
-            totalCancelled: 0,
-            totalCompleted: 0
+    const RAF = {
+        activeIds: new Set(),
+
+        schedule(callback) {
+            const id = requestAnimationFrame(() => {
+                this.activeIds.delete(id);
+                callback();
+            });
+            this.activeIds.add(id);
+            return id;
         },
 
-        /**
-         * 调度一个动画帧任务
-         * @param {Function} callback - 要执行的回调函数
-         * @param {Object} options - 选项
-         * @param {Element} options.element - 关联的DOM元素（用于冲突检测）
-         * @param {number} options.priority - 优先级（默认0，范围-10到10）
-         * @param {string} options.group - 动画组标识（用于批量取消）
-         * @returns {number} 动画帧ID
-         */
-        schedule(callback, options = {}) {
-            if (typeof callback !== 'function') {
-                return null;
-            }
-
-            const { element = null, priority = 0, group = null } = options;
-
-            // 检查元素是否已经在动画中
-            if (element && this.elementToFrameId.has(element)) {
-                const existingFrameId = this.elementToFrameId.get(element);
-                // 取消旧动画（新动画优先级更高或相同）
-                this.cancel(existingFrameId);
-                this.stats.totalCancelled++;
-            }
-
-            // 创建包装回调
-            const frameId = ++this.stats.totalScheduled;
-            const wrappedCallback = (timestamp) => {
-                // 检查是否已被取消
-                if (!this.frameIds.has(frameId)) {
-                    return;
-                }
-
-                // 移除元素映射
-                if (element) {
-                    this.elementToFrameId.delete(element);
-                }
-
-                // 执行回调
-                try {
-                    callback(timestamp);
-                } catch (error) {
-                    // Animation callback error silently ignored
-                }
-
-                // 标记完成
-                this.frameIds.delete(frameId);
-                this.stats.totalCompleted++;
-            };
-
-            // 存储帧ID和元数据
-            this.frameIds.add(frameId);
-            if (element) {
-                this.elementToFrameId.set(element, frameId);
-            }
-
-            // 添加到优先级队列
-            if (priority !== 0) {
-                this.priorityQueue.push({ frameId, priority, group });
-                this.priorityQueue.sort((a, b) => b.priority - a.priority);
-            }
-
-            // 调度动画帧
-            const rafId = requestAnimationFrame(wrappedCallback);
-            
-            // 存储 rafId 以便取消
-            this.frameIds.add(rafId);
-
-            return frameId;
-        },
-
-        /**
-         * 取消指定的动画帧
-         * @param {number} frameId - 要取消的帧ID
-         */
-        cancel(frameId) {
-            if (!frameId) return;
-
-            // 从集合中移除
-            if (this.frameIds.has(frameId)) {
-                this.frameIds.delete(frameId);
-                this.stats.totalCancelled++;
-            }
-
-            // 从优先级队列中移除
-            const queueIndex = this.priorityQueue.findIndex(item => item.frameId === frameId);
-            if (queueIndex > -1) {
-                this.priorityQueue.splice(queueIndex, 1);
+        cancel(id) {
+            if (this.activeIds.has(id)) {
+                cancelAnimationFrame(id);
+                this.activeIds.delete(id);
             }
         },
 
-        /**
-         * 取消所有指定组的动画
-         * @param {string} group - 组标识
-         */
-        cancelGroup(group) {
-            if (!group) return;
-
-            const toCancel = this.priorityQueue
-                .filter(item => item.group === group)
-                .map(item => item.frameId);
-
-            toCancel.forEach(frameId => this.cancel(frameId));
-        },
-
-        /**
-         * 取消所有动画
-         */
         cancelAll() {
-            const count = this.frameIds.size;
-            this.frameIds.clear();
-            this.priorityQueue = [];
-            this.stats.totalCancelled += count;
-        },
-
-        /**
-         * 获取当前活动动画数量
-         * @returns {number}
-         */
-        getActiveCount() {
-            return this.frameIds.size;
-        },
-
-        /**
-         * 获取统计信息
-         * @returns {Object}
-         */
-        getStats() {
-            return {
-                ...this.stats,
-                active: this.frameIds.size,
-                queued: this.priorityQueue.length
-            };
-        },
-
-        /**
-         * 清理统计信息
-         */
-        resetStats() {
-            this.stats = {
-                totalScheduled: 0,
-                totalCancelled: 0,
-                totalCompleted: 0
-            };
+            this.activeIds.forEach(id => cancelAnimationFrame(id));
+            this.activeIds.clear();
         }
     };
 
@@ -1436,17 +1297,11 @@
             window.scrollTo(0, startY * (1 - eased));
 
             if (progress < 1) {
-                AnimationFrameManager.schedule(animateScroll, {
-                    priority: 5,
-                    group: 'scroll'
-                });
+                RAF.schedule(animateScroll);
             }
         }
 
-        AnimationFrameManager.schedule(animateScroll, {
-            priority: 5,
-            group: 'scroll'
-        });
+        RAF.schedule(animateScroll);
     }
 
     /**
@@ -1588,8 +1443,8 @@
 
             current.replaceWith(next);
 
-            // 使用 AnimationFrameManager 确保滚动和焦点恢复在正确的时机执行
-            AnimationFrameManager.schedule(() => {
+            // 使用RAF确保滚动和焦点恢复在正确的时机执行
+            RAF.schedule(() => {
                 if (restoreScroll) {
                     window.scrollTo(0, prevScrollY);
                 }
@@ -1599,7 +1454,7 @@
                         try { el.focus({ preventScroll: true }); } catch { el.focus(); }
                     }
                 }
-            }, { priority: 3, group: 'comment-refresh' });
+            });
 
             scheduleCommentsInit(document, { eager: true });
 
@@ -1727,14 +1582,14 @@
             const card = findIndexPostCardById(listPostKey);
             if (card) {
                 applyPostSharedElementName(card, listPostKey);
-                AnimationFrameManager.schedule(() => {
+                RAF.schedule(() => {
                     const rect = card.getBoundingClientRect();
                     if (rect.bottom < 0 || rect.top > window.innerHeight) {
-                        AnimationFrameManager.schedule(() => {
+                        RAF.schedule(() => {
                             card.scrollIntoView({ block: 'center', inline: 'nearest' });
-                        }, { priority: 4, group: 'vt-scroll' });
+                        });
                     }
-                }, { priority: 4, group: 'vt-check' });
+                });
             } else {
                 clearMarkedViewTransitionNames();
             }
@@ -2070,9 +1925,9 @@
         swup.hooks.on('visit:start', (visit) => {
             STATE.isSwupNavigating = true;
 
-            // 打断之前的动画（包括 AnimationFrameManager 中的动画）
+            // 打断之前的动画
             AnimController.abort();
-            AnimationFrameManager.cancelAll();
+            RAF.cancelAll();
 
             // ✅ 清理 OwO 实例（页面切换时释放资源）
             if (typeof window.OwoManager !== 'undefined' && window.OwoManager.destroy) {
