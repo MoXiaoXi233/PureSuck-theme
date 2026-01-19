@@ -1768,6 +1768,9 @@
         const swup = new Swup({
             containers: ['#swup'],
             plugins,
+            // ✅ 启用Swup内置缓存和预加载（核心性能优化）
+            cache: true,
+            preload: true,
             resolveUrl: (url) => {
                 const resolved = new URL(url, window.location.origin);
                 return resolved.pathname + resolved.search + resolved.hash;
