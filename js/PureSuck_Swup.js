@@ -67,8 +67,6 @@
 
     function supportsViewTransitions() {
         return typeof document.startViewTransition === 'function'
-            && typeof CSS !== 'undefined'
-            && typeof CSS.supports === 'function'
             && CSS.supports('view-transition-name: ps-test');
     }
 
@@ -242,19 +240,11 @@
         buffer: 150,
         visibleElements: new WeakSet(),
         cachedHeight: 0,
-        lastUpdateTime: 0,
-        updateThrottle: 100,
 
         update() {
-            const now = performance.now();
-            if (now - this.lastUpdateTime < this.updateThrottle) {
-                return;
-            }
-
             this.top = 0;
             this.cachedHeight = window.innerHeight;
             this.bottom = this.cachedHeight + this.buffer;
-            this.lastUpdateTime = now;
         },
 
         isVisible(el) {
@@ -305,18 +295,11 @@
 
         init() {
             this.update();
-            if (typeof ResizeObserver !== 'undefined') {
-                const ro = new ResizeObserver(() => {
-                    this.update();
-                    this.clearCache();
-                });
-                ro.observe(document.documentElement);
-            } else {
-                window.addEventListener('resize', () => {
-                    this.update();
-                    this.clearCache();
-                }, { passive: true });
-            }
+            const ro = new ResizeObserver(() => {
+                this.update();
+                this.clearCache();
+            });
+            ro.observe(document.documentElement);
         }
     };
 
@@ -481,16 +464,11 @@
 
     // ==================== 工具函数 ====================
     function prefersReducedMotion() {
-        return typeof window.matchMedia === 'function'
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
     function isAnimatableElement(el) {
         return el?.nodeType === 1 && el?.matches && !el.matches('script, style, link, meta');
-    }
-
-    function isElementVisible(el) {
-        return VIEWPORT.isVisible(el);
     }
 
     function uniqElements(arr) {
@@ -677,7 +655,6 @@
      */
     function scheduleProgressiveImagePreload(root, images) {
         if (!images || images.length === 0) return;
-        if (typeof IntersectionObserver !== 'function') return;
 
         // 收集懒加载图片
         const lazyImages = Array.from(images).filter(img =>
@@ -717,12 +694,6 @@
      * 使用 Font Loading API 和 requestIdleCallback 优化字体加载
      */
     function optimizeFontLoading() {
-        // 检查 Font Loading API 是否可用
-        if (typeof document.fonts === 'undefined' || typeof document.fonts.load !== 'function') {
-            return;
-        }
-
-        // 在浏览器空闲时预加载关键字体
         scheduleIdleTask(() => {
             // 预加载常用字重的字体
             const fontsToPreload = [
@@ -1276,11 +1247,6 @@
 
         if (window.location.hash === '#comments') {
             runInit();
-            return;
-        }
-
-        if (typeof IntersectionObserver !== 'function') {
-            scheduleIdleTask(runInit);
             return;
         }
 

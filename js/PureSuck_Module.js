@@ -562,14 +562,12 @@ const initializeStickyTOC = (() => {
 
         state.sentinel.style.top = state.threshold + 'px';
 
-        if (typeof IntersectionObserver !== 'undefined') {
-            state.observer = new IntersectionObserver(handleIntersection, {
-                root: null,
-                threshold: 0,
-                rootMargin: '0px'
-            });
-            state.observer.observe(state.sentinel);
-        }
+        state.observer = new IntersectionObserver(handleIntersection, {
+            root: null,
+            threshold: 0,
+            rootMargin: '0px'
+        });
+        state.observer.observe(state.sentinel);
     }
 
     function syncState() {
@@ -611,39 +609,20 @@ const initializeStickyTOC = (() => {
 
         state.bound = true;
 
-        if (typeof IntersectionObserver !== 'undefined') {
-            createOrUpdateSentinel();
+        createOrUpdateSentinel();
+        syncState();
+
+        window.addEventListener('load', () => {
             syncState();
-
-            // ✅ load 事件只绑定一次
-            window.addEventListener('load', () => {
-                syncState();
-                // ✅ 只在有 hash 时延迟检查
-                if (window.location.hash) {
-                    setTimeout(syncState, 100);
-                }
-            }, { once: true });
-
-            // ✅ hashchange 事件
-            window.addEventListener('hashchange', () => {
+            if (window.location.hash) {
                 setTimeout(syncState, 100);
-            }, { passive: true });
-        } else {
-            // ✅ 降级方案：使用防抖的 scroll 监听
-            let scrollTimer = 0;
-            updateThreshold();
-            const handleScroll = () => {
-                if (scrollTimer) return;
-                scrollTimer = setTimeout(() => {
-                    scrollTimer = 0;
-                    syncState();
-                }, 16);  // ~60fps
-            };
-            handleScroll();
-            window.addEventListener("scroll", handleScroll, { passive: true });
-        }
+            }
+        }, { once: true });
 
-        // ✅ 使用防抖的 resize 处理
+        window.addEventListener('hashchange', () => {
+            setTimeout(syncState, 100);
+        }, { passive: true });
+
         window.addEventListener("resize", handleResize, { passive: true });
         window.addEventListener("orientationchange", handleResize, { passive: true });
     };
