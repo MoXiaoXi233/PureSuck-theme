@@ -235,21 +235,18 @@
         }
     };
 
-    // ==================== 可见性检查 ====================
-    // ✅ 性能优化版：减少强制重排，使用缓存和批量读取
+    // 可见性检查
     const VIEWPORT = {
         top: 0,
         bottom: 0,
         buffer: 150,
         visibleElements: new WeakSet(),
-        // ✅ 缓存 innerHeight，避免频繁读取
         cachedHeight: 0,
         lastUpdateTime: 0,
-        updateThrottle: 100, // 100ms 内不重复更新
+        updateThrottle: 100,
 
         update() {
             const now = performance.now();
-            // ✅ 节流：避免短时间内多次读取 innerHeight
             if (now - this.lastUpdateTime < this.updateThrottle) {
                 return;
             }
@@ -263,17 +260,13 @@
         isVisible(el) {
             if (!el) return false;
 
-            // 使用缓存的结果，避免重复的 reflow
             if (this.visibleElements.has(el)) {
                 return true;
             }
 
-            // ✅ 延迟到 RAF 中读取布局信息，避免阻塞主线程
-            // 对于非关键路径，使用异步检查
             const rect = el.getBoundingClientRect();
             const isVisible = rect.top < this.bottom && rect.bottom > this.top;
 
-            // 缓存可见元素
             if (isVisible && rect.top < this.cachedHeight) {
                 this.visibleElements.add(el);
             }
@@ -281,12 +274,10 @@
             return isVisible;
         },
 
-        // ✅ 批量检查可见性，一次性读取所有元素的布局信息
         batchCheckVisible(elements) {
             if (!elements || elements.length === 0) return [];
 
             const results = [];
-            // 批量读取所有 rect，浏览器会优化这个过程
             const rects = elements.map(el => el ? el.getBoundingClientRect() : null);
 
             for (let i = 0; i < elements.length; i++) {
@@ -314,7 +305,6 @@
 
         init() {
             this.update();
-            // ✅ 使用 ResizeObserver 替代 resize 事件，更高效
             if (typeof ResizeObserver !== 'undefined') {
                 const ro = new ResizeObserver(() => {
                     this.update();
@@ -322,7 +312,6 @@
                 });
                 ro.observe(document.documentElement);
             } else {
-                // 降级到 resize 事件
                 window.addEventListener('resize', () => {
                     this.update();
                     this.clearCache();
@@ -1194,9 +1183,6 @@
 
     /**
      * 从指定 URL 刷新评论区
-     * @param {string} urlString - 要获取的 URL
-     * @param {Object} options - 选项
-     * @param {boolean} options.restoreScroll - 是否恢复滚动位置，默认 true
      */
     async function refreshCommentsFromUrl(urlString, options = {}) {
         const { restoreScroll = true } = options;
@@ -1205,11 +1191,9 @@
 
         if (!isSameOriginUrl(urlString)) return false;
 
-        // 保存并禁用滚动恢复，防止DOM替换后浏览器自动恢复滚动位置
         const prevScrollRestoration = history.scrollRestoration;
         history.scrollRestoration = 'manual';
 
-        // ✅ 一次性读取 scrollY，避免在异步操作中多次读取
         const prevScrollY = window.scrollY;
         const active = document.activeElement;
         const activeId = active?.id;
@@ -1232,7 +1216,6 @@
 
             current.replaceWith(next);
 
-            // 使用RAF确保滚动和焦点恢复在正确的时机执行
             RAF.schedule(() => {
                 if (restoreScroll) {
                     window.scrollTo(0, prevScrollY);
@@ -1247,7 +1230,6 @@
 
             scheduleCommentsInit(document, { eager: true });
 
-            // 延迟恢复滚动恢复设置，确保DOM操作完成
             setTimeout(() => {
                 history.scrollRestoration = prevScrollRestoration;
             }, 100);
@@ -1262,13 +1244,8 @@
 
     /**
      * 调度评论区 OwO 初始化
-     * 使用 IntersectionObserver 延迟加载，提升性能
-     * @param {Element} root - 根元素
-     * @param {Object} options - 配置选项
-     * @param {boolean} options.eager - 是否立即初始化
      */
     function scheduleCommentsInit(root, options = {}) {
-        // 只检查初始化函数是否存在
         if (typeof initializeCommentsOwO !== 'function') {
             return;
         }
@@ -1283,44 +1260,30 @@
 
         if (!commentsRoot || commentsRoot.dataset.psOwoInit === 'done') return;
 
-        // 标记为待初始化
         commentsRoot.dataset.psOwoInit = 'pending';
 
         const runInit = () => {
-            // 检查元素是否仍在 DOM 中
             if (!commentsRoot.isConnected) return;
-
-            // 防止重复初始化
             if (commentsRoot.dataset.psOwoInit === 'done') return;
 
-            // 标记为已初始化
             commentsRoot.dataset.psOwoInit = 'done';
 
-            // ✅ 性能优化：使用requestIdleCallback延迟初始化，避免阻塞主线程
-            // OwO初始化会创建60个DOM元素，耗时70ms
             scheduleIdleTask(() => {
                 if (!commentsRoot.isConnected) return;
                 initializeCommentsOwO();
             });
         };
 
-        // ✅ 性能优化：只在用户真正需要时才初始化
-        // 策略1：用户点击评论框时才初始化（最优）
-        // 策略2：评论区进入视口时初始化（备用）
-
-        // 立即初始化的情况：URL包含#comments锚点
         if (window.location.hash === '#comments') {
             runInit();
             return;
         }
 
-        // 降级处理：不支持 IntersectionObserver 时延迟初始化
         if (typeof IntersectionObserver !== 'function') {
             scheduleIdleTask(runInit);
             return;
         }
 
-        // ✅ 策略1：用户点击或聚焦评论框时才初始化（最优）
         const onUserInteraction = () => {
             commentTextarea.removeEventListener('focus', onUserInteraction);
             commentTextarea.removeEventListener('click', onUserInteraction);
@@ -1329,13 +1292,10 @@
         commentTextarea.addEventListener('focus', onUserInteraction, { once: true, passive: true });
         commentTextarea.addEventListener('click', onUserInteraction, { once: true, passive: true });
 
-        // ✅ 策略2：评论区进入视口时初始化（备用）
-        // 使用更大的rootMargin（400px），提前预加载
         const io = new IntersectionObserver((entries, observer) => {
             for (const entry of entries) {
                 if (entry.isIntersecting) {
                     observer.disconnect();
-                    // 如果用户还没点击，延迟初始化
                     setTimeout(runInit, 500);
                     break;
                 }
@@ -1345,7 +1305,6 @@
         io.observe(commentsRoot);
     }
 
-    // ==================== VT 同步逻辑 ====================
     /**
      * 同步共享元素的 VT 名称
      */
@@ -1363,7 +1322,6 @@
             return;
         }
 
-        // 返回列表页：匹配的卡片
         let listPostKey = (history.state && typeof history.state === 'object')
             ? history.state.lastPostKey
             : null;
@@ -1373,7 +1331,6 @@
         }
 
         if (pageType === PageType.LIST && listPostKey) {
-            // ✅ 恢复滚动位置（使用优化后的 scrollPlugin）
             const cached = scrollPlugin?.getCachedScrollPositions?.(url);
             const cachedY = cached?.window?.top;
             if (typeof cachedY === 'number') {
@@ -1384,11 +1341,8 @@
             const card = findIndexPostCardById(listPostKey);
             if (card) {
                 applyPostSharedElementName(card, listPostKey);
-                // ✅ 延迟 getBoundingClientRect 到 RAF 中，避免阻塞主线程
-                // 使用 requestIdleCallback 进一步降低优先级
                 const checkAndScroll = () => {
                     RAF.schedule(() => {
-                        // ✅ 使用缓存的 innerHeight，避免重复读取
                         const rect = card.getBoundingClientRect();
                         if (rect.bottom < 0 || rect.top > VIEWPORT.cachedHeight) {
                             RAF.schedule(() => {
@@ -1421,21 +1375,16 @@
         // ========== Swup 4 基础配置 ==========
         const plugins = [];
 
-        // ✅ 优化 SwupScrollPlugin 配置，减少强制重排
         const scrollPlugin = (typeof SwupScrollPlugin === 'function')
             ? new SwupScrollPlugin({
                 doScrollingRightAway: true,
                 animateScroll: {
-                    betweenPages: false, // 禁用默认动画，使用自定义平滑滚动
+                    betweenPages: false,
                     samePageWithHash: true,
                     samePage: true
                 },
-                // ✅ 关键优化：禁用 scroll containers 查询，避免遍历 DOM
-                // 项目中没有使用 data-swup-scroll-container，只需要缓存 window 滚动
-                scrollContainers: '.__non_existent_selector__', // 使用不存在的选择器，避免 DOM 查询
-                // ✅ 使用自定义 scrollFunction，优化滚动行为
+                scrollContainers: '.__non_existent_selector__',
                 scrollFunction: (container, top, left, animate, onStart, onEnd) => {
-                    // 使用 requestIdleCallback 延迟滚动位置读取，避免阻塞主线程
                     if (typeof requestIdleCallback === 'function') {
                         requestIdleCallback(() => {
                             const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
@@ -1447,7 +1396,6 @@
                             container.scrollTo({ top, left, behavior: animate ? 'smooth' : 'instant' });
                         }, { timeout: 50 });
                     } else {
-                        // 降级到默认行为
                         const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
                         onStart();
                         target.addEventListener('scrollend', onEnd, { once: true });
@@ -1462,25 +1410,38 @@
 
         if (scrollPlugin) plugins.push(scrollPlugin);
 
+        // Preload Plugin
+        const preloadPlugin = (typeof SwupPreloadPlugin === 'function')
+            ? new SwupPreloadPlugin({
+                throttle: 5,
+                preloadHoveredLinks: true,
+                preloadVisibleLinks: {
+                    threshold: 0.2,
+                    delay: 500,
+                    containers: ['#swup'],
+                    ignore: (el) => el.closest('#comments, .page-navigator') || el.getAttribute('href')?.startsWith('#')
+                },
+                preloadInitialPage: true
+            })
+            : null;
+
+        if (preloadPlugin) plugins.push(preloadPlugin);
+
         const swup = new Swup({
             containers: ['#swup'],
             plugins,
-            // ✅ 启用Swup内置缓存和预加载（核心性能优化）
             cache: true,
             preload: true,
             resolveUrl: (url) => {
                 const resolved = new URL(url, window.location.origin);
                 return resolved.pathname + resolved.search + resolved.hash;
             },
-            // 排除评论区的链接，让它们保持原生行为
-            // 通过 data-no-swup 属性或在捕获阶段阻止来处理
             linkSelector: 'a[href]:not([data-no-swup]):not(.page-navigator a):not(#comments a):not(a[href^="#"])',
             animateHistoryBrowsing: HAS_VT,
             native: HAS_VT,
             animationSelector: false
         });
 
-        // 保存 swup 实例到全局，供拦截代码使用
         window.swupInstance = swup;
 
         // ========== Typecho 评论系统修复 ==========
@@ -1767,11 +1728,9 @@
         swup.hooks.on('visit:start', (visit) => {
             STATE.isSwupNavigating = true;
 
-            // 打断之前的动画
             AnimController.abort();
             RAF.cancelAll();
 
-            // ✅ 清理 OwO 实例（页面切换时释放资源）
             if (typeof window.OwoManager !== 'undefined' && window.OwoManager.destroy) {
                 window.OwoManager.destroy();
             }
@@ -1895,8 +1854,6 @@
                 }
             }
 
-            // 3. 简化异步调用链，尽快执行动画
-            // 发送自定义事件
             document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
                 detail: {
                     emittedBy: 'ps-after-content-replace',
@@ -1906,8 +1863,6 @@
                 }
             }));
 
-            // ✅ 性能优化：移除 waitForViewTransition，代码已经足够"纯"
-            // 直接在下一帧执行动画，不会干扰 View Transition
             requestAnimationFrame(() => {
                 runEnterAnimation(toType, hasSharedElement);
             });
@@ -2122,99 +2077,6 @@
             });
         }
     }
-
-    // ==================== 性能监控 ====================
-    /**
-     * 性能监控模块 - 监测长任务和主线程阻塞
-     * 使用方法：在控制台设置 window.PS_PERF_DEBUG = true 后刷新页面
-     */
-    const PerformanceMonitor = {
-        enabled: false,
-        longTaskThreshold: 50, // 超过50ms的任务视为长任务
-        stats: {
-            longTasks: 0,
-            totalBlockingTime: 0,
-            maxTaskDuration: 0,
-            pageTransitions: 0
-        },
-
-        init() {
-            // 检查是否启用调试模式
-            this.enabled = window.PS_PERF_DEBUG === true;
-            if (!this.enabled) return;
-
-            console.log('[PureSuck Perf] 性能监控已启用');
-
-            // 监听长任务
-            if (typeof PerformanceObserver !== 'undefined') {
-                try {
-                    const observer = new PerformanceObserver((list) => {
-                        for (const entry of list.getEntries()) {
-                            if (entry.duration > this.longTaskThreshold) {
-                                this.stats.longTasks++;
-                                this.stats.totalBlockingTime += entry.duration;
-                                this.stats.maxTaskDuration = Math.max(
-                                    this.stats.maxTaskDuration,
-                                    entry.duration
-                                );
-
-                                console.warn(
-                                    `[PureSuck Perf] 长任务: ${entry.duration.toFixed(2)}ms`,
-                                    entry.name || entry.entryType
-                                );
-                            }
-                        }
-                    });
-
-                    observer.observe({ entryTypes: ['longtask'] });
-                } catch (e) {
-                    // longtask 不支持时静默失败
-                }
-            }
-
-            // 监听页面切换性能
-            if (typeof swup !== 'undefined') {
-                swup.hooks.on('visit:start', () => {
-                    this.stats.pageTransitions++;
-                    this._transitionStart = performance.now();
-                });
-
-                swup.hooks.on('visit:end', () => {
-                    if (this._transitionStart) {
-                        const duration = performance.now() - this._transitionStart;
-                        console.log(
-                            `[PureSuck Perf] 页面切换: ${duration.toFixed(2)}ms`
-                        );
-                        this._transitionStart = null;
-                    }
-                });
-            }
-
-            window.PS_PERF_STATS = () => {
-                const { _frameTime, _targetFps, _adaptiveMetrics } = TaskScheduler;
-                console.table({
-                    '长任务数量': this.stats.longTasks,
-                    '总阻塞时间(ms)': this.stats.totalBlockingTime.toFixed(2),
-                    '最长任务(ms)': this.stats.maxTaskDuration.toFixed(2),
-                    '页面切换次数': this.stats.pageTransitions,
-                    '平均阻塞(ms)': this.stats.longTasks > 0
-                        ? (this.stats.totalBlockingTime / this.stats.longTasks).toFixed(2)
-                        : 0
-                });
-                console.log(`\n[调度器配置]`);
-                console.log(`  目标帧率: ${_targetFps}fps`);
-                console.log(`  帧时间: ${_frameTime.toFixed(2)}ms`);
-                console.log(`  最优批次: ${_adaptiveMetrics.optimalBatchSize}`);
-                console.log(`  平均任务时间: ${_adaptiveMetrics.avgTaskTime.toFixed(3)}ms/项`);
-                return this.stats;
-            };
-
-            console.log('[PureSuck Perf] 使用 PS_PERF_STATS() 查看统计');
-        }
-    };
-
-    // 初始化性能监控
-    PerformanceMonitor.init();
 
     // 页面加载完成后初始化
     if (document.readyState === 'loading') {
