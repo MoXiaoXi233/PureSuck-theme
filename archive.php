@@ -63,12 +63,7 @@
                                 </a>
                             </h1>
                             <!-- 摘要 -->
-                            <?php if (
-                                isset($this->password)
-                                && $this->password !== Typecho_Cookie::get('protectPassword')
-                                && $this->authorId !== $this->user->uid
-                                && !$this->user->pass('editor', true)
-                            ): ?>
+                            <?php if ($this->hidden): ?>
                                 <p class="post-excerpt">该文章已加密，请输入密码后查看。</p>
                             <?php else: ?>
                                 <p class="post-excerpt">

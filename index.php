@@ -19,9 +19,8 @@ $this->need('header.php');
     <?php while ($this->next()): ?>
         <?php
         $hasImg = $this->fields->img ? true : false;
-        $isProtected = isset($this->password) && $this->password !== Typecho_Cookie::get('protectPassword') && $this->authorId !== $this->user->uid && !$this->user->pass('editor', true);
         ?>
-        <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item <?= $isProtected ? 'post-protected' : ''; ?>" data-protected="<?= $isProtected ? 'true' : 'false'; ?>" data-ps-post-key="<?= $this->cid; ?>">
+        <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item <?= $this->hidden ? 'post-protected' : ''; ?>" data-protected="<?= $this->hidden ? 'true' : 'false'; ?>" data-ps-post-key="<?= $this->cid; ?>">
             <div class="post-inner">
                 <?php
                 $showCardCategory = isset($this->options->showCardCategory)
@@ -73,12 +72,7 @@ $this->need('header.php');
                         </h1>
 
                         <!-- 摘要 -->
-                        <?php if (
-                            isset($this->password)
-                            && $this->password !== Typecho_Cookie::get('protectPassword')
-                            && $this->authorId !== $this->user->uid
-                            && !$this->user->pass('editor', true)
-                        ): ?>
+                        <?php if ($this->hidden): ?>
                             <p class="post-excerpt">该文章已加密，请输入密码后查看。</p>
                         <?php else: ?>
                             <p class="post-excerpt">
