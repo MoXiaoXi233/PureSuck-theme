@@ -42,14 +42,10 @@ html.ps-list-enter .main-lastinfo {
 html.ps-post-enter .post.post--single .post-meta,
 html.ps-post-enter .post.post--single .post-content > *,
 html.ps-post-enter .post.post--single .protected-block,
-html.ps-post-enter .post.post--single .license-info-card {
-	opacity: 0;
-	transform: translate3d(0, var(--ps-anim-translate-small), 0);
-	will-change: opacity, transform;
-}
+html.ps-post-enter .post.post--single .license-info-card,
 html.ps-post-enter .post.post--single .post-comments {
 	opacity: 0;
-	transform: translate3d(0, var(--ps-anim-translate-medium), 0);
+	transform: translate3d(0, var(--ps-anim-translate-small), 0);
 	will-change: opacity, transform;
 }
 

@@ -819,6 +819,18 @@
                 batchSize: ANIM.enter.list.batchSize
             }, skipInitialState);
         }
+
+        // 动画完成后，清理 .post-comments 容器的初始状态
+        if (toType === PageType.POST) {
+            RAF.schedule(() => {
+                const commentsSection = document.querySelector('.post.post--single .post-comments');
+                if (commentsSection) {
+                    commentsSection.style.opacity = '';
+                    commentsSection.style.transform = '';
+                    commentsSection.style.willChange = '';
+                }
+            });
+        }
     }
 
     /**
@@ -851,9 +863,9 @@
 
         if (commentsRoot) {
             const commentsSelector = [
-                '#comments > .comment-title',
-                '#comments > .comment-list > li',
-                '#comments > .page-navigator',
+                '#comments-list > .comment-title',
+                '#comments-list li',
+                '#comments-list > .page-navigator',
                 '#comments > .respond'
             ].join(',');
 
@@ -933,9 +945,9 @@
         const commentsRoot = scope.querySelector('.post-comments');
         if (commentsRoot) {
             const commentsSelector = [
-                '#comments > .comment-title',
-                '#comments > .comment-list > li',
-                '#comments > .page-navigator',
+                '#comments-list > .comment-title',
+                '#comments-list li',
+                '#comments-list > .page-navigator',
                 '#comments > .respond'
             ].join(',');
 
