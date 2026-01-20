@@ -38,19 +38,6 @@ html.is-animating {
 	scroll-behavior: auto !important;
 }
 
-/* 导航期间禁用所有过渡和动画 */
-html.is-animating *,
-html.is-animating *::before,
-html.is-animating *::after {
-	transition: none !important;
-	animation-play-state: paused !important;
-}
-
-/* 动画执行期间禁用页面过渡，避免冲突 */
-html.ps-animating * {
-	transition: none !important;
-}
-
 /* ==================== 预加载状态（防止首屏闪烁） ====================
  * 这些类在CSS加载前通过内联脚本添加到html元素上
  * 确保页面首次渲染时元素就处于动画初始状态

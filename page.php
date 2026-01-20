@@ -49,7 +49,9 @@
                         </div>
 
                         <!-- 解析正文以及短代码 -->
-                        <?= renderPostContent($this->content); ?>
+                        <div class="post-content">
+                            <?= renderPostContent($this->content); ?>
+                        </div>
 
                     </div>
                 </div>
