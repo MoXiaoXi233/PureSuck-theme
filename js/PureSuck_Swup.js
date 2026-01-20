@@ -1229,14 +1229,8 @@
         }
     }
 
-    /**
-     * 调度评论区 OwO 初始化
-     */
     function scheduleCommentsInit(root, options = {}) {
-        // ★ 使用全局的 setupLazyInit，而不是重复实现
-        if (typeof window.setupLazyInit === 'function') {
-            window.setupLazyInit();
-        }
+        window.OwoManager?.init();
     }
 
     /**
