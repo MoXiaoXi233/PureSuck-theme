@@ -861,7 +861,7 @@ function parse_windows($content)
         $type = $matches[1];
         $title = $matches[2];
         $innerContent = $matches[3];
-        return '<div class="notifications-container"><div class="window ' . $type . '"><div class="flex"><div class="window-prompt-wrap"><p class="window-prompt-heading">' . $title . '</p><div class="window-prompt-prompt"><p>' . $innerContent . '</p></div></div></div></div></div>';
+        return '<div class="window ' . $type . '"><div class="flex"><div class="window-prompt-wrap"><p class="window-prompt-heading">' . $title . '</p><div class="window-prompt-prompt"><p>' . $innerContent . '</p></div></div></div></div>';
     }, $content);
     return $content;
 }
