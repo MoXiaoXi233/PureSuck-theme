@@ -109,14 +109,23 @@
      */
     function addCopyButton(preElement) {
         if (!CONFIG.showCopyButton) return;
-        if (preElement.querySelector('.copy-button')) return;
+        if (preElement.parentElement.classList.contains('code-block-wrapper')) return;
 
+        // 创建包装容器
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block-wrapper';
+
+        // 将 pre 元素包装起来
+        preElement.parentNode.insertBefore(wrapper, preElement);
+        wrapper.appendChild(preElement);
+
+        // 创建复制按钮
         const button = document.createElement('button');
         button.className = 'copy-button';
         button.innerText = 'Copy';
         button.setAttribute('onclick', 'window.handleCodeCopy(event)');
 
-        preElement.appendChild(button);
+        wrapper.appendChild(button);
     }
 
     /**

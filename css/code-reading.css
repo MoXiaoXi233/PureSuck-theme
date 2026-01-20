@@ -181,9 +181,14 @@ pre code.hljs::-webkit-scrollbar-thumb {
   }
 }
 
-/* Copy 按钮 */
-pre {
+/* Copy 按钮包装容器 */
+.code-block-wrapper {
   position: relative;
+  margin: 1.2em 0;
+}
+
+.code-block-wrapper pre {
+  margin: 0;
 }
 
 .copy-button {
@@ -205,13 +210,15 @@ pre {
   opacity: 0;
   pointer-events: none;
 
+  z-index: 1;
+
   transition: opacity .15s ease,
     color .15s ease,
     background-color .15s ease;
 }
 
-pre:hover .copy-button,
-pre:focus-within .copy-button {
+.code-block-wrapper:hover .copy-button,
+.code-block-wrapper:focus-within .copy-button {
   opacity: 1;
   pointer-events: auto;
 }
