@@ -1157,7 +1157,8 @@
      */
     async function refreshCommentsFromUrl(urlString, options = {}) {
         const { restoreScroll = true } = options;
-        const current = document.getElementById('comments');
+        // ★ 只刷新评论列表，不动评论表单和OwO
+        const current = document.getElementById('comments-list');
         if (!current) return false;
 
         if (!isSameOriginUrl(urlString)) return false;
@@ -1182,9 +1183,11 @@
 
             const html = await res.text();
             const doc = new DOMParser().parseFromString(html, 'text/html');
-            const next = doc.getElementById('comments');
+            // ★ 只提取评论列表部分
+            const next = doc.getElementById('comments-list');
             if (!next) return false;
 
+            // ★ 只替换评论列表，评论表单和OwO保持不变
             current.replaceWith(next);
 
             RAF.schedule(() => {
@@ -1199,7 +1202,8 @@
                 }
             });
 
-            scheduleCommentsInit(document, { eager: true });
+            // ★ 不再需要重新初始化OwO，因为评论表单没有被替换
+            // scheduleCommentsInit(document, { eager: true });
 
             setTimeout(() => {
                 history.scrollRestoration = prevScrollRestoration;
@@ -1217,58 +1221,10 @@
      * 调度评论区 OwO 初始化
      */
     function scheduleCommentsInit(root, options = {}) {
-        if (typeof initializeCommentsOwO !== 'function') {
-            return;
+        // ★ 使用全局的 setupLazyInit，而不是重复实现
+        if (typeof window.setupLazyInit === 'function') {
+            window.setupLazyInit();
         }
-
-        const scope = root?.querySelector ? root : document;
-        const commentTextarea = scope.querySelector('.OwO-textarea');
-        if (!commentTextarea) return;
-
-        const commentsRoot = commentTextarea.closest('#comments')
-            || commentTextarea.closest('.post-comments')
-            || commentTextarea;
-
-        if (!commentsRoot || commentsRoot.dataset.psOwoInit === 'done') return;
-
-        commentsRoot.dataset.psOwoInit = 'pending';
-
-        const runInit = () => {
-            if (!commentsRoot.isConnected) return;
-            if (commentsRoot.dataset.psOwoInit === 'done') return;
-
-            commentsRoot.dataset.psOwoInit = 'done';
-
-            scheduleIdleTask(() => {
-                if (!commentsRoot.isConnected) return;
-                initializeCommentsOwO();
-            });
-        };
-
-        if (window.location.hash === '#comments') {
-            runInit();
-            return;
-        }
-
-        const onUserInteraction = () => {
-            commentTextarea.removeEventListener('focus', onUserInteraction);
-            commentTextarea.removeEventListener('click', onUserInteraction);
-            runInit();
-        };
-        commentTextarea.addEventListener('focus', onUserInteraction, { once: true, passive: true });
-        commentTextarea.addEventListener('click', onUserInteraction, { once: true, passive: true });
-
-        const io = new IntersectionObserver((entries, observer) => {
-            for (const entry of entries) {
-                if (entry.isIntersecting) {
-                    observer.disconnect();
-                    setTimeout(runInit, 500);
-                    break;
-                }
-            }
-        }, { rootMargin: '400px 0px', threshold: 0.01 });
-
-        io.observe(commentsRoot);
     }
 
     /**
