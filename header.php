@@ -104,6 +104,9 @@
     <!-- 低优先级：按需加载（评论区） -->
     <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
 
+    <!-- 代码高亮：按需加载（只在有代码块时加载） -->
+    <script defer src="<?php $this->options->themeUrl('/js/code-highlight.js'); ?>"></script>
+
     <?php if ($this->options->PjaxScript): ?>
         <script defer>
             // 注册用户自定义回调（Swup page:view 后执行）
@@ -114,7 +117,13 @@
     <?php endif; ?>
 </head>
 
-<body>
+<?php
+// 获取代码块设置
+$codeBlockSettings = $this->options->codeBlockSettings;
+$showLineNumbers = is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings) ? 'true' : 'false';
+$showCopyButton = is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings) ? 'true' : 'false';
+?>
+<body data-code-line-numbers="<?= $showLineNumbers; ?>" data-code-copy-button="<?= $showCopyButton; ?>">
     <div class="wrapper">
         <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
