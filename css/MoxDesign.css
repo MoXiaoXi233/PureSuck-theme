@@ -15,7 +15,6 @@
     font-size: 0.95rem;
     box-shadow: 0 0 6px #00000008;
     line-height: normal;
-    will-change: transform, opacity;
 }
 
 #mox-toast.show {

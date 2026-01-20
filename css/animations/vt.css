@@ -72,7 +72,7 @@ html.ps-theme-vt::view-transition-new(root) {
 /* 共享元素的 VT 容器样式 */
 [data-ps-vt-name] {
 	view-transition-name: attr(data-ps-vt-name);
-	contain: layout style paint;
+	contain: layout style;
 }
 
 /* VT 模式下的页面过渡优化 */

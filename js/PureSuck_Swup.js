@@ -752,7 +752,7 @@
         requestAnimationFrame(() => {
             const transform = `translate3d(0,${y}px,0)`;
             targets.forEach(el => {
-                if (el) el.style.cssText += `opacity:0;transform:${transform};will-change:opacity,transform;contain:layout style paint;`;
+                if (el) el.style.cssText += `opacity:0;transform:${transform};will-change:opacity,transform;contain:layout style;`;
             });
         });
     }
@@ -1005,7 +1005,7 @@
 
         if (!skipInitialState) {
             await TaskScheduler.run(targets, (el) => {
-                el.style.cssText += `opacity:0;transform:translate3d(0,${y}px,0)${scale !== 1 ? ` scale(${scale})` : ''};will-change:opacity,transform;contain:layout style paint;`;
+                el.style.cssText += `opacity:0;transform:translate3d(0,${y}px,0)${scale !== 1 ? ` scale(${scale})` : ''};will-change:opacity,transform;contain:layout style;`;
             }, { priority: 'user-blocking' });
         }
 

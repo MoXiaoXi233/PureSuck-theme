@@ -40,7 +40,6 @@
 		filter: brightness(0.8);
 		transform: translateZ(0);
 		backface-visibility: hidden;
-		will-change: filter;
 	}
 
 	#ZaiJPG {
@@ -980,7 +979,7 @@ body>.wrapper {
 	width: 100%;
 	padding-top: 12px;
 	padding-bottom: 24px;
-	contain: layout style paint;
+	contain: layout style;
 }
 
 .main-pager {
