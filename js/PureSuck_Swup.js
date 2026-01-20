@@ -1361,6 +1361,16 @@
 
         if (preloadPlugin) plugins.push(preloadPlugin);
 
+        const headPlugin = (typeof SwupHeadPlugin === 'function')
+            ? new SwupHeadPlugin({
+                persistAssets: false,
+                awaitAssets: true,
+                attributes: ['lang', 'dir']
+            })
+            : null;
+
+        if (headPlugin) plugins.push(headPlugin);
+
         const swup = new Swup({
             containers: ['#swup'],
             plugins,

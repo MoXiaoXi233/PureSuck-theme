@@ -100,6 +100,7 @@
     <script defer src="<?php getStaticURL(path: 'Swup.umd.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/preload-plugin.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/head-plugin.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
     <!-- 低优先级：按需加载（评论区） -->
