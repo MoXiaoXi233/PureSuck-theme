@@ -415,7 +415,17 @@ function themeConfig($form)
     );
     $form->addInput($ccLicense);
 
-    // 代码高亮设置
+    // 代码高亮功能总开关
+    $enableCodeHighlight = new Typecho_Widget_Helper_Form_Element_Radio(
+        'enableCodeHighlight',
+        array('1' => _t('启用'), '0' => _t('禁用')),
+        '1',
+        _t('是否启用代码高亮功能'),
+        _t('关闭后将不加载 highlight.js，可提升页面加载速度')
+    );
+    $form->addInput($enableCodeHighlight);
+
+    // 代码高亮个性化设置
     $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
         'codeBlockSettings',
         array(
@@ -423,7 +433,8 @@ function themeConfig($form)
             'ShowCopyButton' => _t('显示复制按钮')
         ),
         array('ShowLineNumbers', 'ShowCopyButton'), // 默认选中
-        _t('代码高亮个性化')
+        _t('代码高亮个性化'),
+        _t('仅在启用代码高亮功能时生效')
     );
     $form->addInput($codeBlockSettings->multiMode());
 

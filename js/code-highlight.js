@@ -206,36 +206,18 @@
     }
 
     /**
-     * 高亮所有代码块
-     * 使用 requestIdleCallback 批量处理，避免阻塞主线程
+     * 高亮所有代码块（同步版本）
+     * 直接遍历所有代码块并高亮，确保在动画前完成
      */
     function highlightAllBlocks() {
         const codeBlocks = Array.from(document.querySelectorAll('pre code'));
         if (codeBlocks.length === 0) return;
 
-        const batchSize = 5;
-        let index = 0;
-
-        function processBatch() {
-            const end = Math.min(index + batchSize, codeBlocks.length);
-
-            for (; index < end; index++) {
-                const block = codeBlocks[index];
-                if (block.isConnected) {
-                    highlightBlock(block);
-                }
-            }
-
-            if (index < codeBlocks.length) {
-                if (typeof requestIdleCallback === 'function') {
-                    requestIdleCallback(processBatch, { timeout: 1000 });
-                } else {
-                    setTimeout(processBatch, 0);
-                }
+        for (const block of codeBlocks) {
+            if (block.isConnected) {
+                highlightBlock(block);
             }
         }
-
-        processBatch();
     }
 
     /**
@@ -288,6 +270,6 @@
         init();
     }
 
-    // 监听 Swup 页面切换事件
+    // 监听 Swup 页面切换事件 - 同步执行，高亮完成后再开始动画
     document.addEventListener('swup:contentReplaced', reinit);
 })();

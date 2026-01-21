@@ -106,8 +106,10 @@
     <!-- 低优先级：按需加载（评论区） -->
     <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
 
-    <!-- 代码高亮：按需加载（只在有代码块时加载） -->
-    <script defer src="<?php $this->options->themeUrl('/js/code-highlight.js'); ?>"></script>
+    <?php if ($this->options->enableCodeHighlight == '1'): ?>
+        <!-- 代码高亮：按需加载（只在有代码块时加载） -->
+        <script defer src="<?php $this->options->themeUrl('/js/code-highlight.js'); ?>"></script>
+    <?php endif; ?>
 
     <?php if ($this->options->PjaxScript): ?>
         <script defer>
@@ -120,12 +122,15 @@
 </head>
 
 <?php
-// 获取代码块设置
+// 获取代码高亮功能开关
+$enableCodeHighlight = $this->options->enableCodeHighlight == '1';
+
+// 获取代码块设置（仅在启用代码高亮时生效）
 $codeBlockSettings = $this->options->codeBlockSettings;
-$showLineNumbers = is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings) ? 'true' : 'false';
-$showCopyButton = is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings) ? 'true' : 'false';
+$showLineNumbers = $enableCodeHighlight && is_array($codeBlockSettings) && in_array('ShowLineNumbers', $codeBlockSettings) ? 'true' : 'false';
+$showCopyButton = $enableCodeHighlight && is_array($codeBlockSettings) && in_array('ShowCopyButton', $codeBlockSettings) ? 'true' : 'false';
 ?>
-<body data-code-line-numbers="<?= $showLineNumbers; ?>" data-code-copy-button="<?= $showCopyButton; ?>">
+<body data-code-line-numbers="<?= $showLineNumbers; ?>" data-code-copy-button="<?= $showCopyButton; ?>" data-code-highlight-enabled="<?= $enableCodeHighlight ? 'true' : 'false'; ?>">
     <div class="wrapper">
         <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
