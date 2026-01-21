@@ -108,22 +108,9 @@ html.ps-post-exit .post.post--single {
 	will-change: opacity, transform;
 }
 
-/* 文章页内容分段退出 */
-html.ps-post-exit .post.post--single .post-meta {
-	animation: ps-post-exit-out calc(var(--ps-anim-duration-slow) - 40ms) var(--ps-anim-ease-out) forwards;
-	animation-delay: 0ms;
-	will-change: opacity, transform;
-}
-html.ps-post-exit .post.post--single .post-content > * {
-	animation: ps-post-exit-out calc(var(--ps-anim-duration-slow) - 40ms) var(--ps-anim-ease-out) forwards;
-	animation-delay: 30ms;
-	will-change: opacity, transform;
-}
-html.ps-post-exit .post.post--single .post-comments {
-	animation: ps-post-exit-out calc(var(--ps-anim-duration-slow) - 80ms) var(--ps-anim-ease-out) forwards;
-	animation-delay: 60ms;
-	will-change: opacity, transform;
-}
+/* 文章页内容分段退出 - 已移除以避免与父元素动画冲突 */
+/* 子元素会跟随父元素 .post.post--single 的动画一起退出 */
+/* 这样可以避免合成失败，提升性能 */
 
 /* 文章页退出动画关键帧 */
 @keyframes ps-post-exit-out {
@@ -148,18 +135,9 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	will-change: opacity, transform;
 }
 
-/* 独立页面内部内容退出 */
-html.ps-page-exit .post.post--index.main-item .post-title,
-html.ps-page-exit .post.post--index.main-item .post-meta {
-	animation: ps-page-inner-exit-out 260ms var(--ps-anim-ease-out) forwards;
-	animation-delay: 40ms;
-	will-change: opacity, transform;
-}
-html.ps-page-exit .post.post--index.main-item .inner-post-wrapper > * {
-	animation: ps-page-inner-exit-out 240ms var(--ps-anim-ease-out) forwards;
-	animation-delay: 60ms;
-	will-change: opacity, transform;
-}
+/* 独立页面内部内容退出 - 已移除以避免与父元素动画冲突 */
+/* 子元素会跟随父元素 .post.post--index.main-item 的动画一起退出 */
+/* 这样可以避免合成失败，提升性能 */
 
 /* 独立页面退出动画关键帧 */
 @keyframes ps-page-exit-out {
@@ -173,16 +151,8 @@ html.ps-page-exit .post.post--index.main-item .inner-post-wrapper > * {
 	}
 }
 
-@keyframes ps-page-inner-exit-out {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0);
-	}
-	to {
-		opacity: 0;
-		transform: translate3d(0, -12px, 0);
-	}
-}
+/* ps-page-inner-exit-out 动画已移除 - 不再需要 */
+/* 子元素跟随父元素动画，避免动画冲突 */
 
 /* ==================== 降级处理 ==================== */
 

@@ -407,52 +407,45 @@
                 easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
             }
         },
-        // 进入动画配置
         enter: {
-            // 文章页内容渐入
             post: {
                 duration: 380,
-                stagger: 32,
+                stagger: 40,
                 y: 16,
                 easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
                 maxItems: 24,
                 batchSize: 8,
-                batchGap: 80
+                batchGap: 100
             },
-            // 列表页卡片渐入
             list: {
                 duration: 520,
                 stagger: 65,
                 y: 48,
                 easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)',
-                maxItems: 20,  // 覆盖常见的一页文章数
+                maxItems: 20,
                 batchSize: 6,
                 batchGap: 100
             },
-            // 独立页渐入
             page: {
-                // 第一层：整个卡片
                 card: {
                     duration: 520,
                     y: 40,
                     scale: 0.98,
                     easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)'
                 },
-                // 第二层：内部内容
                 inner: {
                     duration: 360,
-                    stagger: 28,
+                    stagger: 35,
                     y: 12,
                     easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
                     maxItems: 16,
                     batchSize: 6,
-                    batchGap: 70
+                    batchGap: 90
                 }
             },
-            // VT 同步配置
             vt: {
                 duration: VT.duration,
-                leadMs: 100 // VT完成后提前多久开始进入动画
+                leadMs: 100
             }
         },
         // 滚动动画
@@ -1032,6 +1025,11 @@
                 fill: 'both',
                 composite: 'replace'
             });
+
+            anim.onfinish = () => {
+                if (el.style.willChange) el.style.willChange = '';
+            };
+
             AnimController.register(anim, el);
         }, { priority: 'user-blocking' });
     }
@@ -1357,7 +1355,7 @@
 
         const headPlugin = (typeof SwupHeadPlugin === 'function')
             ? new SwupHeadPlugin({
-                persistAssets: false,
+                persistAssets: true,
                 awaitAssets: true,
                 attributes: ['lang', 'dir']
             })

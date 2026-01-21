@@ -13,15 +13,21 @@ function MoxToast(options) {
     // 合并用户参数和默认参数
     const settings = { ...defaults, ...options };
 
-    // 检查并移除旧的Toast元素
     const oldToast = document.getElementById("mox-toast");
     if (oldToast && document.body.contains(oldToast)) {
-        oldToast.className = "hide";
-        setTimeout(function () {
-            if (document.body.contains(oldToast)) {
-                document.body.removeChild(oldToast);
-            }
-        }, 500); // 等待动画完成后再移除
+        oldToast.classList.remove('show');
+        oldToast.classList.add('hide');
+
+        requestAnimationFrame(() => {
+            const removeOldToast = () => {
+                if (document.body.contains(oldToast)) {
+                    document.body.removeChild(oldToast);
+                }
+            };
+
+            oldToast.addEventListener('transitionend', removeOldToast, { once: true });
+            setTimeout(removeOldToast, 500);
+        });
     }
 
     // 创建一个新的div元素
@@ -35,21 +41,28 @@ function MoxToast(options) {
     toast.style.top = settings.position === "top" ? `45px` : "auto";
     toast.classList.add(settings.position);
 
-    // 将Toast元素插入到body中
-    document.body.appendChild(toast);
+    requestAnimationFrame(() => {
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+    });
 
-    // 显示Toast
-    toast.className = `${settings.position} show`;
+    const hideToast = () => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
 
-    // 设置定时器以移除Toast元素
-    setTimeout(function () {
-        toast.className = `${settings.position} hide`;
-        setTimeout(function () {
+        const removeToast = () => {
             if (document.body.contains(toast)) {
                 document.body.removeChild(toast);
             }
-        }, 500); // 等待动画完成后再移除
-    }, settings.duration);
+        };
+
+        toast.addEventListener('transitionend', removeToast, { once: true });
+        setTimeout(removeToast, 500);
+    };
+
+    setTimeout(hideToast, settings.duration);
 }
 
 function MoxNotification(options) {
