@@ -15,7 +15,7 @@
 	--ps-anim-duration-fast: 180ms;
 	--ps-anim-duration-normal: 240ms;
 	--ps-anim-duration-slow: 320ms;
-	--ps-anim-duration-vt: 280ms;
+	--ps-anim-duration-vt: 380ms;
 	
 	/* 动画缓动函数 */
 	--ps-anim-ease-out: cubic-bezier(0.4, 0, 0.2, 1);

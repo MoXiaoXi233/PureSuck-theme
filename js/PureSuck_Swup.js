@@ -61,7 +61,7 @@
     const VT = {
         styleId: 'ps-vt-shared-element-style',
         markerAttr: 'data-ps-vt-name',
-        duration: 500,
+        duration: 380,
         easing: 'cubic-bezier(.2,.8,.2,1)'
     };
 
@@ -1709,10 +1709,7 @@
 
             if (useVT) {
                 document.documentElement.classList.add('ps-vt-mode');
-                // VT模式下也要添加退出动画类，让非共享元素有退出效果
-                if (fromType === PageType.LIST) {
-                    document.documentElement.classList.add('ps-list-exit');
-                }
+                // VT模式下完全依赖浏览器原生动画，不添加自定义动画类
             } else {
                 // 非 VT 模式：应用完整的退出动画
                 if (fromType === PageType.PAGE) {
