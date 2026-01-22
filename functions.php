@@ -415,29 +415,6 @@ function themeConfig($form)
     );
     $form->addInput($ccLicense);
 
-    // 代码高亮功能总开关
-    $enableCodeHighlight = new Typecho_Widget_Helper_Form_Element_Radio(
-        'enableCodeHighlight',
-        array('1' => _t('启用'), '0' => _t('禁用')),
-        '1',
-        _t('是否启用代码高亮功能'),
-        _t('关闭后将不加载 highlight.js，可提升页面加载速度')
-    );
-    $form->addInput($enableCodeHighlight);
-
-    // 代码高亮个性化设置
-    $codeBlockSettings = new Typecho_Widget_Helper_Form_Element_Checkbox(
-        'codeBlockSettings',
-        array(
-            'ShowLineNumbers' => _t('显示代码行数'),
-            'ShowCopyButton' => _t('显示复制按钮')
-        ),
-        array('ShowLineNumbers', 'ShowCopyButton'), // 默认选中
-        _t('代码高亮个性化'),
-        _t('仅在启用代码高亮功能时生效')
-    );
-    $form->addInput($codeBlockSettings->multiMode());
-
     // 主题配色
     $colors = array(
         'pink' => _t('素粉'),
@@ -487,17 +464,14 @@ function getStaticURL($path)
         'local' => [
             'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
             'Swup.umd.min.js' => $options->themeUrl . '/js/lib/Swup/Swup.umd.min.js',
-            'highlight.min.js' => $options->themeUrl . '/js/lib/highlight.min.js',
         ],
         'bootcdn' => [
             'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
             'Swup.modern.min.js' => "https://cdn.bootcdn.net/ajax/libs/swup/4.8.2/Swup.umd.min.js",
-            'highlight.min.js' => "https://cdn.bootcdn.net/ajax/libs/highlight.js/11.10.0/highlight.min.js",
         ],
         "cdnjs" => [
             'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
             'Swup.modern.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/swup/4.8.2/Swup.umd.min.js",
-            'highlight.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js",
         ]
 
     ];

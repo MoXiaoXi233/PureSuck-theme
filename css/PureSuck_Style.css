@@ -266,16 +266,8 @@ pre {
 	max-height: 750px;
 }
 
-pre>code,
-pre>code:hover {
-	padding: 0;
-	border-radius: 0;
-	border: 0;
-	margin: 0;
-}
-
 /* 代码文本 */
-pre code.hljs {
+pre code {
 	display: block;
 	background: transparent;
 	padding: 0.75em 1em;
@@ -288,8 +280,7 @@ pre code.hljs {
 }
 
 /* 行内代码 */
-:not(pre)>code,
-:not(pre)>code.hljs {
+:not(pre)>code {
 	background: var(--hover-color);
 	border: 1px solid var(--line-color);
 
