@@ -67,7 +67,6 @@
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/animations/index.css'); ?>">
 
     <!-- 非关键CSS异步加载（仅在有代码块时需要） -->
-    <link href="<?php $this->options->themeUrl('/css/code-reading.css'); ?>" rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter != 'off'): ?>

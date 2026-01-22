@@ -245,8 +245,60 @@ kbd {
 	position: relative;
 	display: inline-block;
 	top: -1px;
+	margin: 4px 5px;
 	padding-right: 8px;
 	padding-left: 8px;
+	font-family: ui-monospace, "JetBrains Mono", "Fira Code", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* 代码块本体 */
+pre {
+	padding: 12px 16px;
+	margin: 1.2em 0;
+	background: var(--pure-grey-color);
+	border: 1px solid var(--line-color);
+	border-radius: 8px;
+	overflow: auto;
+	font-family: ui-monospace, JetBrains Mono, SFMono-Regular, Menlo, Monaco, Consolas, Andale Mono, Liberation Mono, Ubuntu Mono, Courier New, monospace;
+	font-size: .9em;
+	word-wrap: break-word;
+	position: relative;
+	max-height: 750px;
+}
+
+pre>code,
+pre>code:hover {
+	padding: 0;
+	border-radius: 0;
+	border: 0;
+	margin: 0;
+}
+
+/* 代码文本 */
+pre code.hljs {
+	display: block;
+	background: transparent;
+	padding: 0.75em 1em;
+
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.92em;
+	line-height: 1.7;
+
+	color: var(--text-color);
+}
+
+/* 行内代码 */
+:not(pre)>code,
+:not(pre)>code.hljs {
+	background: var(--hover-color);
+	border: 1px solid var(--line-color);
+
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.92em;
+
+	border-radius: 0.4rem;
+	color: var(--text-color);
+	white-space: nowrap;
 }
 
 .form {
@@ -344,7 +396,7 @@ h3::before {
 	top: 30px;
 }
 
-#comments > h1.comment-title::before {
+#comments>h1.comment-title::before {
 	content: "";
 	display: block;
 	width: 8px;
@@ -1385,15 +1437,6 @@ blockquote::after {
 	opacity: 0.3;
 }
 
-code,
-kbd {
-	border-radius: 0.4rem;
-	color: var(--text-color);
-	background-color: var(--pure-grey-color);
-	border: 1px solid var(--border-color);
-	margin: 4px 5px
-}
-
 ol,
 ul {
 	color: var(--text-color)
@@ -1605,8 +1648,8 @@ strong {
 	color: var(--text-color);
 }
 
-.cp > a:not(.cp-waiting a),
-.cp p > a {
+.cp>a:not(.cp-waiting a),
+.cp p>a {
 	color: var(--themecolor);
 	text-decoration: none;
 	border-radius: 0.35rem;
@@ -1614,8 +1657,8 @@ strong {
 	display: inline-block;
 }
 
-.cp > a:not(.cp-waiting a):hover,
-.cp p > a:hover {
+.cp>a:not(.cp-waiting a):hover,
+.cp p>a:hover {
 	color: var(--themehovercolor);
 }
 
@@ -1742,7 +1785,9 @@ strong {
 }
 
 @keyframes ps-spin {
-	to { transform: rotate(360deg); }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .pagination {

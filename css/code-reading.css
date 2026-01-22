@@ -86,6 +86,7 @@ pre code.hljs {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.92em;
 
+  border-radius: 0.4rem;
   color: var(--code-text);
   white-space: nowrap;
 }
