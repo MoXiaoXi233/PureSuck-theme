@@ -61,7 +61,7 @@
     const VT = {
         styleId: 'ps-vt-shared-element-style',
         markerAttr: 'data-ps-vt-name',
-        duration: 380,
+        duration: 520,
         easing: 'cubic-bezier(.2,.8,.2,1)'
     };
 
@@ -435,7 +435,7 @@
             },
             page: {
                 card: {
-                    duration: 520,
+                    duration: 380,
                     y: 40,
                     scale: 0.98,
                     easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)'
