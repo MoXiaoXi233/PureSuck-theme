@@ -295,11 +295,18 @@
 
         init() {
             this.update();
-            const ro = new ResizeObserver(() => {
-                this.update();
-                this.clearCache();
-            });
-            ro.observe(document.documentElement);
+            // ✅ 使用 window resize 代替 ResizeObserver，避免过度触发
+            // ResizeObserver 监听 document.documentElement 会在页面滚动/内容变化时触发
+            let resizeTimer = 0;
+            const handleResize = () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    this.update();
+                    this.clearCache();
+                }, 100);
+            };
+            window.addEventListener('resize', handleResize, { passive: true });
+            window.addEventListener('orientationchange', handleResize, { passive: true });
         }
     };
 
@@ -731,10 +738,22 @@
             targets = collectPostEnterTargets();
             y = ANIM.enter.post.y;
         } else if (pageType === PageType.PAGE) {
+            // 独立页：两层动画
             const pageTargets = collectPageEnterTargets();
-            if (pageTargets.card) targets.push(pageTargets.card);
-            targets.push(...pageTargets.inner);
-            y = ANIM.enter.page.card.y;
+
+            requestAnimationFrame(() => {
+                // Card: y=40, scale=0.98
+                if (pageTargets.card) {
+                    pageTargets.card.style.cssText += `opacity:0;transform:translate3d(0,${ANIM.enter.page.card.y}px,0) scale(${ANIM.enter.page.card.scale});will-change:opacity,transform;contain:layout style;`;
+                }
+                // Inner: y=12
+                pageTargets.inner.forEach(el => {
+                    if (el) {
+                        el.style.cssText += `opacity:0;transform:translate3d(0,${ANIM.enter.page.inner.y}px,0);will-change:opacity,transform;contain:layout style;`;
+                    }
+                });
+            });
+            return;
         } else if (pageType === PageType.LIST) {
             targets = collectListEnterTargets();
             y = ANIM.enter.list.y;
@@ -779,7 +798,7 @@
             // 独立页面：两层动画
             const pageTargets = collectPageEnterTargets();
 
-            // 第一层：整个卡片动画（与列表卡片同步）
+            // 第一层：整个卡片动画
             if (pageTargets.card) {
                 await animateLightEnter([pageTargets.card], baseDelay, {
                     duration: ANIM.enter.page.card.duration,
@@ -791,7 +810,7 @@
                 }, skipInitialState);
             }
 
-            // 第二层：内部内容动画（在卡片动画完成后开始）
+            // 第二层：内部内容动画
             if (pageTargets.inner.length > 0) {
                 const innerDelay = baseDelay + ANIM.enter.page.card.duration + 60;
                 await animateLightEnter(pageTargets.inner, innerDelay, {
@@ -1766,7 +1785,7 @@
                 markAnimationElements(document.getElementById('swup') || document);
             });
 
-            // VT 共享元素
+            // VT 共享元素（必须同步执行，VT 动画依赖于 viewTransitionName 的设置）
             syncPostSharedElementFromLocation(scrollPlugin);
 
             // 检测是否有 VT 共享元素

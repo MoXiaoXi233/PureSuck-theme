@@ -461,8 +461,10 @@ function bindTabs(root) {
 
         const updateIndicator = index => {
             requestAnimationFrame(() => {
+                // ✅ 使用 transform 代替 left，性能更好（GPU加速）
+                const x = cachedOffsets[index] + cachedWidths[index] * 0.125;
                 indicator.style.width = `${cachedWidths[index] * 0.75}px`;
-                indicator.style.left = `${cachedOffsets[index] + cachedWidths[index] * 0.125}px`;
+                indicator.style.transform = `translateX(${x}px)`;
             });
         };
 

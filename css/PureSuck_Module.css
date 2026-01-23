@@ -625,7 +625,8 @@
 .collapsible-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height .45s ease;
+    /* 与整体动画节奏协调：480ms + cubic-bezier 缓动 */
+    transition: max-height .48s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .collapsible-details {
@@ -634,7 +635,8 @@
     line-height: 1.85;
     transform: translateY(-6px);
     opacity: 0;
-    transition: transform .4s ease, opacity .4s ease;
+    /* 内容淡入：略快于容器展开，形成层次感 */
+    transition: transform .42s cubic-bezier(0.2, 0.8, 0.2, 1), opacity .42s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .collapsible-details>*:first-child {
@@ -916,8 +918,9 @@ timeline-description {
     height: 2px;
     border-radius: 2px;
     transition:
-        left .42s cubic-bezier(0.345, 0.045, 0.345, 1),
+        transform .42s cubic-bezier(0.345, 0.045, 0.345, 1),
         width .42s cubic-bezier(0.345, 0.045, 0.345, 1);
+    will-change: transform, width
 }
 
 .tab-header.dir-right .tab-indicator {

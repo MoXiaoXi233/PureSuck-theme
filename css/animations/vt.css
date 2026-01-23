@@ -129,21 +129,3 @@ html.ps-vt-mode {
 html.ps-vt-mode {
 	scroll-behavior: auto !important;
 }
-
-/* ==================== VT 调试辅助（开发时使用） ==================== */
-
-/*
- * 调试模式：高亮 VT 共享元素
- * 取消注释以下 CSS 可以看到哪些元素参与了 VT 动画
- */
-/*
-[data-ps-vt-name] {
-	outline: 2px dashed red !important;
-	outline-offset: 2px;
-}
-
-::view-transition-old(*),
-::view-transition-new(*) {
-	outline: 2px solid blue !important;
-}
-*/
