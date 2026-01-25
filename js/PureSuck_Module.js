@@ -68,14 +68,27 @@ const initializeTOC = (() => {
         const activationOffset = state.activationOffset;
         let activeIndex = 0;
 
-        // ✅ 一次性获取所有 boundingClientRect，避免循环中多次触发 reflow
-        const rects = state.elements.map(el => el.getBoundingClientRect().top);
+        // ✅ 优先使用 IntersectionObserver 缓存的位置数据，避免触发 reflow
+        const hasCachedData = state.topByIndex && state.topByIndex.size > 0;
 
-        for (let index = 0; index < rects.length; index++) {
-            if (rects[index] <= activationOffset) {
-                activeIndex = index;
-            } else {
-                break;
+        if (hasCachedData) {
+            // 使用缓存数据计算
+            for (let index = 0; index < state.elements.length; index++) {
+                const cachedTop = state.topByIndex.get(index);
+                if (cachedTop != null && cachedTop <= activationOffset) {
+                    activeIndex = index;
+                }
+            }
+        } else {
+            // 降级：一次性获取所有 boundingClientRect，避免循环中多次触发 reflow
+            const rects = state.elements.map(el => el.getBoundingClientRect().top);
+
+            for (let index = 0; index < rects.length; index++) {
+                if (rects[index] <= activationOffset) {
+                    activeIndex = index;
+                } else {
+                    break;
+                }
             }
         }
 
@@ -220,6 +233,7 @@ const initializeTOC = (() => {
         const targetElement = document.getElementById(targetId);
         if (!targetElement) return;
 
+        // 使用原始实现：getBoundingClientRect + scrollTo
         const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({
             top: targetTop,
@@ -338,7 +352,8 @@ const GoTopButton = (() => {
     let bound = false;
     let button = null;
     let anchor = null;
-    let ticking = false;
+    let sentinel = null;
+    let observer = null;
 
     function sync(root) {
         const scope = root && root.querySelector ? root : document;
@@ -346,22 +361,41 @@ const GoTopButton = (() => {
         anchor = button ? button.querySelector('.go') : null;
     }
 
-    function updateVisibility() {
+    // ✅ 使用 IntersectionObserver 替代滚动监听，消除强制重排
+    function createSentinel() {
+        if (sentinel) return sentinel;
+
+        sentinel = document.createElement('div');
+        sentinel.id = 'go-top-sentinel';
+        sentinel.setAttribute('aria-hidden', 'true');
+        sentinel.style.cssText = 'position:absolute;top:100px;left:0;width:1px;height:1px;pointer-events:none;visibility:hidden;';
+        document.body.appendChild(sentinel);
+        return sentinel;
+    }
+
+    function handleIntersect(entries) {
         if (!button) return;
-        if (window.scrollY > 100) {
-            button.classList.add('visible');
-        } else {
+        const [entry] = entries;
+        // sentinel 不可见时（滚动超过 100px），显示按钮
+        if (entry.isIntersecting) {
             button.classList.remove('visible');
+        } else {
+            button.classList.add('visible');
         }
     }
 
-    function onScroll() {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(() => {
-            ticking = false;
-            updateVisibility();
+    function initObserver() {
+        if (observer) {
+            observer.disconnect();
+        }
+
+        const sentinelEl = createSentinel();
+        observer = new IntersectionObserver(handleIntersect, {
+            root: null,
+            threshold: 0,
+            rootMargin: '0px'
         });
+        observer.observe(sentinelEl);
     }
 
     function onClick(event) {
@@ -388,11 +422,11 @@ const GoTopButton = (() => {
 
         if (!bound) {
             bound = true;
-            window.addEventListener('scroll', onScroll, { passive: true });
             document.addEventListener('click', onClick, true);
         }
 
-        updateVisibility();
+        // ✅ 每次初始化时重新设置 observer（支持 Swup 页面切换）
+        initObserver();
     };
 })();
 
@@ -414,6 +448,31 @@ function bindCollapsiblePanels(root) {
 
         if (!button || !contentDiv) return;
 
+        // ✅ 预缓存 scrollHeight，避免点击时同步读取影响 INP
+        let cachedScrollHeight = 0;
+
+        const updateCache = () => {
+            cachedScrollHeight = contentDiv.scrollHeight;
+        };
+
+        // 使用 requestIdleCallback 预缓存
+        if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(updateCache, { timeout: 500 });
+        } else {
+            setTimeout(updateCache, 100);
+        }
+
+        // 使用 ResizeObserver 监听内容变化时更新缓存
+        if (window.ResizeObserver) {
+            const resizeObserver = new ResizeObserver(() => {
+                // 只在展开状态下更新缓存
+                if (contentDiv.style.maxHeight && contentDiv.style.maxHeight !== '0px') {
+                    cachedScrollHeight = contentDiv.scrollHeight;
+                }
+            });
+            resizeObserver.observe(contentDiv);
+        }
+
         button.addEventListener('click', function () {
             this.classList.toggle('active');
 
@@ -424,7 +483,13 @@ function bindCollapsiblePanels(root) {
                     icon.classList.add('icon-down-open');
                 }
             } else {
-                contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
+                // ✅ 使用缓存值，如果缓存为空则降级读取
+                const height = cachedScrollHeight || contentDiv.scrollHeight;
+                contentDiv.style.maxHeight = height + "px";
+                // 更新缓存以备下次使用
+                if (!cachedScrollHeight) {
+                    cachedScrollHeight = height;
+                }
                 if (icon) {
                     icon.classList.remove('icon-down-open');
                     icon.classList.add('icon-up-open');
@@ -454,9 +519,11 @@ function bindTabs(root) {
         let cachedWidths = [];
         let cachedOffsets = [];
 
+        // ✅ 单次遍历同时读取 offsetWidth 和 offsetLeft，减少强制重排
         const updateCache = () => {
-            cachedWidths = tabLinks.map(l => l.offsetWidth);
-            cachedOffsets = tabLinks.map(l => l.offsetLeft);
+            const metrics = tabLinks.map(l => ({ w: l.offsetWidth, o: l.offsetLeft }));
+            cachedWidths = metrics.map(m => m.w);
+            cachedOffsets = metrics.map(m => m.o);
         };
 
         const updateIndicator = index => {
@@ -521,19 +588,35 @@ const initializeStickyTOC = (() => {
         observer: null,
         sentinel: null,
         bound: false,
-        resizeTimer: 0  // ✅ 防抖定时器
+        resizeTimer: 0,  // ✅ 防抖定时器
+        heightCache: new WeakMap()  // ✅ 高度缓存
     };
 
+    // ✅ 同步计算阈值（使用缓存减少重排，但不延迟）
     function updateThreshold() {
         if (!state.section || !state.sidebar) return;
 
-        // ✅ 批量读取高度，避免 Layout Thrashing
         const children = Array.from(state.sidebar.children);
-        const heights = children
-            .filter(el => el !== state.section)
-            .map(el => el.offsetHeight);
+        let totalHeight = 0;
 
-        state.threshold = heights.reduce((sum, h) => sum + h, 0) + 50;
+        children.forEach(el => {
+            if (el === state.section) return;
+
+            // ✅ 优先使用缓存的高度
+            let height = state.heightCache.get(el);
+            if (height == null) {
+                height = el.offsetHeight;
+                state.heightCache.set(el, height);
+            }
+            totalHeight += height;
+        });
+
+        state.threshold = totalHeight + 50;
+    }
+
+    // ✅ resize 时清除缓存
+    function clearHeightCache() {
+        state.heightCache = new WeakMap();
     }
 
     function handleIntersection(entries) {
@@ -553,6 +636,7 @@ const initializeStickyTOC = (() => {
             state.observer.disconnect();
         }
 
+        // ✅ 同步计算阈值（使用缓存，无延迟）
         updateThreshold();
 
         if (!state.sentinel) {
@@ -585,6 +669,7 @@ const initializeStickyTOC = (() => {
         }
         state.resizeTimer = setTimeout(() => {
             state.resizeTimer = 0;
+            clearHeightCache();  // ✅ resize 时清除缓存
             createOrUpdateSentinel();
             syncState();
         }, 150);  // 150ms 防抖
@@ -965,6 +1050,8 @@ const NavIndicator = (() => {
     let indicator = null;
     let navContainer = null;
     let navItems = [];
+    // ✅ 添加位置缓存
+    let metricsCache = new Map();
 
     /**
      * 创建指示器元素
@@ -976,26 +1063,57 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 更新指示器位置和大小
+     * ✅ 批量缓存所有导航项位置（读操作）
+     */
+    function cacheAllMetrics() {
+        if (!navContainer) return;
+
+        metricsCache.clear();
+        const containerRect = navContainer.getBoundingClientRect();
+
+        // 批量读取所有导航项的位置
+        navItems.forEach(item => {
+            const rect = item.getBoundingClientRect();
+            metricsCache.set(item, {
+                width: rect.width,
+                height: rect.height,
+                left: rect.left - containerRect.left,
+                top: rect.top - containerRect.top
+            });
+        });
+    }
+
+    /**
+     * ✅ 更新指示器位置和大小（写操作，使用缓存）
      */
     function updateIndicator(targetItem) {
         if (!indicator || !targetItem) return;
 
-        const itemRect = targetItem.getBoundingClientRect();
-        const containerRect = navContainer.getBoundingClientRect();
+        // 优先使用缓存
+        let metrics = metricsCache.get(targetItem);
 
-        // 计算相对于容器的位置
-        const left = itemRect.left - containerRect.left;
-        const top = itemRect.top - containerRect.top;
+        if (!metrics) {
+            // 缓存未命中，降级读取并缓存
+            const containerRect = navContainer.getBoundingClientRect();
+            const itemRect = targetItem.getBoundingClientRect();
+            metrics = {
+                width: itemRect.width,
+                height: itemRect.height,
+                left: itemRect.left - containerRect.left,
+                top: itemRect.top - containerRect.top
+            };
+            metricsCache.set(targetItem, metrics);
+        }
 
-        // 使用 transform 代替 left/top，性能更好（GPU加速）
-        indicator.style.width = `${itemRect.width}px`;
-        indicator.style.height = `${itemRect.height}px`;
-        indicator.style.transform = `translate(${left}px, ${top}px) scale(1)`;
-
-        // 添加激活状态
+        // ✅ 使用双重 RAF 分离读写
         requestAnimationFrame(() => {
-            indicator.classList.add('active');
+            requestAnimationFrame(() => {
+                // 纯写操作
+                indicator.style.width = `${metrics.width}px`;
+                indicator.style.height = `${metrics.height}px`;
+                indicator.style.transform = `translate(${metrics.left}px, ${metrics.top}px) scale(1)`;
+                indicator.classList.add('active');
+            });
         });
     }
 
@@ -1044,25 +1162,29 @@ const NavIndicator = (() => {
         // 获取所有导航项
         navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
 
-        // 初始定位
-        const activeItem = getActiveNavItem();
-        if (activeItem) {
-            // 使用 requestAnimationFrame 确保元素已渲染
-            requestAnimationFrame(() => {
-                updateIndicator(activeItem);
-            });
-        }
+        // ✅ 初始化时批量缓存所有位置
+        requestAnimationFrame(() => {
+            cacheAllMetrics();
 
-        // ✅ 监听窗口大小变化 - 使用 200ms 防抖
+            // 初始定位
+            const activeItem = getActiveNavItem();
+            if (activeItem) {
+                updateIndicator(activeItem);
+            }
+        });
+
+        // ✅ 监听窗口大小变化 - 使用 200ms 防抖，resize 时清除并重建缓存
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
+                metricsCache.clear();  // ✅ 清除缓存
+                cacheAllMetrics();     // ✅ 重建缓存
                 const activeItem = getActiveNavItem();
                 if (activeItem) {
                     updateIndicator(activeItem);
                 }
-            }, 200); // ✅ 从 100ms 增加到 200ms，减少频繁计算
+            }, 200);
         });
     }
 
@@ -1078,9 +1200,13 @@ const NavIndicator = (() => {
         // 重新获取导航项（Swup 可能会替换内容）
         navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
 
+        // ✅ Swup 切换后清除并重建缓存
+        metricsCache.clear();
+
         const activeItem = getActiveNavItem();
         if (activeItem) {
             requestAnimationFrame(() => {
+                cacheAllMetrics();  // ✅ 重建缓存
                 updateIndicator(activeItem);
             });
         } else {
