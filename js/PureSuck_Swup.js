@@ -62,7 +62,9 @@
         styleId: 'ps-vt-shared-element-style',
         markerAttr: 'data-ps-vt-name',
         duration: 520,
-        easing: 'cubic-bezier(0.15,0.3,0.15,1)'
+        easing: 'cubic-bezier(0.15,0.3,0.15,1)',
+        // ✅ 预计算选择器字符串，避免重复拼接
+        markerSelector: '[data-ps-vt-name]'
     };
 
     function supportsViewTransitions() {
@@ -213,6 +215,16 @@
         async run(items, handler, options = {}) {
             if (!items?.length) return;
 
+            // ✅ 小数组直接同步处理，避免 Promise/RAF 开销
+            if (items.length <= 8) {
+                for (let i = 0; i < items.length; i++) {
+                    try {
+                        handler(items[i], i);
+                    } catch (e) {}
+                }
+                return;
+            }
+
             const batchSize = 8; // 固定批次大小，避免复杂的自适应逻辑
 
             for (let i = 0; i < items.length; i += batchSize) {
@@ -268,18 +280,20 @@
             if (!elements || elements.length === 0) return [];
 
             const results = [];
-            const rects = elements.map(el => el ? el.getBoundingClientRect() : null);
+            const len = elements.length;
 
-            for (let i = 0; i < elements.length; i++) {
+            // ✅ 直接遍历并读取 rect，避免创建中间数组
+            for (let i = 0; i < len; i++) {
                 const el = elements[i];
-                const rect = rects[i];
 
-                if (!el || !rect) {
+                if (!el) {
                     results.push(false);
                     continue;
                 }
 
+                const rect = el.getBoundingClientRect();
                 const isVisible = rect.top < this.bottom && rect.bottom > this.top;
+
                 if (isVisible && rect.top < this.cachedHeight) {
                     this.visibleElements.add(el);
                 }
@@ -336,10 +350,13 @@
     }
 
     function clearMarkedViewTransitionNames() {
-        document.querySelectorAll(`[${VT.markerAttr}]`).forEach((el) => {
+        // ✅ 使用预计算的选择器，避免模板字符串拼接
+        const elements = document.querySelectorAll(VT.markerSelector);
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[i];
             el.style.viewTransitionName = '';
             el.removeAttribute(VT.markerAttr);
-        });
+        }
     }
 
     /**
@@ -362,8 +379,13 @@
     function findIndexPostCardById(postKey) {
         if (!postKey) return null;
 
-        const cards = getSwupRoot().querySelectorAll('.post.post--index');
-        for (const card of cards) {
+        // ✅ 使用 getSwupRoot() 缓存结果，避免重复查询
+        const root = getSwupRoot();
+        const cards = root.querySelectorAll('.post.post--index');
+        const len = cards.length;
+
+        for (let i = 0; i < len; i++) {
+            const card = cards[i];
             const cardKey = getPostKeyFromElement(card);
             if (cardKey === postKey) return card;
         }
@@ -678,43 +700,6 @@
         lazyImages.forEach(img => imageObserver.observe(img));
     }
 
-    /**
-     * 优化字体加载
-     * 使用 Font Loading API 和 requestIdleCallback 优化字体加载
-     */
-    function optimizeFontLoading() {
-        scheduleIdleTask(() => {
-            // 预加载常用字重的字体
-            const fontsToPreload = [
-                // 根据你的主题实际使用的字体调整
-                '400 16px system-ui',
-                '500 16px system-ui',
-                '600 16px system-ui',
-                '700 16px system-ui'
-            ];
-
-            fontsToPreload.forEach(font => {
-                try {
-                    document.fonts.load(font).catch(() => {
-                        // 忽略加载失败，使用系统字体降级
-                    });
-                } catch (e) {
-                    // 忽略错误
-                }
-            });
-        });
-
-        // 监听字体加载完成事件
-        if (document.fonts.ready) {
-            document.fonts.ready.then(() => {
-                // 字体加载完成后，标记 body 以触发字体相关的 CSS 优化
-                document.body.classList.add('fonts-loaded');
-            }).catch(() => {
-                // 忽略错误
-            });
-        }
-    }
-
     // ==================== 进入动画 ====================
 
     /**
@@ -1005,7 +990,7 @@
         const lastInfo = main.querySelector('.main-lastinfo');
         if (lastInfo) targets.push(lastInfo);
 
-        const vtMarker = main.querySelector(`[${VT.markerAttr}]`);
+        const vtMarker = main.querySelector(VT.markerSelector);
         const vtEl = vtMarker?.closest('.post');
 
         // 列表页：直接返回所有卡片，不过滤可见性（透明度归动画管）
@@ -1725,7 +1710,7 @@
             let useVT = false;
 
             // 检测是否点击了列表页中的文章卡片
-            const clickedPostCard = document.querySelector(`[${VT.markerAttr}]`);
+            const clickedPostCard = document.querySelector(VT.markerSelector);
             const isClickingPostFromList = fromType === PageType.LIST && clickedPostCard;
 
             if (isClickingPostFromList) {
@@ -1804,7 +1789,7 @@
             syncPostSharedElementFromLocation(scrollPlugin);
 
             // 检测是否有 VT 共享元素
-            const hasSharedElement = HAS_VT && Boolean(document.querySelector(`[${VT.markerAttr}]`));
+            const hasSharedElement = HAS_VT && Boolean(document.querySelector(VT.markerSelector));
 
             // 3. 添加进入动画类（在同一帧内完成）
             if (!hasSharedElement) {
@@ -1993,9 +1978,6 @@
         });
 
         syncPostSharedElementFromLocation();
-
-        // 优化字体加载（在浏览器空闲时）
-        optimizeFontLoading();
 
         // 修复初始加载闪烁：使用原子化类切换 + 提前设置内联样式
         STATE.lastNavigation.isSwup = false;
