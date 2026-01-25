@@ -62,7 +62,7 @@
         styleId: 'ps-vt-shared-element-style',
         markerAttr: 'data-ps-vt-name',
         duration: 520,
-        easing: 'cubic-bezier(.2,.8,.2,1)'
+        easing: 'cubic-bezier(0.15,0.3,0.15,1)'
     };
 
     function supportsViewTransitions() {

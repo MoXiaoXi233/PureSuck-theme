@@ -98,7 +98,8 @@ html.ps-vt-mode * {
 :root {
 	/* View Transitions 动画参数 */
 	--ps-vt-duration: 520ms;
-	--ps-vt-easing: cubic-bezier(.2, .8, .2, 1);
+	/* 快速启动 → 中段平稳 → 从容减速 */
+	--ps-vt-easing: cubic-bezier(0.15, 0.3, 0.15, 1);
 	--ps-vt-radius: 0.85rem;
 }
 
@@ -126,12 +127,12 @@ html.ps-vt-mode * {
 	@view-transition {
 		navigation: auto;
 	}
-	
+
 	::view-transition-old(root),
 	::view-transition-new(root) {
 		animation: none !important;
 	}
-	
+
 	html.ps-theme-vt::view-transition-old(root),
 	html.ps-theme-vt::view-transition-new(root) {
 		animation: none !important;
