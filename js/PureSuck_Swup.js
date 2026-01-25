@@ -7,35 +7,9 @@
 (function() {
     'use strict';
 
-    // ==================== 简化的RAF管理器 ====================
-    /**
-     * 轻量级RAF管理器（替代177行的AnimationFrameManager）
-     * 只保留必要的取消功能，删除不必要的优先级、统计等复杂逻辑
-     */
-    const RAF = {
-        activeIds: new Set(),
-
-        schedule(callback) {
-            const id = requestAnimationFrame(() => {
-                this.activeIds.delete(id);
-                callback();
-            });
-            this.activeIds.add(id);
-            return id;
-        },
-
-        cancel(id) {
-            if (this.activeIds.has(id)) {
-                cancelAnimationFrame(id);
-                this.activeIds.delete(id);
-            }
-        },
-
-        cancelAll() {
-            this.activeIds.forEach(id => cancelAnimationFrame(id));
-            this.activeIds.clear();
-        }
-    };
+    // ==================== 全局状态 ====================
+    // RAF ID 集合，用于页面切换时取消所有待执行的动画帧
+    const activeRafIds = new Set();
 
     // ==================== 全局状态 ====================
     const STATE = {
@@ -93,20 +67,6 @@
         if (dataType === 'post') return PageType.POST;
         if (dataType === 'page') return PageType.PAGE;
         return PageType.LIST;
-    }
-
-    /**
-     * 检查是否是独立页面（通过DOM判断）
-     */
-    function isStandalonePage() {
-        return Boolean(document.querySelector('.post.post--index.main-item:not(.post--single)'));
-    }
-
-    /**
-     * 检查是否是文章页（通过DOM判断）
-     */
-    function isArticlePage() {
-        return Boolean(document.querySelector('.post.post--single'));
     }
 
 
@@ -190,25 +150,6 @@
         runNext();
     }
 
-    function scheduleIdleBatched(items, batchSize, handler, shouldContinue) {
-        if (!items?.length || typeof handler !== 'function') return;
-        let index = 0;
-        const total = items.length;
-
-        const runBatch = () => {
-            if (typeof shouldContinue === 'function' && !shouldContinue()) return;
-            const end = Math.min(total, index + batchSize);
-            for (; index < end; index++) {
-                handler(items[index], index);
-            }
-            if (index < total) {
-                scheduleIdleTask(runBatch);
-            }
-        };
-
-        scheduleIdleTask(runBatch);
-    }
-
     // ==================== 简化的任务调度器 ====================
     // 轻量级批量处理器，避免过度设计
     const TaskScheduler = {
@@ -244,31 +185,6 @@
             }
         }
     };
-
-    // 视口信息缓存（仅保留必要的属性，删除未使用的 isVisible/batchCheckVisible 方法）
-    const VIEWPORT = {
-        cachedHeight: 0,
-
-        update() {
-            this.cachedHeight = window.innerHeight;
-        },
-
-        init() {
-            this.update();
-            // 使用 window resize 代替 ResizeObserver，避免过度触发
-            let resizeTimer = 0;
-            const handleResize = () => {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(() => {
-                    this.update();
-                }, 100);
-            };
-            window.addEventListener('resize', handleResize, { passive: true });
-            window.addEventListener('orientationchange', handleResize, { passive: true });
-        }
-    };
-
-    VIEWPORT.init();
 
     // ==================== View Transitions 辅助函数 ====================
     function getPostTransitionName(postKey) {
@@ -507,12 +423,8 @@
             }
             this.activeAnimations = [];
 
-            // 2. 清理 CSS 动画类
-            document.documentElement.classList.remove(
-                'ps-page-exit',
-                'ps-post-exit',
-                'ps-list-exit'
-            );
+            // 2. 清理 CSS 动画类（复用统一的清理函数）
+            cleanupAnimationClasses();
 
             // 3. 清理所有动画中的元素样式
             document.querySelectorAll('[data-ps-animating]').forEach(el => {
@@ -758,7 +670,7 @@
 
         // 动画完成后，清理 .post-comments 容器的初始状态
         if (toType === PageType.POST) {
-            RAF.schedule(() => {
+            requestAnimationFrame(() => {
                 const commentsSection = document.querySelector('.post.post--single .post-comments');
                 if (commentsSection) {
                     commentsSection.style.opacity = '';
@@ -1010,11 +922,11 @@
             window.scrollTo(0, startY * (1 - eased));
 
             if (progress < 1) {
-                RAF.schedule(animateScroll);
+                requestAnimationFrame(animateScroll);
             }
         }
 
-        RAF.schedule(animateScroll);
+        requestAnimationFrame(animateScroll);
     }
 
     /**
@@ -1155,7 +1067,7 @@
             // ★ 只替换评论列表，评论表单和OwO保持不变
             current.replaceWith(next);
 
-            RAF.schedule(() => {
+            requestAnimationFrame(() => {
                 if (restoreScroll) {
                     window.scrollTo(0, prevScrollY);
                 }
@@ -1223,10 +1135,10 @@
             if (card) {
                 applyPostSharedElementName(card, listPostKey);
                 const checkAndScroll = () => {
-                    RAF.schedule(() => {
+                    requestAnimationFrame(() => {
                         const rect = card.getBoundingClientRect();
-                        if (rect.bottom < 0 || rect.top > VIEWPORT.cachedHeight) {
-                            RAF.schedule(() => {
+                        if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                            requestAnimationFrame(() => {
                                 card.scrollIntoView({ block: 'center', inline: 'nearest' });
                             });
                         }
@@ -1612,19 +1524,19 @@
             STATE.isSwupNavigating = true;
 
             AnimController.abort();
-            RAF.cancelAll();
+            // 取消所有待执行的 RAF
+            activeRafIds.forEach(id => cancelAnimationFrame(id));
+            activeRafIds.clear();
 
             if (typeof window.OwoManager !== 'undefined' && window.OwoManager.destroy) {
                 window.OwoManager.destroy();
             }
 
-            // 检测源页面类型
+            // 检测源页面类型（内联检测，避免多余的函数调用）
             let fromType = getPageType();
-
-            // 更精确的类型检测
-            if (isArticlePage()) {
+            if (document.querySelector('.post.post--single')) {
                 fromType = PageType.POST;
-            } else if (isStandalonePage()) {
+            } else if (document.querySelector('.post.post--index.main-item:not(.post--single)')) {
                 fromType = PageType.PAGE;
             }
 
@@ -1737,10 +1649,8 @@
                 }
             }
 
-            // ✅ 延迟非关键操作：自定义事件派发和视口更新
+            // ✅ 延迟非关键操作：自定义事件派发
             requestAnimationFrame(() => {
-                VIEWPORT.update();
-
                 document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
                     detail: {
                         emittedBy: 'ps-after-content-replace',

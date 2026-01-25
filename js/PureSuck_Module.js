@@ -788,9 +788,8 @@ function Comments_Submit() {
     );
 }
 
-// 保存 mediumZoom 实例引用，用于 PJAX 后增量更新
+// 保存 mediumZoom 实例引用
 let mediumZoomInstance = null;
-let trackedZoomImages = new WeakSet(); // 追踪已绑定的图片
 
 function runShortcodes(root) {
     history.scrollRestoration = 'auto';
@@ -799,24 +798,21 @@ function runShortcodes(root) {
     handleGoTopButton(root);
     initializeTOC();
 
-    // ✅ mediumZoom 增量更新：只对新图片添加 zoom
+    // mediumZoom 初始化（库本身已处理重复绑定）
     const scope = root && root.querySelector ? root : document;
-    const newImages = Array.from(scope.querySelectorAll('[data-zoomable]'));
+    const images = scope.querySelectorAll('[data-zoomable]');
 
-    if (mediumZoomInstance) {
-        // 只为新图片添加 zoom
-        const untrackedImages = newImages.filter(img => !trackedZoomImages.has(img));
-        if (untrackedImages.length > 0) {
-            mediumZoomInstance.attach(untrackedImages);
-            untrackedImages.forEach(img => trackedZoomImages.add(img));
+    if (images.length > 0) {
+        if (mediumZoomInstance) {
+            // 增量绑定新图片
+            mediumZoomInstance.attach(images);
+        } else {
+            // 首次初始化
+            mediumZoomInstance = mediumZoom('[data-zoomable]', {
+                background: 'rgba(0, 0, 0, 0.85)',
+                margin: 24
+            });
         }
-    } else {
-        // 首次初始化
-        mediumZoomInstance = mediumZoom('[data-zoomable]', {
-            background: 'rgba(0, 0, 0, 0.85)',
-            margin: 24
-        });
-        newImages.forEach(img => trackedZoomImages.add(img));
     }
 
     Comments_Submit();
@@ -1084,7 +1080,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * ✅ 更新指示器位置和大小（写操作，使用缓存）
+     * 更新指示器位置和大小（写操作，使用缓存）
      */
     function updateIndicator(targetItem) {
         if (!indicator || !targetItem) return;
@@ -1105,15 +1101,12 @@ const NavIndicator = (() => {
             metricsCache.set(targetItem, metrics);
         }
 
-        // ✅ 使用双重 RAF 分离读写
+        // 单次 RAF 足够（双重 RAF 会导致 2 帧延迟）
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                // 纯写操作
-                indicator.style.width = `${metrics.width}px`;
-                indicator.style.height = `${metrics.height}px`;
-                indicator.style.transform = `translate(${metrics.left}px, ${metrics.top}px) scale(1)`;
-                indicator.classList.add('active');
-            });
+            indicator.style.width = `${metrics.width}px`;
+            indicator.style.height = `${metrics.height}px`;
+            indicator.style.transform = `translate(${metrics.left}px, ${metrics.top}px) scale(1)`;
+            indicator.classList.add('active');
         });
     }
 
