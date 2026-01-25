@@ -96,6 +96,43 @@ html.ps-page-enter .post-body > * {
     transform: translate3d(0, 12px, 0);
 }
 
+/* ==================== 延迟渲染（VT 优化） ==================== */
+
+/*
+ * 预隐藏类：在 DOM 替换后、JS 执行前，自动隐藏新内容
+ * 解决闪烁问题：DOM 替换 → 用户看到内容 → JS 设置 opacity: 0
+ *
+ * 新流程：
+ * 1. visit:start - 添加 ps-pre-enter
+ * 2. DOM 替换 - 新内容被 ps-pre-enter 自动隐藏（CSS 生效，无需等 JS）
+ * 3. content:replace - 移除 ps-pre-enter，执行渐入动画
+ */
+html.ps-pre-enter #swup .post,
+html.ps-pre-enter #swup .main-pager,
+html.ps-pre-enter #swup .archive-title,
+html.ps-pre-enter #swup .main-lastinfo {
+    opacity: 0 !important;
+}
+
+/* 文章页内容预隐藏 */
+html.ps-pre-enter #swup .post-body > *,
+html.ps-pre-enter #swup .post-comments > * {
+    opacity: 0 !important;
+}
+
+/* 手动控制的延迟渲染类（用于特殊场景） */
+.ps-defer-render {
+    content-visibility: hidden;
+    contain-intrinsic-size: auto 100vh;
+}
+
+/* 降级：不支持 content-visibility 的浏览器 */
+@supports not (content-visibility: hidden) {
+    .ps-defer-render {
+        visibility: hidden;
+    }
+}
+
 /* ==================== 动画状态类 ==================== */
 
 /* 动画中 */

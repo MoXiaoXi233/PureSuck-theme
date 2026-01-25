@@ -514,7 +514,8 @@
             'ps-post-enter',
             'ps-list-exit',
             'ps-list-enter',
-            'ps-vt-mode'
+            'ps-vt-mode',
+            'ps-pre-enter'
         );
     }
 
@@ -1714,6 +1715,10 @@
             // 添加动画状态类
             document.documentElement.classList.add('ps-animating');
 
+            // ✅ 预隐藏类：在 DOM 替换前添加，确保新内容被 CSS 自动隐藏
+            // 解决闪烁问题：DOM 替换后、JS 执行前，内容已被隐藏
+            document.documentElement.classList.add('ps-pre-enter');
+
             // 预测目标页面类型（通过 URL 模式）
             const toUrl = visit.to?.url || '';
             let predictedToType = PageType.LIST;
@@ -1763,7 +1768,11 @@
             // 性能优化：立即隐藏视口外的重内容，减少初始渲染压力
             optimizeInitialRender(toType);
 
-            // 清理旧类
+            // ✅ 先设置元素级隐藏状态，再移除预隐藏类（避免闪烁）
+            // 1. 立即设置内联样式（在DOM替换后第一时间隐藏元素）
+            setInitialAnimationState(toType);
+
+            // 2. 清理旧类（包括 ps-pre-enter）
             cleanupAnimationClasses();
 
             // 新的动画状态
@@ -1797,11 +1806,7 @@
             // 检测是否有 VT 共享元素
             const hasSharedElement = HAS_VT && Boolean(document.querySelector(`[${VT.markerAttr}]`));
 
-            // 方案2+3+4：提前设置内联样式 + 原子化类切换 + 减少异步层级
-            // 1. 立即设置内联样式（在DOM替换后第一时间隐藏元素）
-            setInitialAnimationState(toType);
-
-            // 2. 添加进入动画类（在同一帧内完成）
+            // 3. 添加进入动画类（在同一帧内完成）
             if (!hasSharedElement) {
                 if (toType === PageType.PAGE) {
                     document.documentElement.classList.add('ps-page-enter');
