@@ -245,78 +245,22 @@
         }
     };
 
-    // 可见性检查
+    // 视口信息缓存（仅保留必要的属性，删除未使用的 isVisible/batchCheckVisible 方法）
     const VIEWPORT = {
-        top: 0,
-        bottom: 0,
-        buffer: 150,
-        visibleElements: new WeakSet(),
         cachedHeight: 0,
 
         update() {
-            this.top = 0;
             this.cachedHeight = window.innerHeight;
-            this.bottom = this.cachedHeight + this.buffer;
-        },
-
-        isVisible(el) {
-            if (!el) return false;
-
-            if (this.visibleElements.has(el)) {
-                return true;
-            }
-
-            const rect = el.getBoundingClientRect();
-            const isVisible = rect.top < this.bottom && rect.bottom > this.top;
-
-            if (isVisible && rect.top < this.cachedHeight) {
-                this.visibleElements.add(el);
-            }
-
-            return isVisible;
-        },
-
-        batchCheckVisible(elements) {
-            if (!elements || elements.length === 0) return [];
-
-            const results = [];
-            const len = elements.length;
-
-            // ✅ 直接遍历并读取 rect，避免创建中间数组
-            for (let i = 0; i < len; i++) {
-                const el = elements[i];
-
-                if (!el) {
-                    results.push(false);
-                    continue;
-                }
-
-                const rect = el.getBoundingClientRect();
-                const isVisible = rect.top < this.bottom && rect.bottom > this.top;
-
-                if (isVisible && rect.top < this.cachedHeight) {
-                    this.visibleElements.add(el);
-                }
-                results.push(isVisible);
-            }
-
-            return results;
-        },
-
-        clearCache() {
-            this.visibleElements = new WeakSet();
         },
 
         init() {
             this.update();
-            // ✅ 使用 window resize 代替 ResizeObserver，避免过度触发
-            // ResizeObserver 监听 document.documentElement 会在页面滚动/内容变化时触发
+            // 使用 window resize 代替 ResizeObserver，避免过度触发
             let resizeTimer = 0;
             const handleResize = () => {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(() => {
                     this.update();
-                    this.clearCache();
                 }, 100);
             };
             window.addEventListener('resize', handleResize, { passive: true });
@@ -1322,25 +1266,15 @@
                 },
                 scrollContainers: '.__non_existent_selector__',
                 scrollFunction: (container, top, left, animate, onStart, onEnd) => {
-                    if (typeof requestIdleCallback === 'function') {
-                        requestIdleCallback(() => {
-                            const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
-                            onStart();
-                            target.addEventListener('scrollend', onEnd, { once: true });
-                            target.addEventListener('wheel', () => {
-                                container.scrollTo({ top: container.scrollTop, left: container.scrollLeft, behavior: 'instant' });
-                            }, { once: true });
-                            container.scrollTo({ top, left, behavior: animate ? 'smooth' : 'instant' });
-                        }, { timeout: 50 });
-                    } else {
-                        const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
-                        onStart();
-                        target.addEventListener('scrollend', onEnd, { once: true });
-                        target.addEventListener('wheel', () => {
-                            container.scrollTo({ top: container.scrollTop, left: container.scrollLeft, behavior: 'instant' });
-                        }, { once: true });
-                        container.scrollTo({ top, left, behavior: animate ? 'smooth' : 'instant' });
-                    }
+                    // 直接执行滚动，不使用 requestIdleCallback（滚动是用户期望立即响应的操作）
+                    const target = container instanceof HTMLHtmlElement || container instanceof HTMLBodyElement ? window : container;
+                    onStart();
+                    target.addEventListener('scrollend', onEnd, { once: true });
+                    // 用户主动滚动时中断平滑滚动（不读取当前位置，避免强制重排）
+                    target.addEventListener('wheel', () => {
+                        window.scrollTo({ behavior: 'instant' });
+                    }, { once: true, passive: true });
+                    container.scrollTo({ top, left, behavior: animate ? 'smooth' : 'instant' });
                 }
             })
             : null;
@@ -1367,8 +1301,9 @@
         const headPlugin = (typeof SwupHeadPlugin === 'function')
             ? new SwupHeadPlugin({
                 persistAssets: true,
-                awaitAssets: false,
-                attributes: ['lang', 'dir']
+                awaitAssets: false
+                // 移除 attributes 配置：修改 <html> 的 lang/dir 属性会触发样式重算
+                // 如果页面 lang 不变化（如都是中文），无需同步此属性
             })
             : null;
 
