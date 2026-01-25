@@ -1301,9 +1301,10 @@
         const headPlugin = (typeof SwupHeadPlugin === 'function')
             ? new SwupHeadPlugin({
                 persistAssets: true,
-                awaitAssets: false
-                // 移除 attributes 配置：修改 <html> 的 lang/dir 属性会触发样式重算
-                // 如果页面 lang 不变化（如都是中文），无需同步此属性
+                awaitAssets: false,
+                // 显式设置为空数组，覆盖默认的 ['lang', 'dir']
+                // 修改 <html> 的 lang/dir 属性会触发样式重算
+                attributes: []
             })
             : null;
 
@@ -1685,8 +1686,10 @@
             STATE.isSwupNavigating = false;
             STATE.lastNavigation.toType = toType;
 
-            // 性能优化：立即隐藏视口外的重内容，减少初始渲染压力
-            optimizeInitialRender(toType);
+            // ✅ 延迟非关键操作：图片优化不需要立即执行
+            scheduleIdleTask(() => {
+                optimizeInitialRender(toType);
+            });
 
             // ✅ 先设置元素级隐藏状态，再移除预隐藏类（避免闪烁）
             // 1. 立即设置内联样式（在DOM替换后第一时间隐藏元素）
@@ -1698,9 +1701,6 @@
             // 新的动画状态
             document.documentElement.classList.add('ps-animating');
             document.documentElement.classList.add('ps-enter-active');
-
-            // 更新视口信息（窗口大小可能变化）
-            VIEWPORT.update();
 
             // 滚动处理：列表分页平滑滚动，其他页面立即到顶部
             const shouldScroll = shouldForceScrollToTop(window.location.href);
@@ -1737,16 +1737,19 @@
                 }
             }
 
-            document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
-                detail: {
-                    emittedBy: 'ps-after-content-replace',
-                    url: window.location.href,
-                    pageType: toType,
-                    hasSharedElement
-                }
-            }));
-
+            // ✅ 延迟非关键操作：自定义事件派发和视口更新
             requestAnimationFrame(() => {
+                VIEWPORT.update();
+
+                document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
+                    detail: {
+                        emittedBy: 'ps-after-content-replace',
+                        url: window.location.href,
+                        pageType: toType,
+                        hasSharedElement
+                    }
+                }));
+
                 runEnterAnimation(toType, hasSharedElement);
             });
         });
