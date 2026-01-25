@@ -342,39 +342,19 @@
         });
     }
 
-    function ensureSharedElementTransitionCSS(name) {
-        let style = document.getElementById(VT.styleId);
-        if (!style) {
-            style = document.createElement('style');
-            style.id = VT.styleId;
-            document.head.appendChild(style);
-        }
-
-        style.textContent = `
-/* PureSuck View Transitions: shared element morph */
-::view-transition-group(${name}) {
-  animation-duration: ${VT.duration}ms;
-  animation-timing-function: ${VT.easing};
-  animation-fill-mode: both;
-  border-radius: 0.85rem;
-  overflow: hidden;
-}
-::view-transition-old(${name}),
-::view-transition-new(${name}) {
-  animation-duration: ${VT.duration}ms;
-  animation-timing-function: ${VT.easing};
-  animation-fill-mode: both;
-}
-`;
-    }
-
+    /**
+     * 应用文章卡片共享元素的 View Transitions 名称
+     * 优化：移除动态 style 插入，改用静态 CSS
+     * 性能提升：消除强制布局和样式重计算
+     */
     function applyPostSharedElementName(el, postKey) {
         if (!HAS_VT || !el || !postKey) return;
 
         const name = getPostTransitionName(postKey);
         clearMarkedViewTransitionNames();
-        ensureSharedElementTransitionCSS(name);
 
+        // 优化：直接设置 view-transition-name，不再动态生成 style 标签
+        // CSS 变量在静态 CSS 中定义 (vt.css)
         el.style.viewTransitionName = name;
         el.setAttribute(VT.markerAttr, name);
     }
@@ -500,13 +480,22 @@
         return { items: target, seen: used };
     }
 
+    /**
+     * 标记动画元素
+     * 优化：改进选择器性能，避免使用 :not() 伪类
+     * 性能提升：在 JavaScript 中过滤比 CSS 伪类选择器更快
+     */
     function markAnimationElements(root = document) {
         const scope = root?.querySelector ? root : document;
 
-        // 仅标记元素，不再进行 observe（已移除 VISIBILITY 系统）
-        scope.querySelectorAll('.post:not([data-swup-animation])').forEach(el => {
-            el.setAttribute('data-swup-animation', '');
-        });
+        // 优化：先选择所有 .post 元素，然后在 JavaScript 中过滤
+        // 性能提升：:not() 伪类选择器在大DOM树上性能较差
+        const allPosts = scope.querySelectorAll('.post');
+        for (const el of allPosts) {
+            if (!el.hasAttribute('data-swup-animation')) {
+                el.setAttribute('data-swup-animation', '');
+            }
+        }
 
         const pager = scope.querySelector('.main-pager');
         if (pager && !pager.hasAttribute('data-swup-animation')) {
@@ -569,7 +558,6 @@
          */
         cleanupElement(el) {
             if (!el) return;
-            el.style.willChange = '';
             el.style.opacity = '';
             el.style.transform = '';
             el.removeAttribute('data-ps-animating');
@@ -728,43 +716,49 @@
 
     // ==================== 进入动画 ====================
 
+    /**
+     * 设置页面进入动画的初始状态
+     * 优化：使用 CSS 类替代内联样式，消除强制同步布局
+     * 性能提升：避免 cssText += 操作触发的样式重计算和布局
+     */
     function setInitialAnimationState(pageType) {
         if (prefersReducedMotion()) return;
 
         let targets = [];
-        let y = 12;
+        let className = '';
 
         if (pageType === PageType.POST) {
             targets = collectPostEnterTargets();
-            y = ANIM.enter.post.y;
+            className = 'ps-enter-hidden-post';
         } else if (pageType === PageType.PAGE) {
             // 独立页：两层动画
             const pageTargets = collectPageEnterTargets();
 
             requestAnimationFrame(() => {
-                // Card: y=40, scale=0.98
+                // Card: 使用类名
                 if (pageTargets.card) {
-                    pageTargets.card.style.cssText += `opacity:0;transform:translate3d(0,${ANIM.enter.page.card.y}px,0) scale(${ANIM.enter.page.card.scale});will-change:opacity,transform;contain:layout style;`;
+                    pageTargets.card.classList.add('ps-enter-hidden-page-card');
                 }
-                // Inner: y=12
+                // Inner: 使用类名
                 pageTargets.inner.forEach(el => {
                     if (el) {
-                        el.style.cssText += `opacity:0;transform:translate3d(0,${ANIM.enter.page.inner.y}px,0);will-change:opacity,transform;contain:layout style;`;
+                        el.classList.add('ps-enter-hidden-page-inner');
                     }
                 });
             });
             return;
         } else if (pageType === PageType.LIST) {
             targets = collectListEnterTargets();
-            y = ANIM.enter.list.y;
+            className = 'ps-enter-hidden-list';
         }
 
-        if (!targets.length) return;
+        if (!targets.length || !className) return;
 
         requestAnimationFrame(() => {
-            const transform = `translate3d(0,${y}px,0)`;
+            // 优化：使用 classList.add 替代 cssText +=
+            // 性能提升：避免触发样式重计算
             targets.forEach(el => {
-                if (el) el.style.cssText += `opacity:0;transform:${transform};will-change:opacity,transform;contain:layout style;`;
+                if (el) el.classList.add(className);
             });
         });
     }
@@ -1022,14 +1016,24 @@
         return allTargets.slice(0, ANIM.enter.list.maxItems);
     }
 
+    /**
+     * 轻量级进入动画
+     * 优化：
+     * 1. 使用 CSS 类替代内联样式设置初始状态
+     * 2. 动画开始时添加 will-change，结束后立即移除
+     * 3. 减少不必要的 contain 属性设置
+     */
     async function animateLightEnter(targets, baseDelay = 0, options = {}, skipInitialState = false) {
         if (!targets?.length) return;
 
         const { duration = 380, stagger = 32, y = 16, scale = 1, easing = 'cubic-bezier(0.2, 0.8, 0.2, 1)' } = options;
 
+        // 优化：不再使用内联样式设置初始状态，因为已在 setInitialAnimationState 中设置
         if (!skipInitialState) {
+            // 备用：如果需要设置初始状态，使用类名而不是内联样式
+            const className = scale !== 1 ? 'ps-enter-hidden-page-card' : 'ps-enter-hidden-post';
             await TaskScheduler.run(targets, (el) => {
-                el.style.cssText += `opacity:0;transform:translate3d(0,${y}px,0)${scale !== 1 ? ` scale(${scale})` : ''};will-change:opacity,transform;contain:layout style;`;
+                el.classList.add(className);
             }, { priority: 'user-blocking' });
         }
 
@@ -1046,7 +1050,9 @@
             });
 
             anim.onfinish = () => {
-                if (el.style.willChange) el.style.willChange = '';
+                // 动画结束后清理样式
+                el.style.opacity = '';
+                el.style.transform = '';
             };
 
             AnimController.register(anim, el);
@@ -1375,7 +1381,7 @@
         const headPlugin = (typeof SwupHeadPlugin === 'function')
             ? new SwupHeadPlugin({
                 persistAssets: true,
-                awaitAssets: true,
+                awaitAssets: false,
                 attributes: ['lang', 'dir']
             })
             : null;

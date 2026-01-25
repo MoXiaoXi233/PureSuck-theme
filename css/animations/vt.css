@@ -85,6 +85,40 @@ html.ps-vt-mode * {
 	transition: none !important;
 }
 
+/* ==================== 共享元素 View Transitions ==================== */
+
+/*
+ * 共享元素（文章卡片）的 View Transitions 动画
+ * 动态生成的 view-transition-name 样式（静态化版本）
+ *
+ * 通过 data-ps-vt-name 属性动态指定共享元素的 transition-name
+ * CSS 变量定义动画参数，避免 JavaScript 动态修改 style 标签
+ */
+
+:root {
+	/* View Transitions 动画参数 */
+	--ps-vt-duration: 520ms;
+	--ps-vt-easing: cubic-bezier(.2, .8, .2, 1);
+	--ps-vt-radius: 0.85rem;
+}
+
+/* 共享元素的 VT 容器动画 */
+[data-ps-vt-name]::view-transition-group(*),
+[data-ps-vt-name]::view-transition-old(*),
+[data-ps-vt-name]::view-transition-new(*) {
+	animation-duration: var(--ps-vt-duration);
+	animation-timing-function: var(--ps-vt-easing);
+	animation-fill-mode: both;
+	border-radius: var(--ps-vt-radius);
+	overflow: hidden;
+}
+
+/* 共享元素容器 */
+[data-ps-vt-name] {
+	view-transition-name: attr(data-ps-vt-name);
+	contain: layout style;
+}
+
 /* ==================== VT 相关的降级处理 ==================== */
 
 /* 用户偏好减少动画时，禁用 VT 动画 */

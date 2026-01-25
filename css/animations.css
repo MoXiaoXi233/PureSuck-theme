@@ -154,3 +154,91 @@ html.ps-vt-mode {
         transform: scale(1);
     }
 }
+
+/* ==================== 动画初始状态类（替代内联样式） ==================== */
+
+/*
+ * 使用预定义 CSS 类替代内联样式设置
+ * 避免强制同步布局和样式重计算
+ * 性能提升: 消除 cssText += 操作带来的性能开销
+ */
+
+/* 通用隐藏状态 */
+.ps-hidden {
+    opacity: 0 !important;
+}
+
+/* 列表页卡片进入初始状态 */
+.ps-enter-hidden-list {
+    opacity: 0 !important;
+    transform: translate3d(0, 48px, 0);
+}
+
+/* 文章页内容进入初始状态 */
+.ps-enter-hidden-post {
+    opacity: 0 !important;
+    transform: translate3d(0, 16px, 0);
+}
+
+/* 独立页卡片进入初始状态 */
+.ps-enter-hidden-page-card {
+    opacity: 0 !important;
+    transform: translate3d(0, 40px, 0) scale(0.98);
+}
+
+/* 独立页内部内容进入初始状态 */
+.ps-enter-hidden-page-inner {
+    opacity: 0 !important;
+    transform: translate3d(0, 12px, 0);
+}
+
+/* ==================== 进入动画执行类 ==================== */
+
+/*
+ * 使用 Web Animations API 的关键帧
+ * 定义在 CSS 中便于维护和复用
+ */
+
+@keyframes ps-enter-fade-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 16px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes ps-enter-fade-up-list {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 48px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes ps-enter-fade-up-page-card {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 40px, 0) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes ps-enter-fade-up-page-inner {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 12px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}

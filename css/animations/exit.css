@@ -24,19 +24,16 @@
 html.ps-list-exit .post.post--index {
 	animation: ps-list-exit-out var(--ps-anim-duration-normal) var(--ps-anim-ease-out) forwards;
 	animation-fill-mode: both;
-	will-change: opacity, transform;
 }
 
 /* VT模式下的列表卡片退出动画（用于非点击的卡片） */
 html.ps-vt-mode.ps-list-exit .post.post--index:not([data-ps-vt-name]) {
 	animation: ps-list-card-exit-for-vt var(--ps-anim-duration-vt) var(--ps-anim-ease-out) forwards;
-	will-change: opacity, transform;
 }
 
 /* 共享元素卡片（被点击的）：淡出 + 缩小 */
 html.ps-vt-mode.ps-list-exit .post.post--index[data-ps-vt-name] {
 	animation: ps-list-shared-exit var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
-	will-change: opacity, transform;
 }
 
 /* 列表页退出动画关键帧 */
@@ -88,13 +85,11 @@ html.ps-list-exit .post.post--index:nth-child(n+9) { animation-delay: 180ms; }
 html.ps-list-exit .archive-title {
 	animation: ps-list-exit-out 200ms var(--ps-anim-ease-out) forwards;
 	animation-delay: 40ms;
-	will-change: opacity, transform;
 }
 html.ps-list-exit .main-pager,
 html.ps-list-exit .main-lastinfo {
 	animation: ps-list-exit-out 180ms var(--ps-anim-ease-out) forwards;
 	animation-delay: 100ms;
-	will-change: opacity, transform;
 }
 
 /* ==================== 文章页退出动画 ==================== */
@@ -105,7 +100,6 @@ html.ps-list-exit .main-lastinfo {
  */
 html.ps-post-exit .post.post--single {
 	animation: ps-post-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
-	will-change: opacity, transform;
 }
 
 /* 文章页内容分段退出 - 已移除以避免与父元素动画冲突 */
@@ -132,7 +126,6 @@ html.ps-post-exit .post.post--single {
  */
 html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	animation: ps-page-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
-	will-change: opacity, transform;
 }
 
 /* 独立页面内部内容退出 - 已移除以避免与父元素动画冲突 */

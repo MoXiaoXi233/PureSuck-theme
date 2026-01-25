@@ -24,13 +24,11 @@ html.ps-list-enter .post.post--index,
 html.ps-list-enter .archive-title {
 	opacity: 0;
 	transform: translate3d(0, var(--ps-anim-translate-large), 0);
-	will-change: opacity, transform;
 }
 html.ps-list-enter .main-pager,
 html.ps-list-enter .main-lastinfo {
 	opacity: 0;
 	transform: translate3d(0, var(--ps-anim-translate-medium), 0);
-	will-change: opacity, transform;
 }
 
 /* ==================== 文章页进入动画 ==================== */
@@ -47,11 +45,10 @@ html.ps-post-enter .post.post--single .post-comments {
 
 /* ==================== 独立页面进入动画 ==================== */
 
-/* 独立页面进入动画 - 父元素保留 will-change，子元素由 JS 控制 */
+/* 独立页面进入动画 */
 html.ps-page-enter .post.post--index.main-item:not(.post--single) {
 	opacity: 0;
 	transform: translate3d(0, 40px, 0) scale(0.98);
-	will-change: opacity, transform;
 }
 html.ps-page-enter .post.post--index.main-item .post-title,
 html.ps-page-enter .post.post--index.main-item .post-meta,
@@ -129,12 +126,10 @@ html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
 	html.ps-post-enter .post.post--single .license-info-card {
 		opacity: 1 !important;
 		transform: none !important;
-		will-change: auto !important;
 	}
-	
+
 	html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
 		opacity: 1 !important;
 		transform: none !important;
-		will-change: auto !important;
 	}
 }
