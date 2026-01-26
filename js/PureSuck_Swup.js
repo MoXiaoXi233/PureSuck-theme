@@ -1,7 +1,6 @@
 /**
- * PureSuck Swup 4 配置 - 重构版
- * 完整的页面过渡动画系统
- * 支持独立页面、文章页、列表页的完整动画
+ * PureSuck With Swup 4
+ * 独立页面、文章页、列表页的完整动画架构
  */
 
 (function() {
@@ -239,7 +238,7 @@
     function findIndexPostCardById(postKey) {
         if (!postKey) return null;
 
-        // ✅ 使用 getSwupRoot() 缓存结果，避免重复查询
+        // 使用 getSwupRoot() 缓存结果，避免重复查询
         const root = getSwupRoot();
         const cards = root.querySelectorAll('.post.post--index');
         const len = cards.length;
@@ -956,7 +955,7 @@
                 backgroundColor: isSuccess
                     ? 'rgba(52, 199, 89, 0.9)'
                     : isError
-                        ? 'rgba(255, 59, 48, 0.9)'
+                        ? 'rgba(230, 72, 63, 0.9)'
                         : 'rgba(0, 0, 0, 0.75)',
                 textColor: '#fff',
                 borderColor: isSuccess
@@ -1100,7 +1099,6 @@
 
     /**
      * 同步共享元素的 VT 名称
-     * ✅ 文章页：VT 期间隐藏 .post-content 避免布局计算，但保持占位
      */
     function syncPostSharedElementFromLocation(scrollPlugin) {
         const url = window.location.href;
@@ -1114,7 +1112,7 @@
             rememberLastPostKey(postKey);
             applyPostSharedElementName(postContainer, postKey);
 
-            // ✅ VT 期间隐藏 .post-content，避免 509 个节点的布局计算
+            // VT 期间隐藏 .post-content
             const postContent = postContainer?.querySelector('.post-content');
             if (postContent) {
                 postContent.setAttribute('data-ps-vt-hidden', 'true');
@@ -1555,7 +1553,7 @@
             // 添加动画状态类
             document.documentElement.classList.add('ps-animating');
 
-            // ✅ 预隐藏类：在 DOM 替换前添加，确保新内容被 CSS 自动隐藏
+            // 预隐藏类：在 DOM 替换前添加，确保新内容被 CSS 自动隐藏
             // 解决闪烁问题：DOM 替换后、JS 执行前，内容已被隐藏
             document.documentElement.classList.add('ps-pre-enter');
 
@@ -1568,7 +1566,7 @@
             const clickedPostCard = document.querySelector(VT.markerSelector);
             const isClickingPostFromList = fromType === PageType.LIST && clickedPostCard;
 
-            // ✅ 从文章页返回时也使用 VT（通过隐藏 .post-content 优化性能）
+            // 从文章页返回时也使用 VT（通过隐藏 .post-content 优化性能）
             const isReturningFromPost = fromType === PageType.POST;
 
             if (isClickingPostFromList) {
@@ -1608,12 +1606,12 @@
             STATE.isSwupNavigating = false;
             STATE.lastNavigation.toType = toType;
 
-            // ✅ 延迟非关键操作：图片优化不需要立即执行
+            // 延迟非关键操作：图片优化不需要立即执行
             scheduleIdleTask(() => {
                 optimizeInitialRender(toType);
             });
 
-            // ✅ 先设置元素级隐藏状态，再移除预隐藏类（避免闪烁）
+            // 先设置元素级隐藏状态，再移除预隐藏类（避免闪烁）
             // 1. 立即设置内联样式（在DOM替换后第一时间隐藏元素）
             setInitialAnimationState(toType);
 
@@ -1683,7 +1681,7 @@
                 cleanupAnimationClasses();
             });
 
-            // ✅ VT 动画完成后，正文渐入显示
+            // VT 动画完成后，正文渐入显示
             setTimeout(() => {
                 const hiddenContent = document.querySelector('.post-content[data-ps-vt-hidden]');
                 if (hiddenContent) {
@@ -1813,7 +1811,7 @@
                         message: '✓ 解锁成功',
                         duration: 2000,
                         position: 'bottom',
-                        backgroundColor: 'rgba(52, 199, 89, 0.9)',
+                        backgroundColor: 'rgba(36, 175, 71, 0.9)',
                         textColor: '#fff',
                         borderColor: 'rgba(52, 199, 89, 0.3)'
                     });
@@ -1829,7 +1827,7 @@
                         message: '密码错误，请重试',
                         duration: 3000,
                         position: 'bottom',
-                        backgroundColor: 'rgba(255, 59, 48, 0.9)',
+                        backgroundColor: 'rgba(230, 72, 63, 0.9)',
                         textColor: '#fff',
                         borderColor: 'rgba(255, 59, 48, 0.3)'
                     });
@@ -1859,7 +1857,6 @@
         const hasPreloadClass = preloadClasses.some(cls => document.documentElement.classList.contains(cls));
 
         if (hasPreloadClass) {
-            // 方案2+3：使用 requestAnimationFrame 确保原子化类切换 + 提前设置内联样式
             requestAnimationFrame(() => {
                 // 1. 提前设置内联样式（立即隐藏元素，不依赖CSS类）
                 setInitialAnimationState(initialPageType);
