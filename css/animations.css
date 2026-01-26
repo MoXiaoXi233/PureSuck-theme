@@ -93,7 +93,7 @@ html.ps-page-enter .post {
 
 html.ps-page-enter .post-body > * {
     opacity: 0;
-    transform: translate3d(0, 12px, 0);
+    transform: translate3d(0, 16px, 0);
 }
 
 /* ==================== 延迟渲染（VT 优化） ==================== */
@@ -226,7 +226,7 @@ html.ps-vt-mode {
 /* 独立页内部内容进入初始状态 */
 .ps-enter-hidden-page-inner {
     opacity: 0 !important;
-    transform: translate3d(0, 12px, 0);
+    transform: translate3d(0, 16px, 0);
 }
 
 /* ==================== 进入动画执行类 ==================== */

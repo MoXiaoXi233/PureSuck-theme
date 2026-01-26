@@ -209,7 +209,7 @@
     }
 
     function clearMarkedViewTransitionNames() {
-        // ✅ 使用预计算的选择器，避免模板字符串拼接
+        // 使用预计算的选择器，避免模板字符串拼接
         const elements = document.querySelectorAll(VT.markerSelector);
         for (let i = 0; i < elements.length; i++) {
             const el = elements[i];
@@ -302,13 +302,13 @@
                     easing: 'cubic-bezier(0.16, 0.55, 0.35, 1)'
                 },
                 inner: {
-                    duration: 360,
-                    stagger: 35,
-                    y: 12,
+                    duration: 380,
+                    stagger: 40,
+                    y: 16,
                     easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-                    maxItems: 16,
-                    batchSize: 6,
-                    batchGap: 90
+                    maxItems: 24,
+                    batchSize: 8,
+                    batchGap: 100
                 }
             },
             vt: {
@@ -561,12 +561,16 @@
      * 设置页面进入动画的初始状态
      * 优化：使用 CSS 类替代内联样式，消除强制同步布局
      * 性能提升：避免 cssText += 操作触发的样式重计算和布局
+     *
+     * 修复闪烁：在同一帧内完成隐藏类添加和动画类清理
+     * 防止间隙：确保元素始终处于隐藏状态
      */
-    function setInitialAnimationState(pageType) {
+    function setInitialAnimationState(pageType, cleanup = true) {
         if (prefersReducedMotion()) return;
 
         let targets = [];
         let className = '';
+        let shouldCleanup = cleanup;
 
         if (pageType === PageType.POST) {
             targets = collectPostEnterTargets();
@@ -576,6 +580,7 @@
             const pageTargets = collectPageEnterTargets();
 
             requestAnimationFrame(() => {
+                // 在同一帧内：先添加隐藏类，再清理动画类
                 // Card: 使用类名
                 if (pageTargets.card) {
                     pageTargets.card.classList.add('ps-enter-hidden-page-card');
@@ -586,6 +591,11 @@
                         el.classList.add('ps-enter-hidden-page-inner');
                     }
                 });
+
+                // 立即清理旧动画类，防止间隙闪烁
+                if (shouldCleanup) {
+                    cleanupAnimationClasses();
+                }
             });
             return;
         } else if (pageType === PageType.LIST) {
@@ -596,11 +606,17 @@
         if (!targets.length || !className) return;
 
         requestAnimationFrame(() => {
+            // 在同一帧内：先添加隐藏类，再清理动画类
             // 优化：使用 classList.add 替代 cssText +=
             // 性能提升：避免触发样式重计算
             targets.forEach(el => {
                 if (el) el.classList.add(className);
             });
+
+            // 立即清理旧动画类，防止间隙闪烁
+            if (shouldCleanup) {
+                cleanupAnimationClasses();
+            }
         });
     }
 
@@ -1611,12 +1627,9 @@
                 optimizeInitialRender(toType);
             });
 
-            // 先设置元素级隐藏状态，再移除预隐藏类（避免闪烁）
-            // 1. 立即设置内联样式（在DOM替换后第一时间隐藏元素）
-            setInitialAnimationState(toType);
-
-            // 2. 清理旧类（包括 ps-pre-enter）
-            cleanupAnimationClasses();
+            // 设置元素级隐藏状态，同时在同一帧内清理旧动画类（防止闪烁）
+            // setInitialAnimationState 现在会在 RAF 回调中同时处理添加隐藏类和清理旧类
+            setInitialAnimationState(toType, true);
 
             // 新的动画状态
             document.documentElement.classList.add('ps-animating');
@@ -1657,7 +1670,7 @@
                 }
             }
 
-            // ✅ 延迟非关键操作：自定义事件派发
+            // 延迟非关键操作：自定义事件派发
             requestAnimationFrame(() => {
                 document.dispatchEvent(new CustomEvent('swup:contentReplaced', {
                     detail: {
