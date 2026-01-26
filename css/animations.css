@@ -1,6 +1,6 @@
 /**
  * PureSuck Animations CSS
- * 所有动画定义,用于降级和基础动画
+ * 所有动画定义和基础样式
  */
 
 /* ==================== 退出动画 ==================== */
@@ -71,7 +71,7 @@ html.ps-page-exit .post {
     }
 }
 
-/* ==================== 进入动画初始状态(降级用) ==================== */
+/* ==================== 进入动画初始状态 ==================== */
 
 /* 列表页进入初始状态 */
 html.ps-list-enter .post {
@@ -124,13 +124,6 @@ html.ps-pre-enter #swup .post-comments > * {
 .ps-defer-render {
     content-visibility: hidden;
     contain-intrinsic-size: auto 100vh;
-}
-
-/* 降级：不支持 content-visibility 的浏览器 */
-@supports not (content-visibility: hidden) {
-    .ps-defer-render {
-        visibility: hidden;
-    }
 }
 
 /* ==================== 动画状态类 ==================== */

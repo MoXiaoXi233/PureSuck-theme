@@ -5,7 +5,7 @@
  * - View Transitions API 基础配置
  * - 主题切换动画
  * - VT 模式下的页面过渡
- * - VT 相关的降级处理
+ * - VT 性能优化
  *
  * View Transitions API 说明：
  * - 使用 ::view-transition-old 和 ::view-transition-new 伪元素
@@ -202,7 +202,7 @@ html.ps-vt-mode {
 	scroll-behavior: auto !important;
 }
 
-/* ==================== VT 相关的降级处理 ==================== */
+/* ==================== 无障碍支持 ==================== */
 
 /* 用户偏好减少动画时，禁用 VT 动画 */
 @media (prefers-reduced-motion: reduce) {
@@ -223,15 +223,6 @@ html.ps-vt-mode {
 	html.ps-theme-vt::view-transition-old(root),
 	html.ps-theme-vt::view-transition-new(root) {
 		animation: none !important;
-	}
-}
-
-/* 不支持 View Transitions API 的浏览器降级处理 */
-@supports not (view-transition-name: none) {
-	/* 回退到传统的 CSS 动画 */
-	html.ps-vt-mode .post.post--index {
-		transition: opacity var(--ps-anim-duration-normal) ease,
-		            transform var(--ps-anim-duration-normal) ease;
 	}
 }
 

@@ -12,15 +12,13 @@
 
     // ==================== 全局状态 ====================
     const STATE = {
-        isAnimating: false,
         isSwupNavigating: false,
         currentPageToken: 0,
         lastNavigation: {
             fromType: null,
             toType: null,
             toUrl: '',
-            isSwup: false,
-            useVT: false
+            isSwup: false
         },
         lastPost: {
             key: null,
@@ -38,13 +36,6 @@
         markerSelector: '[data-ps-vt-name]'
     };
 
-    function supportsViewTransitions() {
-        return typeof document.startViewTransition === 'function'
-            && CSS.supports('view-transition-name: ps-test');
-    }
-
-    const HAS_VT = supportsViewTransitions();
-
     // ==================== 页面类型定义 ====================
     const PageType = {
         LIST: 'list',   // 首页、分类页、标签页、搜索页
@@ -58,7 +49,7 @@
      * @returns {string} 页面类型
      */
     function getPageType(url) {
-        const swupRoot = document.getElementById('swup');
+        const swupRoot = getSwupRoot();
         const dataType = swupRoot?.dataset?.psPageType || '';
 
         if (dataType === 'post') return PageType.POST;
@@ -108,11 +99,7 @@
             if (IDLE.queue.length) scheduleIdleDrain();
         };
 
-        if (typeof window.requestIdleCallback === 'function') {
-            window.requestIdleCallback(run, { timeout: IDLE.timeout });
-        } else {
-            setTimeout(run, 0);
-        }
+        window.requestIdleCallback(run, { timeout: IDLE.timeout });
     }
 
     function scheduleIdleTask(task) {
@@ -222,7 +209,7 @@
      * 性能提升：消除强制布局和样式重计算
      */
     function applyPostSharedElementName(el, postKey) {
-        if (!HAS_VT || !el || !postKey) return;
+        if (!el || !postKey) return;
 
         const name = getPostTransitionName(postKey);
         clearMarkedViewTransitionNames();
@@ -252,27 +239,7 @@
 
     // ==================== 动画配置（重构版） ====================
     const ANIM = {
-        // 退出动画配置
-        exit: {
-            // 列表页退出
-            list: {
-                duration: 240,
-                stagger: 25,
-                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-            },
-            // 文章页退出
-            post: {
-                duration: 320,
-                contentStagger: 30,
-                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-            },
-            // 独立页退出
-            page: {
-                duration: 320,
-                innerStagger: 20,
-                easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-            }
-        },
+        // 退出动画由 CSS 处理，无需 JS 配置
         enter: {
             post: {
                 duration: 380,
@@ -540,6 +507,7 @@
     async function runEnterAnimation(toType, hasSharedElement) {
         if (prefersReducedMotion()) return;
 
+        // 有共享元素时等待 VT 动画完成，无共享元素时立即开始
         const baseDelay = hasSharedElement
             ? Math.max(0, ANIM.enter.vt.duration - ANIM.enter.vt.leadMs)
             : 0;
@@ -1044,8 +1012,6 @@
         const url = window.location.href;
         const pageType = getPageType(url);
 
-        if (!HAS_VT) return;
-
         if (pageType === PageType.POST) {
             const postContainer = document.querySelector('.post.post--single');
             const postKey = getPostKeyFromElement(postContainer);
@@ -1090,11 +1056,7 @@
                     });
                 };
 
-                if (typeof requestIdleCallback === 'function') {
-                    requestIdleCallback(checkAndScroll, { timeout: 100 });
-                } else {
-                    checkAndScroll();
-                }
+                requestIdleCallback(checkAndScroll, { timeout: 100 });
             } else {
                 clearMarkedViewTransitionNames();
             }
@@ -1106,10 +1068,6 @@
 
     // ==================== Swup 初始化 ====================
     function initSwup() {
-        if (typeof Swup === 'undefined') {
-            return;
-        }
-
         // ========== Swup 4 基础配置 ==========
         const plugins = [];
 
@@ -1177,8 +1135,8 @@
                 return resolved.pathname + resolved.search + resolved.hash;
             },
             linkSelector: 'a[href]:not([data-no-swup]):not(.page-navigator a):not(#comments a):not(a[href^="#"])',
-            animateHistoryBrowsing: HAS_VT,
-            native: HAS_VT,
+            animateHistoryBrowsing: true,
+            native: true,
             animationSelector: false
         });
 
@@ -1430,7 +1388,6 @@
 
         // ========== 点击事件：设置 VT 共享元素 ==========
         document.addEventListener('click', (event) => {
-            if (!HAS_VT) return;
             if (!isValidMouseClick(event)) return;
 
             const link = event.target?.closest('a[href]');
@@ -1481,24 +1438,13 @@
             const isReturningFromPost = fromType === PageType.POST;
 
             // 列表→文章 或 文章→列表 都使用 VT
-            const useVT = HAS_VT && (isClickingPostFromList || isReturningFromPost);
+            const useVT = isClickingPostFromList || isReturningFromPost;
 
             if (useVT) {
                 document.documentElement.classList.add('ps-vt-mode');
-                // VT模式下完全依赖浏览器原生动画，不添加自定义动画类
-            } else {
-                // 非 VT 模式：应用完整的退出动画
-                if (fromType === PageType.PAGE) {
-                    document.documentElement.classList.add('ps-page-exit');
-                } else if (fromType === PageType.POST) {
-                    document.documentElement.classList.add('ps-post-exit');
-                } else if (fromType === PageType.LIST) {
-                    document.documentElement.classList.add('ps-list-exit');
-                }
             }
 
             STATE.lastPost.fromSingle = fromType === PageType.POST;
-            STATE.lastNavigation.useVT = useVT;
         });
 
         // ========== 动画流程：content:replace ==========
@@ -1531,24 +1477,22 @@
 
             // 标记新元素
             scheduleIdleTask(() => {
-                markAnimationElements(document.getElementById('swup') || document);
+                markAnimationElements(getSwupRoot());
             });
 
             // VT 共享元素（必须同步执行，VT 动画依赖于 viewTransitionName 的设置）
             syncPostSharedElementFromLocation(scrollPlugin);
 
             // 检测是否有 VT 共享元素
-            const hasSharedElement = HAS_VT && Boolean(document.querySelector(VT.markerSelector));
+            const hasSharedElement = Boolean(document.querySelector(VT.markerSelector));
 
-            // 3. 添加进入动画类（在同一帧内完成）
-            if (!hasSharedElement) {
-                if (toType === PageType.PAGE) {
-                    document.documentElement.classList.add('ps-page-enter');
-                } else if (toType === PageType.POST) {
-                    document.documentElement.classList.add('ps-post-enter');
-                } else if (toType === PageType.LIST) {
-                    document.documentElement.classList.add('ps-list-enter');
-                }
+            // 添加进入动画类
+            if (toType === PageType.PAGE) {
+                document.documentElement.classList.add('ps-page-enter');
+            } else if (toType === PageType.POST) {
+                document.documentElement.classList.add('ps-post-enter');
+            } else if (toType === PageType.LIST) {
+                document.documentElement.classList.add('ps-list-enter');
             }
 
             // 延迟非关键操作：自定义事件派发
@@ -1591,7 +1535,7 @@
 
         // ========== 页面加载完成 ==========
         swup.hooks.on('page:view', () => {
-            const swupRoot = document.getElementById('swup') || document;
+            const swupRoot = getSwupRoot();
             const pageType = getPageType(window.location.href);
             const token = ++STATE.currentPageToken;
             const isCurrent = () => token === STATE.currentPageToken;
@@ -1737,7 +1681,7 @@
 
         // ========== 初始加载 ==========
         scheduleIdleTask(() => {
-            markAnimationElements(document.getElementById('swup') || document);
+            markAnimationElements(getSwupRoot());
         });
 
         syncPostSharedElementFromLocation();

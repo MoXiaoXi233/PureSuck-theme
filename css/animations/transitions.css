@@ -78,7 +78,7 @@ html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	transform: translate3d(0, 12px, 0) !important;
 }
 
-/* ==================== 降级处理 ==================== */
+/* ==================== 无障碍支持 ==================== */
 
 /* 用户偏好减少动画时，禁用所有动画 */
 @media (prefers-reduced-motion: reduce) {

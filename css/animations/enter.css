@@ -108,7 +108,7 @@ html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
 	}
 }
 
-/* ==================== 降级处理 ==================== */
+/* ==================== 无障碍支持 ==================== */
 
 /* 用户偏好减少动画时，禁用所有进入动画 */
 @media (prefers-reduced-motion: reduce) {

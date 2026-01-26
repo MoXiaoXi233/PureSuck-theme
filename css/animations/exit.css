@@ -147,7 +147,7 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 /* ps-page-inner-exit-out 动画已移除 - 不再需要 */
 /* 子元素跟随父元素动画，避免动画冲突 */
 
-/* ==================== 降级处理 ==================== */
+/* ==================== 无障碍支持 ==================== */
 
 /* 用户偏好减少动画时，禁用所有退出动画 */
 @media (prefers-reduced-motion: reduce) {
