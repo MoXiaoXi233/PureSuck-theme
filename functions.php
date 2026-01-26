@@ -916,6 +916,8 @@ function renderPostContent($content)
 
     $content = theme_wrap_tables($content); # 表格外嵌套，用于适配滚动
     $content = add_zoomable_to_images($content); # 图片放大
+    $content = parseOwOcodes($content); # OwO 表情解析
+
 
     return TOC_Generate($content);
 }
