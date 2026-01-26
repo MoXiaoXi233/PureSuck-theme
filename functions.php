@@ -561,12 +561,8 @@ function generateDynamicCSS()
 
 function getMarkdownCharacters($content)
 {
-    // 去除多行代码块
+    // 只去除代码块，其他不过滤
     $content = preg_replace('/```[\s\S]*?```/m', '', $content);
-    // 去除行内代码
-    $content = preg_replace('/`[^`]*`/', '', $content);
-    // 去除 HTML 标签
-    $content = strip_tags($content);
 
     // 只统计汉字数
     preg_match_all('/[\x{4e00}-\x{9fa5}]/u', $content, $matches);

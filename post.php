@@ -60,7 +60,7 @@
                         <?php if (!$this->hidden && $this->options->showWordCount == '1'): ?>
                             <?php
                             $wordCount = getMarkdownCharacters($this->text);
-                            $readingTime = ceil($wordCount / 400); //假设每分钟400字
+                            $readingTime = ceil($wordCount / 300); //假设每分钟300字
                             ?>
                             <div class="meta post-meta">
                                 <div class="icon-record-outline">
