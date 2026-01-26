@@ -1459,7 +1459,14 @@ h6 {
 
 b,
 strong {
-	font-weight: 600
+	font-weight: 600;
+	background-image: linear-gradient(to top,
+		color-mix(in srgb, var(--themecolor) 35%, transparent) 0%,
+		transparent 100%
+	);
+	background-size: 100% 45%;
+	background-repeat: no-repeat;
+	background-position: 0 88%;
 }
 
 .avatar,

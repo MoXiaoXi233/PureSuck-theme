@@ -18,9 +18,6 @@
     </title>
     <?php generateDynamicCSS(); ?>
 
-    <!-- 预加载关键图片（改善 LCP） -->
-    <link rel="preload" href="<?= $this->options->logoIndex; ?>" as="image" imagesrcset="<?= $this->options->logoIndex; ?> 1x" imagesizes="120px">
-
     <script>
         window.THEME_URL = '<?= $this->options->themeUrl; ?>';
     </script>
@@ -65,8 +62,6 @@
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>">
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>">
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/animations/index.css'); ?>">
-
-    <!-- 非关键CSS异步加载（仅在有代码块时需要） -->
 
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter != 'off'): ?>
