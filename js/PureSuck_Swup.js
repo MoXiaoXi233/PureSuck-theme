@@ -20,8 +20,6 @@
             toType: null,
             toUrl: '',
             isSwup: false,
-            fromTypeDetail: null,
-            predictedToType: null,
             useVT: false
         },
         lastPost: {
@@ -873,6 +871,18 @@
         }
     }
 
+    // ==================== 工具函数 ====================
+    /**
+     * 检查是否为有效的鼠标左键点击事件
+     * 排除：已阻止、非左键、修饰键
+     */
+    function isValidMouseClick(event) {
+        if (event.defaultPrevented) return false;
+        if (event.button !== 0) return false;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+        return true;
+    }
+
     // ==================== 评论相关函数 ====================
     function psToast(message, variant) {
         if (typeof MoxToast === 'function') {
@@ -1265,9 +1275,7 @@
         document.addEventListener('click', (event) => {
             const link = event.target?.closest('a[href*="replyTo"]');
             if (!link) return;
-            if (event.defaultPrevented) return;
-            if (event.button !== 0) return;
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if (!isValidMouseClick(event)) return;
 
             event.preventDefault();
             event.stopPropagation();
@@ -1332,11 +1340,7 @@
             const pageNavigator = link.closest('.page-navigator');
             if (!pageNavigator) return;
 
-            // 已被阻止或修饰键点击，不处理
-            if (event.defaultPrevented) return;
-            if (event.button !== 0) return;
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
+            if (!isValidMouseClick(event)) return;
             handleCommentPaginationClick(link, event);
         }, true);
 
@@ -1427,22 +1431,13 @@
         // ========== 点击事件：设置 VT 共享元素 ==========
         document.addEventListener('click', (event) => {
             if (!HAS_VT) return;
-            if (event.defaultPrevented) return;
-            if (event.button !== 0) return;
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if (!isValidMouseClick(event)) return;
 
             const link = event.target?.closest('a[href]');
             if (!link) return;
             if (link.target && link.target !== '_self') return;
             if (link.hasAttribute('download')) return;
-
-            let toUrl;
-            try {
-                toUrl = new URL(link.href, window.location.origin);
-            } catch {
-                return;
-            }
-            if (toUrl.origin !== window.location.origin) return;
+            if (!isSameOriginUrl(link.href)) return;
 
             const postCard = link.closest('.post.post--index');
             if (!postCard) return;
@@ -1467,16 +1462,9 @@
                 window.OwoManager.destroy();
             }
 
-            // 检测源页面类型（内联检测，避免多余的函数调用）
+            // 检测源页面类型
             let fromType = getPageType();
-            if (document.querySelector('.post.post--single')) {
-                fromType = PageType.POST;
-            } else if (document.querySelector('.post.post--index.main-item:not(.post--single)')) {
-                fromType = PageType.PAGE;
-            }
-
             STATE.lastNavigation.fromType = fromType;
-            STATE.lastNavigation.fromTypeDetail = fromType;
             STATE.lastNavigation.toUrl = visit.to?.url || '';
             STATE.lastNavigation.isSwup = true;
 
@@ -1487,26 +1475,13 @@
             // 解决闪烁问题：DOM 替换后、JS 执行前，内容已被隐藏
             document.documentElement.classList.add('ps-pre-enter');
 
-            // 预测目标页面类型（通过 URL 模式）
-            const toUrl = visit.to?.url || '';
-            let predictedToType = PageType.LIST;
-            let useVT = false;
-
-            // 检测是否点击了列表页中的文章卡片
+            // 检测是否使用 View Transitions
             const clickedPostCard = document.querySelector(VT.markerSelector);
             const isClickingPostFromList = fromType === PageType.LIST && clickedPostCard;
-
-            // 从文章页返回时也使用 VT（通过隐藏 .post-content 优化性能）
             const isReturningFromPost = fromType === PageType.POST;
 
-            if (isClickingPostFromList) {
-                predictedToType = PageType.POST;
-            } else if (toUrl.includes('/archives/') || toUrl.includes('/about/') || toUrl.includes('/links/') || toUrl.includes('/tags/')) {
-                predictedToType = PageType.PAGE;
-            }
-
             // 列表→文章 或 文章→列表 都使用 VT
-            useVT = HAS_VT && (isClickingPostFromList || isReturningFromPost);
+            const useVT = HAS_VT && (isClickingPostFromList || isReturningFromPost);
 
             if (useVT) {
                 document.documentElement.classList.add('ps-vt-mode');
@@ -1523,9 +1498,6 @@
             }
 
             STATE.lastPost.fromSingle = fromType === PageType.POST;
-
-            // 存储预测的目标类型和 VT 模式，供后续使用
-            STATE.lastNavigation.predictedToType = predictedToType;
             STATE.lastNavigation.useVT = useVT;
         });
 
