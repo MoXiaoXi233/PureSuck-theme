@@ -447,56 +447,48 @@
     function setInitialAnimationState(pageType, cleanup = true) {
         if (prefersReducedMotion()) return;
 
-        let targets = [];
-        let className = '';
-        let shouldCleanup = cleanup;
-
         if (pageType === PageType.POST) {
-            targets = collectPostEnterTargets();
-            className = 'ps-enter-hidden-post';
-        } else if (pageType === PageType.PAGE) {
-            // 独立页：两层动画
-            const pageTargets = collectPageEnterTargets();
+            const targets = collectPostEnterTargets();
+            if (!targets.length) return;
 
             requestAnimationFrame(() => {
-                // 在同一帧内：先添加隐藏类，再清理动画类
-                // Card: 使用类名
+                targets.forEach(el => {
+                    if (el) el.classList.add('ps-enter-hidden-post');
+                });
+                if (cleanup) cleanupAnimationClasses();
+            });
+        } else if (pageType === PageType.PAGE) {
+            const pageTargets = collectPageEnterTargets();
+            if (!pageTargets.card && !pageTargets.inner.length) return;
+
+            requestAnimationFrame(() => {
+                // 添加元素级隐藏类
                 if (pageTargets.card) {
                     pageTargets.card.classList.add('ps-enter-hidden-page-card');
                 }
-                // Inner: 使用类名
                 pageTargets.inner.forEach(el => {
-                    if (el) {
-                        el.classList.add('ps-enter-hidden-page-inner');
-                    }
+                    if (el) el.classList.add('ps-enter-hidden-page-inner');
                 });
 
-                // 立即清理旧动画类，防止间隙闪烁
-                if (shouldCleanup) {
-                    cleanupAnimationClasses();
+                // 关键：延迟到下一帧才清理 ps-pre-enter
+                // 确保元素级隐藏类已生效，避免闪烁间隙
+                if (cleanup) {
+                    requestAnimationFrame(() => {
+                        cleanupAnimationClasses();
+                    });
                 }
             });
-            return;
         } else if (pageType === PageType.LIST) {
-            targets = collectListEnterTargets();
-            className = 'ps-enter-hidden-list';
-        }
+            const targets = collectListEnterTargets();
+            if (!targets.length) return;
 
-        if (!targets.length || !className) return;
-
-        requestAnimationFrame(() => {
-            // 在同一帧内：先添加隐藏类，再清理动画类
-            // 优化：使用 classList.add 替代 cssText +=
-            // 性能提升：避免触发样式重计算
-            targets.forEach(el => {
-                if (el) el.classList.add(className);
+            requestAnimationFrame(() => {
+                targets.forEach(el => {
+                    if (el) el.classList.add('ps-enter-hidden-list');
+                });
+                if (cleanup) cleanupAnimationClasses();
             });
-
-            // 立即清理旧动画类，防止间隙闪烁
-            if (shouldCleanup) {
-                cleanupAnimationClasses();
-            }
-        });
+        }
     }
 
     /**

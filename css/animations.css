@@ -213,7 +213,7 @@ html.ps-vt-mode {
 /* 独立页卡片进入初始状态 */
 .ps-enter-hidden-page-card {
     opacity: 0 !important;
-    transform: translate3d(0, 40px, 0) scale(0.98);
+    transform: translate3d(0, 40px, 0) scale(0.98) !important;
 }
 
 /* 独立页内部内容进入初始状态 */
