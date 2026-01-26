@@ -35,9 +35,9 @@
     const VT = {
         styleId: 'ps-vt-shared-element-style',
         markerAttr: 'data-ps-vt-name',
-        duration: 520,
-        easing: 'cubic-bezier(0.15,0.3,0.15,1)',
-        // ✅ 预计算选择器字符串，避免重复拼接
+        duration: 380,  // 与 CSS 保持一致
+        easing: 'cubic-bezier(0.22,0.68,0.35,1.0)',
+        // 预计算选择器字符串，避免重复拼接
         markerSelector: '[data-ps-vt-name]'
     };
 

@@ -1,12 +1,12 @@
 /**
  * PureSuck 主题 View Transitions 样式
- * 
+ *
  * 包含：
  * - View Transitions API 基础配置
  * - 主题切换动画
  * - VT 模式下的页面过渡
  * - VT 相关的降级处理
- * 
+ *
  * View Transitions API 说明：
  * - 使用 ::view-transition-old 和 ::view-transition-new 伪元素
  * - 支持共享元素动画（morphing）
@@ -62,62 +62,103 @@ html.ps-theme-vt::view-transition-new(root) {
 	animation: ps-theme-fade-in calc(var(--ps-anim-duration-vt) + 40ms) ease;
 }
 
-/* ==================== VT 模式下的页面过渡 ==================== */
-
-/*
- * VT 模式下的共享元素动画
- * 使用 data-ps-vt-name 属性标识共享元素
- */
-
-/* 共享元素的 VT 容器样式 */
-[data-ps-vt-name] {
-	view-transition-name: attr(data-ps-vt-name);
-	contain: layout style;
-}
-
-/* VT 模式下的页面过渡优化 */
-html.ps-vt-mode {
-	/* VT 期间禁用页面过渡，避免冲突 */
-	transition: none !important;
-}
-
-html.ps-vt-mode * {
-	transition: none !important;
-}
-
 /* ==================== 共享元素 View Transitions ==================== */
 
-/*
- * 共享元素（文章卡片）的 View Transitions 动画
- * 动态生成的 view-transition-name 样式（静态化版本）
- *
- * 通过 data-ps-vt-name 属性动态指定共享元素的 transition-name
- * CSS 变量定义动画参数，避免 JavaScript 动态修改 style 标签
- */
-
 :root {
-	/* View Transitions 动画参数 */
-	--ps-vt-duration: 520ms;
-	/* 快速启动 → 中段平稳 → 从容减速 */
-	--ps-vt-easing: cubic-bezier(0.15, 0.3, 0.15, 1);
+	/* View Transitions 动画参数 - 更短更干脆 */
+	--ps-vt-duration: 380ms;
+	/* 快速启动 → 平稳减速，更有活力 */
+	--ps-vt-easing: cubic-bezier(0.22, 0.68, 0.35, 1.0);
 	--ps-vt-radius: 0.85rem;
 }
 
-/* 共享元素的 VT 容器动画 */
-[data-ps-vt-name]::view-transition-group(*),
-[data-ps-vt-name]::view-transition-old(*),
-[data-ps-vt-name]::view-transition-new(*) {
+/* 共享元素容器 - 基础样式 */
+[data-ps-vt-name] {
+	contain: layout style;
+}
+
+/* ==================== 共享元素退出动画（列表页卡片） ==================== */
+
+/* 旧元素（列表页卡片）退出动画 - 简单淡出，不抢戏 */
+@keyframes ps-vt-card-exit {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.01);
+	}
+}
+
+/* 新元素（文章页容器）进入动画 - 主角登场 */
+@keyframes ps-vt-article-enter {
+	0% {
+		opacity: 0;
+		transform: scale(0.97) translateY(8px);
+	}
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+/* 从文章返回列表时 - 旧元素退出 */
+@keyframes ps-vt-article-exit {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.01);
+	}
+}
+
+/* 从文章返回列表时 - 新元素（卡片）进入 */
+@keyframes ps-vt-card-enter {
+	0% {
+		opacity: 0;
+		transform: scale(0.97) translateY(6px);
+	}
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+/* 共享元素的 VT group 动画 */
+::view-transition-group(*) {
 	animation-duration: var(--ps-vt-duration);
 	animation-timing-function: var(--ps-vt-easing);
 	animation-fill-mode: both;
+}
+
+/* 共享元素 old/new 的动画 - 排除 root */
+::view-transition-old(*):not(::view-transition-old(root)) {
+	animation: ps-vt-card-exit var(--ps-vt-duration) var(--ps-vt-easing) both;
 	border-radius: var(--ps-vt-radius);
 	overflow: hidden;
 }
 
-/* 共享元素容器 */
-[data-ps-vt-name] {
-	view-transition-name: attr(data-ps-vt-name);
-	contain: layout style;
+::view-transition-new(*):not(::view-transition-new(root)) {
+	animation: ps-vt-article-enter var(--ps-vt-duration) var(--ps-vt-easing) both;
+	border-radius: var(--ps-vt-radius);
+	overflow: hidden;
+}
+
+/* ==================== VT 模式下的页面过渡优化 ==================== */
+
+/* VT 模式标识 */
+html.ps-vt-mode {
+	/* VT 期间避免滚动干扰 */
+	scroll-behavior: auto !important;
 }
 
 /* ==================== VT 相关的降级处理 ==================== */
@@ -130,6 +171,11 @@ html.ps-vt-mode * {
 
 	::view-transition-old(root),
 	::view-transition-new(root) {
+		animation: none !important;
+	}
+
+	::view-transition-old(*),
+	::view-transition-new(*) {
 		animation: none !important;
 	}
 
@@ -153,14 +199,4 @@ html.ps-vt-mode * {
 /* 使用 contain 属性优化 VT 性能 */
 ::view-transition-image-pair(root) {
 	isolation: isolate;
-}
-
-/* 优化 VT 动画期间的渲染性能 */
-html.ps-vt-mode {
-	will-change: auto;
-}
-
-/* VT 期间的滚动行为优化 */
-html.ps-vt-mode {
-	scroll-behavior: auto !important;
 }
