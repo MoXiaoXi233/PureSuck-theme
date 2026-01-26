@@ -1100,6 +1100,7 @@
 
     /**
      * 同步共享元素的 VT 名称
+     * ✅ 文章页：VT 期间隐藏 .post-content 避免布局计算，但保持占位
      */
     function syncPostSharedElementFromLocation(scrollPlugin) {
         const url = window.location.href;
@@ -1112,6 +1113,12 @@
             const postKey = getPostKeyFromElement(postContainer);
             rememberLastPostKey(postKey);
             applyPostSharedElementName(postContainer, postKey);
+
+            // ✅ VT 期间隐藏 .post-content，避免 509 个节点的布局计算
+            const postContent = postContainer?.querySelector('.post-content');
+            if (postContent) {
+                postContent.setAttribute('data-ps-vt-hidden', 'true');
+            }
             return;
         }
 
@@ -1561,14 +1568,17 @@
             const clickedPostCard = document.querySelector(VT.markerSelector);
             const isClickingPostFromList = fromType === PageType.LIST && clickedPostCard;
 
+            // ✅ 从文章页返回时也使用 VT（通过隐藏 .post-content 优化性能）
+            const isReturningFromPost = fromType === PageType.POST;
+
             if (isClickingPostFromList) {
                 predictedToType = PageType.POST;
             } else if (toUrl.includes('/archives/') || toUrl.includes('/about/') || toUrl.includes('/links/') || toUrl.includes('/tags/')) {
                 predictedToType = PageType.PAGE;
             }
 
-            // 只有从列表点击文章卡片时使用 VT
-            useVT = HAS_VT && isClickingPostFromList;
+            // 列表→文章 或 文章→列表 都使用 VT
+            useVT = HAS_VT && (isClickingPostFromList || isReturningFromPost);
 
             if (useVT) {
                 document.documentElement.classList.add('ps-vt-mode');
@@ -1672,6 +1682,19 @@
             scheduleIdleTask(() => {
                 cleanupAnimationClasses();
             });
+
+            // ✅ VT 动画完成后，正文渐入显示
+            setTimeout(() => {
+                const hiddenContent = document.querySelector('.post-content[data-ps-vt-hidden]');
+                if (hiddenContent) {
+                    // 触发渐入动画
+                    hiddenContent.setAttribute('data-ps-vt-hidden', 'animating');
+                    // 动画完成后清理属性
+                    setTimeout(() => {
+                        hiddenContent.removeAttribute('data-ps-vt-hidden');
+                    }, 500);
+                }
+            }, 350); // 与 VT 动画同步
         });
 
         // ========== 页面加载完成 ==========

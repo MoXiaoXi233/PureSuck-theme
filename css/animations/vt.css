@@ -77,6 +77,47 @@ html.ps-theme-vt::view-transition-new(root) {
 	contain: layout style;
 }
 
+/* VT 期间隐藏文章正文 */
+.post--single[data-ps-vt-name] .post-content[data-ps-vt-hidden] > * {
+	opacity: 0;
+	transform: translate3d(0, 12px, 0);
+}
+
+/* 正文子元素逐个显示的渐入动画 */
+.post--single .post-content[data-ps-vt-hidden="animating"] > * {
+	animation: ps-content-fade-in 0.4s ease forwards;
+}
+
+/* 逐个显示的 stagger 延迟 */
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(1) { animation-delay: 0ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(2) { animation-delay: 30ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(3) { animation-delay: 40ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(4) { animation-delay: 50ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(5) { animation-delay: 55ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(6) { animation-delay: 60ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(7) { animation-delay: 65ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(8) { animation-delay: 70ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(9) { animation-delay: 75ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(10) { animation-delay: 80ms; }
+
+/* 10个以后的元素，每8个一批，批次间隔80ms */
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(n+11):nth-child(-n+18) { animation-delay: 90ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(n+19):nth-child(-n+26) { animation-delay: 100ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(n+27):nth-child(-n+34) { animation-delay: 110ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(n+35):nth-child(-n+42) { animation-delay: 120ms; }
+.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(n+43) { animation-delay: 130ms; }
+
+@keyframes ps-content-fade-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 12px, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
 /* ==================== 共享元素退出动画（列表页卡片） ==================== */
 
 /* 旧元素（列表页卡片）退出动画 - 简单淡出，不抢戏 */
