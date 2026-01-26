@@ -469,92 +469,6 @@
         }
     };
 
-    // ==================== 性能优化：初始渲染 ====================
-    /**
-     * 优化初始渲染性能
-     * 主要优化图片加载策略
-     */
-    function optimizeInitialRender(pageType) {
-        const swupRoot = document.getElementById('swup');
-        if (!swupRoot) return;
-
-        // 优化图片加载
-        optimizeImageLoading(swupRoot, pageType);
-    }
-
-    /**
-     * 优化图片加载
-     * 添加原生懒加载和异步解码属性
-     */
-    function optimizeImageLoading(root, pageType) {
-        const images = root.querySelectorAll('img');
-
-        images.forEach((img, index) => {
-            // 首屏图片立即加载，其余懒加载
-            const isAboveFold = (pageType === PageType.POST && index < 3) ||
-                                (pageType === PageType.LIST && index < 2);
-
-            if (!isAboveFold && !img.hasAttribute('loading')) {
-                img.setAttribute('loading', 'lazy');
-            }
-
-            // 所有图片使用异步解码
-            if (!img.hasAttribute('decoding')) {
-                img.setAttribute('decoding', 'async');
-            }
-
-            // 添加 fetchpriority 属性，优化加载优先级
-            if (isAboveFold && !img.hasAttribute('fetchpriority')) {
-                img.setAttribute('fetchpriority', 'high');
-            }
-        });
-
-        // 在浏览器空闲时预加载即将进入视口的图片
-        scheduleProgressiveImagePreload(root, images);
-    }
-
-    /**
-     * 渐进式图片预加载
-     * 使用 IntersectionObserver 和 requestIdleCallback 优化图片加载
-     * @param {Element} root - 根元素
-     * @param {NodeList} images - 图片列表
-     */
-    function scheduleProgressiveImagePreload(root, images) {
-        if (!images || images.length === 0) return;
-
-        // 收集懒加载图片
-        const lazyImages = Array.from(images).filter(img =>
-            img.hasAttribute('loading') && img.getAttribute('loading') === 'lazy'
-        );
-
-        if (lazyImages.length === 0) return;
-
-        // 使用 IntersectionObserver 监听图片即将进入视口
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    observer.unobserve(img);
-
-                    // 在浏览器空闲时预加载图片
-                    scheduleIdleTask(() => {
-                        // 如果图片还没有加载，触发加载
-                        if (!img.complete && img.dataset.src) {
-                            img.src = img.dataset.src;
-                        }
-                    });
-                }
-            });
-        }, {
-            // 提前 300px 开始预加载
-            rootMargin: '300px 0px',
-            threshold: 0.01
-        });
-
-        // 观察所有懒加载图片
-        lazyImages.forEach(img => imageObserver.observe(img));
-    }
-
     // ==================== 进入动画 ====================
 
     /**
@@ -1621,11 +1535,6 @@
 
             STATE.isSwupNavigating = false;
             STATE.lastNavigation.toType = toType;
-
-            // 延迟非关键操作：图片优化不需要立即执行
-            scheduleIdleTask(() => {
-                optimizeInitialRender(toType);
-            });
 
             // 设置元素级隐藏状态，同时在同一帧内清理旧动画类（防止闪烁）
             // setInitialAnimationState 现在会在 RAF 回调中同时处理添加隐藏类和清理旧类
