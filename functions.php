@@ -481,11 +481,11 @@ function getStaticURL($path)
         ],
         'bootcdn' => [
             'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
-            'Swup.modern.min.js' => "https://cdn.bootcdn.net/ajax/libs/swup/4.8.2/Swup.umd.min.js",
+            'Swup.umd.min.js' => "https://cdn.bootcdn.net/ajax/libs/swup/4.8.2/Swup.umd.min.js",
         ],
         "cdnjs" => [
             'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
-            'Swup.modern.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/swup/4.8.2/Swup.umd.min.js",
+            'Swup.umd.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/swup/4.8.2/Swup.umd.min.js",
         ]
 
     ];
@@ -561,11 +561,16 @@ function generateDynamicCSS()
 
 function getMarkdownCharacters($content)
 {
-    $content = trim($content); // 去除 HTML 标签
-    // 使用正则表达式匹配并去除代码块（包括 ``` 包裹的代码块和行内代码块）
-    $content = preg_replace('/```[\s\S]*?```/m', '', $content); // 去除多行代码块
-    $wordCount = mb_strlen($content, 'UTF-8'); // 计算字数
-    return $wordCount;
+    // 去除多行代码块
+    $content = preg_replace('/```[\s\S]*?```/m', '', $content);
+    // 去除行内代码
+    $content = preg_replace('/`[^`]*`/', '', $content);
+    // 去除 HTML 标签
+    $content = strip_tags($content);
+
+    // 只统计汉字数
+    preg_match_all('/[\x{4e00}-\x{9fa5}]/u', $content, $matches);
+    return count($matches[0]);
 }
 
 function allOfCharacters()
