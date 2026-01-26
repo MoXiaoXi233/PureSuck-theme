@@ -204,8 +204,22 @@ function themeConfig($form)
             }
         }
     }
-    echo '
-    <h3>当前主题版本：<span style="color: #b45864;">1.3.0</span></h3>
+    // 获取最新版本号
+    $currentVersion = '1.3.1';
+    $latestVersion = getLatestGitHubRelease('MoXiaoXi233', 'PureSuck-theme');
+    $versionHtml = '<h3>当前主题版本：<span style="color: #b45864;">' . htmlspecialchars($currentVersion) . '</span>';
+
+    if ($latestVersion) {
+        if (version_compare($latestVersion, $currentVersion, '>')) {
+            $versionHtml .= ' <span style="color: #ff6b6b; font-size: 0.9em;">(有新版本: ' . htmlspecialchars($latestVersion) . ')</span>';
+        } else {
+            $versionHtml .= ' <span style="color: #51cf66; font-size: 0.9em;">(已是最新)</span>';
+        }
+    }
+
+    $versionHtml .= '</h3>';
+
+    echo $versionHtml . '
     <h4>主题开源页面及文档：<span style="color: #b45864;"><a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #3273dc; text-decoration: none;">PureSuck-theme</a></span></h4>
     <h5>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</h5>
     <form class="protected home" action="?' . $name . 'bf" method="post">
@@ -1004,4 +1018,37 @@ function TOC_Generate($content)
     $GLOBALS['toc_html'] = $result['toc'];
 
     return $result['content'];
+}
+
+/**
+ * 获取 GitHub 仓库最新 release 版本号
+ *
+ * @param string $owner 仓库所有者
+ * @param string $repo 仓库名称
+ * @return string|false 最新版本号，失败返回 false
+ */
+function getLatestGitHubRelease($owner, $repo)
+{
+    // 请求 GitHub API
+    $url = "https://api.github.com/repos/{$owner}/{$repo}/releases/latest";
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => "User-Agent: PureSuck-Theme\r\n"
+        ]
+    ]);
+
+    $response = @file_get_contents($url, false, $context);
+
+    if ($response === false) {
+        return false;
+    }
+
+    $data = json_decode($response, true);
+
+    if ($data && isset($data['tag_name'])) {
+        return ltrim($data['tag_name'], 'v');
+    }
+
+    return false;
 }
