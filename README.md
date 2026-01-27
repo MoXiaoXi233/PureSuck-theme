@@ -51,6 +51,7 @@ Pure 意指纯洁、干净，后者取自爱人 RuoSuck，希望这份干净的�
 ```
 根据你自己的需要删改，你想要允许引用效果就要加上`<blockquote>`，你想要代码就要加上`<pre><code>`等等
 - **搭配字体 「霞骛文楷」 使用，可以借助[SimpleFonts插件](https://github.com/MoXiaoXi233/SimpleFonts-Typecho)完成**
+- 搭配[PS_Highlight](https://github.com/MoXiaoXi233/PS-HighLight-Plugin)以及内置的`PaperSu`主题获取高性能的代码高亮功能。
 - 搭配[主题相关拓展](https://github.com/MoXiaoXi233/PureSuck-Extras)使用取得更统一的体验
 - 遇到问题联系作者
 
@@ -142,9 +143,7 @@ MoxToast({
 ## 引用库
 [medium-zoom](https://github.com/francoischalifour/medium-zoom)  
 [OWO.JS](https://github.com/DIYgod/OwO)  
-[HighLight.JS](https://github.com/highlightjs/highlight.js)  
-[Pjax](https://github.com/MoOx/pjax)  
-[Pace](https://github.com/CodeByZach/pace)
+
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！  
 感谢使用本主题！❤
