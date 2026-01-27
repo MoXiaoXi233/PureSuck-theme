@@ -207,10 +207,6 @@
     }
 }
 
-.window:active {
-    transform: scale(0.98);
-}
-
 /* Tab Header 在 hover 时"醒一下" */
 @media (hover: hover) {
     .window:hover::before {
