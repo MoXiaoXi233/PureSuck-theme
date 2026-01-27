@@ -999,8 +999,10 @@
 
     /**
      * 同步共享元素的 VT 名称
+     * @param {Object} scrollPlugin - Swup 滚动插件实例
+     * @param {boolean} isTransition - 是否是页面切换中（初始加载/刷新时为 false）
      */
-    function syncPostSharedElementFromLocation(scrollPlugin) {
+    function syncPostSharedElementFromLocation(scrollPlugin, isTransition = true) {
         const url = window.location.href;
         const pageType = getPageType(url);
 
@@ -1010,10 +1012,13 @@
             rememberLastPostKey(postKey);
             applyPostSharedElementName(postContainer, postKey);
 
-            // VT 期间隐藏 .post-content
-            const postContent = postContainer?.querySelector('.post-content');
-            if (postContent) {
-                postContent.setAttribute('data-ps-vt-hidden', 'true');
+            // 仅在页面切换时隐藏内容（VT 动画需要）
+            // 初始加载/刷新时不隐藏，因为没有过渡动画
+            if (isTransition) {
+                const postContent = postContainer?.querySelector('.post-content');
+                if (postContent) {
+                    postContent.setAttribute('data-ps-vt-hidden', 'true');
+                }
             }
             return;
         }
@@ -1518,9 +1523,10 @@
                     // 触发渐入动画
                     hiddenContent.setAttribute('data-ps-vt-hidden', 'animating');
                     // 动画完成后清理属性
+                    // 最晚元素：delay(130ms) + duration(400ms) = 530ms，设置 600ms 留出余量
                     setTimeout(() => {
                         hiddenContent.removeAttribute('data-ps-vt-hidden');
-                    }, 500);
+                    }, 600);
                 }
             }, 350); // 与 VT 动画同步
         });
@@ -1676,7 +1682,8 @@
             markAnimationElements(getSwupRoot());
         });
 
-        syncPostSharedElementFromLocation();
+        // 初始加载时传入 false，避免设置 data-ps-vt-hidden 导致内容被隐藏
+        syncPostSharedElementFromLocation(undefined, false);
 
         // 修复初始加载闪烁：使用原子化类切换 + 提前设置内联样式
         STATE.lastNavigation.isSwup = false;
