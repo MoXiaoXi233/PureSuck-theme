@@ -156,6 +156,20 @@ const initializeTOC = (() => {
                 }
             });
 
+            // 当没有元素在激活区域内时，找到最接近激活区域的元素
+            // 这处理向上/向下滚动到页面顶部/底部的情况
+            if (bestIndex < 0 && state.topByIndex.size > 0) {
+                let closestDistance = Infinity;
+                state.topByIndex.forEach((top, index) => {
+                    if (top == null) return;
+                    const distance = Math.abs(top - state.activationOffset);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        bestIndex = index;
+                    }
+                });
+            }
+
             if (bestIndex >= 0) {
                 setActive(bestIndex);
             }
@@ -259,8 +273,14 @@ const initializeTOC = (() => {
         }
 
         waitForScrollEnd(() => {
+            // 清理缓存，因为滚动后位置已变化
+            state.topByIndex.clear();
+            state.intersecting.clear();
             bindObserver();
-            setActive(getInitialActiveIndex());
+            // 使用当前目标索引，不重新计算（避免使用过期缓存）
+            if (index != null) {
+                setActive(index);
+            }
         });
     }
 
