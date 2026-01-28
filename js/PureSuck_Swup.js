@@ -134,34 +134,28 @@
         runNext();
     }
 
-    // ==================== 简化的任务调度器 ====================
-    // 轻量级批量处理器，避免过度设计
+    // ==================== 任务调度器 ====================
+    // 轻量级批量处理器，固定批次大小
     const TaskScheduler = {
         async run(items, handler, options = {}) {
             if (!items?.length) return;
 
-            // ✅ 小数组直接同步处理，避免 Promise/RAF 开销
-            if (items.length <= 8) {
+            const batchSize = 8;
+
+            // 小数组直接同步处理，避免 Promise/RAF 开销
+            if (items.length <= batchSize) {
                 for (let i = 0; i < items.length; i++) {
-                    try {
-                        handler(items[i], i);
-                    } catch (e) {}
+                    try { handler(items[i], i); } catch (e) {}
                 }
                 return;
             }
 
-            const batchSize = 8; // 固定批次大小，避免复杂的自适应逻辑
-
             for (let i = 0; i < items.length; i += batchSize) {
                 const end = Math.min(i + batchSize, items.length);
-
-                // 使用RAF批量处理，避免阻塞主线程
                 await new Promise(resolve => {
                     requestAnimationFrame(() => {
                         for (let j = i; j < end; j++) {
-                            try {
-                                handler(items[j], j);
-                            } catch (e) {}
+                            try { handler(items[j], j); } catch (e) {}
                         }
                         resolve();
                     });
@@ -169,6 +163,54 @@
             }
         }
     };
+
+    // ==================== DOM 查询缓存 ====================
+    // 页面切换期间缓存 DOM 查询结果，避免重复查询
+    const DOMCache = {
+        _cache: new Map(),
+        _token: 0,
+
+        // 页面切换时失效缓存
+        invalidate() {
+            this._cache.clear();
+            this._token++;
+        },
+
+        // 缓存单个查询结果
+        query(selector, scope = document) {
+            const key = `${this._token}:${selector}`;
+            if (!this._cache.has(key)) {
+                this._cache.set(key, scope.querySelector(selector));
+            }
+            return this._cache.get(key);
+        },
+
+        // 缓存多个查询结果
+        queryAll(selector, scope = document) {
+            const key = `${this._token}:all:${selector}`;
+            if (!this._cache.has(key)) {
+                this._cache.set(key, Array.from(scope.querySelectorAll(selector)));
+            }
+            return this._cache.get(key);
+        }
+    };
+
+    // ==================== VT 动画延迟设置 ====================
+    // 预定义延迟映射表，避免24条CSS规则
+    const VT_DELAY_MAP = [0,30,40,50,55,60,65,70,75,80,90,90,90,90,90,90,90,90,100,100,100,100,100,100];
+
+    /**
+     * 为 VT 动画设置 CSS 变量延迟
+     * 替代24条 nth-child CSS 规则，减少样式计算开销
+     */
+    function setVTAnimationDelays(contentEl) {
+        if (!contentEl) return;
+        const children = contentEl.children;
+        const max = Math.min(children.length, 24);
+        for (let i = 0; i < max; i++) {
+            children[i].style.setProperty('--ps-anim-delay', VT_DELAY_MAP[i] || 130);
+        }
+    }
 
     // ==================== View Transitions 辅助函数 ====================
     function getPostTransitionName(postKey) {
@@ -367,7 +409,8 @@
 
     // ==================== 动画控制器 ====================
     const AnimController = {
-        activeAnimations: [],
+        _id: 0,
+        activeAnimations: new Map(),  // 使用 Map 替代数组，实现 O(1) 删除
         animatingElements: new WeakSet(), // 追踪正在动画的元素
 
         /**
@@ -376,7 +419,7 @@
          */
         abort() {
             // 1. 打断所有 Web Animations API 动画
-            for (const anim of this.activeAnimations) {
+            for (const { anim } of this.activeAnimations.values()) {
                 try {
                     if (anim && typeof anim.cancel === 'function') {
                         anim.cancel();
@@ -385,7 +428,7 @@
                     // 忽略错误
                 }
             }
-            this.activeAnimations = [];
+            this.activeAnimations.clear();
 
             // 2. 清理 CSS 动画类（复用统一的清理函数）
             cleanupAnimationClasses();
@@ -413,16 +456,18 @@
         register(anim, element = null) {
             if (!anim) return;
 
+            const id = ++this._id;
+
             // 追踪正在动画的元素，用于后续清理
             if (element) {
                 this.animatingElements.add(element);
+                element.setAttribute('data-ps-animating', '');
             }
 
-            this.activeAnimations.push(anim);
+            this.activeAnimations.set(id, { anim, element });
 
             const onEnd = () => {
-                const idx = this.activeAnimations.indexOf(anim);
-                if (idx > -1) this.activeAnimations.splice(idx, 1);
+                this.activeAnimations.delete(id);  // O(1) 删除
                 // 动画结束后立即清理元素
                 if (element) {
                     this.cleanupElement(element);
@@ -749,7 +794,7 @@
      * 轻量级进入动画
      * 优化：
      * 1. 使用 CSS 类替代内联样式设置初始状态
-     * 2. 动画开始时添加 will-change，结束后立即移除
+     * 2. 预计算 keyframes，避免循环内重复构建对象
      * 3. 减少不必要的 contain 属性设置
      */
     async function animateLightEnter(targets, baseDelay = 0, options = {}, skipInitialState = false) {
@@ -757,26 +802,25 @@
 
         const { duration = 380, stagger = 32, y = 16, scale = 1, easing = 'cubic-bezier(0.2, 0.8, 0.2, 1)' } = options;
 
+        // 预计算 keyframes（避免循环内重复构建）
+        const hasScale = scale !== 1;
+        const keyframes = [
+            { opacity: 0, transform: hasScale ? `translate3d(0,${y}px,0) scale(${scale})` : `translate3d(0,${y}px,0)` },
+            { opacity: 1, transform: hasScale ? 'translate3d(0,0,0) scale(1)' : 'translate3d(0,0,0)' }
+        ];
+        const baseOpts = { duration, easing, fill: 'both', composite: 'replace' };
+
         // 优化：不再使用内联样式设置初始状态，因为已在 setInitialAnimationState 中设置
         if (!skipInitialState) {
             // 备用：如果需要设置初始状态，使用类名而不是内联样式
-            const className = scale !== 1 ? 'ps-enter-hidden-page-card' : 'ps-enter-hidden-post';
+            const className = hasScale ? 'ps-enter-hidden-page-card' : 'ps-enter-hidden-post';
             await TaskScheduler.run(targets, (el) => {
                 el.classList.add(className);
             }, { priority: 'user-blocking' });
         }
 
         await TaskScheduler.run(targets, (el, index) => {
-            const anim = el.animate([
-                { opacity: 0, transform: `translate3d(0,${y}px,0)${scale !== 1 ? ` scale(${scale})` : ''}` },
-                { opacity: 1, transform: 'translate3d(0,0,0) scale(1)' }
-            ], {
-                duration,
-                easing,
-                delay: baseDelay + index * stagger,
-                fill: 'both',
-                composite: 'replace'
-            });
+            const anim = el.animate(keyframes, { ...baseOpts, delay: baseDelay + index * stagger });
 
             anim.onfinish = () => {
                 // 动画结束后清理样式
@@ -1446,6 +1490,9 @@
 
         // ========== 动画流程：content:replace ==========
         swup.hooks.on('content:replace', () => {
+            // 页面切换时失效 DOM 缓存
+            DOMCache.invalidate();
+
             const toType = getPageType();
 
             STATE.isSwupNavigating = false;
@@ -1520,6 +1567,8 @@
             setTimeout(() => {
                 const hiddenContent = document.querySelector('.post-content[data-ps-vt-hidden]');
                 if (hiddenContent) {
+                    // 设置 CSS 变量延迟，替代24条 nth-child 规则
+                    setVTAnimationDelays(hiddenContent);
                     // 触发渐入动画
                     hiddenContent.setAttribute('data-ps-vt-hidden', 'animating');
                     // 动画完成后清理属性

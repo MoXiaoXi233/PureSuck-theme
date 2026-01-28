@@ -33,9 +33,9 @@ html.ps-list-enter .main-lastinfo {
 
 /* ==================== 文章页进入动画 ==================== */
 
-/* 文章页进入动画 - 子元素 will-change 由 JS 动态控制 */
+/* 文章页进入动画 - 子元素 will-change 由 JS 动态控制，限定前24个元素 */
 html.ps-post-enter .post.post--single .post-meta,
-html.ps-post-enter .post.post--single .post-content > *,
+html.ps-post-enter .post.post--single .post-content > *:nth-child(-n+24),
 html.ps-post-enter .post.post--single .protected-block,
 html.ps-post-enter .post.post--single .license-info-card,
 html.ps-post-enter .post.post--single .post-comments {
@@ -59,8 +59,8 @@ html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 
 /* ==================== VT 模式特殊处理 ==================== */
 
-/* VT 模式 - will-change 由 JS 控制 */
-html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
+/* VT 模式 - will-change 由 JS 控制，限定前24个元素 */
+html.ps-vt-mode.ps-enter-active .post.post--single .post-content > *:nth-child(-n+24) {
 	opacity: 0;
 	transform: translate3d(0, 12px, 0);
 }
@@ -121,14 +121,14 @@ html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
 	html.ps-list-enter .main-pager,
 	html.ps-list-enter .main-lastinfo,
 	html.ps-post-enter .post.post--single .post-meta,
-	html.ps-post-enter .post.post--single .post-content > *,
+	html.ps-post-enter .post.post--single .post-content > *:nth-child(-n+24),
 	html.ps-post-enter .post.post--single .protected-block,
 	html.ps-post-enter .post.post--single .license-info-card {
 		opacity: 1 !important;
 		transform: none !important;
 	}
 
-	html.ps-vt-mode.ps-enter-active .post.post--single .post-content > * {
+	html.ps-vt-mode.ps-enter-active .post.post--single .post-content > *:nth-child(-n+24) {
 		opacity: 1 !important;
 		transform: none !important;
 	}
