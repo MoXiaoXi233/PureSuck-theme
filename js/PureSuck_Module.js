@@ -885,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             setTimeout(() => {
                 root.classList.remove('ps-theme-vt');
-            }, 300);
+            }, 380);  // 与 VT 动画时长保持一致
         }
     }
 

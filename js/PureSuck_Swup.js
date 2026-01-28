@@ -28,13 +28,15 @@
 
     // ==================== View Transitions 配置 ====================
     const VT = {
-        styleId: 'ps-vt-shared-element-style',
         markerAttr: 'data-ps-vt-name',
         duration: 380,  // 与 CSS 保持一致
         easing: 'cubic-bezier(0.22,0.68,0.35,1.0)',
         // 预计算选择器字符串，避免重复拼接
         markerSelector: '[data-ps-vt-name]'
     };
+
+    // 追踪当前标记的 VT 元素，实现 O(1) 清理
+    let _currentVTElement = null;
 
     // ==================== 页面类型定义 ====================
     const PageType = {
@@ -219,30 +221,37 @@
     }
 
     function clearMarkedViewTransitionNames() {
-        // 使用预计算的选择器，避免模板字符串拼接
+        // 优化：使用追踪变量实现 O(1) 清理
+        if (_currentVTElement) {
+            _currentVTElement.style.viewTransitionName = '';
+            _currentVTElement.removeAttribute(VT.markerAttr);
+            _currentVTElement = null;
+            return;
+        }
+        // 回退：追踪失效时使用原逻辑 O(n)
         const elements = document.querySelectorAll(VT.markerSelector);
         for (let i = 0; i < elements.length; i++) {
-            const el = elements[i];
-            el.style.viewTransitionName = '';
-            el.removeAttribute(VT.markerAttr);
+            elements[i].style.viewTransitionName = '';
+            elements[i].removeAttribute(VT.markerAttr);
         }
     }
 
     /**
      * 应用文章卡片共享元素的 View Transitions 名称
-     * 优化：移除动态 style 插入，改用静态 CSS
-     * 性能提升：消除强制布局和样式重计算
+     * 优化：使用追踪变量实现 O(1) 清理，跳过相同元素
      */
     function applyPostSharedElementName(el, postKey) {
         if (!el || !postKey) return;
 
         const name = getPostTransitionName(postKey);
-        clearMarkedViewTransitionNames();
 
-        // 优化：直接设置 view-transition-name，不再动态生成 style 标签
-        // CSS 变量在静态 CSS 中定义 (vt.css)
+        // 跳过相同元素和名称（避免重复操作）
+        if (_currentVTElement === el && el.style.viewTransitionName === name) return;
+
+        clearMarkedViewTransitionNames();
         el.style.viewTransitionName = name;
         el.setAttribute(VT.markerAttr, name);
+        _currentVTElement = el;
     }
 
     function findIndexPostCardById(postKey) {
@@ -1019,58 +1028,85 @@
         window.OwoManager?.init();
     }
 
+    // ==================== VT 同步辅助函数（重构版） ====================
+
     /**
-     * 同步共享元素的 VT 名称
+     * 获取上一个文章的 postKey
+     */
+    function getLastPostKey() {
+        const stateKey = history.state?.lastPostKey;
+        if (stateKey) return stateKey;
+        return STATE.lastPost.fromSingle ? STATE.lastPost.key : null;
+    }
+
+    /**
+     * 同步文章页的共享元素
+     */
+    function syncPostPageSharedElement() {
+        const postContainer = document.querySelector('.post.post--single');
+        const postKey = getPostKeyFromElement(postContainer);
+        if (!postKey) return;
+        rememberLastPostKey(postKey);
+        applyPostSharedElementName(postContainer, postKey);
+    }
+
+    /**
+     * 按需滚动元素到可见区域（使用 requestIdleCallback 调度）
+     */
+    function scheduleScrollIntoViewIfNeeded(el) {
+        requestIdleCallback(() => {
+            requestAnimationFrame(() => {
+                const rect = el.getBoundingClientRect();
+                if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                    requestAnimationFrame(() => {
+                        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+                    });
+                }
+            });
+        }, { timeout: 100 });
+    }
+
+    /**
+     * 同步列表页的共享元素
+     */
+    function syncListPageSharedElement(scrollPlugin, listPostKey) {
+        const url = window.location.href;
+        const cachedY = scrollPlugin?.getCachedScrollPositions?.(url)?.window?.top;
+
+        if (typeof cachedY === 'number') {
+            window.scrollTo(0, cachedY);
+            queueMicrotask(() => window.scrollTo(0, cachedY));
+        }
+
+        const card = findIndexPostCardById(listPostKey);
+        if (!card) {
+            clearMarkedViewTransitionNames();
+            return;
+        }
+
+        applyPostSharedElementName(card, listPostKey);
+        scheduleScrollIntoViewIfNeeded(card);
+    }
+
+    /**
+     * 同步共享元素的 VT 名称（主调度函数）
      * @param {Object} scrollPlugin - Swup 滚动插件实例
      * @param {boolean} isTransition - 是否是页面切换中（初始加载/刷新时为 false）
      */
     function syncPostSharedElementFromLocation(scrollPlugin, isTransition = true) {
-        const url = window.location.href;
-        const pageType = getPageType(url);
+        const pageType = getPageType(window.location.href);
 
         if (pageType === PageType.POST) {
-            const postContainer = document.querySelector('.post.post--single');
-            const postKey = getPostKeyFromElement(postContainer);
-            rememberLastPostKey(postKey);
-            applyPostSharedElementName(postContainer, postKey);
+            syncPostPageSharedElement();
             return;
         }
 
-        let listPostKey = (history.state && typeof history.state === 'object')
-            ? history.state.lastPostKey
-            : null;
-
-        if (!listPostKey && STATE.lastPost.fromSingle) {
-            listPostKey = STATE.lastPost.key;
-        }
-
-        if (pageType === PageType.LIST && listPostKey) {
-            const cached = scrollPlugin?.getCachedScrollPositions?.(url);
-            const cachedY = cached?.window?.top;
-            if (typeof cachedY === 'number') {
-                window.scrollTo(0, cachedY);
-                queueMicrotask(() => window.scrollTo(0, cachedY));
+        if (pageType === PageType.LIST) {
+            const listPostKey = getLastPostKey();
+            if (listPostKey) {
+                syncListPageSharedElement(scrollPlugin, listPostKey);
+                return;
             }
-
-            const card = findIndexPostCardById(listPostKey);
-            if (card) {
-                applyPostSharedElementName(card, listPostKey);
-                const checkAndScroll = () => {
-                    requestAnimationFrame(() => {
-                        const rect = card.getBoundingClientRect();
-                        if (rect.bottom < 0 || rect.top > window.innerHeight) {
-                            requestAnimationFrame(() => {
-                                card.scrollIntoView({ block: 'center', inline: 'nearest' });
-                            });
-                        }
-                    });
-                };
-
-                requestIdleCallback(checkAndScroll, { timeout: 100 });
-            } else {
-                clearMarkedViewTransitionNames();
-            }
-            return;
         }
 
         clearMarkedViewTransitionNames();

@@ -29,6 +29,11 @@
 	/* 动画缩放比例 */
 	--ps-anim-scale-exit: 0.96;
 	--ps-anim-scale-enter: 0.98;
+
+	/* View Transitions 语义别名（单一来源定义） */
+	--ps-vt-duration: var(--ps-anim-duration-vt);
+	--ps-vt-easing: cubic-bezier(0.22, 0.68, 0.35, 1.0);
+	--ps-vt-radius: 0.85rem;
 }
 
 /* ==================== Swup 导航期间的状态控制 ==================== */
