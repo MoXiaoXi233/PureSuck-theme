@@ -195,23 +195,6 @@
         }
     };
 
-    // ==================== VT 动画延迟设置 ====================
-    // 预定义延迟映射表，避免24条CSS规则
-    const VT_DELAY_MAP = [0,30,40,50,55,60,65,70,75,80,90,90,90,90,90,90,90,90,100,100,100,100,100,100];
-
-    /**
-     * 为 VT 动画设置 CSS 变量延迟
-     * 替代24条 nth-child CSS 规则，减少样式计算开销
-     */
-    function setVTAnimationDelays(contentEl) {
-        if (!contentEl) return;
-        const children = contentEl.children;
-        const max = Math.min(children.length, 24);
-        for (let i = 0; i < max; i++) {
-            children[i].style.setProperty('--ps-anim-delay', VT_DELAY_MAP[i] || 130);
-        }
-    }
-
     // ==================== View Transitions 辅助函数 ====================
     function getPostTransitionName(postKey) {
         const safeKey = encodeURIComponent(String(postKey || '')).replace(/%/g, '_');
@@ -622,12 +605,7 @@
 
         if (!postBody) return [];
 
-        const selector = [
-            '.post-meta',
-            '.post-content > *',
-            '.protected-block',
-            '.license-info-card'
-        ].join(',');
+        const selector = ['.post-meta', '.post-content > *', '.protected-block', '.license-info-card'].join(',');
 
         const maxItems = ANIM.enter.post.maxItems;
         const reserveBelow = 8;
@@ -1055,15 +1033,6 @@
             const postKey = getPostKeyFromElement(postContainer);
             rememberLastPostKey(postKey);
             applyPostSharedElementName(postContainer, postKey);
-
-            // 仅在页面切换时隐藏内容（VT 动画需要）
-            // 初始加载/刷新时不隐藏，因为没有过渡动画
-            if (isTransition) {
-                const postContent = postContainer?.querySelector('.post-content');
-                if (postContent) {
-                    postContent.setAttribute('data-ps-vt-hidden', 'true');
-                }
-            }
             return;
         }
 
@@ -1562,22 +1531,6 @@
             scheduleIdleTask(() => {
                 cleanupAnimationClasses();
             });
-
-            // VT 动画完成后，正文渐入显示
-            setTimeout(() => {
-                const hiddenContent = document.querySelector('.post-content[data-ps-vt-hidden]');
-                if (hiddenContent) {
-                    // 设置 CSS 变量延迟，替代24条 nth-child 规则
-                    setVTAnimationDelays(hiddenContent);
-                    // 触发渐入动画
-                    hiddenContent.setAttribute('data-ps-vt-hidden', 'animating');
-                    // 动画完成后清理属性
-                    // 最晚元素：delay(130ms) + duration(400ms) = 530ms，设置 600ms 留出余量
-                    setTimeout(() => {
-                        hiddenContent.removeAttribute('data-ps-vt-hidden');
-                    }, 600);
-                }
-            }, 350); // 与 VT 动画同步
         });
 
         // ========== 页面加载完成 ==========

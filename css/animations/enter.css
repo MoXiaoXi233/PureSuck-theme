@@ -57,14 +57,6 @@ html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	transform: translate3d(0, 16px, 0);
 }
 
-/* ==================== VT 模式特殊处理 ==================== */
-
-/* VT 模式 - will-change 由 JS 控制，限定前24个元素 */
-html.ps-vt-mode.ps-enter-active .post.post--single .post-content > *:nth-child(-n+24) {
-	opacity: 0;
-	transform: translate3d(0, 12px, 0);
-}
-
 /* ==================== 进入动画关键帧（JS控制使用） ==================== */
 
 /*
@@ -124,11 +116,6 @@ html.ps-vt-mode.ps-enter-active .post.post--single .post-content > *:nth-child(-
 	html.ps-post-enter .post.post--single .post-content > *:nth-child(-n+24),
 	html.ps-post-enter .post.post--single .protected-block,
 	html.ps-post-enter .post.post--single .license-info-card {
-		opacity: 1 !important;
-		transform: none !important;
-	}
-
-	html.ps-vt-mode.ps-enter-active .post.post--single .post-content > *:nth-child(-n+24) {
 		opacity: 1 !important;
 		transform: none !important;
 	}

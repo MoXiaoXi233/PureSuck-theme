@@ -77,29 +77,6 @@ html.ps-theme-vt::view-transition-new(root) {
 	contain: layout style;
 }
 
-/* VT 期间隐藏文章正文 - 限定前24个元素，避免长文章样式计算开销 */
-.post--single[data-ps-vt-name] .post-content[data-ps-vt-hidden] > *:nth-child(-n+24) {
-	opacity: 0;
-	transform: translate3d(0, 12px, 0);
-}
-
-/* 正文子元素逐个显示的渐入动画 - 使用 CSS 变量替代24条 nth-child 规则 */
-.post--single .post-content[data-ps-vt-hidden="animating"] > *:nth-child(-n+24) {
-	animation: ps-content-fade-in 0.4s ease forwards;
-	animation-delay: calc(var(--ps-anim-delay, 0) * 1ms);
-}
-
-@keyframes ps-content-fade-in {
-	from {
-		opacity: 0;
-		transform: translate3d(0, 12px, 0);
-	}
-	to {
-		opacity: 1;
-		transform: translate3d(0, 0, 0);
-	}
-}
-
 /* ==================== 共享元素退出动画（列表页卡片） ==================== */
 
 /* 旧元素（列表页卡片）退出动画 - 简单淡出，不抢戏 */
