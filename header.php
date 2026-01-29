@@ -7,6 +7,10 @@
     <meta name="renderer" content="webkit">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php $this->header(); ?>
+    <?php if ($this->is('post') || $this->is('page')): ?>
+        <link rel="canonical" href="<?php $this->permalink(); ?>">
+    <?php endif; ?>
+
     <title>
         <?php $this->archiveTitle([
             'category' => _t('分类 %s 下的文章'),
@@ -16,6 +20,7 @@
         ], '', ' - '); ?>
         <?= $this->options->title(); ?>
     </title>
+
     <?php generateDynamicCSS(); ?>
 
     <script>
@@ -24,25 +29,25 @@
 
     <!-- 主题防闪烁脚本 -->
     <script>
-        (function(){
-            const cookieMatch=document.cookie.match(/(?:^|;)\s*theme=([^;]+)/),cookieTheme=cookieMatch?cookieMatch[1]:null;
-            const localTheme=localStorage.getItem('theme');
-            let initialTheme=cookieTheme||localTheme||'auto';
-            if(initialTheme==='auto'){
-                initialTheme=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+        (function () {
+            const cookieMatch = document.cookie.match(/(?:^|;)\s*theme=([^;]+)/), cookieTheme = cookieMatch ? cookieMatch[1] : null;
+            const localTheme = localStorage.getItem('theme');
+            let initialTheme = cookieTheme || localTheme || 'auto';
+            if (initialTheme === 'auto') {
+                initialTheme = window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
             }
-            document.documentElement.setAttribute('data-theme',initialTheme);
-            try{
-                if(window.matchMedia&&!window.matchMedia('(prefers-reduced-motion:reduce)').matches){
-                    <?php if($this->is('index')||$this->is('archive')):?>
+            document.documentElement.setAttribute('data-theme', initialTheme);
+            try {
+                if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
+                    <?php if ($this->is('index') || $this->is('archive')): ?>
                         document.documentElement.classList.add('ps-preload-list-enter');
-                    <?php elseif($this->is('post')):?>
+                    <?php elseif ($this->is('post')): ?>
                         document.documentElement.classList.add('ps-preload-post-enter');
-                    <?php elseif($this->is('page')):?>
+                    <?php elseif ($this->is('page')): ?>
                         document.documentElement.classList.add('ps-preload-page-enter');
-                    <?php endif;?>
+                    <?php endif; ?>
                 }
-            }catch(e){}
+            } catch (e) { }
         })();
     </script>
 
@@ -67,17 +72,35 @@
     <?php if ($this->options->postTitleAfter != 'off'): ?>
         <style>
             .post-title::after {
-                bottom: <?php echo $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>;
-                left: <?php echo '0'; ?>;
-                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>width: <?php echo '58px'; ?>;
-                height: <?php echo '11px'; ?>;
-                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>width: <?php echo '106px'; ?>;
-                height: <?php echo '12px'; ?>;
-                mask: <?php echo "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>;
-                mask-size: <?php echo '40px 12px'; ?>;
+                bottom:
+                    <?php echo $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>
+                ;
+                left:
+                    <?php echo '0'; ?>
+                ;
+                <?php if ($this->options->postTitleAfter == 'boldLine'): ?>
+                    width:
+                        <?php echo '58px'; ?>
+                    ;
+                    height:
+                        <?php echo '11px'; ?>
+                    ;
+                <?php elseif ($this->options->postTitleAfter == 'wavyLine'): ?>
+                    width:
+                        <?php echo '106px'; ?>
+                    ;
+                    height:
+                        <?php echo '12px'; ?>
+                    ;
+                    mask:
+                        <?php echo "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"10\" viewBox=\"0 0 40 10\" preserveAspectRatio=\"none\"><path d=\"M0 5 Q 10 0, 20 5 T 40 5\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\"/></svg>') repeat-x"; ?>
+                    ;
+                    mask-size:
+                        <?php echo '40px 12px'; ?>
+                    ;
                 <?php elseif ($this->options->postTitleAfter == 'handDrawn'): ?>
-                /* 添加手绘风格的样式 */
-                /* 这里可以添加具体的手绘风格的样式 */
+                    /* 添加手绘风格的样式 */
+                    /* 这里可以添加具体的手绘风格的样式 */
                 <?php endif; ?>
             }
         </style>
@@ -118,8 +141,8 @@
                     aria-label="博主名字">
                     <span class="el-avatar el-avatar--circle avatar-hover-effect">
                         <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="120"
-                            height="120" data-name="博主名字" draggable="false"
-                            fetchpriority="high" decoding="async" loading="eager">
+                            height="120" data-name="博主名字" draggable="false" fetchpriority="high" decoding="async"
+                            loading="eager">
                     </span>
                 </a>
                 <div class="header-title">
