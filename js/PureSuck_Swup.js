@@ -1044,10 +1044,77 @@
      */
     function syncPostPageSharedElement() {
         const postContainer = document.querySelector('.post.post--single');
-        const postKey = getPostKeyFromElement(postContainer);
-        if (!postKey) return;
+
+        // 优先从元素属性获取，失败则从 history.state 或 STATE 获取
+        let postKey = getPostKeyFromElement(postContainer);
+        if (!postKey) {
+            postKey = history.state?.lastPostKey || STATE.lastPost.key;
+        }
+
+        if (!postKey || !postContainer) return;
+
         rememberLastPostKey(postKey);
         applyPostSharedElementName(postContainer, postKey);
+    }
+
+    /**
+     * 确保旧页面的元素在 VT 开始前已设置 viewTransitionName
+     * 这是 VT 共享元素动画能工作的关键前提
+     */
+    function ensureOldPageViewTransitionName(fromType) {
+        if (fromType === PageType.POST) {
+            // 从文章页离开：确保文章容器有 viewTransitionName
+            const postContainer = document.querySelector('.post.post--single');
+            if (postContainer && !postContainer.style.viewTransitionName) {
+                const postKey = getPostKeyFromElement(postContainer)
+                             || STATE.lastPost.key
+                             || history.state?.lastPostKey;
+                if (postKey) {
+                    applyPostSharedElementName(postContainer, postKey);
+                }
+            }
+        } else if (fromType === PageType.LIST) {
+            // 从列表页离开：检查是否已有标记的卡片
+            // （点击卡片时已设置，这里作为备用检查）
+            const markedCard = document.querySelector(VT.markerSelector);
+            if (!markedCard) {
+                // 没有标记的卡片，尝试从 state 恢复
+                const lastKey = STATE.lastPost.key || history.state?.lastPostKey;
+                if (lastKey) {
+                    const card = findIndexPostCardById(lastKey);
+                    if (card) {
+                        applyPostSharedElementName(card, lastKey);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 初始加载时预设置 viewTransitionName
+     * 确保从当前页面导航离开时，VT 动画有正确的旧元素
+     */
+    function presetViewTransitionNames() {
+        const pageType = getPageType(window.location.href);
+
+        if (pageType === PageType.POST) {
+            // 文章页：预设置文章容器的 viewTransitionName
+            const postContainer = document.querySelector('.post.post--single');
+            const postKey = getPostKeyFromElement(postContainer);
+            if (postKey) {
+                applyPostSharedElementName(postContainer, postKey);
+                rememberLastPostKey(postKey);
+            }
+        } else if (pageType === PageType.LIST) {
+            // 列表页：如果有上一篇文章的 key，预设置对应卡片
+            const lastKey = history.state?.lastPostKey || STATE.lastPost.key;
+            if (lastKey) {
+                const card = findIndexPostCardById(lastKey);
+                if (card) {
+                    applyPostSharedElementName(card, lastKey);
+                }
+            }
+        }
     }
 
     /**
@@ -1471,6 +1538,9 @@
             STATE.lastNavigation.toUrl = visit.to?.url || '';
             STATE.lastNavigation.isSwup = true;
 
+            // ★ 确保旧页面元素在 VT 开始前已设置 viewTransitionName
+            ensureOldPageViewTransitionName(fromType);
+
             // 添加动画状态类
             document.documentElement.classList.add('ps-animating');
 
@@ -1720,8 +1790,9 @@
             markAnimationElements(getSwupRoot());
         });
 
-        // 初始加载时传入 false，避免设置 data-ps-vt-hidden 导致内容被隐藏
-        syncPostSharedElementFromLocation(undefined, false);
+        // 初始加载时预设置 viewTransitionName
+        // 确保离开当前页面时 VT 动画能正常工作
+        presetViewTransitionNames();
 
         // 修复初始加载闪烁：使用原子化类切换 + 提前设置内联样式
         STATE.lastNavigation.isSwup = false;
