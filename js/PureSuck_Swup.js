@@ -35,8 +35,23 @@
         markerSelector: '[data-ps-vt-name]'
     };
 
-    // 追踪当前标记的 VT 元素，实现 O(1) 清理
-    let _currentVTElement = null;
+    // ==================== 多元素 VT 配置 ====================
+    const VT_CONFIG = {
+        elements: {
+            container: { prefix: 'ps-post',   listSel: null,            singleSel: null,           required: true },
+            title:     { prefix: 'ps-title',  listSel: '.post-title',   singleSel: '.post-title',  required: true },
+            author:    { prefix: 'ps-author', listSel: '.post-author',  singleSel: '.post-author', required: true }
+        },
+        // 封面图不单独参与 VT，跟随容器一起动画（避免圆角问题）
+        fadeOut: ['.post-excerpt', '.post-footer', '.post-cat-vertical']
+    };
+
+    // 追踪当前标记的多个 VT 元素，实现 O(1) 清理
+    let _currentVTElements = {
+        container: null,
+        title: null,
+        author: null
+    };
 
     // ==================== 页面类型定义 ====================
     const PageType = {
@@ -220,38 +235,103 @@
         STATE.lastPost.key = postKey;
     }
 
-    function clearMarkedViewTransitionNames() {
-        // 优化：使用追踪变量实现 O(1) 清理
-        if (_currentVTElement) {
-            _currentVTElement.style.viewTransitionName = '';
-            _currentVTElement.removeAttribute(VT.markerAttr);
-            _currentVTElement = null;
-            return;
+    /**
+     * 生成元素的 VT 名称
+     * @param {string} type - 元素类型（container, cover, title, avatar, author）
+     * @param {string} postKey - 文章唯一标识
+     */
+    function getElementVTName(type, postKey) {
+        const cfg = VT_CONFIG.elements[type];
+        if (!cfg) return null;
+        const safeKey = encodeURIComponent(String(postKey)).replace(/%/g, '_');
+        return `${cfg.prefix}-${safeKey}`;
+    }
+
+    /**
+     * 清理所有 VT 标记（多元素版本）
+     */
+    function clearAllVTNames() {
+        let hasTracked = false;
+        for (const type in _currentVTElements) {
+            const el = _currentVTElements[type];
+            if (el) {
+                hasTracked = true;
+                el.style.viewTransitionName = '';
+                el.removeAttribute(VT.markerAttr);
+                _currentVTElements[type] = null;
+            }
         }
-        // 回退：追踪失效时使用原逻辑 O(n)
-        const elements = document.querySelectorAll(VT.markerSelector);
-        for (let i = 0; i < elements.length; i++) {
-            elements[i].style.viewTransitionName = '';
-            elements[i].removeAttribute(VT.markerAttr);
+        // 回退：追踪失效时使用 DOM 查询 O(n)
+        if (!hasTracked) {
+            const elements = document.querySelectorAll(VT.markerSelector);
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].style.viewTransitionName = '';
+                elements[i].removeAttribute(VT.markerAttr);
+            }
         }
     }
 
     /**
-     * 应用文章卡片共享元素的 View Transitions 名称
-     * 优化：使用追踪变量实现 O(1) 清理，跳过相同元素
+     * 应用多元素 VT 名称（列表卡片）
+     * @param {HTMLElement} cardEl - 卡片元素
+     * @param {string} postKey - 文章唯一标识
      */
+    function applyMultiVTNames(cardEl, postKey) {
+        if (!cardEl || !postKey) return;
+
+        // 检查是否是相同卡片（跳过重复设置）
+        if (_currentVTElements.container === cardEl) {
+            const existingName = cardEl.style.viewTransitionName;
+            const expectedName = getElementVTName('container', postKey);
+            if (existingName === expectedName) return;
+        }
+
+        clearAllVTNames();
+
+        for (const type in VT_CONFIG.elements) {
+            const { listSel } = VT_CONFIG.elements[type];
+            const el = type === 'container' ? cardEl : cardEl.querySelector(listSel);
+            if (el) {
+                const name = getElementVTName(type, postKey);
+                el.style.viewTransitionName = name;
+                el.setAttribute(VT.markerAttr, name);
+                _currentVTElements[type] = el;
+            }
+        }
+    }
+
+    /**
+     * 同步文章页多元素 VT 名称
+     */
+    function syncPostMultiVTNames() {
+        const container = document.querySelector('.post.post--single');
+        let postKey = getPostKeyFromElement(container)
+                    || history.state?.lastPostKey
+                    || STATE.lastPost.key;
+
+        if (!postKey || !container) return;
+
+        rememberLastPostKey(postKey);
+
+        for (const type in VT_CONFIG.elements) {
+            const { singleSel } = VT_CONFIG.elements[type];
+            const el = type === 'container' ? container : container.querySelector(singleSel);
+            if (el) {
+                const name = getElementVTName(type, postKey);
+                el.style.viewTransitionName = name;
+                el.setAttribute(VT.markerAttr, name);
+                _currentVTElements[type] = el;
+            }
+        }
+    }
+
+    // 兼容旧调用的包装函数
+    function clearMarkedViewTransitionNames() {
+        clearAllVTNames();
+    }
+
     function applyPostSharedElementName(el, postKey) {
-        if (!el || !postKey) return;
-
-        const name = getPostTransitionName(postKey);
-
-        // 跳过相同元素和名称（避免重复操作）
-        if (_currentVTElement === el && el.style.viewTransitionName === name) return;
-
-        clearMarkedViewTransitionNames();
-        el.style.viewTransitionName = name;
-        el.setAttribute(VT.markerAttr, name);
-        _currentVTElement = el;
+        applyMultiVTNames(el, postKey);
     }
 
     function findIndexPostCardById(postKey) {
@@ -1040,42 +1120,30 @@
     }
 
     /**
-     * 同步文章页的共享元素
+     * 同步文章页的共享元素（使用多元素版本）
      */
     function syncPostPageSharedElement() {
-        const postContainer = document.querySelector('.post.post--single');
-
-        // 优先从元素属性获取，失败则从 history.state 或 STATE 获取
-        let postKey = getPostKeyFromElement(postContainer);
-        if (!postKey) {
-            postKey = history.state?.lastPostKey || STATE.lastPost.key;
-        }
-
-        if (!postKey || !postContainer) return;
-
-        rememberLastPostKey(postKey);
-        applyPostSharedElementName(postContainer, postKey);
+        syncPostMultiVTNames();
     }
 
     /**
      * 确保旧页面的元素在 VT 开始前已设置 viewTransitionName
-     * 这是 VT 共享元素动画能工作的关键前提
+     * 这是 VT 共享元素动画能工作的关键前提（多元素版本）
      */
     function ensureOldPageViewTransitionName(fromType) {
         if (fromType === PageType.POST) {
-            // 从文章页离开：确保文章容器有 viewTransitionName
+            // 从文章页离开：确保文章容器和子元素有 viewTransitionName
             const postContainer = document.querySelector('.post.post--single');
             if (postContainer && !postContainer.style.viewTransitionName) {
                 const postKey = getPostKeyFromElement(postContainer)
                              || STATE.lastPost.key
                              || history.state?.lastPostKey;
                 if (postKey) {
-                    applyPostSharedElementName(postContainer, postKey);
+                    syncPostMultiVTNames();
                 }
             }
         } else if (fromType === PageType.LIST) {
             // 从列表页离开：检查是否已有标记的卡片
-            // （点击卡片时已设置，这里作为备用检查）
             const markedCard = document.querySelector(VT.markerSelector);
             if (!markedCard) {
                 // 没有标记的卡片，尝试从 state 恢复
@@ -1083,7 +1151,7 @@
                 if (lastKey) {
                     const card = findIndexPostCardById(lastKey);
                     if (card) {
-                        applyPostSharedElementName(card, lastKey);
+                        applyMultiVTNames(card, lastKey);
                     }
                 }
             }
@@ -1092,26 +1160,21 @@
 
     /**
      * 初始加载时预设置 viewTransitionName
-     * 确保从当前页面导航离开时，VT 动画有正确的旧元素
+     * 确保从当前页面导航离开时，VT 动画有正确的旧元素（多元素版本）
      */
     function presetViewTransitionNames() {
         const pageType = getPageType(window.location.href);
 
         if (pageType === PageType.POST) {
-            // 文章页：预设置文章容器的 viewTransitionName
-            const postContainer = document.querySelector('.post.post--single');
-            const postKey = getPostKeyFromElement(postContainer);
-            if (postKey) {
-                applyPostSharedElementName(postContainer, postKey);
-                rememberLastPostKey(postKey);
-            }
+            // 文章页：预设置文章容器和子元素的 viewTransitionName
+            syncPostMultiVTNames();
         } else if (pageType === PageType.LIST) {
             // 列表页：如果有上一篇文章的 key，预设置对应卡片
             const lastKey = history.state?.lastPostKey || STATE.lastPost.key;
             if (lastKey) {
                 const card = findIndexPostCardById(lastKey);
                 if (card) {
-                    applyPostSharedElementName(card, lastKey);
+                    applyMultiVTNames(card, lastKey);
                 }
             }
         }
@@ -1134,7 +1197,7 @@
     }
 
     /**
-     * 同步列表页的共享元素
+     * 同步列表页的共享元素（多元素版本）
      */
     function syncListPageSharedElement(scrollPlugin, listPostKey) {
         const url = window.location.href;
@@ -1147,11 +1210,11 @@
 
         const card = findIndexPostCardById(listPostKey);
         if (!card) {
-            clearMarkedViewTransitionNames();
+            clearAllVTNames();
             return;
         }
 
-        applyPostSharedElementName(card, listPostKey);
+        applyMultiVTNames(card, listPostKey);
         scheduleScrollIntoViewIfNeeded(card);
     }
 

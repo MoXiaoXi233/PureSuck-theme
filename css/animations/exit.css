@@ -147,6 +147,30 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 /* ps-page-inner-exit-out 动画已移除 - 不再需要 */
 /* 子元素跟随父元素动画，避免动画冲突 */
 
+/* ==================== VT 模式下非 morph 元素淡出 ==================== */
+
+/*
+ * VT 模式下被点击卡片的非 morph 元素淡出
+ * 这些元素不参与共享元素动画，需要优雅地淡出
+ */
+@keyframes ps-vt-fade-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(0, -8px, 0);
+	}
+}
+
+/* 被点击卡片中不参与 morph 的元素 */
+html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
+html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
+html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
+	animation: ps-vt-fade-out calc(var(--ps-vt-duration) * 0.5) var(--ps-anim-ease-out) forwards;
+}
+
 /* ==================== 无障碍支持 ==================== */
 
 /* 用户偏好减少动画时，禁用所有退出动画 */
@@ -156,7 +180,11 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	html.ps-list-exit .post.post--index,
 	html.ps-page-exit .post.post--index .post-title,
 	html.ps-page-exit .post.post--index .post-meta,
-	html.ps-page-exit .post.post--index .inner-post-wrapper > * {
+	html.ps-page-exit .post.post--index .inner-post-wrapper > *,
+	/* VT 模式下非 morph 元素淡出 */
+	html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
+	html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
+	html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
 		animation: none !important;
 		opacity: 1 !important;
 		transform: none !important;

@@ -55,8 +55,30 @@ html.ps-theme-vt::view-transition-new(root) {
 
 /* ==================== 共享元素 View Transitions ==================== */
 
-/* 共享元素容器 - 基础样式 */
-[data-ps-vt-name] {
+/* 共享元素容器 - 基础样式（仅在 VT 模式下生效） */
+html.ps-vt-mode [data-ps-vt-name] {
+	contain: layout style;
+}
+
+/* ==================== 多元素 VT 标记元素样式 ==================== */
+
+/*
+ * 仅在 VT 模式下生效，避免影响普通状态的样式
+ * 封面图跟随容器动画，不单独设置 VT（避免圆角问题）
+ */
+
+/* 容器元素：主卡片/文章容器 */
+html.ps-vt-mode [data-ps-vt-name^="ps-post-"] {
+	contain: layout style;
+}
+
+/* 标题元素 */
+html.ps-vt-mode [data-ps-vt-name^="ps-title-"] {
+	contain: layout style;
+}
+
+/* 作者区域（包含头像和名字） */
+html.ps-vt-mode [data-ps-vt-name^="ps-author-"] {
 	contain: layout style;
 }
 
