@@ -55,30 +55,24 @@ html.ps-theme-vt::view-transition-new(root) {
 
 /* ==================== 共享元素 View Transitions ==================== */
 
-/* 共享元素容器 - 基础样式（仅在 VT 模式下生效） */
-html.ps-vt-mode [data-ps-vt-name] {
-	contain: layout style;
-}
-
-/* ==================== 多元素 VT 标记元素样式 ==================== */
-
 /*
- * 仅在 VT 模式下生效，避免影响普通状态的样式
- * 封面图跟随容器动画，不单独设置 VT（避免圆角问题）
+ * 使用 [data-ps-vt-name] 属性选择器替代 html.ps-vt-mode
+ * 减少样式计算范围：只检查已标记元素，而非全部 DOM
  */
 
-/* 容器元素：主卡片/文章容器 */
-html.ps-vt-mode [data-ps-vt-name^="ps-post-"] {
+/* 共享元素容器 - 基础样式 */
+[data-ps-vt-name] {
 	contain: layout style;
 }
 
-/* 标题元素 */
-html.ps-vt-mode [data-ps-vt-name^="ps-title-"] {
-	contain: layout style;
-}
+/* ==================== 单元素 VT（简化版） ==================== */
 
-/* 作者区域（包含头像和名字） */
-html.ps-vt-mode [data-ps-vt-name^="ps-author-"] {
+/*
+ * 简化 VT：只保留容器 morph，减少浏览器计算开销
+ * 多元素 morph 会导致多次快照计算，每次都是长任务
+ * title 和 author 改为跟随容器动画，不单独 morph
+ */
+[data-ps-vt-name^="ps-post-"] {
 	contain: layout style;
 }
 
@@ -133,9 +127,11 @@ html.ps-vt-mode [data-ps-vt-name^="ps-author-"] {
 
 /* ==================== VT 模式下的页面过渡优化 ==================== */
 
-/* VT 模式标识 */
-html.ps-vt-mode {
-	/* VT 期间避免滚动干扰 */
+/*
+ * VT 期间滚动控制
+ * 使用 :has() 选择器检测 #swup.ps-vt-mode，避免在 html 上添加类
+ */
+html:has(#swup.ps-vt-mode) {
 	scroll-behavior: auto !important;
 }
 

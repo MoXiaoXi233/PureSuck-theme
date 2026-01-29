@@ -27,12 +27,12 @@ html.ps-list-exit .post.post--index {
 }
 
 /* VT模式下的列表卡片退出动画（用于非点击的卡片） */
-html.ps-vt-mode.ps-list-exit .post.post--index:not([data-ps-vt-name]) {
+html.ps-list-exit #swup.ps-vt-mode .post.post--index:not([data-ps-vt-name]) {
 	animation: ps-list-card-exit-for-vt var(--ps-anim-duration-vt) var(--ps-anim-ease-out) forwards;
 }
 
 /* 共享元素卡片（被点击的）：淡出 + 缩小 */
-html.ps-vt-mode.ps-list-exit .post.post--index[data-ps-vt-name] {
+html.ps-list-exit #swup.ps-vt-mode .post.post--index[data-ps-vt-name] {
 	animation: ps-list-shared-exit var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
 }
 
@@ -150,8 +150,8 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 /* ==================== VT 模式下非 morph 元素淡出 ==================== */
 
 /*
- * VT 模式下被点击卡片的非 morph 元素淡出
- * 这些元素不参与共享元素动画，需要优雅地淡出
+ * 使用 #swup.ps-vt-mode 替代 html.ps-vt-mode
+ * 减少样式计算范围：只检查 #swup 内的元素
  */
 @keyframes ps-vt-fade-out {
 	from {
@@ -164,25 +164,26 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	}
 }
 
-/* 被点击卡片中不参与 morph 的元素 */
-html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
-html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
-html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
+/* 被点击卡片中不参与 morph 的元素淡出 */
+#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
+#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
+#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
 	animation: ps-vt-fade-out calc(var(--ps-vt-duration) * 0.5) var(--ps-anim-ease-out) forwards;
 }
 
 /* ==================== VT 性能优化：隐藏复杂内容 ==================== */
 
 /*
- * VT 期间隐藏文章页容器内的复杂内容，减少快照渲染开销
- * visibility: hidden 保持布局占位，不影响容器尺寸
- * VT 结束后 ps-vt-mode 类移除，内容自动恢复显示
+ * VT 期间隐藏文章页容器内的复杂内容
+ * 使用 display: none 完全从 DOM 树中移除，减少 VT 快照计算开销
+ * 比 content-visibility 更彻底：VT 快照完全跳过这些元素
+ * #swup.ps-vt-mode 类在 VT 结束后移除，内容自动恢复
  */
-html.ps-vt-mode .post.post--single .post-content,
-html.ps-vt-mode .post.post--single .post-comments,
-html.ps-vt-mode .post.post--single .license-info-card,
-html.ps-vt-mode .post.post--single .post-footer {
-	visibility: hidden;
+#swup.ps-vt-mode .post.post--single .post-content,
+#swup.ps-vt-mode .post.post--single .post-comments,
+#swup.ps-vt-mode .post.post--single .license-info-card,
+#swup.ps-vt-mode .post.post--single .post-footer {
+	display: none !important;
 }
 
 /* ==================== 无障碍支持 ==================== */
@@ -195,13 +196,21 @@ html.ps-vt-mode .post.post--single .post-footer {
 	html.ps-page-exit .post.post--index .post-title,
 	html.ps-page-exit .post.post--index .post-meta,
 	html.ps-page-exit .post.post--index .inner-post-wrapper > *,
-	/* VT 模式下非 morph 元素淡出 */
-	html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
-	html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
-	html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
+	/* VT 元素淡出 */
+	#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
+	#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
+	#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
 		animation: none !important;
 		opacity: 1 !important;
 		transform: none !important;
 		will-change: auto !important;
+	}
+
+	/* VT 复杂内容隐藏 */
+	#swup.ps-vt-mode .post.post--single .post-content,
+	#swup.ps-vt-mode .post.post--single .post-comments,
+	#swup.ps-vt-mode .post.post--single .license-info-card,
+	#swup.ps-vt-mode .post.post--single .post-footer {
+		display: block !important;
 	}
 }

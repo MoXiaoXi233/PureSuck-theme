@@ -145,9 +145,11 @@ html.ps-enter-active {
 
 /* ==================== View Transitions 模式 ==================== */
 
-html.ps-vt-mode {
-    /* View Transitions 激活时的样式 */
-}
+/*
+ * ps-vt-mode 现在添加到 #swup 元素而非 html
+ * 使用 :has() 选择器实现对 html 的样式控制
+ * 相关规则已移至 css/animations/vt.css
+ */
 
 /* ==================== 通用动画 ==================== */
 

@@ -41,14 +41,29 @@
   opacity: 0;
   transform: translateY(6px) scale(.985);
   pointer-events: none;
-  transition: opacity .22s cubic-bezier(.2, .9, .2, 1), transform .22s cubic-bezier(.2, .9, .2, 1);
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .1));
+  /* 性能优化：完全从布局树移除，不参与任何计算 */
+  display: none;
 }
 
 .OwO.OwO-open .OwO-body {
+  display: block;
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
+  /* 打开时执行入场动画 */
+  animation: owo-panel-in .22s cubic-bezier(.2, .9, .2, 1) forwards;
+}
+
+@keyframes owo-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .OwO .OwO-panel {

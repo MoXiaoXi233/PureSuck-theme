@@ -38,19 +38,17 @@
     // ==================== 多元素 VT 配置 ====================
     const VT_CONFIG = {
         elements: {
-            container: { prefix: 'ps-post',   listSel: null,            singleSel: null,           required: true },
-            title:     { prefix: 'ps-title',  listSel: '.post-title',   singleSel: '.post-title',  required: true },
-            author:    { prefix: 'ps-author', listSel: '.post-author',  singleSel: '.post-author', required: true }
+            // ★ 简化 VT：只保留容器 morph，减少浏览器计算开销
+            // 多元素 morph 会导致多次快照计算，每次都是长任务
+            container: { prefix: 'ps-post', listSel: null, singleSel: null, required: true }
+            // title 和 author 改为跟随容器动画，不单独 morph
         },
-        // 封面图不单独参与 VT，跟随容器一起动画（避免圆角问题）
         fadeOut: ['.post-excerpt', '.post-footer', '.post-cat-vertical']
     };
 
-    // 追踪当前标记的多个 VT 元素，实现 O(1) 清理
+    // 追踪当前标记的 VT 元素
     let _currentVTElements = {
-        container: null,
-        title: null,
-        author: null
+        container: null
     };
 
     // ==================== 页面类型定义 ====================
@@ -474,9 +472,15 @@
             'ps-post-enter',
             'ps-list-exit',
             'ps-list-enter',
-            'ps-vt-mode',
             'ps-pre-enter'
         );
+        // ★ ps-vt-mode 延迟移除，避免 content-visibility 恢复触发 reflow 阻塞 VT 动画
+        // VT 动画完成后再移除，让 reflow 在动画结束后发生
+        const vtDuration = VT.duration + 50; // 380ms + 50ms 缓冲
+        setTimeout(() => {
+            document.documentElement.classList.remove('ps-vt-mode');
+            getSwupRoot().classList.remove('ps-vt-mode');
+        }, vtDuration);
     }
 
     // ==================== 动画控制器 ====================
@@ -1620,7 +1624,8 @@
             const useVT = isClickingPostFromList || isReturningFromPost;
 
             if (useVT) {
-                document.documentElement.classList.add('ps-vt-mode');
+                // 添加到 #swup 而非 html，减少样式计算范围
+                getSwupRoot().classList.add('ps-vt-mode');
             }
 
             STATE.lastPost.fromSingle = fromType === PageType.POST;
