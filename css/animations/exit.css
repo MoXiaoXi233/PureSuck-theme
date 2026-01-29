@@ -171,6 +171,20 @@ html.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertica
 	animation: ps-vt-fade-out calc(var(--ps-vt-duration) * 0.5) var(--ps-anim-ease-out) forwards;
 }
 
+/* ==================== VT 性能优化：隐藏复杂内容 ==================== */
+
+/*
+ * VT 期间隐藏文章页容器内的复杂内容，减少快照渲染开销
+ * visibility: hidden 保持布局占位，不影响容器尺寸
+ * VT 结束后 ps-vt-mode 类移除，内容自动恢复显示
+ */
+html.ps-vt-mode .post.post--single .post-content,
+html.ps-vt-mode .post.post--single .post-comments,
+html.ps-vt-mode .post.post--single .license-info-card,
+html.ps-vt-mode .post.post--single .post-footer {
+	visibility: hidden;
+}
+
 /* ==================== 无障碍支持 ==================== */
 
 /* 用户偏好减少动画时，禁用所有退出动画 */
