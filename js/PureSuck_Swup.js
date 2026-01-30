@@ -1061,6 +1061,11 @@
         const active = document.activeElement;
         const activeId = active?.id;
 
+        // ★ 保存 respond 元素（可能被移动到 comments-list 内部用于回复）
+        const respond = document.querySelector('.respond');
+        const holder = document.getElementById('comment-form-place-holder');
+        const respondWasInsideList = respond && current.contains(respond);
+
         try {
             const res = await fetch(urlString, {
                 method: 'GET',
@@ -1078,8 +1083,21 @@
             const next = doc.getElementById('comments-list');
             if (!next) return false;
 
+            // ★ 如果 respond 在 comments-list 内部（回复状态），先移出来
+            if (respondWasInsideList && respond && holder) {
+                holder.parentNode.insertBefore(respond, holder);
+            }
+
             // ★ 只替换评论列表，评论表单和OwO保持不变
             current.replaceWith(next);
+
+            // ★ 重置回复状态（清除 parent 字段，隐藏取消按钮）
+            if (respondWasInsideList) {
+                const input = document.getElementById('comment-parent');
+                if (input) input.parentNode.removeChild(input);
+                const cancelBtn = document.getElementById('cancel-comment-reply-link');
+                if (cancelBtn) cancelBtn.style.display = 'none';
+            }
 
             requestAnimationFrame(() => {
                 if (restoreScroll) {
