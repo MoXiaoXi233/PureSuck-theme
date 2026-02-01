@@ -29,7 +29,7 @@
                     <img itemprop="image"
                         src="<?php $this->fields->img(); ?>"
                         alt="头图"
-                        loading="lazy"
+                        loading="eager"
                         decoding="async"
                         fetchpriority="high">
                 </figure>

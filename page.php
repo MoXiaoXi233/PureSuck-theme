@@ -23,7 +23,11 @@
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
                     <img itemprop="image"
-                        src="<?php $this->fields->img(); ?>" alt="头图">
+                        src="<?php $this->fields->img(); ?>"
+                        alt="头图"
+                        loading="eager"
+                        decoding="async"
+                        fetchpriority="high">
                 </figure>
             <?php endif; ?>
 
