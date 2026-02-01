@@ -808,8 +808,8 @@ function Comments_Submit() {
     );
 }
 
-// 保存 mediumZoom 实例引用
-let mediumZoomInstance = null;
+// 保存 mediumZoom 实例引用（全局，供 LazyLoad 使用）
+window.mediumZoomInstance = null;
 
 function runShortcodes(root) {
     history.scrollRestoration = 'auto';
@@ -818,17 +818,18 @@ function runShortcodes(root) {
     handleGoTopButton(root);
     initializeTOC();
 
-    // mediumZoom 初始化（库本身已处理重复绑定）
+    // mediumZoom 初始化
+    // 只绑定已加载完成的图片（排除懒加载中的图片）
     const scope = root && root.querySelector ? root : document;
-    const images = scope.querySelectorAll('[data-zoomable]');
+    const images = scope.querySelectorAll('[data-zoomable]:not([data-lazy-src])');
 
     if (images.length > 0) {
-        if (mediumZoomInstance) {
+        if (window.mediumZoomInstance) {
             // 增量绑定新图片
-            mediumZoomInstance.attach(images);
+            window.mediumZoomInstance.attach(images);
         } else {
             // 首次初始化
-            mediumZoomInstance = mediumZoom('[data-zoomable]', {
+            window.mediumZoomInstance = mediumZoom('[data-zoomable]:not([data-lazy-src])', {
                 background: 'rgba(0, 0, 0, 0.85)',
                 margin: 24
             });

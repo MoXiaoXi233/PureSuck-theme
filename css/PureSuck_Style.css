@@ -2090,6 +2090,24 @@ textarea:focus-within+.CtBoxBar {
 	object-position: center;
 }
 
+/* ==================== 懒加载样式 ==================== */
+/* 懒加载图片：加载完成淡入 */
+img.lazy-loaded {
+	animation: lazy-fade-in 0.25s ease-out;
+}
+
+@keyframes lazy-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+	img.lazy-loaded {
+		animation: none;
+	}
+}
+
 /* 文章版权信息卡片 */
 .license-info-card {
 	--_theme-soft: color-mix(in srgb, var(--themecolor) 14%, transparent);

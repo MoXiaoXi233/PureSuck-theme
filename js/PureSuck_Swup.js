@@ -1584,7 +1584,7 @@
             }
         }, true);
 
-        // ========== 点击事件：设置 VT 共享元素 ==========
+        // ========== 点击事件：设置 VT 共享元素 + 预加载图片 ==========
         document.addEventListener('click', (event) => {
             if (!isValidMouseClick(event)) return;
 
@@ -1602,6 +1602,11 @@
 
             rememberLastPostKey(postKey);
             applyPostSharedElementName(postCard, postKey);
+
+            // ★ VT 动画前预加载卡片内的图片（确保动画流畅）
+            if (typeof window.LazyLoadManager !== 'undefined') {
+                window.LazyLoadManager.loadForVT(postCard);
+            }
         }, true);
 
         // ========== 动画流程：visit:start ==========
@@ -1623,8 +1628,27 @@
             STATE.lastNavigation.toUrl = visit.to?.url || '';
             STATE.lastNavigation.isSwup = true;
 
-            // ★ 确保旧页面元素在 VT 开始前已设置 viewTransitionName
-            ensureOldPageViewTransitionName(fromType);
+            // 检测是否使用 View Transitions
+            const clickedPostCard = document.querySelector(VT.markerSelector);
+            const isClickingPostFromList = fromType === PageType.LIST && clickedPostCard;
+
+            // 从文章页返回时，检查是否有记录的 postKey（用于匹配列表页卡片）
+            const lastPostKey = STATE.lastPost.key || history.state?.lastPostKey;
+            const isReturningFromPost = fromType === PageType.POST && lastPostKey;
+
+            // 列表→文章（有点击的卡片）或 文章→列表（有记录的 key）才使用 VT
+            const useVT = isClickingPostFromList || isReturningFromPost;
+
+            if (useVT) {
+                // ★ 确保旧页面元素在 VT 开始前已设置 viewTransitionName
+                ensureOldPageViewTransitionName(fromType);
+                // 添加到 #swup 而非 html，减少样式计算范围
+                getSwupRoot().classList.add('ps-vt-mode');
+            } else {
+                // ★ 没有 VT 共享元素时，清除所有 viewTransitionName
+                // 避免旧元素残留导致的视觉问题
+                clearAllVTNames();
+            }
 
             // 添加动画状态类
             document.documentElement.classList.add('ps-animating');
@@ -1632,19 +1656,6 @@
             // 预隐藏类：在 DOM 替换前添加，确保新内容被 CSS 自动隐藏
             // 解决闪烁问题：DOM 替换后、JS 执行前，内容已被隐藏
             document.documentElement.classList.add('ps-pre-enter');
-
-            // 检测是否使用 View Transitions
-            const clickedPostCard = document.querySelector(VT.markerSelector);
-            const isClickingPostFromList = fromType === PageType.LIST && clickedPostCard;
-            const isReturningFromPost = fromType === PageType.POST;
-
-            // 列表→文章 或 文章→列表 都使用 VT
-            const useVT = isClickingPostFromList || isReturningFromPost;
-
-            if (useVT) {
-                // 添加到 #swup 而非 html，减少样式计算范围
-                getSwupRoot().classList.add('ps-vt-mode');
-            }
 
             STATE.lastPost.fromSingle = fromType === PageType.POST;
         });
@@ -1710,6 +1721,11 @@
                         hasSharedElement
                     }
                 }));
+
+                // ★ 重新观察新内容中的懒加载图片
+                if (typeof window.LazyLoadManager !== 'undefined') {
+                    window.LazyLoadManager.observe(getSwupRoot());
+                }
 
                 runEnterAnimation(toType, hasSharedElement);
             });

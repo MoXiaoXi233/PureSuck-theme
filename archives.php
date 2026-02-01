@@ -30,7 +30,8 @@ $this->need('header.php');
             <?php if ($hasImg): ?>
                 <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
                     <img itemprop="image"
-                        src="<?php $this->fields->img(); ?>" alt="头图">
+                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        data-lazy-src="<?php $this->fields->img(); ?>" alt="头图" decoding="async">
                 </figure>
             <?php endif; ?>
 

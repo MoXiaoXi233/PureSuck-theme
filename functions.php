@@ -636,10 +636,23 @@ function add_zoomable_to_images($content)
             if (strpos($img, 'data-zoomable') === false) {
                 $img = preg_replace('/<img/', '<img data-zoomable', $img);
             }
-            
-            // 添加 loading="lazy" 属性(如果还没有)
-            if (strpos($img, 'loading=') === false) {
-                $img = preg_replace('/<img/', '<img loading="lazy"', $img);
+
+            // 使用自定义懒加载（与 Swup/VT 动画兼容）
+            // 将 src 转换为 data-lazy-src
+            if (strpos($img, 'data-lazy-src') === false && strpos($img, 'loading="eager"') === false) {
+                // 提取原始 src
+                if (preg_match('/src=["\']([^"\']+)["\']/', $img, $srcMatch)) {
+                    $originalSrc = $srcMatch[1];
+                    // 替换 src 为占位图，添加 data-lazy-src
+                    $placeholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    $img = preg_replace('/src=["\'][^"\']+["\']/', 'src="' . $placeholder . '" data-lazy-src="' . htmlspecialchars($originalSrc, ENT_QUOTES) . '"', $img);
+                }
+
+                // 处理 srcset（如果存在）
+                if (preg_match('/srcset=["\']([^"\']+)["\']/', $img, $srcsetMatch)) {
+                    $originalSrcset = $srcsetMatch[1];
+                    $img = preg_replace('/srcset=["\'][^"\']+["\']/', 'data-lazy-srcset="' . htmlspecialchars($originalSrcset, ENT_QUOTES) . '"', $img);
+                }
             }
         }
  
