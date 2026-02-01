@@ -73,6 +73,7 @@
     <?php if ($this->options->postTitleAfter != 'off'): ?>
         <style>
             .post-title::after {
+                content: "";
                 bottom:
                     <?php echo $this->options->postTitleAfter == 'wavyLine' ? '-5px' : '5px'; ?>
                 ;

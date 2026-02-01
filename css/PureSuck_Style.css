@@ -387,8 +387,9 @@ h3::before {
 	top: 30px;
 }
 
-#comments>h1.comment-title::before {
+#comments-list>h1.comment-title::before {
 	content: "";
+	right: 3px;
 	display: block;
 	width: 8px;
 	height: 8px;
@@ -449,6 +450,12 @@ small {
 		top: 35px;
 	}
 
+	#comments-list>h1.comment-title::before {
+		width: 10px;
+		height: 10px;
+		top: 35px;
+	}
+
 	.h3,
 	h3 {
 		line-height: 36px
@@ -484,6 +491,12 @@ small {
 	}
 
 	h2::before {
+		width: 12px;
+		height: 12px;
+		top: 40px;
+	}
+
+	#comments-list>h1.comment-title::before {
 		width: 12px;
 		height: 12px;
 		top: 40px;
@@ -2044,7 +2057,7 @@ textarea:focus-within+.CtBoxBar {
 }
 
 .post-title::after {
-	content: "";
+	content: none;
 	position: absolute;
 	left: 0;
 	bottom: 6px;
