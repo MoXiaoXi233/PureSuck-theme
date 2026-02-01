@@ -107,9 +107,6 @@
         </div>
     </div>
 
-    <!-- CSS引入 -->
-    <link rel="stylesheet" href="<?= $this->options->themeUrl('css/OwO.min.css'); ?>">
-
 <?php else: ?>
     <div>
         <h3><?php _e('评论已关闭'); ?></h3>

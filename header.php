@@ -67,6 +67,7 @@
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/PureSuck_Module.css'); ?>">
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/MoxDesign.css'); ?>">
     <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/animations/index.css'); ?>">
+    <link rel="stylesheet" href="<?php $this->options->themeUrl('/css/OwO.min.css'); ?>">
 
     <!-- 标题线条 -->
     <?php if ($this->options->postTitleAfter != 'off'): ?>
