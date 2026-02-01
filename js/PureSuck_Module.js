@@ -823,17 +823,17 @@ function runShortcodes(root) {
     const scope = root && root.querySelector ? root : document;
     const images = scope.querySelectorAll('[data-zoomable]:not([data-lazy-src])');
 
+    // 确保实例始终存在（即使当前没有图片）
+    if (!window.mediumZoomInstance) {
+        window.mediumZoomInstance = mediumZoom({
+            background: 'rgba(0, 0, 0, 0.85)',
+            margin: 24
+        });
+    }
+
+    // 增量绑定新图片
     if (images.length > 0) {
-        if (window.mediumZoomInstance) {
-            // 增量绑定新图片
-            window.mediumZoomInstance.attach(images);
-        } else {
-            // 首次初始化
-            window.mediumZoomInstance = mediumZoom('[data-zoomable]:not([data-lazy-src])', {
-                background: 'rgba(0, 0, 0, 0.85)',
-                margin: 24
-            });
-        }
+        window.mediumZoomInstance.attach(images);
     }
 
     Comments_Submit();
