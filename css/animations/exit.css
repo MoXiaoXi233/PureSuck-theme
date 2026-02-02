@@ -1,32 +1,12 @@
-/**
- * PureSuck 主题退出动画
- * 
- * 包含：
- * - 列表页退出动画
- * - 文章页退出动画
- * - 独立页面退出动画
- * - VT 模式下的特殊退出动画
- * 
- * 动画设计原则：
- * 1. 退出动画：淡出 + 轻微缩小 + 方向性位移
- * 2. 对称性：退出和进入形成视觉对称
- * 3. 层次感：主要元素先动，次要元素后动
- * 4. GPU 加速：使用 transform: translate3d 和 will-change
- */
+/* PureSuck 退出动画 */
 
-/* ==================== 列表页退出动画 ==================== */
-
-/*
- * 列表页退出动画
- * 效果：卡片逐个淡出 + 缩小 + 轻微上移
- * 使用 GPU 加速优化性能
- */
+/* 列表页退出动画 */
 html.ps-list-exit .post.post--index {
 	animation: ps-list-exit-out var(--ps-anim-duration-normal) var(--ps-anim-ease-out) forwards;
 	animation-fill-mode: both;
 }
 
-/* VT模式下的列表卡片退出动画（用于非点击的卡片） */
+/* VT 模式下的列表卡片退出动画（用于非点击的卡片） */
 html.ps-list-exit #swup.ps-vt-mode .post.post--index:not([data-ps-vt-name]) {
 	animation: ps-list-card-exit-for-vt var(--ps-anim-duration-vt) var(--ps-anim-ease-out) forwards;
 }
@@ -92,19 +72,10 @@ html.ps-list-exit .main-lastinfo {
 	animation-delay: 100ms;
 }
 
-/* ==================== 文章页退出动画 ==================== */
-
-/*
- * 文章页退出动画
- * 效果：整体淡出 + 轻微上移 + 缩小
- */
+/* 文章页退出动画 */
 html.ps-post-exit .post.post--single {
 	animation: ps-post-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
 }
-
-/* 文章页内容分段退出 - 已移除以避免与父元素动画冲突 */
-/* 子元素会跟随父元素 .post.post--single 的动画一起退出 */
-/* 这样可以避免合成失败，提升性能 */
 
 /* 文章页退出动画关键帧 */
 @keyframes ps-post-exit-out {
@@ -118,19 +89,10 @@ html.ps-post-exit .post.post--single {
 	}
 }
 
-/* ==================== 独立页面退出动画 ==================== */
-
-/*
- * 独立页面退出动画
- * 效果：卡片淡出 + 上移 + 缩小
- */
+/* 独立页面退出动画 */
 html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	animation: ps-page-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
 }
-
-/* 独立页面内部内容退出 - 已移除以避免与父元素动画冲突 */
-/* 子元素会跟随父元素 .post.post--index.main-item 的动画一起退出 */
-/* 这样可以避免合成失败，提升性能 */
 
 /* 独立页面退出动画关键帧 */
 @keyframes ps-page-exit-out {
@@ -144,15 +106,7 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	}
 }
 
-/* ps-page-inner-exit-out 动画已移除 - 不再需要 */
-/* 子元素跟随父元素动画，避免动画冲突 */
-
-/* ==================== VT 模式下非 morph 元素淡出 ==================== */
-
-/*
- * 使用 #swup.ps-vt-mode 替代 html.ps-vt-mode
- * 减少样式计算范围：只检查 #swup 内的元素
- */
+/* VT 模式下非 morph 元素淡出 */
 @keyframes ps-vt-fade-out {
 	from {
 		opacity: 1;
@@ -171,14 +125,7 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	animation: ps-vt-fade-out calc(var(--ps-vt-duration) * 0.5) var(--ps-anim-ease-out) forwards;
 }
 
-/* ==================== VT 性能优化：隐藏复杂内容 ==================== */
-
-/*
- * VT 期间隐藏文章页容器内的复杂内容
- * 使用 display: none 完全从 DOM 树中移除，减少 VT 快照计算开销
- * 比 content-visibility 更彻底：VT 快照完全跳过这些元素
- * #swup.ps-vt-mode 类在 VT 结束后移除，内容自动恢复
- */
+/* VT 性能优化：隐藏复杂内容 */
 #swup.ps-vt-mode .post.post--single .post-content,
 #swup.ps-vt-mode .post.post--single .post-comments,
 #swup.ps-vt-mode .post.post--single .license-info-card,
@@ -186,9 +133,7 @@ html.ps-page-exit .post.post--index.main-item:not(.post--single) {
 	display: none !important;
 }
 
-/* ==================== 无障碍支持 ==================== */
-
-/* 用户偏好减少动画时，禁用所有退出动画 */
+/* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {
 	html.ps-page-exit .post.post--index.main-item:not(.post--single),
 	html.ps-post-exit .post.post--single,

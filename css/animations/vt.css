@@ -1,39 +1,16 @@
-/**
- * PureSuck 主题 View Transitions 样式
- *
- * 包含：
- * - View Transitions API 基础配置
- * - 主题切换动画
- * - VT 模式下的页面过渡
- * - VT 性能优化
- *
- * View Transitions API 说明：
- * - 使用 ::view-transition-old 和 ::view-transition-new 伪元素
- * - 支持共享元素动画（morphing）
- * - 自动处理页面切换的视觉效果
- */
+/* PureSuck View Transitions 样式 */
 
-/* ==================== View Transitions API 基础配置 ==================== */
-
-/* 启用 View Transitions API 的自动导航 */
+/* View Transitions API 基础配置 */
 @view-transition {
 	navigation: auto;
 }
 
-/* 保持 morph 聚焦于共享元素，避免全页面交叉淡入淡出 */
 ::view-transition-old(root),
 ::view-transition-new(root) {
 	animation: none;
 }
 
-/* ==================== 主题切换动画 ==================== */
-
-/*
- * 主题切换时的 View Transitions 动画
- * 使用 ps-theme-vt 类标识主题切换过程
- */
-
-/* 主题切换统一动画（通过 reverse 反向播放实现淡入） */
+/* 主题切换动画 */
 @keyframes ps-theme-fade {
 	from {
 		opacity: 1;
@@ -43,7 +20,6 @@
 	}
 }
 
-/* 主题切换时的 VT 动画 */
 html.ps-theme-vt::view-transition-old(root) {
 	animation: ps-theme-fade var(--ps-anim-duration-vt) ease forwards;
 }
@@ -53,32 +29,17 @@ html.ps-theme-vt::view-transition-new(root) {
 	animation-delay: 40ms;
 }
 
-/* ==================== 共享元素 View Transitions ==================== */
-
-/*
- * 使用 [data-ps-vt-name] 属性选择器替代 html.ps-vt-mode
- * 减少样式计算范围：只检查已标记元素，而非全部 DOM
- */
-
-/* 共享元素容器 - 基础样式 */
+/* 共享元素 View Transitions */
 [data-ps-vt-name] {
 	contain: layout style;
 }
 
-/* ==================== 单元素 VT（简化版） ==================== */
-
-/*
- * 简化 VT：只保留容器 morph，减少浏览器计算开销
- * 多元素 morph 会导致多次快照计算，每次都是长任务
- * title 和 author 改为跟随容器动画，不单独 morph
- */
+/* 单元素 VT（简化版） */
 [data-ps-vt-name^="ps-post-"] {
 	contain: layout style;
 }
 
-/* ==================== 共享元素动画关键帧 ==================== */
-
-/* 统一的退出动画 */
+/* 共享元素动画关键帧 */
 @keyframes ps-vt-shared-exit {
 	from {
 		opacity: 1;
@@ -90,7 +51,6 @@ html.ps-theme-vt::view-transition-new(root) {
 	}
 }
 
-/* 统一的进入动画 */
 @keyframes ps-vt-shared-enter {
 	0% {
 		opacity: 0;
@@ -125,19 +85,12 @@ html.ps-theme-vt::view-transition-new(root) {
 	overflow: hidden;
 }
 
-/* ==================== VT 模式下的页面过渡优化 ==================== */
-
-/*
- * VT 期间滚动控制
- * 使用 :has() 选择器检测 #swup.ps-vt-mode，避免在 html 上添加类
- */
+/* VT 模式下的页面过渡优化 */
 html:has(#swup.ps-vt-mode) {
 	scroll-behavior: auto !important;
 }
 
-/* ==================== 无障碍支持 ==================== */
-
-/* 用户偏好减少动画时，禁用 VT 动画 */
+/* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {
 	@view-transition {
 		navigation: auto;
@@ -159,9 +112,7 @@ html:has(#swup.ps-vt-mode) {
 	}
 }
 
-/* ==================== VT 性能优化 ==================== */
-
-/* 使用 contain 属性优化 VT 性能 */
+/* VT 性能优化 */
 ::view-transition-image-pair(root) {
 	isolation: isolate;
 }

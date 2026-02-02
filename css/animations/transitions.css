@@ -1,53 +1,33 @@
-/**
- * PureSuck 主题动画基础设置
- * 
- * 包含：
- * - CSS 动画变量定义
- * - 动画基础设置
- * - 预加载状态（防止首屏闪烁）
- * - Swup 导航期间的状态控制
- */
+/* PureSuck 动画基础设置 */
 
-/* ==================== 动画变量定义 ==================== */
-
+/* 动画变量定义 */
 :root {
-	/* 动画时长变量 - 可在主题配置中覆盖 */
 	--ps-anim-duration-fast: 180ms;
 	--ps-anim-duration-normal: 240ms;
 	--ps-anim-duration-slow: 320ms;
 	--ps-anim-duration-vt: 380ms;
-	
-	/* 动画缓动函数 */
+
 	--ps-anim-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
 	--ps-anim-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-	
-	/* 动画位移距离 */
+
 	--ps-anim-translate-small: 12px;
 	--ps-anim-translate-medium: 24px;
 	--ps-anim-translate-large: 48px;
-	
-	/* 动画缩放比例 */
+
 	--ps-anim-scale-exit: 0.96;
 	--ps-anim-scale-enter: 0.98;
 
-	/* View Transitions 语义别名（单一来源定义） */
 	--ps-vt-duration: var(--ps-anim-duration-vt);
 	--ps-vt-easing: cubic-bezier(0.22, 0.68, 0.35, 1.0);
 	--ps-vt-radius: 0.85rem;
 }
 
-/* ==================== Swup 导航期间的状态控制 ==================== */
-
-/* Swup 导航期间禁止平滑滚动（避免 scrollTo/锚点触发"滑动上去"） */
+/* Swup 导航状态控制 */
 html.is-animating {
 	scroll-behavior: auto !important;
 }
 
-/* ==================== 预加载状态（防止首屏闪烁） ====================
- * 这些类在CSS加载前通过内联脚本添加到html元素上
- * 确保页面首次渲染时元素就处于动画初始状态
- * 注意：不使用will-change，避免性能问题
- */
+/* 预加载状态（防止首屏闪烁） */
 
 /* 列表页预加载状态 */
 html.ps-preload-list-enter .post.post--index,
@@ -83,9 +63,7 @@ html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	transform: translate3d(0, 12px, 0) !important;
 }
 
-/* ==================== 无障碍支持 ==================== */
-
-/* 用户偏好减少动画时，禁用所有动画 */
+/* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {
 	html.ps-preload-list-enter .post.post--index,
 	html.ps-preload-list-enter .archive-title,
@@ -103,11 +81,11 @@ html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 		opacity: 1 !important;
 		transform: none !important;
 	}
-	
+
 	html.ps-animating {
 		scroll-behavior: auto !important;
 	}
-	
+
 	html.ps-animating *,
 	html.ps-animating *::before,
 	html.ps-animating *::after {
@@ -116,9 +94,7 @@ html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	}
 }
 
-/* ==================== 滚动条控制 ==================== */
-
-/* 动画期间保持滚动条稳定 */
+/* 滚动条控制 */
 html.ps-animating {
 	scrollbar-gutter: stable;
 }

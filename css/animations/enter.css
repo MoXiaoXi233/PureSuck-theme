@@ -1,25 +1,6 @@
-/**
- * PureSuck 主题进入动画
- * 
- * 包含：
- * - 列表页进入动画（CSS辅助初始状态，主体动画由JS控制）
- * - 文章页进入动画（CSS辅助初始状态）
- * - 独立页面进入动画（CSS辅助初始状态）
- * - VT 模式下的特殊进入动画
- * 
- * 动画设计原则：
- * 1. 进入动画：淡入 + 轻微放大 + 反向位移
- * 2. 对称性：退出和进入形成视觉对称
- * 3. 层次感：主要元素先动，次要元素后动
- * 4. GPU 加速：使用 transform: translate3d 和 will-change
- */
+/* PureSuck 进入动画 */
 
-/* ==================== 列表页进入动画 ==================== */
-
-/*
- * 列表页进入动画（CSS辅助初始状态，主体动画由JS控制）
- * 设置初始状态，等待 JS 添加动画类
- */
+/* 列表页进入动画 */
 html.ps-list-enter .post.post--index,
 html.ps-list-enter .archive-title {
 	opacity: 0;
@@ -31,9 +12,7 @@ html.ps-list-enter .main-lastinfo {
 	transform: translate3d(0, var(--ps-anim-translate-medium), 0);
 }
 
-/* ==================== 文章页进入动画 ==================== */
-
-/* 文章页进入动画 - 子元素 will-change 由 JS 动态控制，限定前24个元素 */
+/* 文章页进入动画 */
 html.ps-post-enter .post.post--single .post-meta,
 html.ps-post-enter .post.post--single .post-content > *:nth-child(-n+24),
 html.ps-post-enter .post.post--single .protected-block,
@@ -42,8 +21,6 @@ html.ps-post-enter .post.post--single .post-comments {
 	opacity: 0;
 	transform: translate3d(0, var(--ps-anim-translate-small), 0);
 }
-
-/* ==================== 独立页面进入动画 ==================== */
 
 /* 独立页面进入动画 */
 html.ps-page-enter .post.post--index.main-item:not(.post--single) {
@@ -57,14 +34,7 @@ html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	transform: translate3d(0, 16px, 0);
 }
 
-/* ==================== 进入动画关键帧（JS控制使用） ==================== */
-
-/*
- * 这些关键帧由 JS 动态添加到元素上
- * CSS 只提供初始状态，JS 负责触发动画
- */
-
-/* 列表页进入动画 */
+/* 进入动画关键帧（JS控制使用） */
 @keyframes ps-list-enter-in {
 	from {
 		opacity: 0;
@@ -76,7 +46,6 @@ html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	}
 }
 
-/* 文章页进入动画 */
 @keyframes ps-post-enter-in {
 	from {
 		opacity: 0;
@@ -88,7 +57,6 @@ html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	}
 }
 
-/* 独立页面进入动画 */
 @keyframes ps-page-enter-in {
 	from {
 		opacity: 0;
@@ -100,9 +68,7 @@ html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
 	}
 }
 
-/* ==================== 无障碍支持 ==================== */
-
-/* 用户偏好减少动画时，禁用所有进入动画 */
+/* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {
 	html.ps-page-enter .post.post--index.main-item:not(.post--single),
 	html.ps-page-enter .post.post--index .post-title,
