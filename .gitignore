@@ -6,3 +6,6 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Theme cache
+cache/

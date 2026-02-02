@@ -109,6 +109,462 @@ function TOC_Generate($content)
     return $result['content'];
 }
 
+// GitHub repo card helpers
+function ps_github_parse_repo($input)
+{
+    $input = trim((string)$input);
+    if ($input === '') {
+        return null;
+    }
+
+    $input = htmlspecialchars_decode($input, ENT_QUOTES);
+    $input = trim($input);
+
+    $owner = '';
+    $repo = '';
+
+    if (preg_match('~^(https?:)?//github\.com/([^/\s]+)/([^/\s\#?]+)~i', $input, $matches)) {
+        $owner = $matches[2];
+        $repo = $matches[3];
+    } elseif (preg_match('~^github\.com/([^/\s]+)/([^/\s\#?]+)~i', $input, $matches)) {
+        $owner = $matches[1];
+        $repo = $matches[2];
+    } elseif (preg_match('#^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$#', $input, $matches)) {
+        $owner = $matches[1];
+        $repo = $matches[2];
+    }
+
+    $repo = preg_replace('/\.git$/i', '', $repo);
+
+    if ($owner === '' || $repo === '') {
+        return null;
+    }
+
+    if (!preg_match('/^[A-Za-z0-9_.-]+$/', $owner) || !preg_match('/^[A-Za-z0-9_.-]+$/', $repo)) {
+        return null;
+    }
+
+    return [
+        'owner' => $owner,
+        'repo' => $repo,
+        'url' => 'https://github.com/' . $owner . '/' . $repo
+    ];
+}
+
+function ps_github_parse_user($input)
+{
+    $input = trim((string)$input);
+    if ($input === '') {
+        return null;
+    }
+
+    $input = htmlspecialchars_decode($input, ENT_QUOTES);
+    $input = trim($input);
+    $input = preg_replace('~^https?://~i', '', $input);
+    $input = preg_replace('~^//~', '', $input);
+
+    if (stripos($input, 'github.com/') === 0) {
+        $input = substr($input, strlen('github.com/'));
+    }
+
+    $input = preg_replace('/[?#].*$/', '', $input);
+    $input = trim($input, "/ \t\n\r\0\x0B");
+
+    if ($input === '' || strpos($input, '/') !== false) {
+        return null;
+    }
+
+    if (!preg_match('/^[A-Za-z0-9-]+$/', $input)) {
+        return null;
+    }
+
+    return [
+        'user' => $input,
+        'url' => 'https://github.com/' . $input
+    ];
+}
+
+function ps_github_cache_dir()
+{
+    return dirname(__DIR__) . '/cache/github';
+}
+
+function ps_github_cache_path($key)
+{
+    return ps_github_cache_dir() . '/' . md5($key) . '.json';
+}
+
+function ps_github_cache_get($key, $ttl)
+{
+    $path = ps_github_cache_path($key);
+    if (!is_file($path)) {
+        return null;
+    }
+
+    $content = @file_get_contents($path);
+    if ($content === false) {
+        return null;
+    }
+
+    $cache = json_decode($content, true);
+    if (!is_array($cache) || empty($cache['data'])) {
+        return null;
+    }
+
+    $cache['fresh'] = isset($cache['fetched_at']) && (time() - (int)$cache['fetched_at'] < $ttl);
+    return $cache;
+}
+
+function ps_github_cache_set($key, $data, $etag = null)
+{
+    $dir = ps_github_cache_dir();
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+
+    $payload = [
+        'fetched_at' => time(),
+        'etag' => $etag,
+        'data' => $data
+    ];
+
+    @file_put_contents(
+        ps_github_cache_path($key),
+        json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+    );
+}
+
+function ps_github_parse_headers($headers)
+{
+    $status = 0;
+    $etag = null;
+
+    if (!is_array($headers)) {
+        return ['status' => $status, 'etag' => $etag];
+    }
+
+    foreach ($headers as $header) {
+        if ($status === 0 && preg_match('#^HTTP/\\S+\\s+(\\d{3})#i', $header, $matches)) {
+            $status = (int)$matches[1];
+        }
+
+        if ($etag === null && stripos($header, 'ETag:') === 0) {
+            $etagValue = trim(substr($header, 5));
+            $etag = trim($etagValue);
+        }
+    }
+
+    return ['status' => $status, 'etag' => $etag];
+}
+
+function ps_github_fetch_repo($owner, $repo)
+{
+    $fullName = $owner . '/' . $repo;
+    $cacheKey = 'repo:v2:' . $fullName;
+    $ttl = 6 * 3600;
+    $cache = ps_github_cache_get($cacheKey, $ttl);
+
+    if ($cache && !empty($cache['fresh'])) {
+        return ['data' => $cache['data'], 'stale' => false];
+    }
+
+    $headers = "User-Agent: PureSuck-Theme\r\nAccept: application/vnd.github+json\r\n";
+    if ($cache && !empty($cache['etag'])) {
+        $headers .= "If-None-Match: {$cache['etag']}\r\n";
+    }
+
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => $headers,
+            'timeout' => 6
+        ]
+    ]);
+
+    $url = "https://api.github.com/repos/{$owner}/{$repo}";
+    $response = @file_get_contents($url, false, $context);
+    $parsed = ps_github_parse_headers(isset($http_response_header) ? $http_response_header : []);
+    $status = $parsed['status'];
+    $etag = $parsed['etag'] ?: ($cache['etag'] ?? null);
+
+    if ($status === 304 && $cache) {
+        ps_github_cache_set($cacheKey, $cache['data'], $etag);
+        return ['data' => $cache['data'], 'stale' => false];
+    }
+
+    if ($response !== false && $status >= 200 && $status < 300) {
+        $data = json_decode($response, true);
+        if (is_array($data) && isset($data['full_name'])) {
+            $payload = [
+                'name' => $data['name'] ?? $repo,
+                'owner' => $data['owner']['login'] ?? $owner,
+                'html_url' => $data['html_url'] ?? "https://github.com/{$owner}/{$repo}",
+                'description' => $data['description'] ?? '',
+                'stargazers_count' => (int)($data['stargazers_count'] ?? 0),
+                'language' => $data['language'] ?? '',
+                'updated_at' => $data['updated_at'] ?? ''
+            ];
+            ps_github_cache_set($cacheKey, $payload, $etag);
+            return ['data' => $payload, 'stale' => false];
+        }
+    }
+
+    if ($cache && !empty($cache['data'])) {
+        return ['data' => $cache['data'], 'stale' => true, 'error' => $status];
+    }
+
+    return ['error' => $status];
+}
+
+function ps_github_fetch_user($user)
+{
+    $key = 'user:v2:' . $user;
+    $ttl = 6 * 3600;
+    $cache = ps_github_cache_get($key, $ttl);
+
+    if ($cache && !empty($cache['fresh'])) {
+        return ['data' => $cache['data'], 'stale' => false];
+    }
+
+    $headers = "User-Agent: PureSuck-Theme\r\nAccept: application/vnd.github+json\r\n";
+    if ($cache && !empty($cache['etag'])) {
+        $headers .= "If-None-Match: {$cache['etag']}\r\n";
+    }
+
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => $headers,
+            'timeout' => 6
+        ]
+    ]);
+
+    $url = "https://api.github.com/users/{$user}";
+    $response = @file_get_contents($url, false, $context);
+    $parsed = ps_github_parse_headers(isset($http_response_header) ? $http_response_header : []);
+    $status = $parsed['status'];
+    $etag = $parsed['etag'] ?: ($cache['etag'] ?? null);
+
+    if ($status === 304 && $cache) {
+        ps_github_cache_set($key, $cache['data'], $etag);
+        return ['data' => $cache['data'], 'stale' => false];
+    }
+
+    if ($response !== false && $status >= 200 && $status < 300) {
+        $data = json_decode($response, true);
+        if (is_array($data) && isset($data['login'])) {
+            $payload = [
+                'login' => $data['login'],
+                'name' => $data['name'] ?? '',
+                'avatar_url' => $data['avatar_url'] ?? '',
+                'html_url' => $data['html_url'] ?? "https://github.com/{$user}",
+                'bio' => $data['bio'] ?? '',
+                'followers' => (int)($data['followers'] ?? 0),
+                'public_repos' => (int)($data['public_repos'] ?? 0)
+            ];
+            ps_github_cache_set($key, $payload, $etag);
+            return ['data' => $payload, 'stale' => false];
+        }
+    }
+
+    if ($cache && !empty($cache['data'])) {
+        return ['data' => $cache['data'], 'stale' => true, 'error' => $status];
+    }
+
+    return ['error' => $status];
+}
+
+function ps_github_format_stars($stars)
+{
+    $stars = (int)$stars;
+    if ($stars < 1000) {
+        return (string)$stars;
+    }
+
+    if ($stars < 1000000) {
+        $value = round($stars / 1000, 1);
+        return rtrim(rtrim((string)$value, '0'), '.') . 'k';
+    }
+
+    if ($stars < 1000000000) {
+        $value = round($stars / 1000000, 1);
+        return rtrim(rtrim((string)$value, '0'), '.') . 'M';
+    }
+
+    $value = round($stars / 1000000000, 1);
+    return rtrim(rtrim((string)$value, '0'), '.') . 'B';
+}
+
+function ps_github_language_color($language)
+{
+    $map = [
+        'JavaScript' => '#f1e05a',
+        'TypeScript' => '#3178c6',
+        'Python' => '#3572A5',
+        'PHP' => '#4F5D95',
+        'Go' => '#00ADD8',
+        'Rust' => '#dea584',
+        'Java' => '#b07219',
+        'C++' => '#f34b7d',
+        'C#' => '#178600',
+        'C' => '#555555',
+        'HTML' => '#e34c26',
+        'CSS' => '#563d7c',
+        'Vue' => '#41b883',
+        'Shell' => '#89e051',
+        'Swift' => '#F05138',
+        'Kotlin' => '#A97BFF',
+        'Dart' => '#00B4AB',
+        'Ruby' => '#701516'
+    ];
+
+    if ($language && isset($map[$language])) {
+        return $map[$language];
+    }
+
+    return 'var(--themecolor)';
+}
+
+function ps_github_render_error($message, $url = '')
+{
+    $safeMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+    $safeUrl = $url ? htmlspecialchars($url, ENT_QUOTES, 'UTF-8') : '';
+
+    $linkHtml = $safeUrl
+        ? '<a class="github-card-error-link" href="' . $safeUrl . '" target="_blank" rel="noopener noreferrer">查看仓库</a>'
+        : '';
+
+    return '<div class="github-card github-card-error" role="status">'
+        . '<div class="github-card-header">'
+        . '<span class="github-card-icon"><i class="icon icon-github-circled"></i></span>'
+        . '<div class="github-card-title-wrap">'
+        . '<div class="github-card-title">GitHub Repo</div>'
+        . '<div class="github-card-owner">加载失败</div>'
+        . '</div>'
+        . '</div>'
+        . '<div class="github-card-desc">' . $safeMessage . '</div>'
+        . ($linkHtml ? '<div class="github-card-meta">' . $linkHtml . '</div>' : '')
+        . '</div>';
+}
+
+function ps_github_render_card($url)
+{
+    $userInfo = ps_github_parse_user($url);
+    if ($userInfo) {
+        $result = ps_github_fetch_user($userInfo['user']);
+        if (empty($result['data'])) {
+            if (isset($result['error']) && (int)$result['error'] === 404) {
+                return ps_github_render_error('User not found.', $userInfo['url']);
+            }
+            if (isset($result['error']) && (int)$result['error'] === 403) {
+                return ps_github_render_error('GitHub API rate limited.', $userInfo['url']);
+            }
+            return ps_github_render_error('Failed to fetch GitHub profile.', $userInfo['url']);
+        }
+
+        $data = $result['data'];
+        $login = htmlspecialchars($data['login'] ?? $userInfo['user'], ENT_QUOTES, 'UTF-8');
+        $name = trim((string)($data['name'] ?? ''));
+        $title = $name !== '' ? htmlspecialchars($name, ENT_QUOTES, 'UTF-8') : $login;
+        $bio = trim((string)($data['bio'] ?? ''));
+        if ($bio === '') {
+            $bio = 'No bio provided.';
+        }
+        $bio = htmlspecialchars($bio, ENT_QUOTES, 'UTF-8');
+        $followers = ps_github_format_stars($data['followers'] ?? 0);
+        $repos = (int)($data['public_repos'] ?? 0);
+        $link = htmlspecialchars($data['html_url'] ?? $userInfo['url'], ENT_QUOTES, 'UTF-8');
+        $avatar = trim((string)($data['avatar_url'] ?? ''));
+        $mediaHtml = $avatar !== ''
+            ? '<span class="github-card-media github-card-media-avatar"><img src="' . htmlspecialchars($avatar, ENT_QUOTES, 'UTF-8') . '" alt="' . $login . '" class="github-card-media-img no-zoom no-figcaption" loading="lazy"></span>'
+            : '';
+
+        return '<a class="github-card" href="' . $link . '" target="_blank" rel="noopener noreferrer">'
+            . '<span class="github-card-layout">'
+            . '<span class="github-card-content">'
+            . '<span class="github-card-header">'
+            . '<span class="github-card-icon"><i class="icon icon-github-circled"></i></span>'
+            . '<span class="github-card-title-wrap">'
+            . '<span class="github-card-title-row"><span class="github-card-title">' . $title . '</span><span class="github-card-badge github-card-badge-user">User</span></span>'
+            . '<span class="github-card-owner">@' . $login . '</span>'
+            . '</span>'
+            . '</span>'
+            . '<span class="github-card-desc">' . $bio . '</span>'
+            . '<span class="github-card-meta">'
+            . '<span class="meta-item">Followers ' . $followers . '</span>'
+            . '<span class="meta-item">Repos ' . $repos . '</span>'
+            . '</span>'
+            . '</span>'
+            . $mediaHtml
+            . '</span>'
+            . '</a>';
+    }
+    $repoInfo = ps_github_parse_repo($url);
+    if (!$repoInfo) {
+        return ps_github_render_error('GitHub 地址解析失败，请检查链接格式。');
+    }
+
+    $result = ps_github_fetch_repo($repoInfo['owner'], $repoInfo['repo']);
+    if (empty($result['data'])) {
+        if (isset($result['error']) && (int)$result['error'] === 404) {
+            return ps_github_render_error('仓库不存在或无权限访问。', $repoInfo['url']);
+        }
+        if (isset($result['error']) && (int)$result['error'] === 403) {
+            return ps_github_render_error('GitHub API 访问受限，请稍后重试。', $repoInfo['url']);
+        }
+        return ps_github_render_error('GitHub 数据获取失败，请稍后重试。', $repoInfo['url']);
+    }
+
+    $data = $result['data'];
+    $name = htmlspecialchars($data['name'] ?? $repoInfo['repo'], ENT_QUOTES, 'UTF-8');
+    $owner = htmlspecialchars($data['owner'] ?? $repoInfo['owner'], ENT_QUOTES, 'UTF-8');
+    $desc = trim((string)($data['description'] ?? ''));
+    if ($desc === '') {
+        $desc = '暂无项目描述';
+    }
+    $desc = htmlspecialchars($desc, ENT_QUOTES, 'UTF-8');
+    $stars = ps_github_format_stars($data['stargazers_count'] ?? 0);
+    $language = trim((string)($data['language'] ?? ''));
+    $languageLabel = $language !== '' ? htmlspecialchars($language, ENT_QUOTES, 'UTF-8') : 'Unknown';
+    $languageColor = ps_github_language_color($language);
+    $link = htmlspecialchars($data['html_url'] ?? $repoInfo['url'], ENT_QUOTES, 'UTF-8');
+    $cacheBuster = '1';
+    if (!empty($data['updated_at'])) {
+        $timestamp = strtotime($data['updated_at']);
+        if ($timestamp) {
+            $cacheBuster = (string)$timestamp;
+        }
+    }
+    $cover = 'https://opengraph.githubassets.com/' . $cacheBuster . '/' . rawurlencode($repoInfo['owner']) . '/' . rawurlencode($repoInfo['repo']);
+    $mediaHtml = $cover !== ''
+        ? '<span class="github-card-media github-card-media-cover"><img src="' . htmlspecialchars($cover, ENT_QUOTES, 'UTF-8') . '" alt="' . $name . '" class="github-card-media-img no-zoom no-figcaption" loading="lazy"></span>'
+        : '';
+
+
+    return '<a class="github-card" href="' . $link . '" target="_blank" rel="noopener noreferrer">'
+        . '<span class="github-card-layout">'
+        . '<span class="github-card-content">'
+        . '<span class="github-card-header">'
+        . '<span class="github-card-icon"><i class="icon icon-github-circled"></i></span>'
+        . '<span class="github-card-title-wrap">'
+        . '<span class="github-card-title-row"><span class="github-card-title">' . $name . '</span><span class="github-card-badge github-card-badge-repo">Repo</span></span>'
+        . '<span class="github-card-owner">@' . $owner . '</span>'
+        . '</span>'
+        . '</span>'
+        . '<span class="github-card-desc">' . $desc . '</span>'
+        . '<span class="github-card-meta">'
+        . '<span class="meta-item"><span class="github-card-star">&#9733;</span>' . $stars . '</span>'
+        . '<span class="meta-item github-card-language">'
+        . '<span class="github-card-language-dot" style="--lang-color: ' . $languageColor . ';"></span>'
+        . $languageLabel
+        . '</span>'
+        . '</span>'
+        . '</span>'
+        . $mediaHtml
+        . '</span>'
+        . '</a>';
+}
+
 // 短代码解析器
 function parse_Shortcodes($content)
 {
@@ -141,6 +597,9 @@ function parse_Shortcodes($content)
         return "<div window-type=\"$type\" title=\"$title\">$text</div>";
     }, $content);
 
+    $content = preg_replace_callback('/\[github\s+url="([^"]+)"\s*\]/i', function ($matches) {
+        return ps_github_render_card($matches[1]);
+    }, $content);
     $content = preg_replace_callback('/\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/s', function ($matches) {
         $name = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
         $ico = htmlspecialchars($matches[2], ENT_QUOTES, 'UTF-8');
@@ -336,7 +795,9 @@ function add_zoomable_to_images($content)
     $exclude_elements = array(
         '.no-zoom',
         '#no-zoom',
+        'no-zoom',
         'friends-card-avatar',
+        'github-card-media-img',
     );
 
     $content = preg_replace_callback('/<img[^>]+>/', function ($matches) use ($exclude_elements) {

@@ -217,10 +217,6 @@ table tr:has(td):hover {
 	background-color: var(--hover-color);
 }
 
-.icon:empty:before {
-	margin-right: 0
-}
-
 .icon-ui:before {
 	vertical-align: bottom;
 	font-size: 20px;
@@ -1350,7 +1346,7 @@ a:hover {
 	color: var(--themehovercolor);
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a) {
+.inner-post-wrapper a:not(.github-card):not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a) {
 	border-radius: 0.35rem;
 	position: relative;
 	display: inline-block;
@@ -1360,7 +1356,7 @@ a:hover {
 	color: var(--themecolor);
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a)::before {
+.inner-post-wrapper a:not(.github-card):not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a)::before {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -1374,17 +1370,17 @@ a:hover {
 	opacity: 0;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a):hover::before {
+.inner-post-wrapper a:not(.github-card):not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a):hover::before {
 	transform: scale(1.05, 0.88);
 	opacity: 0.25;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a):active::before {
+.inner-post-wrapper a:not(.github-card):not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a):active::before {
 	transform: scale(1.03, 0.8);
 	opacity: 0.4;
 }
 
-.inner-post-wrapper a:not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a)::after {
+.inner-post-wrapper a:not(.github-card):not(.friendsboard-list a):not(.meta.post-meta a):not(.cloud-container a)::after {
 	content: '\e81f';
 	font-family: fontello;
 	color: currentColor;
