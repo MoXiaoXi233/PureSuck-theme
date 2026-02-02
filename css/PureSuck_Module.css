@@ -1,35 +1,35 @@
-/** 一些后期添加的模块样式 **/
-/** 本CSS包含解析项目、右侧边栏及部分小模块 **/
+/* 一些后期添加的模块样式 **/
+/* 本CSS包含解析项目、右侧边栏及部分小模块 **/
 :root {
-    /* Pale：纸感 + 明确色相 */
+    /* Pale：纸感色相 */
     --blue-pale-color: #f4f7ff;
     --green-pale-color: #f4faf6;
     --yellow-pale-color: #fff9ee;
     --red-pale-color: #fff5f5;
     --pink-pale-color: #fff4f8;
 
-    /* Border：低饱和但有色 */
+    /* Border：低饱和色 */
     --blue-border-color: #c3d2f5;
     --green-border-color: #c6e0d0;
     --yellow-border-color: #f0d9b5;
     --red-border-color: #efc2c2;
     --pink-border-color: #eec3d4;
 
-    /* Base：给 Tab / 轻强调 */
+    /* Base：Tab/轻强调 */
     --blue-base-color: #4f6fdc;
     --green-base-color: #4f9b6a;
     --yellow-base-color: #d6a65a;
     --red-base-color: #d46a6a;
     --pink-base-color: #d36b8c;
 
-    /* Bold：标题 / 关键字（降一点闷感） */
+    /* Bold：标题/关键字 */
     --blue-bold-color: #365acb;
     --green-bold-color: #2f7d4f;
     --yellow-bold-color: #b7791f;
     --red-bold-color: #b84a4a;
     --pink-bold-color: #b94a73;
 
-    /* 饱和度高一点的 */
+    /* 饱和度更高 */
     --blue-alert-color: #6482db;
     --green-alert-color: #4ead86;
     --yellow-alert-color: #e5b96e;
@@ -39,28 +39,28 @@
 }
 
 [data-theme="dark"] {
-    /* Pale：暗色纸面（雾化，有色但不亮） */
+    /* Pale：暗色纸面 */
     --blue-pale-color: #1c2230;
     --green-pale-color: #1d2621;
     --yellow-pale-color: #262318;
     --red-pale-color: #261b1b;
     --pink-pale-color: #261b22;
 
-    /* Border：低存在感结构线 */
+    /* Border：低存在感 */
     --blue-border-color: #2a3554;
     --green-border-color: #2a3f35;
     --yellow-border-color: #4a4026;
     --red-border-color: #4a2a2a;
     --pink-border-color: #4a2a3a;
 
-    /* Base：Tab / 次强调（被压亮度） */
+    /* Base：Tab/次强调 */
     --blue-base-color: #5f74c8;
     --green-base-color: #5fa37f;
     --yellow-base-color: #c6a25a;
     --red-base-color: #c67a7a;
     --pink-base-color: #c67a9a;
 
-    /* Bold：标题 / Tab（不刺、不亮） */
+    /* Bold：标题/Tab */
     --blue-bold-color: #8fa2e0;
     --green-bold-color: #8fcfa8;
     --yellow-bold-color: #e0c98a;
@@ -74,7 +74,7 @@
     --pink-alert-color: #bf677a;
 }
 
-/** 回到顶部 **/
+/* 回到顶部 **/
 .go-top {
     z-index: 1;
     position: fixed;
@@ -86,7 +86,7 @@
     color: var(--pure-color);
     opacity: 0;
     visibility: hidden;
-    /* 隐藏 */
+    /* 隐藏按钮 */
     pointer-events: none;
     /* 默认禁用点击 */
     border-radius: 14px;
@@ -324,11 +324,7 @@
 
 @media (hover: hover) {
     .window:hover .window-prompt-heading {
-        letter-spacing: 0.03em;
-    }
-
-    .window:hover .window-prompt-wrap {
-        letter-spacing: 0.01em;
+        letter-spacing: 0.05em;
     }
 }
 
@@ -338,7 +334,7 @@
     color: inherit;
 }
 
-/** 友链卡片 **/
+/* 友链卡片 **/
 .friendsboard-list {
     display: flex;
     flex-flow: row wrap;
@@ -1128,7 +1124,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 }
 
 
-/** TOC 目录**/
+/* TOC 目录**/
 .toc-section {
     overflow: hidden;
     -ms-overflow-style: none;
@@ -1143,13 +1139,13 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     z-index: 100;
 }
 
-/* ✅ TOC 固定时，隐藏 sidebar 中 TOC 之前的所有元素 */
+/* TOC 固定时，隐藏 sidebar 中 TOC 之前的所有元素 */
 .toc-section.sticky~.cloud-section,
 .toc-section.sticky~.search-section {
     display: none;
 }
 
-/* ✅ 或者使用相邻选择器 */
+/* 或者使用相邻选择器 */
 .right-sidebar:has(.toc-section.sticky) .cloud-section,
 .right-sidebar:has(.toc-section.sticky) .search-section {
     display: none;

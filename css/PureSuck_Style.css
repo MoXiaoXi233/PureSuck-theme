@@ -1,9 +1,5 @@
-/**
- * PureSuck 主题主样式文件
- *
- * 本文件包含主题的核心样式，动画样式已分离到 animations/ 目录
- * 动画样式已移至异步加载，避免阻塞渲染
- */
+/* PureSuck主题主样式 */
+/* 动画样式已分离到 animations/目录 */
 
 :root {
 	--background-color: #f6f6F6F6;
@@ -251,7 +247,7 @@ kbd {
 	font-family: ui-monospace, "JetBrains Mono", "Fira Code", SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* 代码块本体 */
+/* 代码块 */
 pre {
 	padding: 12px 16px;
 	margin: 1.2em 0;
@@ -1409,7 +1405,7 @@ blockquote {
 	border: 1px solid var(--border-color);
 }
 
-/* 多段内容的时候让排版更优雅，但只适合新点的浏览器 */
+/* 多段内容排版 */
 blockquote:has(p + p),
 blockquote:has(ul),
 blockquote:has(ol),
@@ -1601,7 +1597,7 @@ strong {
 	font-weight: inherit
 }
 
-/** comment footer **/
+/* comment footer **/
 .cf {
 	margin: 0 0 3rem 0
 }
@@ -1632,7 +1628,7 @@ strong {
 	background-color: var(--pure-grey-color);
 }
 
-/** comment post **/
+/* comment post **/
 .cp {
 	overflow: hidden;
 	padding: 1.6rem 0;
@@ -1767,13 +1763,13 @@ strong {
 	gap: 10px;
 }
 
-/* comments*/
+/* 评论 */
 .page-navigator {
 	margin: 24px 0;
 	position: relative;
 }
 
-/* 评论分页加载状态 */
+/* 评论分页状态 */
 .page-navigator.loading {
 	opacity: 0.6;
 	pointer-events: none;
@@ -1950,7 +1946,7 @@ textarea:focus-within+.CtBoxBar {
 	}
 }
 
-/* 网站主头像 */
+/* 网站头像 */
 .el-avatar {
 	display: inline-flex;
 	align-items: center;
@@ -2047,7 +2043,7 @@ textarea:focus-within+.CtBoxBar {
 	}
 }
 
-/* 主内容块 */
+/* 主内容区 */
 .wrapper {
 	position: relative;
 }
@@ -2103,8 +2099,8 @@ textarea:focus-within+.CtBoxBar {
 	object-position: center;
 }
 
-/* ==================== 懒加载样式 ==================== */
-/* 懒加载图片：加载完成淡入 */
+/* 懒加载样式 */
+/* 懒加载淡入 */
 img.lazy-loaded {
 	animation: lazy-fade-in 0.25s ease-out;
 }
@@ -2121,7 +2117,7 @@ img.lazy-loaded {
 	}
 }
 
-/* 文章版权信息卡片 */
+/* 版权信息卡片 */
 .license-info-card {
 	--_theme-soft: color-mix(in srgb, var(--themecolor) 14%, transparent);
 	--_theme-line: color-mix(in srgb, var(--themecolor) 55%, var(--border-color));
@@ -2229,7 +2225,7 @@ img.lazy-loaded {
 			var(--border-color));
 }
 
-/** PicGird 图片框架 布局 **/
+/* PicGird 图片框架 布局 **/
 
 .pic-grid {
 	column-count: 3;
@@ -2318,7 +2314,7 @@ img.lazy-loaded {
 	color: var(--nav-text-color);
 }
 
-/** Medium-zoom 图片 **/
+/* Medium-zoom 图片 **/
 .medium-zoom-overlay,
 .medium-zoom-image--opened {
 	z-index: 999;
@@ -2490,7 +2486,7 @@ input:-webkit-autofill:active {
 	width: 50%;
 }
 
-/** 超链接颜色 **/
+/* 超链接颜色 **/
 
 .post-content a {
 	color: var(--themecolor);
