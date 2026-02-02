@@ -1303,7 +1303,7 @@
                     threshold: 0.2,
                     delay: 500,
                     containers: ['#swup'],
-                    ignore: (el) => el.closest('#comments, .page-navigator') || el.getAttribute('href')?.startsWith('#')
+                    ignore: (el) => el.closest('#comments, .main-lastinfo, .header-credit') || el.getAttribute('href')?.startsWith('#')
                 },
                 preloadInitialPage: true
             })
