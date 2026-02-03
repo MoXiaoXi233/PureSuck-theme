@@ -9,15 +9,15 @@ if (!defined('__TYPECHO_ROOT_DIR__'))
 function renderPostContent($content)
 {
     // 文章页功能处理
-    $content = parse_Shortcodes($content);
-    $content = parse_alerts($content);
-    $content = parse_windows($content);
-    $content = parse_timeline($content);
+    $content = parseShortcodes($content);
+    $content = parseAlerts($content);
+    $content = parseWindows($content);
+    $content = parseTimeline($content);
     $content = parsePicGrid($content);
 
-    $content = theme_wrap_tables($content);
-    $content = add_zoomable_to_images($content);
+    $content = wrapTables($content);
+    $content = addZoomableToImages($content);
     $content = parseOwOcodes($content);
 
-    return TOC_Generate($content);
+    return generateToc($content);
 }

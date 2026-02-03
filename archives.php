@@ -46,7 +46,7 @@ $this->need('header.php');
 
                         <div class="meta post-meta">
                             这里会归档一切文章<br>
-                            共创作了 <?= getTotalPostsCount(); ?> 篇文章，合 <?= allOfCharacters(); ?> 字
+                            共创作了 <?= getTotalPostsCount(); ?> 篇文章，合 <?= getAllCharacters(); ?> 字
                         </div>
 
                         <!-- 标签 -->

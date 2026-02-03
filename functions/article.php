@@ -2,10 +2,22 @@
 if (!defined('__TYPECHO_ROOT_DIR__'))
     exit;
 
-// ==================== 文章页功能模块 ====================
-// 包含：TOC、短代码、图片处理、表情、文章字段
+// ==================== 模块索引 ====================
+// 1) 文章字段与目录
+// 2) GitHub 卡片
+// 3) 文章卡片
+// 4) 媒体与表格增强
+// 5) OwO 表情
+
+
+
+
+
+// ==================== 1) 文章字段与目录 ====================
+// 包含：TOC 目录、文章字段
 
 // 文章自定义字段
+
 function themeFields($layout)
 {
     $img = new Typecho_Widget_Helper_Form_Element_Text('img', NULL, NULL, _t('文章头图'), _t('输入文章头图的 URL 地址，为空则不显示'));
@@ -18,7 +30,7 @@ function themeFields($layout)
 }
 
 // TOC 目录生成器
-function TOC_Generate($content)
+function generateToc($content)
 {
     $result = [
         'content' => $content,
@@ -109,8 +121,13 @@ function TOC_Generate($content)
     return $result['content'];
 }
 
-// GitHub repo card helpers
-function ps_github_parse_repo($input)
+
+
+// ==================== 2) GitHub 卡片 ====================
+// 解析 GitHub 链接/输入
+// GitHub 数据获取与渲染
+
+function parseGithubRepo($input)
 {
     $input = trim((string)$input);
     if ($input === '') {
@@ -151,7 +168,7 @@ function ps_github_parse_repo($input)
     ];
 }
 
-function ps_github_parse_user($input)
+function parseGithubUser($input)
 {
     $input = trim((string)$input);
     if ($input === '') {
@@ -184,57 +201,7 @@ function ps_github_parse_user($input)
     ];
 }
 
-function ps_github_cache_dir()
-{
-    return dirname(__DIR__) . '/cache/github';
-}
-
-function ps_github_cache_path($key)
-{
-    return ps_github_cache_dir() . '/' . md5($key) . '.json';
-}
-
-function ps_github_cache_get($key, $ttl)
-{
-    $path = ps_github_cache_path($key);
-    if (!is_file($path)) {
-        return null;
-    }
-
-    $content = @file_get_contents($path);
-    if ($content === false) {
-        return null;
-    }
-
-    $cache = json_decode($content, true);
-    if (!is_array($cache) || empty($cache['data'])) {
-        return null;
-    }
-
-    $cache['fresh'] = isset($cache['fetched_at']) && (time() - (int)$cache['fetched_at'] < $ttl);
-    return $cache;
-}
-
-function ps_github_cache_set($key, $data, $etag = null)
-{
-    $dir = ps_github_cache_dir();
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0755, true);
-    }
-
-    $payload = [
-        'fetched_at' => time(),
-        'etag' => $etag,
-        'data' => $data
-    ];
-
-    @file_put_contents(
-        ps_github_cache_path($key),
-        json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-    );
-}
-
-function ps_github_parse_headers($headers)
+function parseGithubHeaders($headers)
 {
     $status = 0;
     $etag = null;
@@ -257,12 +224,12 @@ function ps_github_parse_headers($headers)
     return ['status' => $status, 'etag' => $etag];
 }
 
-function ps_github_fetch_repo($owner, $repo)
+function fetchGithubRepo($owner, $repo)
 {
     $fullName = $owner . '/' . $repo;
     $cacheKey = 'repo:v2:' . $fullName;
     $ttl = 6 * 3600;
-    $cache = ps_github_cache_get($cacheKey, $ttl);
+    $cache = getGithubCache($cacheKey, $ttl);
 
     if ($cache && !empty($cache['fresh'])) {
         return ['data' => $cache['data'], 'stale' => false];
@@ -283,12 +250,12 @@ function ps_github_fetch_repo($owner, $repo)
 
     $url = "https://api.github.com/repos/{$owner}/{$repo}";
     $response = @file_get_contents($url, false, $context);
-    $parsed = ps_github_parse_headers(isset($http_response_header) ? $http_response_header : []);
+    $parsed = parseGithubHeaders(isset($http_response_header) ? $http_response_header : []);
     $status = $parsed['status'];
     $etag = $parsed['etag'] ?: ($cache['etag'] ?? null);
 
     if ($status === 304 && $cache) {
-        ps_github_cache_set($cacheKey, $cache['data'], $etag);
+        setGithubCache($cacheKey, $cache['data'], $etag);
         return ['data' => $cache['data'], 'stale' => false];
     }
 
@@ -304,7 +271,7 @@ function ps_github_fetch_repo($owner, $repo)
                 'language' => $data['language'] ?? '',
                 'updated_at' => $data['updated_at'] ?? ''
             ];
-            ps_github_cache_set($cacheKey, $payload, $etag);
+            setGithubCache($cacheKey, $payload, $etag);
             return ['data' => $payload, 'stale' => false];
         }
     }
@@ -316,11 +283,11 @@ function ps_github_fetch_repo($owner, $repo)
     return ['error' => $status];
 }
 
-function ps_github_fetch_user($user)
+function fetchGithubUser($user)
 {
     $key = 'user:v2:' . $user;
     $ttl = 6 * 3600;
-    $cache = ps_github_cache_get($key, $ttl);
+    $cache = getGithubCache($key, $ttl);
 
     if ($cache && !empty($cache['fresh'])) {
         return ['data' => $cache['data'], 'stale' => false];
@@ -341,12 +308,12 @@ function ps_github_fetch_user($user)
 
     $url = "https://api.github.com/users/{$user}";
     $response = @file_get_contents($url, false, $context);
-    $parsed = ps_github_parse_headers(isset($http_response_header) ? $http_response_header : []);
+    $parsed = parseGithubHeaders(isset($http_response_header) ? $http_response_header : []);
     $status = $parsed['status'];
     $etag = $parsed['etag'] ?: ($cache['etag'] ?? null);
 
     if ($status === 304 && $cache) {
-        ps_github_cache_set($key, $cache['data'], $etag);
+        setGithubCache($key, $cache['data'], $etag);
         return ['data' => $cache['data'], 'stale' => false];
     }
 
@@ -362,7 +329,7 @@ function ps_github_fetch_user($user)
                 'followers' => (int)($data['followers'] ?? 0),
                 'public_repos' => (int)($data['public_repos'] ?? 0)
             ];
-            ps_github_cache_set($key, $payload, $etag);
+            setGithubCache($key, $payload, $etag);
             return ['data' => $payload, 'stale' => false];
         }
     }
@@ -374,7 +341,7 @@ function ps_github_fetch_user($user)
     return ['error' => $status];
 }
 
-function ps_github_format_stars($stars)
+function formatGithubStars($stars)
 {
     $stars = (int)$stars;
     if ($stars < 1000) {
@@ -395,7 +362,7 @@ function ps_github_format_stars($stars)
     return rtrim(rtrim((string)$value, '0'), '.') . 'B';
 }
 
-function ps_github_language_color($language)
+function getGithubLanguageColor($language)
 {
     $map = [
         'JavaScript' => '#f1e05a',
@@ -425,7 +392,7 @@ function ps_github_language_color($language)
     return 'var(--themecolor)';
 }
 
-function ps_github_render_error($message, $url = '')
+function renderGithubError($message, $url = '')
 {
     $safeMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
     $safeUrl = $url ? htmlspecialchars($url, ENT_QUOTES, 'UTF-8') : '';
@@ -447,19 +414,19 @@ function ps_github_render_error($message, $url = '')
         . '</div>';
 }
 
-function ps_github_render_card($url)
+function renderGithubCard($url)
 {
-    $userInfo = ps_github_parse_user($url);
+    $userInfo = parseGithubUser($url);
     if ($userInfo) {
-        $result = ps_github_fetch_user($userInfo['user']);
+        $result = fetchGithubUser($userInfo['user']);
         if (empty($result['data'])) {
             if (isset($result['error']) && (int)$result['error'] === 404) {
-                return ps_github_render_error('User not found.', $userInfo['url']);
+                return renderGithubError('User not found.', $userInfo['url']);
             }
             if (isset($result['error']) && (int)$result['error'] === 403) {
-                return ps_github_render_error('GitHub API rate limited.', $userInfo['url']);
+                return renderGithubError('GitHub API rate limited.', $userInfo['url']);
             }
-            return ps_github_render_error('Failed to fetch GitHub profile.', $userInfo['url']);
+            return renderGithubError('Failed to fetch GitHub profile.', $userInfo['url']);
         }
 
         $data = $result['data'];
@@ -471,7 +438,7 @@ function ps_github_render_card($url)
             $bio = 'No bio provided.';
         }
         $bio = htmlspecialchars($bio, ENT_QUOTES, 'UTF-8');
-        $followers = ps_github_format_stars($data['followers'] ?? 0);
+        $followers = formatGithubStars($data['followers'] ?? 0);
         $repos = (int)($data['public_repos'] ?? 0);
         $link = htmlspecialchars($data['html_url'] ?? $userInfo['url'], ENT_QUOTES, 'UTF-8');
         $avatar = trim((string)($data['avatar_url'] ?? ''));
@@ -499,20 +466,20 @@ function ps_github_render_card($url)
             . '</span>'
             . '</a>';
     }
-    $repoInfo = ps_github_parse_repo($url);
+    $repoInfo = parseGithubRepo($url);
     if (!$repoInfo) {
-        return ps_github_render_error('GitHub 地址解析失败，请检查链接格式。');
+        return renderGithubError('GitHub 地址解析失败，请检查链接格式。');
     }
 
-    $result = ps_github_fetch_repo($repoInfo['owner'], $repoInfo['repo']);
+    $result = fetchGithubRepo($repoInfo['owner'], $repoInfo['repo']);
     if (empty($result['data'])) {
         if (isset($result['error']) && (int)$result['error'] === 404) {
-            return ps_github_render_error('仓库不存在或无权限访问。', $repoInfo['url']);
+            return renderGithubError('仓库不存在或无权限访问。', $repoInfo['url']);
         }
         if (isset($result['error']) && (int)$result['error'] === 403) {
-            return ps_github_render_error('GitHub API 访问受限，请稍后重试。', $repoInfo['url']);
+            return renderGithubError('GitHub API 访问受限，请稍后重试。', $repoInfo['url']);
         }
-        return ps_github_render_error('GitHub 数据获取失败，请稍后重试。', $repoInfo['url']);
+        return renderGithubError('GitHub 数据获取失败，请稍后重试。', $repoInfo['url']);
     }
 
     $data = $result['data'];
@@ -523,10 +490,10 @@ function ps_github_render_card($url)
         $desc = '暂无项目描述';
     }
     $desc = htmlspecialchars($desc, ENT_QUOTES, 'UTF-8');
-    $stars = ps_github_format_stars($data['stargazers_count'] ?? 0);
+    $stars = formatGithubStars($data['stargazers_count'] ?? 0);
     $language = trim((string)($data['language'] ?? ''));
     $languageLabel = $language !== '' ? htmlspecialchars($language, ENT_QUOTES, 'UTF-8') : 'Unknown';
-    $languageColor = ps_github_language_color($language);
+    $languageColor = getGithubLanguageColor($language);
     $link = htmlspecialchars($data['html_url'] ?? $repoInfo['url'], ENT_QUOTES, 'UTF-8');
     $cacheBuster = '1';
     if (!empty($data['updated_at'])) {
@@ -565,233 +532,412 @@ function ps_github_render_card($url)
         . '</a>';
 }
 
-// 短代码解析器
-function parse_Shortcodes($content)
+// ==================== 3) 文章卡片 ====================
+// 解析文章卡片输入与渲染
+
+// 解析文章卡片输入
+function parsePostcardIdentifier($input)
 {
-    static $tabsInstance = 0;
+    $value = trim((string)$input);
+    if ($value === '') {
+        return null;
+    }
 
-    $content = preg_replace(
-        [
-            '/\[\/(alert|window|friend-card|collapsible-panel|timeline|tabs)\](<br\s*\/?>)?/i',
-            '/\[\/timeline-event\](<br\s*\/?>)?/i',
-            '/\[\/tab\](<br\s*\/?>)?/i'
-        ],
-        [
-            '[/$1]',
-            '[/timeline-event]',
-            '[/tab]'
-        ],
-        $content
-    );
+    $value = htmlspecialchars_decode($value, ENT_QUOTES);
+    $value = trim($value);
 
-    $content = preg_replace_callback('/\[alert type="([^"]*)"\](.*?)\[\/alert\]/s', function ($matches) {
-        $type = $matches[1];
-        $text = $matches[2];
-        return "<div alert-type=\"$type\">$text</div>";
-    }, $content);
+    return [
+        'raw' => $value,
+        'url' => $value
+    ];
+}
 
-    $content = preg_replace_callback('/\[window type="([^"]*)" title="([^"]*)"\](.*?)\[\/window\]/s', function ($matches) {
-        $type = $matches[1];
-        $title = $matches[2];
-        $text = preg_replace('/^<br\s*\/?>/', '', $matches[3]);
-        return "<div window-type=\"$type\" title=\"$title\">$text</div>";
-    }, $content);
+// 规范化输入为路由可识别路径
+function normalizePostcardPath($value)
+{
+    $value = trim((string)$value);
+    if ($value === '') {
+        return '';
+    }
 
-    $content = preg_replace_callback('/\[github\s+url="([^"]+)"\s*\]/i', function ($matches) {
-        return ps_github_render_card($matches[1]);
-    }, $content);
-    $content = preg_replace_callback('/\[friend-card name="([^"]*)" ico="([^"]*)" url="([^"]*)"\](.*?)\[\/friend-card\]/s', function ($matches) {
-        $name = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
-        $ico = htmlspecialchars($matches[2], ENT_QUOTES, 'UTF-8');
-        $url = htmlspecialchars($matches[3], ENT_QUOTES, 'UTF-8');
-        $description = $matches[4];
-        return '<a href="' . $url . '" class="friendsboard-item" target="_blank">'
-            . '<div class="friends-card-header">'
-            . '<span class="friends-card-username">' . $name . '</span>'
-            . '<span class="friends-card-dot"></span>'
+    $path = $value;
+    $host = null;
+
+    static $options = null;
+    static $siteHost = null;
+    static $rootPath = null;
+    static $localSet = ['localhost', '127.0.0.1'];
+
+    if ($options === null) {
+        $options = Typecho_Widget::widget('Widget_Options');
+        $siteHost = parse_url($options->siteUrl, PHP_URL_HOST);
+        $siteHost = $siteHost ? strtolower($siteHost) : '';
+        $rootPath = parse_url($options->rootUrl, PHP_URL_PATH) ?? '';
+        $rootPath = rtrim($rootPath, '/');
+    }
+
+    if (preg_match('~^(https?:)?//~i', $value)) {
+        $parts = parse_url($value);
+        $host = $parts['host'] ?? null;
+        $path = $parts['path'] ?? '';
+    } elseif (strpos($value, '/') !== false) {
+        $first = strtok($value, '/');
+        $rest = substr($value, strlen($first));
+        $firstLower = strtolower($first);
+        $hostCandidates = $localSet;
+        if ($siteHost !== '') {
+            $hostCandidates[] = $siteHost;
+        }
+        $firstNoPort = preg_replace('/:\d+$/', '', $firstLower);
+        if (in_array($firstLower, $hostCandidates, true) || in_array($firstNoPort, $hostCandidates, true)) {
+            $host = $firstLower;
+            $path = $rest !== '' ? $rest : '/';
+        }
+    }
+
+    if ($host && $siteHost) {
+        $hostOnly = strtolower(preg_replace('/:\d+$/', '', $host));
+        if ($hostOnly !== $siteHost) {
+            if (!(in_array($hostOnly, $localSet, true) && in_array($siteHost, $localSet, true))) {
+                return '';
+            }
+        }
+    }
+
+    $path = preg_replace('/[?#].*$/', '', (string)$path);
+    $path = '/' . ltrim($path, '/');
+    $path = rtrim($path, '/');
+    if ($path === '') {
+        $path = '/';
+    }
+
+    if ($rootPath !== '' && $rootPath !== '/') {
+        if (strpos($path, $rootPath . '/') === 0) {
+            $path = substr($path, strlen($rootPath));
+            $path = '/' . ltrim($path, '/');
+        } elseif ($path === $rootPath) {
+            $path = '/';
+        }
+    }
+
+    if (preg_match('#^/[^/]+\.php(?:/|$)#', $path, $match)) {
+        $script = rtrim($match[0], '/');
+        $path = substr($path, strlen($script));
+        $path = $path === '' ? '/' : '/' . ltrim($path, '/');
+    }
+
+    return $path;
+}
+
+function buildPostcardWidgetFromResolved($resolved, $path)
+{
+    if ($resolved === null) {
+        return null;
+    }
+
+    $widget = null;
+
+    if (isset($resolved['routeKey'])) {
+        $routeKey = $resolved['routeKey'];
+        $params = isset($resolved['params']) && is_array($resolved['params']) ? $resolved['params'] : [];
+        $alias = 'postcard_route_' . md5($routeKey . '|' . $path);
+        $widget = Typecho_Widget::widget(
+            'Widget_Archive@' . $alias,
+            ['type' => $routeKey],
+            $params,
+            false
+        );
+    } elseif (isset($resolved['cid'])) {
+        $alias = 'postcard_' . (int)$resolved['cid'];
+        $widget = Typecho_Widget::widget(
+            'Widget_Archive@' . $alias,
+            ['type' => 'single'],
+            ['cid' => (int)$resolved['cid']],
+            false
+        );
+    } elseif (isset($resolved['slug'])) {
+        $slug = (string)$resolved['slug'];
+        $alias = 'postcard_' . md5($slug);
+        $widget = Typecho_Widget::widget(
+            'Widget_Archive@' . $alias,
+            ['type' => 'single'],
+            ['slug' => $slug],
+            false
+        );
+    }
+
+    if ($widget && $widget->have()) {
+        if (method_exists($widget, 'is') && !$widget->is('single')) {
+            return null;
+        }
+        return $widget;
+    }
+
+    return null;
+}
+
+// 将 URL/路径解析为文章组件
+// 优先走路由表，不触发 Router::match
+function fetchPostcardWidgetByUrl($url)
+{
+    static $routeCache = null;
+    static $resolveCache = [];
+
+    $path = normalizePostcardPath($url);
+    if ($path === '') {
+        return null;
+    }
+
+    $path = '/' . ltrim($path, '/');
+    $path = urldecode($path);
+
+    if (array_key_exists($path, $resolveCache)) {
+        return buildPostcardWidgetFromResolved($resolveCache[$path], $path);
+    }
+
+    if ($routeCache === null) {
+        $options = Typecho_Widget::widget('Widget_Options');
+        $routingTable = $options->routingTable;
+        $parsedRoutes = is_array($routingTable) && isset($routingTable[0]) ? $routingTable[0] : null;
+        $routeCache = is_array($parsedRoutes) ? $parsedRoutes : false;
+    }
+
+    if ($routeCache === false) {
+        $resolveCache[$path] = null;
+        return null;
+    }
+
+    $resolved = null;
+
+    foreach ($routeCache as $routeKey => $route) {
+        if (empty($route['regx']) || empty($route['widget'])) {
+            continue;
+        }
+
+        if (!preg_match($route['regx'], $path, $matches)) {
+            continue;
+        }
+
+        if (stripos($route['widget'], 'Widget_Archive') !== 0) {
+            continue;
+        }
+
+        $params = [];
+        if (!empty($route['params'])) {
+            unset($matches[0]);
+            if (count($route['params']) != count($matches)) {
+                continue;
+            }
+            $params = array_combine($route['params'], $matches);
+            if ($params === false) {
+                continue;
+            }
+        }
+
+        $resolved = [
+            'routeKey' => $routeKey,
+            'params' => $params
+        ];
+        break;
+    }
+
+    if ($resolved === null) {
+        $last = trim(basename(rtrim($path, '/')));
+        if ($last !== '') {
+            if (ctype_digit($last)) {
+                $resolved = ['cid' => (int)$last];
+            } else {
+                $resolved = ['slug' => $last];
+            }
+        }
+    }
+
+    $resolveCache[$path] = $resolved;
+    return buildPostcardWidgetFromResolved($resolved, $path);
+}
+
+
+// 摘要裁剪与净化
+function trimPostcardText($text, $length = 90)
+{
+    $text = trim((string)$text);
+    if ($text === '') {
+        return '';
+    }
+
+    $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+    $text = strip_tags($text);
+    $text = preg_replace('/\s+/u', ' ', $text);
+    $text = trim($text);
+
+    if ($text === '') {
+        return '';
+    }
+
+    if (class_exists('Typecho_Common')) {
+        $text = Typecho_Common::subStr($text, 0, $length, '...');
+    } elseif (function_exists('mb_substr')) {
+        if (mb_strlen($text, 'UTF-8') > $length) {
+            $text = mb_substr($text, 0, $length, 'UTF-8') . '...';
+        }
+    } elseif (strlen($text) > $length) {
+        $text = substr($text, 0, $length) . '...';
+    }
+
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+function fetchPostcardWidget(array $identifier)
+{
+    $widget = null;
+
+    if (!empty($identifier['url'])) {
+        $widget = fetchPostcardWidgetByUrl($identifier['url']);
+    }
+
+    if ($widget && $widget->have()) {
+        $widget->next();
+        return $widget;
+    }
+
+    return null;
+}
+
+// 渲染文章卡片 HTML
+function renderPostcard($input)
+{
+    static $renderCache = [];
+    $cacheKey = trim((string)$input);
+    if ($cacheKey !== '' && array_key_exists($cacheKey, $renderCache)) {
+        return $renderCache[$cacheKey];
+    }
+
+    $identifier = parsePostcardIdentifier($input);
+    if (!$identifier) {
+        return '';
+    }
+
+    $widget = fetchPostcardWidget($identifier);
+    if (!$widget) {
+        $safeInput = htmlspecialchars($identifier['raw'] ?? '', ENT_QUOTES, 'UTF-8');
+        $result = '<div class="ps-post-card ps-post-card-error" role="status">'
+            . '<div class="ps-post-card-header">'
+            . '<span class="ps-post-card-icon"><i class="icon icon-article"></i></span>'
+            . '<div class="ps-post-card-title-wrap">'
+            . '<div class="ps-post-card-title">Post</div>'
+            . '<div class="ps-post-card-owner">Not Found</div>'
             . '</div>'
-            . '<div class="friends-card-body">'
-            . '<div class="friends-card-text">' . $description . '</div>'
-            . '<div class="friends-card-avatar-container">'
-            . '<img src="' . $ico . '" alt="Avatar" class="friends-card-avatar no-zoom no-figcaption" draggable="false">'
             . '</div>'
-            . '</div>'
-            . '</a>';
-    }, $content);
-
-    $content = preg_replace_callback('/\[collapsible-panel title="([^"]*)"\](.*?)\[\/collapsible-panel\]/s', function ($matches) {
-        $title = htmlspecialchars($matches[1], ENT_QUOTES, 'UTF-8');
-        $text = preg_replace('/^<br\s*\/?>/', '', $matches[2]);
-        return '<div class="collapsible-panel">'
-            . '<button class="collapsible-header">'
-            . $title
-            . '<span class="icon icon-down-open"></span>'
-            . '</button>'
-            . '<div class="collapsible-content" style="max-height: 0; overflow: hidden;">'
-            . '<div class="collapsible-details">' . $text . '</div>'
-            . '</div>'
+            . '<div class="ps-post-card-excerpt">Unable to locate the linked post.</div>'
+            . ($safeInput !== '' ? '<span class="ps-post-card-meta"><span class="meta-item">' . $safeInput . '</span></span>' : '')
             . '</div>';
-    }, $content);
-
-    $content = preg_replace_callback('/\[timeline\](.*?)\[\/timeline\]/s', function ($matches) {
-        $innerContent = $matches[1];
-        $innerContent = preg_replace_callback('/\[timeline-event date="([^"]*)" title="([^"]*)"\](.*?)\[\/timeline-event\]/s', function ($eventMatches) {
-            $date = $eventMatches[1];
-            $title = $eventMatches[2];
-            $eventText = $eventMatches[3];
-            return "<div timeline-event date=\"$date\" title=\"$title\">$eventText</div>";
-        }, $innerContent);
-        return "<div id=\"timeline\">$innerContent</div>";
-    }, $content);
-
-    $content = preg_replace_callback('/\[tabs\](.*?)\[\/tabs\]/s', function ($matches) use (&$tabsInstance) {
-        $innerContent = $matches[1];
-        preg_match_all('/\[tab title="([^"]*)"\](.*?)\[\/tab\]/s', $innerContent, $tabMatches, PREG_SET_ORDER);
-        if (!$tabMatches) {
-            return '';
+        if ($cacheKey !== '') {
+            $renderCache[$cacheKey] = $result;
         }
+        return $result;
+    }
 
-        $tabsInstance++;
-        $tabIdBase = 'tab' . $tabsInstance;
-        $tabLinks = [];
-        $tabPanes = [];
+    $title = htmlspecialchars($widget->title, ENT_QUOTES, 'UTF-8');
+    $permalink = htmlspecialchars($widget->permalink, ENT_QUOTES, 'UTF-8');
 
-        foreach ($tabMatches as $index => $match) {
-            $title = htmlspecialchars($match[1], ENT_QUOTES, 'UTF-8');
-            $tabContent = preg_replace('/^\s*<br\s*\/?>/', '', $match[2]);
-            $tabId = $tabIdBase . '-' . ($index + 1);
-            $isActive = $index === 0;
+    $excerpt = '';
+    if ($widget->hidden) {
+        $excerpt = 'This post is protected.';
+    } elseif (isset($widget->fields) && !empty($widget->fields->desc)) {
+        $excerpt = trimPostcardText($widget->fields->desc, 90);
+    } else {
+        $excerpt = trimPostcardText($widget->plainExcerpt ?? $widget->excerpt ?? $widget->text, 90);
+    }
 
-            $tabLinks[] = '<div class="tab-link' . ($isActive ? ' active' : '') . '"'
-                . ' data-tab="' . $tabId . '" role="tab"'
-                . ' aria-controls="' . $tabId . '"'
-                . ' tabindex="' . ($isActive ? '0' : '-1') . '">'
-                . $title
-                . '</div>';
+    if ($excerpt === '') {
+        $excerpt = 'No summary available.';
+    }
 
-            $tabPanes[] = '<div class="tab-pane' . ($isActive ? ' active' : '') . '"'
-                . ' id="' . $tabId . '" role="tabpanel"'
-                . ' aria-labelledby="' . $tabId . '">'
-                . $tabContent
-                . '</div>';
-        }
+    $dateText = '';
+    if ($widget->date) {
+        $dateText = $widget->date->format($widget->options->dateFormat ?? 'Y-m-d');
+    }
+    $dateText = htmlspecialchars((string)$dateText, ENT_QUOTES, 'UTF-8');
 
-        return '<div class="tab-container">'
-            . '<div class="tab-header-wrapper">'
-            . '<button class="scroll-button left" aria-label="向左"></button>'
-            . '<div class="tab-header dir-right" role="tablist">'
-            . implode('', $tabLinks)
-            . '<div class="tab-indicator"></div>'
-            . '</div>'
-            . '<button class="scroll-button right" aria-label="向右"></button>'
-            . '</div>'
-            . '<div class="tab-content">'
-            . implode('', $tabPanes)
-            . '</div>'
-            . '</div>';
-    }, $content);
+    $categoryText = '';
+    if (!empty($widget->categories) && isset($widget->categories[0]['name'])) {
+        $categoryText = htmlspecialchars($widget->categories[0]['name'], ENT_QUOTES, 'UTF-8');
+    }
 
-    $content = preg_replace_callback('/\[bilibili-card bvid="([^"]*)"\]/', function ($matches) {
-        $bvid = $matches[1];
-        $url = "//player.bilibili.com/player.html?bvid=$bvid&autoplay=0";
-        return "
-        <div class='bilibili-card'>
-            <iframe src='$url' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true'></iframe>
-        </div>
-    ";
-    }, $content);
-
-    $content = preg_replace_callback('/(?:\s*<a[^>]*class="[^"]*friendsboard-item[^"]*"[^>]*>.*?<\/a>\s*)+/s', function ($matches) {
-        return '<div class="friendsboard-list">' . trim($matches[0]) . '</div>';
-    }, $content);
-
-    $pattern = '/<img.*?src=[\'"](.*?)[\'"].*?>/i';
-    $content = preg_replace_callback($pattern, function ($matches) {
-        if (strpos($matches[0], 'friends-card-avatar') !== false || strpos($matches[0], 'no-figcaption') !== false) {
-            return $matches[0];
-        }
-        $alt = '';
-        if (preg_match('/alt=[\'"](.*?)[\'"]/i', $matches[0], $alt_matches)) {
-            $alt = $alt_matches[1];
-        }
-
-        if (!empty($alt)) {
-            return '<figure>' . $matches[0] . '<figcaption>' . $alt . '</figcaption></figure>';
-        }
-
-        return $matches[0];
-    }, $content);
-
-    return $content;
-}
-
-function parse_alerts($content)
-{
-    $content = preg_replace_callback('/<div alert-type="(.*?)">(.*?)<\/div>/', function ($matches) {
-        $type = $matches[1];
-        $innerContent = $matches[2];
-        $iconClass = 'icon-info-circled';
-        switch ($type) {
-            case 'green':
-                $iconClass = 'icon-ok-circle';
+    $tagTexts = [];
+    if (!empty($widget->tags) && is_array($widget->tags)) {
+        foreach ($widget->tags as $tag) {
+            if (isset($tag['name']) && $tag['name'] !== '') {
+                $tagTexts[] = htmlspecialchars($tag['name'], ENT_QUOTES, 'UTF-8');
+            }
+            if (count($tagTexts) >= 2) {
                 break;
-            case 'blue':
-                $iconClass = 'icon-info-circled';
-                break;
-            case 'yellow':
-                $iconClass = 'icon-attention';
-                break;
-            case 'red':
-                $iconClass = 'icon-cancel-circle';
-                break;
+            }
         }
-        return '<div role="alert" class="alert-box ' . $type . '"><i class="' . $iconClass . '"></i><p class="text-xs font-semibold">' . $innerContent . '</p></div>';
-    }, $content);
-    return $content;
+    }
+
+    $badgeText = $widget->hidden ? 'Protected' : 'Post';
+
+    $metaItems = '';
+    if ($dateText !== '') {
+        $metaItems .= '<span class="meta-item"><i class="icon icon-clock"></i>' . $dateText . '</span>';
+    }
+    if ($categoryText !== '') {
+        $metaItems .= '<span class="meta-item"><i class="icon icon-article"></i>' . $categoryText . '</span>';
+    }
+    if (!empty($tagTexts)) {
+        $metaItems .= '<span class="meta-item"><i class="icon icon-hashtag"></i>' . implode(' / ', $tagTexts) . '</span>';
+    }
+    $metaHtml = $metaItems !== '' ? '<span class="ps-post-card-meta">' . $metaItems . '</span>' : '';
+
+    $coverHtml = '';
+    if (isset($widget->fields) && !empty($widget->fields->img)) {
+        $coverUrl = htmlspecialchars($widget->fields->img, ENT_QUOTES, 'UTF-8');
+        $coverHtml = '<span class="ps-post-card-cover">'
+            . '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"'
+            . ' data-lazy-src="' . $coverUrl . '" alt="' . $title . '"'
+            . ' class="ps-post-card-cover-img no-zoom no-figcaption" loading="lazy" decoding="async">'
+            . '</span>';
+    }
+
+    $result = '<a class="ps-post-card" href="' . $permalink . '">'
+        . '<span class="ps-post-card-layout">'
+        . '<span class="ps-post-card-body">'
+        . '<span class="ps-post-card-header">'
+        . '<span class="ps-post-card-icon"><i class="icon icon-article"></i></span>'
+        . '<span class="ps-post-card-title-wrap">'
+        . '<span class="ps-post-card-title-row">'
+        . '<span class="ps-post-card-title">' . $title . '</span>'
+        . '<span class="ps-post-card-badge">' . htmlspecialchars($badgeText, ENT_QUOTES, 'UTF-8') . '</span>'
+        . '</span>'
+        . '</span>'
+        . '</span>'
+        . '<span class="ps-post-card-excerpt">' . $excerpt . '</span>'
+        . $metaHtml
+        . '</span>'
+        . $coverHtml
+        . '</span>'
+        . '</a>';
+
+    if ($cacheKey !== '') {
+        $renderCache[$cacheKey] = $result;
+    }
+
+    return $result;
 }
 
-function parse_windows($content)
-{
-    $content = preg_replace_callback('/<div window-type="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
-        $type = $matches[1];
-        $title = $matches[2];
-        $innerContent = $matches[3];
-        return '<div class="window ' . $type . '"><div class="flex"><div class="window-prompt-wrap"><p class="window-prompt-heading">' . $title . '</p><div class="window-prompt-prompt"><p>' . $innerContent . '</p></div></div></div></div>';
-    }, $content);
-    return $content;
-}
 
-function parse_timeline($content)
-{
-    $content = preg_replace_callback('/<div timeline-event date="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
-        $date = $matches[1];
-        $title = $matches[2];
-        $innerContent = $matches[3];
-        return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">' . $date . '</div><p class="timeline-title">' . $title . '</p><p class="timeline-description">' . $innerContent . '</p></div></div>';
-    }, $content);
-    return $content;
-}
 
-function parsePicGrid($content)
-{
-    return preg_replace_callback(
-        '/\[PicGrid\](.*?)\[\/PicGrid\]/s',
-        function ($matches) {
-            $cleanMatch = preg_replace([
-                '/<br\s*\/?>/i',
-                '/<figcaption>.*?<\/figcaption>/s',
-                '/<\/?p>/i',
-            ], '', $matches[1]);
 
-            return '<div class="pic-grid">' . $cleanMatch . '</div>';
-        },
-        $content
-    );
-}
+// ==================== 4) 媒体与表格增强 ====================
+// 图像、表格等内容增强
 
-// 图片处理功能
-function add_zoomable_to_images($content)
+function addZoomableToImages($content)
 {
+    if (strpos($content, '<img') === false) {
+        return $content;
+    }
+
     $exclude_elements = array(
         '.no-zoom',
         '#no-zoom',
@@ -836,7 +982,8 @@ function add_zoomable_to_images($content)
     return $content;
 }
 
-function theme_wrap_tables($content)
+// 表格包裹滚动容器
+function wrapTables($content)
 {
     return preg_replace(
         '/<table\b[^>]*>.*?<\/table>/is',
@@ -845,7 +992,9 @@ function theme_wrap_tables($content)
     );
 }
 
+// ==================== 5) OwO 表情 ====================
 // OwO 表情解析器
+
 function parseOwOcodes($content)
 {
     if (strpos($content, ':$(') === false && strpos($content, ':#(') === false) {

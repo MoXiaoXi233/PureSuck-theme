@@ -121,7 +121,7 @@
                                     </div>
                                     <div>
                                         <span>许可协议</span>
-                                        <a href="<?php echo get_cc_link(); ?>">CC
+                                        <a href="<?php echo getCcLink(); ?>">CC
                                             <?php echo strtoupper($this->options->ccLicense); ?> 4.0</a>
                                     </div>
                                 </div>

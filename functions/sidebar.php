@@ -6,7 +6,7 @@ if (!defined('__TYPECHO_ROOT_DIR__'))
 // 包含：统计、搜索、分类、标签、个人信息
 
 // 全站文章总字数
-function allOfCharacters()
+function getAllCharacters()
 {
     $chars = 0;
     $db = Typecho_Db::get();
@@ -42,7 +42,7 @@ function getTotalPostsCount()
 }
 
 // 获取 CC 协议链接
-function get_cc_link()
+function getCcLink()
 {
     $options = Typecho_Widget::widget('Widget_Options');
     return 'https://creativecommons.org/licenses/' . $options->ccLicense . '/4.0/deed.zh-hans';
