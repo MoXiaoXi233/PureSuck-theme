@@ -119,6 +119,19 @@ function generateDynamicCSS()
 // 获取 GitHub 最新版本号
 function getLatestGitHubRelease($owner, $repo)
 {
+    $owner = trim((string)$owner);
+    $repo = trim((string)$repo);
+    if ($owner === '' || $repo === '') {
+        return false;
+    }
+
+    $cacheKey = 'release:v1:' . strtolower($owner) . '/' . strtolower($repo);
+    $ttl = 6 * 3600;
+    $cache = getGithubCache($cacheKey, $ttl);
+    if ($cache && !empty($cache['fresh'])) {
+        return $cache['data'];
+    }
+
     $url = "https://api.github.com/repos/{$owner}/{$repo}/releases/latest";
     $context = stream_context_create([
         'http' => [
@@ -130,13 +143,22 @@ function getLatestGitHubRelease($owner, $repo)
     $response = @file_get_contents($url, false, $context);
 
     if ($response === false) {
+        if ($cache && isset($cache['data'])) {
+            return $cache['data'];
+        }
         return false;
     }
 
     $data = json_decode($response, true);
 
     if ($data && isset($data['tag_name'])) {
-        return ltrim($data['tag_name'], 'v');
+        $version = ltrim($data['tag_name'], 'v');
+        setGithubCache($cacheKey, $version);
+        return $version;
+    }
+
+    if ($cache && isset($cache['data'])) {
+        return $cache['data'];
     }
 
     return false;
@@ -157,7 +179,7 @@ function themeConfig($form)
         if ($_POST["type"] == "备份模板设置数据") {
             if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'))) {
                 $update = $db->update('table.options')->rows(array('value' => $ysj))->where('name = ?', 'theme:' . $name . 'bf');
-                $updateRows = $db->query($update);
+                $db->query($update);
                 echo '<div class="tongzhi home">备份已更新，请等待自动刷新！如果等不到请点击';
                 ?>
                 <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
@@ -169,7 +191,7 @@ function themeConfig($form)
                 if ($ysj) {
                     $insert = $db->insert('table.options')
                         ->rows(array('name' => 'theme:' . $name . 'bf', 'user' => '0', 'value' => $ysj));
-                    $insertId = $db->query($insert);
+                    $db->query($insert);
                     echo '<div class="tongzhi home">备份完成，请等待自动刷新！如果等不到请点击';
                     ?>
                     <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
@@ -185,7 +207,7 @@ function themeConfig($form)
                 $sjdub = $db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'));
                 $bsj = $sjdub['value'];
                 $update = $db->update('table.options')->rows(array('value' => $bsj))->where('name = ?', 'theme:' . $name);
-                $updateRows = $db->query($update);
+                $db->query($update);
                 echo '<div class="tongzhi home">检测到模板备份数据，恢复完成，请等待自动刷新！如果等不到请点击';
                 ?>
                 <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>
@@ -200,7 +222,7 @@ function themeConfig($form)
         if ($_POST["type"] == "删除备份数据") {
             if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', 'theme:' . $name . 'bf'))) {
                 $delete = $db->delete('table.options')->where('name = ?', 'theme:' . $name . 'bf');
-                $deletedRows = $db->query($delete);
+                $db->query($delete);
                 echo '<div class="tongzhi home">删除成功，请等待自动刷新，如果等不到请点击';
                 ?>
                 <a href="<?php Helper::options()->adminUrl('options-theme.php'); ?>">这里</a></div>

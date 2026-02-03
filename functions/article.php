@@ -985,6 +985,10 @@ function addZoomableToImages($content)
 // 表格包裹滚动容器
 function wrapTables($content)
 {
+    if (stripos($content, '<table') === false) {
+        return $content;
+    }
+
     return preg_replace(
         '/<table\b[^>]*>.*?<\/table>/is',
         '<div class="table-scroll">$0</div>',

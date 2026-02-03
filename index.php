@@ -16,6 +16,10 @@ $this->need('header.php');
 
 <div class="wrapper">
 
+    <?php
+    $showCardCategory = isset($this->options->showCardCategory)
+        && $this->options->showCardCategory === '1';
+    ?>
     <?php while ($this->next()): ?>
         <?php
         $hasImg = $this->fields->img ? true : false;
@@ -23,8 +27,7 @@ $this->need('header.php');
         <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item <?= $this->hidden ? 'post-protected' : ''; ?>" data-protected="<?= $this->hidden ? 'true' : 'false'; ?>" data-ps-post-key="<?= $this->cid; ?>">
             <div class="post-inner">
                 <?php
-                $showCardCategory = isset($this->options->showCardCategory)
-                    && $this->options->showCardCategory === '1';
+                $cat = null;
 
                 // 仅在开启时才取分类
                 if ($showCardCategory) {
@@ -123,10 +126,7 @@ $this->need('header.php');
 
 <div class="nav main-lastinfo">
     <span class="nav-item-alt">
-        <?php
-        $options = Typecho_Widget::widget('Widget_Options');
-        echo $options->footerInfo;
-        ?>
+        <?php echo $this->options->footerInfo; ?>
     </span>
 </div>
 </main>

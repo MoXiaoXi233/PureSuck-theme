@@ -12,7 +12,6 @@ require_once __DIR__ . '/functions/cache.php';
 require_once __DIR__ . '/functions/article.php';
 
 // 首页功能：列表、卡片等
-require_once __DIR__ . '/functions/index.php';
 
 // 侧边栏功能：统计、搜索、分类、标签
 require_once __DIR__ . '/functions/sidebar.php';

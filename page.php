@@ -74,10 +74,7 @@
 <nav class="nav main-pager" role="navigation" aria-label="Pagination" data-js="pager">
     <div class="nav main-lastinfo">
         <span class="nav-item-alt">
-            <?php
-            $options = Typecho_Widget::widget('Widget_Options');
-            echo $options->footerInfo;
-            ?>
+            <?php echo $this->options->footerInfo; ?>
         </span>
     </div>
 </nav>

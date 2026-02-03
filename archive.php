@@ -11,6 +11,10 @@
         'author' => _t('%s 发布的文章')
     ], '', ''); ?></h3>
 
+    <?php
+    $showCardCategory = isset($this->options->showCardCategory)
+        && $this->options->showCardCategory === '1';
+    ?>
     <?php if ($this->have()): ?>
         <?php while ($this->next()): ?>
             <?php
@@ -19,8 +23,7 @@
             <article class="post <?= $hasImg ? 'post--photo post--cover' : 'post--text'; ?> post--index main-item" data-ps-post-key="<?= $this->cid; ?>">
                 <div class="post-inner">
                     <?php
-                    $showCardCategory = isset($this->options->showCardCategory)
-                        && $this->options->showCardCategory === '1';
+                    $cat = null;
 
                     // 仅在开启时才取分类
                     if ($showCardCategory) {
@@ -134,10 +137,7 @@
 
 <div class="nav main-lastinfo">
     <span class="nav-item-alt">
-        <?php
-        $options = Typecho_Widget::widget('Widget_Options');
-        echo $options->footerInfo;
-        ?>
+        <?php echo $this->options->footerInfo; ?>
     </span>
 </div>
 </main>

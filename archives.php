@@ -44,9 +44,10 @@ $this->need('header.php');
                     </h1>
                     <div class="inner-post-wrapper">
 
+                        <?php $totalPosts = (int)getTotalPostsCount(); ?>
                         <div class="meta post-meta">
                             这里会归档一切文章<br>
-                            共创作了 <?= getTotalPostsCount(); ?> 篇文章，合 <?= getAllCharacters(); ?> 字
+                            共创作了 <?= $totalPosts; ?> 篇文章，合 <?= getAllCharacters(); ?> 字
                         </div>
 
                         <!-- 标签 -->
@@ -67,7 +68,7 @@ $this->need('header.php');
                         <h2>时间线</h2>
                         <?php
                         // 获取所有文章
-                        $this->widget('Widget_Contents_Post_Recent', 'pageSize=100')->to($posts);
+                        $this->widget('Widget_Contents_Post_Recent', 'pageSize=' . max(1, $totalPosts))->to($posts);
                         $archives = [];
 
                         // 按年份和月份分组文章
@@ -108,12 +109,9 @@ $this->need('header.php');
 <nav class="nav main-pager" role="navigation" aria-label="Pagination" data-js="pager">
     <div class="nav main-lastinfo">
         <span class="nav-item-alt">
-            <?php
-            $options = Typecho_Widget::widget('Widget_Options');
-            echo $options->footerInfo;
-            ?>
-        </span>
-    </div>
+        <?php echo $this->options->footerInfo; ?>
+    </span>
+</div>
 </nav>
 </main>
 
