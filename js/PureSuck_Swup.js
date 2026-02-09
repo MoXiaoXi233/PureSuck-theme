@@ -15,15 +15,13 @@
         'ps-phase-exit',
         'ps-mode-card',
         'ps-mode-vt',
-        'ps-vt-list-hold',
-        'ps-vt-list-reveal',
+        'ps-vt-reveal',
         'ps-enter-list',
         'ps-enter-post',
         'ps-enter-page',
         'ps-exit-list',
         'ps-exit-post',
-        'ps-exit-page',
-        'ps-pre-enter'
+        'ps-exit-page'
     ];
 
     const DURATION = {
@@ -217,8 +215,7 @@
             'ps-phase-exit',
             'ps-mode-card',
             'ps-mode-vt',
-            'ps-vt-list-hold',
-            'ps-vt-list-reveal',
+            'ps-vt-reveal',
             'ps-enter-list',
             'ps-enter-post',
             'ps-enter-page',
@@ -255,7 +252,6 @@
         }
 
         setTransitionState('exit', mode, fromType);
-        document.documentElement.classList.add('ps-pre-enter');
     }
 
     function startEnterTransition(toType, mode, options) {
@@ -274,19 +270,15 @@
 
         startPrimeGuard();
         setTransitionState('enter', mode, toType);
-        document.documentElement.classList.remove('ps-pre-enter');
-        document.documentElement.classList.remove('ps-vt-list-hold', 'ps-vt-list-reveal');
 
         let cleanupDelay = DURATION.enter;
         if (!config.force && mode === 'vt' && toType === 'list') {
             const html = document.documentElement;
             const revealDelay = DURATION.vtMorph + DURATION.vtRevealGap;
-            html.classList.add('ps-vt-list-hold');
 
             clearTimer('reveal');
             state.timers.reveal = window.setTimeout(() => {
-                html.classList.remove('ps-vt-list-hold');
-                html.classList.add('ps-vt-list-reveal');
+                html.classList.add('ps-vt-reveal');
                 clearTimer('reveal');
             }, revealDelay);
 

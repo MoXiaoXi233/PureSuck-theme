@@ -214,6 +214,48 @@
 - 处理：对统一 `page shell` 引入固定 `transform-origin` 与 page 专属 scale 参数（进入/退出/预载三阶段同步）。
 - 结论：不区分模板，继续保持同一 `page` 语义，只修正长页面观感一致性。
 
+## 14. 第八轮：移除过度设计的动画分段（2026-02-10）
+
+### 14.1 目标
+- 删除文章内容分段渐入/退出动画（`.post-content`、`.post-comments`、`.license-info-card` 不应单独做动画）。
+- 删除列表卡片 stagger 延迟（12 个 `nth-of-type` 规则），改为统一进入。
+
+### 14.2 问题描述
+- **问题 1**：VT 模式下文章页内容被拆分成多个区块分段渐入（140ms 延迟），造成"卡片整体已加载但内容分段飘入"的观感。
+- **问题 2**：列表卡片使用 stagger（最大延迟 312ms），属于过度设计，不符合 DevPlan 0.2 "保持务实"的原则。
+
+### 14.3 本轮修改文件
+- `css/animations/enter.css`
+  - 删除 VT 模式下 `.post-content/.post-comments/.license-info-card` 的分段渐入动画
+  - 清理 `--ps-item-delay` 引用，改为固定值
+- `css/animations/exit.css`
+  - 删除 VT 模式下文章内容的分段退出动画
+  - 清理 `--ps-item-delay` 引用
+- `css/animations/transitions.css`
+  - 删除 12 个 `nth-of-type` stagger 规则
+
+### 14.4 对照 DevPlan 完成项
+- 已完成：0.2 "需要降级的过度设计点" — 移除不必要的复杂动画。
+- 已完成：6.3 "非共享元素仅允许轻量淡出/淡入" — 文章内容不再单独做动画。
+- 已完成：6.4 "stagger 必须克制" — 移除列表卡片 stagger。
+
+### 14.5 校验
+- 列表页：所有卡片统一进入，无延迟差异
+- 文章页：内容跟随卡片整体进入/退出
+- VT 模式：共享元素 morph 正常，非共享元素轻量淡入
+
+### 14.6 动画状态机简化（追加）
+- 移除 `ps-pre-enter`（无 CSS 使用，属于冗余状态类）
+- 合并 `ps-vt-list-hold` 和 `ps-vt-list-reveal` 为 `ps-vt-reveal`
+- 状态类从 14 个减少到 12 个
+- 修改文件：`js/PureSuck_Swup.js`、`css/animations/enter.css`
+
+### 14.7 后续待完成（Phase 2.5 剩余任务）
+以下任务已记录到 DevPlan Phase 2.5，待后续重构：
+- **TOC 缓存简化**：合并 6 个 Map/Set 为单层结构
+- **全局命名空间收敛**：将 `window.swupInstance`、`window.mediumZoomInstance`、`window.setTheme`、`window.toggleTheme`、`window.NavIndicator`、`window.LazyLoadManager` 收敛到 `window.PS` 下
+- **PHP 缓存简化**：评估双层缓存的必要性
+
 ## 13. 第七轮：右栏三栏语义重构（2026-02-09）
 
 ### 13.1 目标

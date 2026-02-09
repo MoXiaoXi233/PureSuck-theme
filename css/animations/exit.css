@@ -47,7 +47,6 @@
 /* 形态 B：普通卡片转场 */
 html.ps-phase-exit.ps-mode-card.ps-exit-list #swup .post.post--index {
     animation: ps-exit-list-card var(--ps-motion-exit) var(--ps-ease-exit) both;
-    animation-delay: calc(var(--ps-item-delay, 0ms) * 0.5);
 }
 
 html.ps-phase-exit.ps-mode-card.ps-exit-list #swup .archive-title,
@@ -69,12 +68,6 @@ html.ps-phase-exit.ps-mode-card.ps-exit-page #swup [data-ps-page-shell] {
 /* 形态 A：VT 时只让非共享元素退出，避免与 morph 打架 */
 html.ps-phase-exit.ps-mode-vt.ps-exit-list #swup .post.post--index:not([data-ps-vt-name]) {
     animation: ps-vt-soft-fade calc(var(--ps-motion-vt) - 120ms) var(--ps-ease-exit) both;
-    animation-delay: calc(var(--ps-item-delay, 0ms) * 0.35);
 }
 
-html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .post-content,
-html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .post-comments,
-html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .license-info-card,
-html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .post-footer {
-    animation: ps-vt-soft-fade calc(var(--ps-motion-vt) - 120ms) var(--ps-ease-exit) both;
-}
+/* 文章内容区域跟随卡片整体退出，不做分段动画 */

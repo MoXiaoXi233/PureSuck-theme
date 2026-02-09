@@ -42,20 +42,7 @@ html.ps-animating #swup .main-lastinfo {
     contain: layout style paint;
 }
 
-/* 列表 stagger，覆盖常见数量即可 */
-#swup .post.post--index:nth-of-type(1) { --ps-item-delay: 0ms; }
-#swup .post.post--index:nth-of-type(2) { --ps-item-delay: 26ms; }
-#swup .post.post--index:nth-of-type(3) { --ps-item-delay: 52ms; }
-#swup .post.post--index:nth-of-type(4) { --ps-item-delay: 78ms; }
-#swup .post.post--index:nth-of-type(5) { --ps-item-delay: 104ms; }
-#swup .post.post--index:nth-of-type(6) { --ps-item-delay: 130ms; }
-#swup .post.post--index:nth-of-type(7) { --ps-item-delay: 156ms; }
-#swup .post.post--index:nth-of-type(8) { --ps-item-delay: 182ms; }
-#swup .post.post--index:nth-of-type(9) { --ps-item-delay: 208ms; }
-#swup .post.post--index:nth-of-type(10) { --ps-item-delay: 234ms; }
-#swup .post.post--index:nth-of-type(11) { --ps-item-delay: 260ms; }
-#swup .post.post--index:nth-of-type(12) { --ps-item-delay: 286ms; }
-#swup .post.post--index:nth-of-type(n + 13) { --ps-item-delay: 312ms; }
+/* 列表卡片统一进入，不做 stagger 延迟 */
 
 /* 首屏预载 */
 html.ps-preload-list-enter .post.post--index,

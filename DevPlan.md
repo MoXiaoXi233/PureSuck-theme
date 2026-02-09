@@ -63,12 +63,32 @@
 - 保持 `#swup` 容器在所有模板一致存在；避免把 header/footer 放入 `#swup`（减少重复绑定与闪烁）。
 - 统一可复用的 class/data 属性命名（减少“同一语义多套类名”的情况）。
 
-### Phase 2：JS 组织方式（替代“Islands 强规范”）
-- 建立一个“模块注册表”概念：每个模块暴露 `init(root)` / `destroy(root)`（或类似）即可。
+### Phase 2：JS 组织方式（替代"Islands 强规范"）
+- 建立一个"模块注册表"概念：每个模块暴露 `init(root)` / `destroy(root)`（或类似）即可。
 - Swup 生命周期中只做两件事：
   - 进入前：集中 `destroy`（解绑事件/observer/RAF/timer）。
   - 进入后：集中 `init`（只在需要的页面类型或 DOM 存在时初始化）。
-- 把“页面类型差异”（list/post/page）收敛成少量条件分支，避免在 JS 里散落大量模板细节。
+- 把"页面类型差异"（list/post/page）收敛成少量条件分支，避免在 JS 里散落大量模板细节。
+
+### Phase 2.5：过度设计清理（务实精简）
+> 目标：对照 0.2 "需要降级的过度设计点"，清理已识别的复杂度负担。
+
+**动画状态机简化**：
+- 现状：14 个 CSS 状态类、5 个时间常量、4 个嵌套计时器。
+- 目标：收敛到 6 个核心状态类（`ps-animating`、`ps-phase-enter`、`ps-phase-exit`、`ps-mode-card`、`ps-mode-vt`、`ps-enter-{type}`/`ps-exit-{type}`）。
+- 移除不必要的中间态（`ps-vt-list-hold`、`ps-vt-list-reveal` 等），VT 分层改为 CSS 原生 `::view-transition` 控制。
+
+**TOC 缓存简化**：
+- 现状：7 个状态变量 + 4 个 Map/Set（indexByElement、indexById、linkById、itemById、topByIndex、intersecting）。
+- 目标：合并为单一 `state` 对象 + 1 个 Map（id → 元素/链接/位置），IntersectionObserver 回调直接更新 DOM，不做多层缓存。
+
+**全局命名空间收敛**：
+- 现状：20+ 全局挂载（`window.mediumZoomInstance`、`window.setTheme`、`window.toggleTheme`、`window.NavIndicator`、`window.swupInstance`、`window.LazyLoadManager` 等）。
+- 目标：全部收敛到 `window.PS` 下（`PS.zoom`、`PS.theme`、`PS.nav`、`PS.swup`、`PS.lazy`），对外 API 不超过 10 个。
+
+**PHP 缓存简化**：
+- 现状：L1 内存缓存 + L2 文件缓存，3 个获取函数，复杂的 cache key 生成。
+- 目标：保留 L1 请求级内存缓存，L2 文件缓存简化为可选增强；cache key 统一为 `主题版本:内容哈希`，配置指纹仅在必要时加入。
 
 ### Phase 3：性能与体验打磨（基于真实瓶颈）
 - 对 `PureSuck_Swup.js` 做“可维护性重构”：分文件/分模块（即便仍然发布为一个文件）。
