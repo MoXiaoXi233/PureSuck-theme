@@ -389,10 +389,8 @@
             }
         });
 
-        // 更新导航指示器（优先使用 PS.nav）
-        const nav = PS.nav || window.NavIndicator;
-        if (nav && typeof nav.update === 'function') {
-            nav.update();
+        if (window.NavIndicator && typeof window.NavIndicator.update === 'function') {
+            window.NavIndicator.update();
         }
     }
 
@@ -745,10 +743,8 @@
             rememberLastPostKey(postKey);
             markSharedElement(postCard, postKey);
 
-            // 预加载卡片图片（优先使用 PS.lazy）
-            const lazy = PS.lazy || window.LazyLoadManager;
-            if (lazy && typeof lazy.loadForVT === 'function') {
-                lazy.loadForVT(postCard);
+            if (window.LazyLoadManager && typeof window.LazyLoadManager.loadForVT === 'function') {
+                window.LazyLoadManager.loadForVT(postCard);
             }
         }, true);
 
@@ -786,10 +782,8 @@
                 if (typeof window.runShortcodes === 'function') {
                     window.runShortcodes(root);
                 }
-                // 优先使用 PS.lazy
-                const lazy = PS.lazy || window.LazyLoadManager;
-                if (lazy && typeof lazy.observe === 'function') {
-                    lazy.observe(root);
+                if (window.LazyLoadManager && typeof window.LazyLoadManager.observe === 'function') {
+                    window.LazyLoadManager.observe(root);
                 }
                 updateNavCurrentState();
                 if (window.OwoManager && typeof window.OwoManager.init === 'function') {
@@ -886,7 +880,7 @@
 
         try {
             const swup = new window.Swup({
-                containers: ['#swup'],
+                containers: ['#swup', '#right-sidebar'],
                 plugins: createPlugins(),
                 cache: true,
                 native: true,
@@ -901,8 +895,7 @@
             });
 
             state.swup = swup;
-            PS.swup = swup;                // 收敛到 PS.swup
-            window.swupInstance = swup;    // 向后兼容
+            window.swupInstance = swup;
 
             swup.hooks.on('visit:start', function onVisitStart() {
                 cleanupTransitionState({ keepSharedMarker: true });
@@ -930,10 +923,8 @@
 
                 startEnterTransition(toType, enterMode, { fromType: state.lastFromType });
 
-                // 优先使用 PS.lazy
-                const lazy = PS.lazy || window.LazyLoadManager;
-                if (lazy && typeof lazy.observe === 'function') {
-                    lazy.observe(getSwupRoot());
+                if (window.LazyLoadManager && typeof window.LazyLoadManager.observe === 'function') {
+                    window.LazyLoadManager.observe(getSwupRoot());
                 }
             });
 

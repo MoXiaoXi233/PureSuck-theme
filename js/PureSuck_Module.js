@@ -1,361 +1,198 @@
 /** 这个JS包含了各种需要处理的的内容 **/
 /** 回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
 
+/**
+ * TOC 目录高亮 - 简化重构版
+ * 核心原则：简单、直接、快速响应
+ */
 const initializeTOC = (() => {
     let state = null;
-    let listenersBound = false;
     let hashTimer = 0;
-    let scrollEndTimer = 0;
-    let scrollEndHandler = null;
-    let rafId = null; // 用于节流 IntersectionObserver 回调
-    let refreshRaf = 0;
+    let isClickScrolling = false;  // 点击滚动中，暂停 Observer 响应
 
-    function reset() {
+    function destroy() {
         if (!state) return;
 
-        if (hashTimer) {
-            clearTimeout(hashTimer);
-            hashTimer = 0;
-        }
-
-        if (scrollEndHandler) {
-            window.removeEventListener("scroll", scrollEndHandler);
-            scrollEndHandler = null;
-        }
-
-        if (scrollEndTimer) {
-            clearTimeout(scrollEndTimer);
-            scrollEndTimer = 0;
-        }
-
-        if (refreshRaf) {
-            cancelAnimationFrame(refreshRaf);
-            refreshRaf = 0;
-        }
+        clearTimeout(hashTimer);
+        hashTimer = 0;
+        isClickScrolling = false;
 
         if (state.observer) {
             state.observer.disconnect();
-            state.observer = null;
         }
 
-        const previousElement = state.elements[state.activeIndex];
-        if (previousElement && previousElement.id) {
-            const previousLink = state.linkById.get(previousElement.id);
-            if (previousLink) {
-                previousLink.classList.remove("li-active");
-            }
+        if (state.activeLink) {
+            state.activeLink.classList.remove('li-active');
         }
 
         state = null;
     }
 
-    function refreshLayout() {
-        if (!state) return;
-        bindObserver();
-        setActive(getInitialActiveIndex());
-    }
+    function setActive(index) {
+        if (!state || index < 0 || index >= state.headings.length) return;
+        if (state.activeIndex === index) return;
 
-    function scheduleRefreshLayout() {
-        if (refreshRaf) cancelAnimationFrame(refreshRaf);
-        refreshRaf = requestAnimationFrame(() => {
-            refreshRaf = 0;
-            refreshLayout();
-        });
-    }
-
-    function getInitialActiveIndex() {
-        if (!state) return 0;
-        const activationOffset = state.activationOffset;
-        let activeIndex = 0;
-
-        // ✅ 优先使用 IntersectionObserver 缓存的位置数据，避免触发 reflow
-        const hasCachedData = state.topByIndex && state.topByIndex.size > 0;
-
-        if (hasCachedData) {
-            // 使用缓存数据计算
-            for (let index = 0; index < state.elements.length; index++) {
-                const cachedTop = state.topByIndex.get(index);
-                if (cachedTop != null && cachedTop <= activationOffset) {
-                    activeIndex = index;
-                }
-            }
-        } else {
-            // 降级：一次性获取所有 boundingClientRect，避免循环中多次触发 reflow
-            const rects = state.elements.map(el => el.getBoundingClientRect().top);
-
-            for (let index = 0; index < rects.length; index++) {
-                if (rects[index] <= activationOffset) {
-                    activeIndex = index;
-                } else {
-                    break;
-                }
-            }
+        // 移除旧激活状态
+        if (state.activeLink) {
+            state.activeLink.classList.remove('li-active');
         }
 
-        return activeIndex;
-    }
+        const heading = state.headings[index];
+        const link = state.linkById.get(heading.id);
+        if (!link) return;
 
-    function bindObserver() {
-        if (!state) return;
-        if (state.observer) {
-            state.observer.disconnect();
+        // 设置新激活状态
+        link.classList.add('li-active');
+        state.activeLink = link;
+        state.activeIndex = index;
+
+        // 更新侧边栏指示器位置
+        const li = state.liById.get(heading.id);
+        if (state.indicator && li) {
+            state.indicator.style.transform = `translateY(${li.offsetTop}px)`;
         }
-
-        state.intersecting.clear();
-
-        const activationRatio = 0.15;
-        const bottomRatio = 1;
-        state.activationOffset = Math.round(window.innerHeight * activationRatio);
-        state.observer = new IntersectionObserver(handleIntersect, {
-            rootMargin: `-${activationRatio * 100}% 0px -${bottomRatio * 100}% 0px`,
-            threshold: 0
-        });
-
-        state.elements.forEach(element => {
-            if (element.id) {
-                state.observer.observe(element);
-            }
-        });
     }
 
     function handleIntersect(entries) {
-        if (!state || !state.indexByElement) return;
+        if (!state || isClickScrolling) return;  // 点击滚动中不响应
 
-        // 取消之前的 RAF，避免重复处理
-        if (rafId) cancelAnimationFrame(rafId);
+        // 直接处理，不加 RAF 节流
+        entries.forEach(entry => {
+            const index = state.indexMap.get(entry.target);
+            if (index == null) return;
 
-        // IntersectionObserver 已经是异步批量回调，直接用 RAF 优化即可
-        rafId = requestAnimationFrame(() => {
-            if (!state || !state.indexByElement) {
-                rafId = null;
-                return;
+            if (entry.isIntersecting) {
+                state.visible.add(index);
+            } else {
+                state.visible.delete(index);
             }
-
-            let bestIndex = -1;
-            let bestDistance = Infinity;
-
-            entries.forEach(entry => {
-                if (!entry || !entry.target) return;
-                const index = state.indexByElement.get(entry.target);
-                if (index == null) return;
-                if (entry.isIntersecting) {
-                    state.intersecting.add(index);
-                    state.topByIndex.set(index, entry.boundingClientRect.top);
-                } else {
-                    state.intersecting.delete(index);
-                }
-            });
-
-            state.intersecting.forEach(index => {
-                const top = state.topByIndex.get(index);
-                if (top == null) return;
-                const distance = Math.abs(top - state.activationOffset);
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    bestIndex = index;
-                }
-            });
-
-            // 当没有元素在激活区域内时，找到最接近激活区域的元素
-            // 这处理向上/向下滚动到页面顶部/底部的情况
-            if (bestIndex < 0 && state.topByIndex.size > 0) {
-                let closestDistance = Infinity;
-                state.topByIndex.forEach((top, index) => {
-                    if (top == null) return;
-                    const distance = Math.abs(top - state.activationOffset);
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        bestIndex = index;
-                    }
-                });
-            }
-
-            if (bestIndex >= 0) {
-                setActive(bestIndex);
-            }
-
-            rafId = null;
         });
-    }
 
-    function setActive(index) {
-        if (!state) return;
-        if (index < 0 || index >= state.elements.length) return;
-        if (state.activeIndex === index) return;
-
-        const element = state.elements[index];
-        if (!element || !element.id) return;
-        const link = state.linkById.get(element.id);
-        if (!link) return;
-
-        const previousElement = state.elements[state.activeIndex];
-        if (previousElement && previousElement.id) {
-            const previousLink = state.linkById.get(previousElement.id);
-            if (previousLink) {
-                previousLink.classList.remove("li-active");
-            }
-        }
-
-        link.classList.add("li-active");
-        state.activeIndex = index;
-
-        // 直接从 link 获取父 li，不再使用 itemById 缓存
-        const item = link.closest('li');
-        if (state.siderbar && item) {
-            state.siderbar.style.transform = `translate3d(0, ${item.offsetTop + 4}px, 0)`;
+        // 选择最靠前的可见标题
+        if (state.visible.size > 0) {
+            setActive(Math.min(...state.visible));
         }
     }
 
-    function waitForScrollEnd(done, timeout = 160) {
-        if (scrollEndHandler) {
-            window.removeEventListener("scroll", scrollEndHandler);
-            scrollEndHandler = null;
-        }
+    function handleClick(e) {
+        const link = e.target.closest('.toc-a');
+        if (!link || !state) return;
 
-        if (scrollEndTimer) {
-            clearTimeout(scrollEndTimer);
-            scrollEndTimer = 0;
-        }
+        const href = link.getAttribute('href');
+        if (!href || href[0] !== '#') return;
 
-        scrollEndHandler = () => {
-            if (scrollEndTimer) {
-                clearTimeout(scrollEndTimer);
-            }
-            scrollEndTimer = window.setTimeout(() => {
-                window.removeEventListener("scroll", scrollEndHandler);
-                scrollEndHandler = null;
-                scrollEndTimer = 0;
-                done();
-            }, timeout);
-        };
-
-        window.addEventListener("scroll", scrollEndHandler, { passive: true });
-        scrollEndHandler();
-    }
-
-    function handleClick(event) {
-        if (!state) return;
-        const link = event.target instanceof Element ? event.target.closest(".toc-a") : null;
-        if (!link) return;
-
-        const href = link.getAttribute("href");
-        if (!href || href.charAt(0) !== "#") return;
-
-        event.preventDefault();
-        event.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
 
         const targetId = href.slice(1);
-        const targetElement = document.getElementById(targetId);
-        if (!targetElement) return;
+        const target = document.getElementById(targetId);
+        if (!target) return;
 
-        // 使用原始实现：getBoundingClientRect + scrollTo
-        const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({
-            top: targetTop,
-            behavior: "smooth"
-        });
+        // 立即更新激活状态
+        const index = state.headings.findIndex(h => h.id === targetId);
+        if (index >= 0) setActive(index);
 
-        if (state.observer) {
-            state.observer.disconnect();
-            state.observer = null;
-        }
+        // 暂停 Observer 响应，避免滚动过程中来回跳
+        isClickScrolling = true;
 
-        if (hashTimer) {
-            clearTimeout(hashTimer);
-        }
-        hashTimer = window.setTimeout(() => {
-            window.location.hash = targetId;
-            hashTimer = 0;
-        }, 300);
+        // 平滑滚动到目标
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        const index = state.indexById.get(targetId);
-        if (index != null) {
-            setActive(index);
-        }
-
-        waitForScrollEnd(() => {
-            // 清理缓存，因为滚动后位置已变化
-            state.topByIndex.clear();
-            state.intersecting.clear();
-            bindObserver();
-            // 使用当前目标索引，不重新计算（避免使用过期缓存）
-            if (index != null) {
-                setActive(index);
-            }
-        });
+        // 延迟更新 URL hash，并恢复 Observer 响应
+        clearTimeout(hashTimer);
+        hashTimer = setTimeout(() => {
+            history.replaceState(null, '', href);
+            isClickScrolling = false;  // 滚动结束，恢复响应
+        }, 600);  // 给足够时间让滚动完成
     }
 
     return function initializeTOC() {
-        const tocSection = document.getElementById("toc-section");
-        const toc = document.querySelector(".toc");
-        const postWrapper = document.querySelector(".inner-post-wrapper");
+        // 每次初始化前必须清理
+        destroy();
 
-        if (!toc || !postWrapper) {
-            reset();
+        const tocSection = document.getElementById('toc-section');
+        const toc = document.querySelector('.toc');
+        const content = document.querySelector('.inner-post-wrapper');
+
+        if (!toc || !content) {
+            if (tocSection) tocSection.style.display = 'none';
             return;
         }
 
-        const elements = Array.from(postWrapper.querySelectorAll("h1, h2, h3, h4, h5, h6"));
-        const links = Array.from(toc.querySelectorAll(".toc-a"));
-        const siderbar = document.querySelector(".siderbar");
-
-        if (!elements.length || !links.length || !siderbar) {
-            reset();
+        // 只选择有 id 的标题
+        const headings = Array.from(content.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'));
+        if (!headings.length) {
+            if (tocSection) tocSection.style.display = 'none';
             return;
         }
 
-        siderbar.style.transition = "transform 0.5s ease";
+        const indicator = document.querySelector('.siderbar');
+        const linkById = new Map();
+        const liById = new Map();
+        const indexMap = new Map();
 
-        if (tocSection) {
-            tocSection.style.display = "block";
-        }
+        // 建立映射
+        headings.forEach((heading, index) => {
+            indexMap.set(heading, index);
 
-        links.forEach(link => {
-            link.setAttribute("no-pjax", "");
-            link.classList.remove("li-active");
-        });
+            // 使用 CSS.escape 安全转义 ID
+            const escapedId = CSS.escape(heading.id);
+            const link = toc.querySelector(`.toc-a[href="#${escapedId}"]`);
+            if (link) {
+                linkById.set(heading.id, link);
+                link.setAttribute('no-pjax', '');
+                link.classList.remove('li-active');
 
-        state = {
-            elements,
-            links,
-            siderbar,
-            activeIndex: -1,
-            indexByElement: new Map(),
-            indexById: new Map(),
-            linkById: new Map(),
-            topByIndex: new Map(),
-            activationOffset: 0,
-            observer: null,
-            intersecting: new Set()
-        };
-
-        state.elements.forEach((element, index) => {
-            state.indexByElement.set(element, index);
-            if (element.id) {
-                state.indexById.set(element.id, index);
+                const li = link.closest('li');
+                if (li) liById.set(heading.id, li);
             }
         });
 
-        state.links.forEach(link => {
-            const href = link.getAttribute("href");
-            if (!href || href.charAt(0) !== "#") return;
-            const id = href.slice(1);
-            state.linkById.set(id, link);
+        state = {
+            headings,
+            linkById,
+            liById,
+            indexMap,
+            indicator,
+            visible: new Set(),
+            activeIndex: -1,
+            activeLink: null,
+            observer: null
+        };
+
+        // 显示 TOC
+        if (tocSection) tocSection.style.display = 'block';
+        if (indicator) indicator.style.transition = 'transform 0.25s ease-out';
+
+        // 绑定点击（只绑定一次）
+        if (!toc.dataset.tocBound) {
+            toc.addEventListener('click', handleClick, true);
+            toc.dataset.tocBound = '1';
+        }
+
+        // 创建 IntersectionObserver
+        // rootMargin: 顶部留 100px 触发区，底部排除 66%
+        state.observer = new IntersectionObserver(handleIntersect, {
+            rootMargin: '-100px 0px -66% 0px',
+            threshold: 0
         });
 
-        if (toc.dataset.binded !== "1") {
-            toc.addEventListener("click", handleClick, true);
-            toc.dataset.binded = "1";
-        }
+        headings.forEach(h => state.observer.observe(h));
 
-        if (!listenersBound) {
-            listenersBound = true;
-            window.addEventListener("resize", scheduleRefreshLayout, { passive: true });
-            window.addEventListener("orientationchange", scheduleRefreshLayout);
-            window.addEventListener("load", scheduleRefreshLayout, { once: true });
-        }
-
-        refreshLayout();
+        // 初始化：激活第一个可见的或第一个
+        requestAnimationFrame(() => {
+            if (!state) return;
+            // 找到当前视口内最靠前的标题
+            const scrollTop = window.scrollY;
+            let initialIndex = 0;
+            for (let i = 0; i < headings.length; i++) {
+                const rect = headings[i].getBoundingClientRect();
+                if (rect.top <= 120) {
+                    initialIndex = i;
+                }
+            }
+            setActive(initialIndex);
+        });
     };
 })();
 
@@ -799,8 +636,8 @@ function Comments_Submit() {
     );
 }
 
-// mediumZoom 实例挂载到 PS.zoom（向后兼容保留 window.mediumZoomInstance）
-const PS = window.PS || {};
+// 保存 mediumZoom 实例引用（全局，供 LazyLoad 使用）
+window.mediumZoomInstance = null;
 
 function runShortcodes(root) {
     history.scrollRestoration = 'auto';
@@ -808,6 +645,7 @@ function runShortcodes(root) {
     bindTabs(root);
     handleGoTopButton(root);
     initializeTOC();
+    initializeStickyTOC();  // 确保 Swup 切换后 TOC sticky 也能工作
 
     // mediumZoom 初始化
     // 只绑定已加载完成的图片（排除懒加载中的图片）
@@ -815,17 +653,16 @@ function runShortcodes(root) {
     const images = scope.querySelectorAll('[data-zoomable]:not([data-lazy-src])');
 
     // 确保实例始终存在（即使当前没有图片）
-    if (!PS.zoom) {
-        PS.zoom = mediumZoom({
+    if (!window.mediumZoomInstance) {
+        window.mediumZoomInstance = mediumZoom({
             background: 'rgba(0, 0, 0, 0.85)',
             margin: 24
         });
-        window.mediumZoomInstance = PS.zoom; // 向后兼容
     }
 
     // 增量绑定新图片
     if (images.length > 0) {
-        PS.zoom.attach(images);
+        window.mediumZoomInstance.attach(images);
     }
 
     Comments_Submit();
@@ -1036,10 +873,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 导出到 PS.theme（向后兼容保留 window.setTheme/toggleTheme）
-    if (window.PS) {
-        window.PS.theme = { set: setTheme, toggle: toggleTheme };
-    }
+    // 导出到全局
     window.setTheme = setTheme;
     window.toggleTheme = toggleTheme;
 
@@ -1223,12 +1057,11 @@ const NavIndicator = (() => {
         }
     }
 
-    // 导出到 PS.nav（向后兼容保留 window.NavIndicator）
-    const navAPI = { init, update };
-    if (window.PS) {
-        window.PS.nav = navAPI;
-    }
-    window.NavIndicator = navAPI;
+    // 导出到全局
+    window.NavIndicator = {
+        init,
+        update
+    };
 
     // 自动初始化
     if (document.readyState === 'loading') {
