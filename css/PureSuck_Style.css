@@ -2519,3 +2519,11 @@ input:-webkit-autofill:active {
 #timeline .timeline-title a:hover {
 	color: var(--themehovercolor) !important;
 }
+
+/* 渲染性能优化 - 跳过屏幕外内容渲染 */
+.post-content,
+.post-comments,
+#comments-list {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 500px;
+}

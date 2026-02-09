@@ -340,6 +340,8 @@
     flex-flow: row wrap;
     width: calc(100% + 16px);
     margin-left: -16px;
+    padding: 4px;
+    margin-top: -4px;
     transition: scale .3s ease;
 }
 
