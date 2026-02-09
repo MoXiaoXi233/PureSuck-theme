@@ -237,7 +237,7 @@ function themeConfig($form)
     }
 
     // 获取最新版本号
-    $currentVersion = '1.3.2';
+    $currentVersion = defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '1.3.2';
     $latestVersion = getLatestGitHubRelease('MoXiaoXi233', 'PureSuck-theme');
     $versionHtml = '<h3>当前主题版本：<span style="color: #b45864;">' . htmlspecialchars($currentVersion) . '</span>';
 

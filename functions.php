@@ -2,6 +2,11 @@
 if (!defined('__TYPECHO_ROOT_DIR__'))
     exit;
 
+// Theme constants (used for cache keys, etc.)
+if (!defined('PS_THEME_VERSION')) {
+    define('PS_THEME_VERSION', '1.3.2');
+}
+
 // ==================== 主入口文件 ====================
 // Typecho标准结构：functions/ 目录存放功能文件
 
