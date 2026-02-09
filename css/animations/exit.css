@@ -1,161 +1,80 @@
-/* PureSuck 退出动画 */
+﻿/* PureSuck 退出动画 */
 
-/* 列表页退出动画 */
-html.ps-list-exit .post.post--index {
-	animation: ps-list-exit-out var(--ps-anim-duration-normal) var(--ps-anim-ease-out) forwards;
-	animation-fill-mode: both;
+@keyframes ps-exit-list-card {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, calc(var(--ps-shift-s) * -1), 0) scale(var(--ps-scale-exit));
+    }
 }
 
-/* VT 模式下的列表卡片退出动画（用于非点击的卡片） */
-html.ps-list-exit #swup.ps-vt-mode .post.post--index:not([data-ps-vt-name]) {
-	animation: ps-list-card-exit-for-vt var(--ps-anim-duration-vt) var(--ps-anim-ease-out) forwards;
+@keyframes ps-exit-main-card {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, calc(var(--ps-shift-m) * -1), 0) scale(var(--ps-scale-exit));
+    }
 }
 
-/* 共享元素卡片（被点击的）：淡出 + 缩小 */
-html.ps-list-exit #swup.ps-vt-mode .post.post--index[data-ps-vt-name] {
-	animation: ps-list-shared-exit var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
+@keyframes ps-exit-page-shell {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, calc(var(--ps-shift-m) * -1), 0) scale(var(--ps-scale-exit-page));
+    }
 }
 
-/* 列表页退出动画关键帧 */
-@keyframes ps-list-exit-out {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: translate3d(0, -12px, 0) scale(var(--ps-anim-scale-exit));
-	}
+@keyframes ps-vt-soft-fade {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, calc(var(--ps-shift-s) * -1), 0);
+    }
 }
 
-@keyframes ps-list-card-exit-for-vt {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-	to {
-		opacity: 0.4;
-		transform: translate3d(0, -8px, 0) scale(0.98);
-	}
+/* 形态 B：普通卡片转场 */
+html.ps-phase-exit.ps-mode-card.ps-exit-list #swup .post.post--index {
+    animation: ps-exit-list-card var(--ps-motion-exit) var(--ps-ease-exit) both;
+    animation-delay: calc(var(--ps-item-delay, 0ms) * 0.5);
 }
 
-@keyframes ps-list-shared-exit {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: translate3d(0, -16px, 0) scale(0.94);
-	}
+html.ps-phase-exit.ps-mode-card.ps-exit-list #swup .archive-title,
+html.ps-phase-exit.ps-mode-card.ps-exit-list #swup .main-pager,
+html.ps-phase-exit.ps-mode-card.ps-exit-list #swup .main-lastinfo {
+    animation: ps-vt-soft-fade calc(var(--ps-motion-exit) - 60ms) var(--ps-ease-exit) both;
 }
 
-/* 列表页退出：卡片延迟效果（波浪式退出） */
-html.ps-list-exit .post.post--index:nth-child(1) { animation-delay: 0ms; }
-html.ps-list-exit .post.post--index:nth-child(2) { animation-delay: 25ms; }
-html.ps-list-exit .post.post--index:nth-child(3) { animation-delay: 50ms; }
-html.ps-list-exit .post.post--index:nth-child(4) { animation-delay: 75ms; }
-html.ps-list-exit .post.post--index:nth-child(5) { animation-delay: 100ms; }
-html.ps-list-exit .post.post--index:nth-child(6) { animation-delay: 120ms; }
-html.ps-list-exit .post.post--index:nth-child(7) { animation-delay: 140ms; }
-html.ps-list-exit .post.post--index:nth-child(8) { animation-delay: 160ms; }
-html.ps-list-exit .post.post--index:nth-child(n+9) { animation-delay: 180ms; }
-
-/* 列表页退出：辅助元素延迟更久 */
-html.ps-list-exit .archive-title {
-	animation: ps-list-exit-out 200ms var(--ps-anim-ease-out) forwards;
-	animation-delay: 40ms;
-}
-html.ps-list-exit .main-pager,
-html.ps-list-exit .main-lastinfo {
-	animation: ps-list-exit-out 180ms var(--ps-anim-ease-out) forwards;
-	animation-delay: 100ms;
+html.ps-phase-exit.ps-mode-card.ps-exit-post #swup .post.post--single,
+html.ps-phase-exit.ps-mode-card.ps-exit-page #swup [data-ps-page-shell] {
+    animation: ps-exit-main-card var(--ps-motion-exit) var(--ps-ease-exit) both;
 }
 
-/* 文章页退出动画 */
-html.ps-post-exit .post.post--single {
-	animation: ps-post-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
+html.ps-phase-exit.ps-mode-card.ps-exit-page #swup [data-ps-page-shell] {
+    transform-origin: 50% 92px;
+    animation-name: ps-exit-page-shell;
 }
 
-/* 文章页退出动画关键帧 */
-@keyframes ps-post-exit-out {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: translate3d(0, var(--ps-anim-translate-medium), 0) scale(0.98);
-	}
+/* 形态 A：VT 时只让非共享元素退出，避免与 morph 打架 */
+html.ps-phase-exit.ps-mode-vt.ps-exit-list #swup .post.post--index:not([data-ps-vt-name]) {
+    animation: ps-vt-soft-fade calc(var(--ps-motion-vt) - 120ms) var(--ps-ease-exit) both;
+    animation-delay: calc(var(--ps-item-delay, 0ms) * 0.35);
 }
 
-/* 独立页面退出动画 */
-html.ps-page-exit .post.post--index.main-item:not(.post--single) {
-	animation: ps-page-exit-out var(--ps-anim-duration-slow) var(--ps-anim-ease-out) forwards;
-}
-
-/* 独立页面退出动画关键帧 */
-@keyframes ps-page-exit-out {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: translate3d(0, -20px, 0) scale(0.97);
-	}
-}
-
-/* VT 模式下非 morph 元素淡出 */
-@keyframes ps-vt-fade-out {
-	from {
-		opacity: 1;
-		transform: translate3d(0, 0, 0);
-	}
-	to {
-		opacity: 0;
-		transform: translate3d(0, -8px, 0);
-	}
-}
-
-/* 被点击卡片中不参与 morph 的元素淡出 */
-#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
-#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
-#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
-	animation: ps-vt-fade-out calc(var(--ps-vt-duration) * 0.5) var(--ps-anim-ease-out) forwards;
-}
-
-/* VT 性能优化：隐藏复杂内容 */
-#swup.ps-vt-mode .post.post--single .post-content,
-#swup.ps-vt-mode .post.post--single .post-comments,
-#swup.ps-vt-mode .post.post--single .license-info-card,
-#swup.ps-vt-mode .post.post--single .post-footer {
-	display: none !important;
-}
-
-/* 无障碍支持 */
-@media (prefers-reduced-motion: reduce) {
-	html.ps-page-exit .post.post--index.main-item:not(.post--single),
-	html.ps-post-exit .post.post--single,
-	html.ps-list-exit .post.post--index,
-	html.ps-page-exit .post.post--index .post-title,
-	html.ps-page-exit .post.post--index .post-meta,
-	html.ps-page-exit .post.post--index .inner-post-wrapper > *,
-	/* VT 元素淡出 */
-	#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-excerpt,
-	#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-footer,
-	#swup.ps-vt-mode .post.post--index[data-ps-vt-name^="ps-post-"] .post-cat-vertical {
-		animation: none !important;
-		opacity: 1 !important;
-		transform: none !important;
-		will-change: auto !important;
-	}
-
-	/* VT 复杂内容隐藏 */
-	#swup.ps-vt-mode .post.post--single .post-content,
-	#swup.ps-vt-mode .post.post--single .post-comments,
-	#swup.ps-vt-mode .post.post--single .license-info-card,
-	#swup.ps-vt-mode .post.post--single .post-footer {
-		display: block !important;
-	}
+html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .post-content,
+html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .post-comments,
+html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .license-info-card,
+html.ps-phase-exit.ps-mode-vt.ps-exit-post #swup .post.post--single .post-footer {
+    animation: ps-vt-soft-fade calc(var(--ps-motion-vt) - 120ms) var(--ps-ease-exit) both;
 }

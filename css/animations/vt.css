@@ -1,118 +1,67 @@
-/* PureSuck View Transitions 样式 */
+﻿/* PureSuck View Transitions */
 
-/* View Transitions API 基础配置 */
 @view-transition {
-	navigation: auto;
+    navigation: auto;
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-	animation: none;
+    animation: none;
 }
 
-/* 主题切换动画 */
-@keyframes ps-theme-fade {
-	from {
-		opacity: 1;
-	}
-	to {
-		opacity: 0;
-	}
-}
-
-html.ps-theme-vt::view-transition-old(root) {
-	animation: ps-theme-fade var(--ps-anim-duration-vt) ease forwards;
-}
-
-html.ps-theme-vt::view-transition-new(root) {
-	animation: ps-theme-fade var(--ps-anim-duration-vt) ease reverse forwards;
-	animation-delay: 40ms;
-}
-
-/* 共享元素 View Transitions */
-[data-ps-vt-name] {
-	contain: layout style;
-}
-
-/* 单元素 VT（简化版） */
 [data-ps-vt-name^="ps-post-"] {
-	contain: layout style;
+    contain: layout style paint;
 }
 
-/* 共享元素动画关键帧 */
-@keyframes ps-vt-shared-exit {
-	from {
-		opacity: 1;
-		transform: scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: scale(1.01);
-	}
+@keyframes ps-vt-shared-old {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        opacity: 0.96;
+        transform: translate3d(0, -4px, 0) scale(0.995);
+    }
 }
 
-@keyframes ps-vt-shared-enter {
-	0% {
-		opacity: 0;
-		transform: scale(0.97) translateY(8px);
-	}
-	60% {
-		opacity: 1;
-	}
-	100% {
-		opacity: 1;
-		transform: scale(1) translateY(0);
-	}
+@keyframes ps-vt-shared-new {
+    from {
+        opacity: 0.8;
+        transform: translate3d(0, 8px, 0) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
 }
 
-/* 共享元素的 VT group 动画 */
-::view-transition-group(*) {
-	animation-duration: var(--ps-vt-duration);
-	animation-timing-function: var(--ps-vt-easing);
-	animation-fill-mode: both;
+html.ps-mode-vt::view-transition-group(*) {
+    animation-duration: var(--ps-motion-vt);
+    animation-timing-function: var(--ps-ease-enter);
+    animation-fill-mode: both;
 }
 
-/* 共享元素 old/new 的动画 - 排除 root */
-::view-transition-old(*):not(::view-transition-old(root)) {
-	animation: ps-vt-shared-exit var(--ps-vt-duration) var(--ps-vt-easing) both;
-	border-radius: var(--ps-vt-radius);
-	overflow: hidden;
+html.ps-mode-vt::view-transition-old(*):not(::view-transition-old(root)) {
+    animation: ps-vt-shared-old var(--ps-motion-vt) var(--ps-ease-exit) both;
+    border-radius: var(--ps-vt-radius);
+    overflow: hidden;
 }
 
-::view-transition-new(*):not(::view-transition-new(root)) {
-	animation: ps-vt-shared-enter var(--ps-vt-duration) var(--ps-vt-easing) both;
-	border-radius: var(--ps-vt-radius);
-	overflow: hidden;
+html.ps-mode-vt::view-transition-new(*):not(::view-transition-new(root)) {
+    animation: ps-vt-shared-new var(--ps-motion-vt) var(--ps-ease-enter) both;
+    border-radius: var(--ps-vt-radius);
+    overflow: hidden;
 }
 
-/* VT 模式下的页面过渡优化 */
-html:has(#swup.ps-vt-mode) {
-	scroll-behavior: auto !important;
-}
-
-/* 无障碍支持 */
-@media (prefers-reduced-motion: reduce) {
-	@view-transition {
-		navigation: auto;
-	}
-
-	::view-transition-old(root),
-	::view-transition-new(root) {
-		animation: none !important;
-	}
-
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
-	}
-
-	html.ps-theme-vt::view-transition-old(root),
-	html.ps-theme-vt::view-transition-new(root) {
-		animation: none !important;
-	}
-}
-
-/* VT 性能优化 */
 ::view-transition-image-pair(root) {
-	isolation: isolate;
+    isolation: isolate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
 }

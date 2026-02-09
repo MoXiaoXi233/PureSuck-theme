@@ -141,5 +141,4 @@
     </span>
 </div>
 </main>
-<?php $this->need('sidebar.php'); ?>
 <?php $this->need('footer.php'); ?>

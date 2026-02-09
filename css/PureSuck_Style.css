@@ -860,15 +860,38 @@ body>.wrapper {
 @media (min-width:1183px) {
 	body>.wrapper {
 		max-width: 1700px;
-		padding-left: 0px;
-		padding-right: 299px;
+		padding-left: 0;
+		padding-right: 0;
 	}
 }
 
 @media (min-width: 1400px) {
 	body>.wrapper {
 		padding-left: 35px;
-		padding-right: 365px;
+		padding-right: 35px;
+	}
+}
+
+.content-layout {
+	width: 100%;
+}
+
+.content-main {
+	min-width: 0;
+}
+
+@media (min-width:1183px) {
+	.content-layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 299px;
+		align-items: start;
+		column-gap: 0;
+	}
+}
+
+@media (min-width:1400px) {
+	.content-layout {
+		grid-template-columns: minmax(0, 1fr) 365px;
 	}
 }
 
@@ -2353,10 +2376,6 @@ input:-webkit-autofill:active {
 
 /* 本来想改下样式，但这2000行css不敢动 */
 /* 大胆动呗=） 史山不能一直史下去 */
-
-.pace .pace-progress {
-	background: var(--themecolor) !important;
-}
 
 /* 自定义选中文本的背景色和文字颜色 */
 ::selection {

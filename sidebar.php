@@ -87,7 +87,7 @@
     <?php
     $tocHtml = $GLOBALS['toc_html'] ?? '';
     ?>
-    <?php if ($this->options->showTOC === '1' && $tocHtml && ($this->is('post') || $this->is('page') || $this->is('archives'))): ?>
+    <?php if ($this->options->showTOC === '1' && $tocHtml && ($this->is('post') || $this->is('page'))): ?>
         <div class="toc-section" id="toc-section">
             <header class="section-header">
                 <span class="icon-article"></span>

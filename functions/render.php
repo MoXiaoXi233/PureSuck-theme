@@ -5,17 +5,64 @@ if (!defined('__TYPECHO_ROOT_DIR__'))
 // ==================== 渲染管道模块 ====================
 // 协调各页面模块，按顺序处理文章内容
 
+function psGetRenderOptionFingerprint()
+{
+    $options = Typecho_Widget::widget('Widget_Options');
+    $runtime = getPSRuntimeConfig();
+
+    $fingerprint = [
+        'theme_version' => defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '0',
+        'theme_url' => (string)$options->themeUrl,
+        'show_toc' => (string)($options->showTOC ?? '1'),
+        'runtime' => $runtime['features'] ?? []
+    ];
+
+    return md5(json_encode($fingerprint, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+}
+
+function psRenderContentPipeline($content)
+{
+    $steps = [
+        'parseShortcodes',
+        'parseAlerts',
+        'parseWindows',
+        'parseTimeline',
+        'parsePicGrid',
+        'wrapTables',
+        'addZoomableToImages',
+        'parseOwOcodes',
+        'generateToc'
+    ];
+
+    foreach ($steps as $step) {
+        if (!function_exists($step)) {
+            continue;
+        }
+        $content = $step($content);
+    }
+
+    return $content;
+}
+
 // 内容渲染主函数
 function renderPostContent($content)
 {
-    // 文章页功能处理
-    if (trim((string)$content) === '') {
+    $source = (string)$content;
+    if (trim($source) === '') {
         $GLOBALS['toc_html'] = '';
-        return $content;
+        $GLOBALS['ps_render_context'] = [
+            'cache_hit' => false,
+            'cache_key' => '',
+            'content_hash' => '',
+            'toc' => ''
+        ];
+        return $source;
     }
 
     $version = defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '0';
-    $cacheKey = 'render_post_content:v1:' . $version . ':' . md5($content);
+    $optionFingerprint = psGetRenderOptionFingerprint();
+    $contentHash = md5($source);
+    $cacheKey = 'render_post_content:v2:' . $version . ':' . $contentHash . ':' . $optionFingerprint;
     $ttl = 6 * 3600;
 
     $cache = getCache($cacheKey, $ttl, 'render');
@@ -27,21 +74,25 @@ function renderPostContent($content)
         array_key_exists('content', $cache['data'])
     ) {
         $GLOBALS['toc_html'] = (string)($cache['data']['toc'] ?? '');
+        $GLOBALS['ps_render_context'] = [
+            'cache_hit' => true,
+            'cache_key' => $cacheKey,
+            'content_hash' => $contentHash,
+            'toc' => (string)($cache['data']['toc'] ?? '')
+        ];
         return (string)$cache['data']['content'];
     }
 
-    $content = parseShortcodes($content);
-    $content = parseAlerts($content);
-    $content = parseWindows($content);
-    $content = parseTimeline($content);
-    $content = parsePicGrid($content);
-
-    $content = wrapTables($content);
-    $content = addZoomableToImages($content);
-    $content = parseOwOcodes($content);
-
-    $content = generateToc($content);
+    $content = psRenderContentPipeline($source);
     $toc = (string)($GLOBALS['toc_html'] ?? '');
     setCache($cacheKey, ['content' => $content, 'toc' => $toc], 'render');
+
+    $GLOBALS['ps_render_context'] = [
+        'cache_hit' => false,
+        'cache_key' => $cacheKey,
+        'content_hash' => $contentHash,
+        'toc' => $toc
+    ];
+
     return $content;
 }

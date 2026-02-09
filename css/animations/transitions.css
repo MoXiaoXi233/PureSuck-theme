@@ -1,100 +1,93 @@
-/* PureSuck 动画基础设置 */
+﻿/* PureSuck 过渡基础变量与状态 */
 
-/* 动画变量定义 */
 :root {
-	--ps-anim-duration-fast: 180ms;
-	--ps-anim-duration-normal: 240ms;
-	--ps-anim-duration-slow: 320ms;
-	--ps-anim-duration-vt: 380ms;
+    --ps-motion-enter: 420ms;
+    --ps-motion-enter-list: 520ms;
+    --ps-motion-exit: 260ms;
+    --ps-motion-vt: 380ms;
 
-	--ps-anim-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
-	--ps-anim-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ps-ease-enter: cubic-bezier(0.22, 0.68, 0.35, 1);
+    --ps-ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
 
-	--ps-anim-translate-small: 12px;
-	--ps-anim-translate-medium: 24px;
-	--ps-anim-translate-large: 48px;
+    --ps-shift-s: 12px;
+    --ps-shift-m: 22px;
+    --ps-shift-l: 46px;
 
-	--ps-anim-scale-exit: 0.96;
-	--ps-anim-scale-enter: 0.98;
-
-	--ps-vt-duration: var(--ps-anim-duration-vt);
-	--ps-vt-easing: cubic-bezier(0.22, 0.68, 0.35, 1.0);
-	--ps-vt-radius: 0.85rem;
+    --ps-scale-enter: 0.985;
+    --ps-scale-enter-page: 0.972;
+    --ps-scale-enter-list: 0.968;
+    --ps-scale-exit: 0.975;
+    --ps-scale-exit-page: 0.968;
+    --ps-vt-radius: 0.85rem;
 }
 
-/* Swup 导航状态控制 */
-html.is-animating {
-	scroll-behavior: auto !important;
+html.ps-animating {
+    scroll-behavior: auto !important;
+    scrollbar-gutter: stable;
 }
 
-/* 预加载状态（防止首屏闪烁） */
+/* 仅在动画阶段临时开启 will-change */
+html.ps-animating #swup .post,
+html.ps-animating #swup .archive-title,
+html.ps-animating #swup .main-pager,
+html.ps-animating #swup .main-lastinfo {
+    will-change: transform, opacity;
+}
 
-/* 列表页预加载状态 */
+#swup.ps-enter-prime .main {
+    opacity: 0.001;
+}
+
+#swup.ps-vt-active {
+    contain: layout style paint;
+}
+
+/* 列表 stagger，覆盖常见数量即可 */
+#swup .post.post--index:nth-of-type(1) { --ps-item-delay: 0ms; }
+#swup .post.post--index:nth-of-type(2) { --ps-item-delay: 26ms; }
+#swup .post.post--index:nth-of-type(3) { --ps-item-delay: 52ms; }
+#swup .post.post--index:nth-of-type(4) { --ps-item-delay: 78ms; }
+#swup .post.post--index:nth-of-type(5) { --ps-item-delay: 104ms; }
+#swup .post.post--index:nth-of-type(6) { --ps-item-delay: 130ms; }
+#swup .post.post--index:nth-of-type(7) { --ps-item-delay: 156ms; }
+#swup .post.post--index:nth-of-type(8) { --ps-item-delay: 182ms; }
+#swup .post.post--index:nth-of-type(9) { --ps-item-delay: 208ms; }
+#swup .post.post--index:nth-of-type(10) { --ps-item-delay: 234ms; }
+#swup .post.post--index:nth-of-type(11) { --ps-item-delay: 260ms; }
+#swup .post.post--index:nth-of-type(12) { --ps-item-delay: 286ms; }
+#swup .post.post--index:nth-of-type(n + 13) { --ps-item-delay: 312ms; }
+
+/* 首屏预载 */
 html.ps-preload-list-enter .post.post--index,
 html.ps-preload-list-enter .archive-title,
 html.ps-preload-list-enter .main-pager,
 html.ps-preload-list-enter .main-lastinfo {
-	opacity: 0 !important;
-	transform: translate3d(0, var(--ps-anim-translate-large), 0) !important;
+    opacity: 0 !important;
+    transform: translate3d(0, var(--ps-shift-l), 0) scale(var(--ps-scale-enter-list)) !important;
 }
 
-/* 文章页预加载状态 */
-html.ps-preload-post-enter .post.post--single .post-meta,
-html.ps-preload-post-enter .post.post--single .post-content > *,
-html.ps-preload-post-enter .post.post--single .protected-block,
-html.ps-preload-post-enter .post.post--single .license-info-card {
-	opacity: 0 !important;
-	transform: translate3d(0, var(--ps-anim-translate-small), 0) !important;
-}
-html.ps-preload-post-enter .post.post--single .post-comments {
-	opacity: 0 !important;
-	transform: translate3d(0, var(--ps-anim-translate-medium), 0) !important;
+html.ps-preload-post-enter .post.post--single,
+html.ps-preload-page-enter #swup [data-ps-page-shell] {
+    opacity: 0 !important;
+    transform-origin: 50% 92px !important;
+    transform: translate3d(0, var(--ps-shift-m), 0) scale(var(--ps-scale-enter-page)) !important;
 }
 
-/* 独立页预加载状态 */
-html.ps-preload-page-enter .post.post--index.main-item:not(.post--single) {
-	opacity: 0 !important;
-	transform: translate3d(0, 40px, 0) scale(0.98) !important;
-}
-html.ps-preload-page-enter .post.post--index.main-item .post-title,
-html.ps-preload-page-enter .post.post--index.main-item .post-meta,
-html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
-	opacity: 0 !important;
-	transform: translate3d(0, 12px, 0) !important;
-}
-
-/* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {
-	html.ps-preload-list-enter .post.post--index,
-	html.ps-preload-list-enter .archive-title,
-	html.ps-preload-list-enter .main-pager,
-	html.ps-preload-list-enter .main-lastinfo,
-	html.ps-preload-post-enter .post.post--single .post-meta,
-	html.ps-preload-post-enter .post.post--single .post-content > *,
-	html.ps-preload-post-enter .post.post--single .protected-block,
-	html.ps-preload-post-enter .post.post--single .license-info-card,
-	html.ps-preload-post-enter .post.post--single .post-comments,
-	html.ps-preload-page-enter .post.post--index.main-item:not(.post--single),
-	html.ps-preload-page-enter .post.post--index.main-item .post-title,
-	html.ps-preload-page-enter .post.post--index.main-item .post-meta,
-	html.ps-preload-page-enter .post.post--index.main-item .inner-post-wrapper > * {
-		opacity: 1 !important;
-		transform: none !important;
-	}
+    html.ps-preload-list-enter .post.post--index,
+    html.ps-preload-list-enter .archive-title,
+    html.ps-preload-list-enter .main-pager,
+    html.ps-preload-list-enter .main-lastinfo,
+    html.ps-preload-post-enter .post.post--single,
+    html.ps-preload-page-enter #swup [data-ps-page-shell] {
+        opacity: 1 !important;
+        transform: none !important;
+    }
 
-	html.ps-animating {
-		scroll-behavior: auto !important;
-	}
-
-	html.ps-animating *,
-	html.ps-animating *::before,
-	html.ps-animating *::after {
-		transition: none !important;
-		animation: none !important;
-	}
-}
-
-/* 滚动条控制 */
-html.ps-animating {
-	scrollbar-gutter: stable;
+    html.ps-animating *,
+    html.ps-animating *::before,
+    html.ps-animating *::after {
+        animation: none !important;
+        transition: none !important;
+    }
 }

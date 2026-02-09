@@ -1,88 +1,101 @@
-/* PureSuck 进入动画 */
+﻿/* PureSuck 进入动画 */
 
-/* 列表页进入动画 */
-html.ps-list-enter .post.post--index,
-html.ps-list-enter .archive-title {
-	opacity: 0;
-	transform: translate3d(0, var(--ps-anim-translate-large), 0);
-}
-html.ps-list-enter .main-pager,
-html.ps-list-enter .main-lastinfo {
-	opacity: 0;
-	transform: translate3d(0, var(--ps-anim-translate-medium), 0);
-}
-
-/* 文章页进入动画 */
-html.ps-post-enter .post.post--single .post-meta,
-html.ps-post-enter .post.post--single .post-content > *:nth-child(-n+24),
-html.ps-post-enter .post.post--single .protected-block,
-html.ps-post-enter .post.post--single .license-info-card,
-html.ps-post-enter .post.post--single .post-comments {
-	opacity: 0;
-	transform: translate3d(0, var(--ps-anim-translate-small), 0);
+@keyframes ps-enter-list-card {
+    from {
+        opacity: 0;
+        transform: translate3d(0, var(--ps-shift-l), 0) scale(var(--ps-scale-enter-list));
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
 }
 
-/* 独立页面进入动画 */
-html.ps-page-enter .post.post--index.main-item:not(.post--single) {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0) scale(0.98);
-}
-html.ps-page-enter .post.post--index.main-item .post-title,
-html.ps-page-enter .post.post--index.main-item .post-meta,
-html.ps-page-enter .post.post--index.main-item .inner-post-wrapper > * {
-	opacity: 0;
-	transform: translate3d(0, 16px, 0);
-}
-
-/* 进入动画关键帧（JS控制使用） */
-@keyframes ps-list-enter-in {
-	from {
-		opacity: 0;
-		transform: translate3d(0, var(--ps-anim-translate-large), 0);
-	}
-	to {
-		opacity: 1;
-		transform: translate3d(0, 0, 0);
-	}
+@keyframes ps-enter-main-card {
+    from {
+        opacity: 0;
+        transform: translate3d(0, var(--ps-shift-m), 0) scale(var(--ps-scale-enter));
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
 }
 
-@keyframes ps-post-enter-in {
-	from {
-		opacity: 0;
-		transform: translate3d(0, var(--ps-anim-translate-small), 0);
-	}
-	to {
-		opacity: 1;
-		transform: translate3d(0, 0, 0);
-	}
+@keyframes ps-enter-page-shell {
+    from {
+        opacity: 0;
+        transform: translate3d(0, var(--ps-shift-m), 0) scale(var(--ps-scale-enter-page));
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
 }
 
-@keyframes ps-page-enter-in {
-	from {
-		opacity: 0;
-		transform: translate3d(0, 40px, 0) scale(0.98);
-	}
-	to {
-		opacity: 1;
-		transform: translate3d(0, 0, 0) scale(1);
-	}
+@keyframes ps-enter-meta-soft {
+    from {
+        opacity: 0;
+        transform: translate3d(0, var(--ps-shift-s), 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
 }
 
-/* 无障碍支持 */
-@media (prefers-reduced-motion: reduce) {
-	html.ps-page-enter .post.post--index.main-item:not(.post--single),
-	html.ps-page-enter .post.post--index .post-title,
-	html.ps-page-enter .post.post--index .post-meta,
-	html.ps-page-enter .post.post--index .inner-post-wrapper > *,
-	html.ps-list-enter .post.post--index,
-	html.ps-list-enter .archive-title,
-	html.ps-list-enter .main-pager,
-	html.ps-list-enter .main-lastinfo,
-	html.ps-post-enter .post.post--single .post-meta,
-	html.ps-post-enter .post.post--single .post-content > *:nth-child(-n+24),
-	html.ps-post-enter .post.post--single .protected-block,
-	html.ps-post-enter .post.post--single .license-info-card {
-		opacity: 1 !important;
-		transform: none !important;
-	}
+/* 形态 B：普通卡片转场 */
+html.ps-phase-enter.ps-mode-card.ps-enter-list #swup .post.post--index {
+    animation: ps-enter-list-card var(--ps-motion-enter-list) var(--ps-ease-enter) both;
+    animation-delay: calc(var(--ps-item-delay, 0ms) + 30ms);
+}
+
+html.ps-phase-enter.ps-mode-card.ps-enter-list #swup .archive-title,
+html.ps-phase-enter.ps-mode-card.ps-enter-list #swup .main-pager,
+html.ps-phase-enter.ps-mode-card.ps-enter-list #swup .main-lastinfo {
+    animation: ps-enter-meta-soft calc(var(--ps-motion-enter) - 80ms) var(--ps-ease-enter) both;
+    animation-delay: 100ms;
+}
+
+html.ps-phase-enter.ps-mode-card.ps-enter-post #swup .post.post--single,
+html.ps-phase-enter.ps-mode-card.ps-enter-page #swup [data-ps-page-shell] {
+    animation: ps-enter-main-card var(--ps-motion-enter) var(--ps-ease-enter) both;
+    animation-delay: 60ms;
+}
+
+html.ps-phase-enter.ps-mode-card.ps-enter-page #swup [data-ps-page-shell] {
+    transform-origin: 50% 92px;
+    animation-name: ps-enter-page-shell;
+}
+
+/* 形态 A：VT 列表分层进入（先 morph，再 reveal 非共享元素） */
+html.ps-phase-enter.ps-mode-vt.ps-enter-list:not(.ps-vt-list-reveal) #swup .post.post--index:not([data-ps-vt-name]) {
+    opacity: 0 !important;
+    transform: translate3d(0, var(--ps-shift-l), 0) scale(var(--ps-scale-enter-list)) !important;
+}
+
+html.ps-phase-enter.ps-mode-vt.ps-enter-list:not(.ps-vt-list-reveal) #swup .archive-title,
+html.ps-phase-enter.ps-mode-vt.ps-enter-list:not(.ps-vt-list-reveal) #swup .main-pager,
+html.ps-phase-enter.ps-mode-vt.ps-enter-list:not(.ps-vt-list-reveal) #swup .main-lastinfo {
+    opacity: 0 !important;
+    transform: translate3d(0, var(--ps-shift-s), 0) !important;
+}
+
+html.ps-phase-enter.ps-mode-vt.ps-enter-list.ps-vt-list-reveal #swup .post.post--index:not([data-ps-vt-name]) {
+    animation: ps-enter-list-card var(--ps-motion-enter-list) var(--ps-ease-enter) both;
+    animation-delay: calc(var(--ps-item-delay, 0ms) + 18ms);
+}
+
+html.ps-phase-enter.ps-mode-vt.ps-enter-list.ps-vt-list-reveal #swup .archive-title,
+html.ps-phase-enter.ps-mode-vt.ps-enter-list.ps-vt-list-reveal #swup .main-pager,
+html.ps-phase-enter.ps-mode-vt.ps-enter-list.ps-vt-list-reveal #swup .main-lastinfo {
+    animation: ps-enter-meta-soft calc(var(--ps-motion-enter-list) - 110ms) var(--ps-ease-enter) both;
+    animation-delay: 90ms;
+}
+
+html.ps-phase-enter.ps-mode-vt.ps-enter-post #swup .post.post--single .post-content,
+html.ps-phase-enter.ps-mode-vt.ps-enter-post #swup .post.post--single .post-comments,
+html.ps-phase-enter.ps-mode-vt.ps-enter-post #swup .post.post--single .license-info-card {
+    animation: ps-enter-meta-soft calc(var(--ps-motion-vt) - 60ms) var(--ps-ease-enter) both;
+    animation-delay: 140ms;
 }

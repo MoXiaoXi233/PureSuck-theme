@@ -22,10 +22,13 @@
     </title>
 
     <?php generateDynamicCSS(); ?>
+    <?php $psRuntimeConfig = getPSRuntimeConfig($this); ?>
+    <?php $psSwupEnabled = !empty($psRuntimeConfig['features']['swup']); ?>
 
     <script>
         window.THEME_URL = '<?= $this->options->themeUrl; ?>';
     </script>
+    <?php outputPSRuntimeConfigScript($this); ?>
 
     <!-- 主题防闪烁脚本 -->
     <script>
@@ -38,13 +41,19 @@
             }
             document.documentElement.setAttribute('data-theme', initialTheme);
             try {
-                if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
+                const psConfig = window.PS_CONFIG || {};
+                const features = psConfig.features || {};
+                const swupEnabled = features.swup !== false;
+                const canAnimateEnter = window.matchMedia && !window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+                if (canAnimateEnter) {
                     <?php if ($this->is('index') || $this->is('archive')): ?>
+                        // 列表首屏渐入属于基础动效，不依赖 Swup 是否启用
                         document.documentElement.classList.add('ps-preload-list-enter');
                     <?php elseif ($this->is('post')): ?>
-                        document.documentElement.classList.add('ps-preload-post-enter');
+                        if (swupEnabled) document.documentElement.classList.add('ps-preload-post-enter');
                     <?php elseif ($this->is('page')): ?>
-                        document.documentElement.classList.add('ps-preload-page-enter');
+                        if (swupEnabled) document.documentElement.classList.add('ps-preload-page-enter');
                     <?php endif; ?>
                 }
             } catch (e) { }
@@ -111,18 +120,21 @@
     <!-- JS引入：按优先级分组加载（性能优化版） -->
 
     <!-- 高优先级：核心模块（首屏必需） -->
-    <script defer src="<?php getStaticURL(path: 'medium-zoom.min.js'); ?>"></script>
+    <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Core.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
     <!-- 懒加载管理器（必须在 Swup 之前加载） -->
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_LazyLoad.js'); ?>"></script>
 
-    <!-- Swup 4：页面过渡动画 -->
-    <script defer src="<?php getStaticURL(path: 'Swup.umd.min.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/preload-plugin.js'); ?>"></script>
-    <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/head-plugin.js'); ?>"></script>
+    <?php if ($psSwupEnabled): ?>
+        <!-- Swup 4：页面过渡动画 -->
+        <script defer src="<?php getStaticURL('Swup.umd.min.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/preload-plugin.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/head-plugin.js'); ?>"></script>
+    <?php endif; ?>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
     <!-- 低优先级：按需加载（评论区） -->
@@ -198,5 +210,7 @@
             $psPageType = 'list';
         }
         ?>
-        <div id="swup" data-ps-page-type="<?= $psPageType; ?>">
-            <main class="main">
+        <div class="content-layout" data-layout="three-column">
+            <div class="content-main">
+                <div id="swup" data-ps-page-type="<?= $psPageType; ?>">
+                    <main class="main">

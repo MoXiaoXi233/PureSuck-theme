@@ -1502,10 +1502,11 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 /* 右侧边栏相关 CSS 位于下方 */
 /* 右侧边栏 */
 .right-sidebar {
-    top: 0;
-    overflow: hidden;
-    padding: 40px 50px 50px 50px;
-    position: fixed;
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    overflow: visible;
+    padding: 0;
     z-index: 1;
 }
 
@@ -1634,10 +1635,12 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 }
 
 .toc-section.sticky {
-    position: fixed;
-    padding: 35px 100px 50px 0px;
-    width: 344px;
+    position: sticky;
     top: 0;
+    width: 100%;
+    max-height: calc(100vh - 8px);
+    overflow: auto;
+    padding: 0;
     z-index: 100;
 }
 
@@ -1809,15 +1812,14 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 
 @media (min-width:1183px) {
     .right-sidebar {
-        display: inline;
+        position: sticky;
+        top: 0;
+        align-self: start;
+        padding: 20px 35px 50px 30px;
     }
 
     .search-input {
         width: 165px;
-    }
-
-    .right-sidebar {
-        padding: 20px 35px 50px 30px;
     }
 }
 
@@ -1827,12 +1829,11 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     }
 
     .right-sidebar {
-        width: 344px;
         padding: 40px 50px 50px 50px;
     }
 }
 
-@media (max-width:1183px) {
+@media (max-width:1182px) {
 
     .right-sidebar,
     .toc-section {

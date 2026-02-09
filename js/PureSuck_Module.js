@@ -307,11 +307,6 @@ const initializeTOC = (() => {
 
         if (tocSection) {
             tocSection.style.display = "block";
-            const rightSidebar = document.querySelector(".right-sidebar");
-            if (rightSidebar) {
-                rightSidebar.style.position = "absolute";
-                rightSidebar.style.top = "0";
-            }
         }
 
         links.forEach(link => {

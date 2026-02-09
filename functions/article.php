@@ -989,11 +989,28 @@ function wrapTables($content)
         return $content;
     }
 
-    return preg_replace(
+    $preserved = [];
+    $content = preg_replace_callback(
+        '/<div\s+class=["\']table-scroll["\'][^>]*>\s*<table\b[^>]*>.*?<\/table>\s*<\/div>/is',
+        function ($matches) use (&$preserved) {
+            $token = '__PS_TABLE_SCROLL_' . count($preserved) . '__';
+            $preserved[$token] = $matches[0];
+            return $token;
+        },
+        $content
+    );
+
+    $content = preg_replace(
         '/<table\b[^>]*>.*?<\/table>/is',
         '<div class="table-scroll">$0</div>',
         $content
     );
+
+    if (!empty($preserved)) {
+        $content = strtr($content, $preserved);
+    }
+
+    return $content;
 }
 
 // ==================== 5) OwO 表情 ====================
