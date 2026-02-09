@@ -1093,7 +1093,6 @@
 
 .collapsible-header.active {
     letter-spacing: 0.035em;
-    font-weight: 550;
     background-color: color-mix(in srgb,
             var(--themecolor) 6%,
             var(--card2-color));
