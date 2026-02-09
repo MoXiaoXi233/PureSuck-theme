@@ -1,6 +1,6 @@
 ﻿# 重构记录（Refactor Record）
 
-更新时间：2026-02-09
+更新时间：2026-02-10
 对照基准：`DevPlan.md`
 
 ## 1. 本轮目标
@@ -250,11 +250,8 @@
 - 状态类从 14 个减少到 12 个
 - 修改文件：`js/PureSuck_Swup.js`、`css/animations/enter.css`
 
-### 14.7 后续待完成（Phase 2.5 剩余任务）
-以下任务已记录到 DevPlan Phase 2.5，待后续重构：
-- **TOC 缓存简化**：合并 6 个 Map/Set 为单层结构
-- **全局命名空间收敛**：将 `window.swupInstance`、`window.mediumZoomInstance`、`window.setTheme`、`window.toggleTheme`、`window.NavIndicator`、`window.LazyLoadManager` 收敛到 `window.PS` 下
-- **PHP 缓存简化**：评估双层缓存的必要性
+### 14.7 后续任务（已完成）
+以下任务已在 Phase 2.5（第九轮）完成，详见第 15 节。
 
 ## 13. 第七轮：右栏三栏语义重构（2026-02-09）
 
@@ -289,4 +286,61 @@
 - 反馈：结构正确后，桌面端像素、间距与旧版存在明显偏差。
 - 处理：在不回退结构重构的前提下，回调桌面断点列宽到旧节奏（1183: `299px`，1400: `365px`），并统一右栏盒模型为 `border-box`。
 - 处理：右栏与 TOC sticky 顶部基线回调为 `top: 0`，降低与旧版视感差异。
-- 结果：保持“sidebar 在 swup 外 + 统一骨架输出”的规范，同时尽量贴近旧版视觉参数。
+- 结果：保持"sidebar 在 swup 外 + 统一骨架输出"的规范，同时尽量贴近旧版视觉参数。
+
+## 15. 第九轮：Phase 2.5 过度设计清理（2026-02-10）
+
+### 15.1 目标
+- 完成 DevPlan Phase 2.5 定义的过度设计清理任务。
+- 收敛全局命名空间、简化缓存结构、保持向后兼容。
+
+### 15.2 本轮完成项
+
+#### 15.2.1 全局命名空间收敛（window.* → PS.*）
+- **问题**：20+ 全局变量直接挂载在 `window` 下，污染全局命名空间。
+- **方案**：将所有主题相关全局对象收敛到 `window.PS` 下，保留向后兼容别名。
+- **修改文件**：
+  - `js/PureSuck_Core.js`：预置命名空间占位（`PS.swup`、`PS.zoom`、`PS.lazy`、`PS.theme`、`PS.nav`）
+  - `js/PureSuck_Swup.js`：使用 `PS.swup` 作为主引用，保留 `window.swupInstance`
+  - `js/PureSuck_Module.js`：
+    - `mediumZoomInstance` → `PS.zoom`（保留 `window.mediumZoomInstance`）
+    - `setTheme/toggleTheme` → `PS.theme.set/toggle`（保留 `window.setTheme/toggleTheme`）
+    - `NavIndicator` → `PS.nav`（保留 `window.NavIndicator`）
+  - `js/PureSuck_LazyLoad.js`：使用 `PS.lazy` 作为主引用，保留 `window.LazyLoadManager`
+
+#### 15.2.2 TOC 缓存系统简化（6→5 Map/Set）
+- **问题**：TOC 模块使用 6 个 Map/Set 缓存数据，`itemById` 可通过 `link.closest('li')` 动态获取。
+- **方案**：移除 `itemById` Map，改用 DOM 查询。
+- **修改文件**：`js/PureSuck_Module.js`
+- **精简结果**：
+  - 移除 `itemById: new Map()`
+  - 移除 `state.itemById.set(id, item)` 缓存写入
+  - `setActive()` 改用 `link.closest('li')` 获取父 li
+
+#### 15.2.3 PHP 缓存配置指纹简化
+- **问题**：`psGetRenderOptionFingerprint()` 包含 4 项配置，部分已不再影响渲染输出。
+- **方案**：精简为仅包含真正影响渲染的配置（版本号 + TOC 开关）。
+- **修改文件**：`functions/render.php`
+- **精简结果**：
+  ```php
+  // 只包含真正影响渲染输出的配置
+  $fingerprint = [
+      'v' => defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '0',
+      'toc' => (string)($options->showTOC ?? '1')
+  ];
+  ```
+
+### 15.3 对照 DevPlan 完成项
+- 已完成：Phase 2.5 全局命名空间收敛（≤5 顶级入口）
+- 已完成：Phase 2.5 TOC 缓存结构约束（≤5 Map/Set）
+- 已完成：Phase 2.5 PHP 缓存配置精简
+
+### 15.4 向后兼容说明
+- 所有旧的全局变量（`window.swupInstance`、`window.mediumZoomInstance`、`window.setTheme`、`window.toggleTheme`、`window.NavIndicator`、`window.LazyLoadManager`）仍然可用。
+- 新代码应优先使用 `PS.*` 命名空间。
+- 外部脚本（如 `pjaxCustomCallback`）无需修改即可继续工作。
+
+### 15.5 校验
+- 全局命名空间：所有功能通过 `PS.*` 可访问，旧别名同时可用
+- TOC：标题高亮、侧边栏滑块定位正常
+- 缓存：文章渲染缓存命中正常，配置变更后缓存正确失效

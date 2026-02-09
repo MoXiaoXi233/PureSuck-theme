@@ -8,6 +8,8 @@
 (function() {
     'use strict';
 
+    const PS = window.PS || {};
+
     // ==================== 配置 ====================
     const CONFIG = {
         rootMargin: '200px 0px',
@@ -44,8 +46,8 @@
             }
 
             // 绑定 medium-zoom
-            if (img.hasAttribute('data-zoomable') && window.mediumZoomInstance) {
-                window.mediumZoomInstance.attach(img);
+            if (img.hasAttribute('data-zoomable') && (PS.zoom || window.mediumZoomInstance)) {
+                (PS.zoom || window.mediumZoomInstance).attach(img);
             }
 
             resolve(img);
@@ -119,6 +121,10 @@
     };
 
     // ==================== 导出 & 初始化 ====================
+    // 收敛到 PS.lazy（向后兼容保留 window.LazyLoadManager）
+    if (window.PS) {
+        window.PS.lazy = LazyLoadManager;
+    }
     window.LazyLoadManager = LazyLoadManager;
 
     if (document.readyState === 'loading') {

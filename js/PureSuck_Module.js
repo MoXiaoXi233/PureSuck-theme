@@ -199,7 +199,8 @@ const initializeTOC = (() => {
         link.classList.add("li-active");
         state.activeIndex = index;
 
-        const item = state.itemById.get(element.id);
+        // 直接从 link 获取父 li，不再使用 itemById 缓存
+        const item = link.closest('li');
         if (state.siderbar && item) {
             state.siderbar.style.transform = `translate3d(0, ${item.offsetTop + 4}px, 0)`;
         }
@@ -322,7 +323,6 @@ const initializeTOC = (() => {
             indexByElement: new Map(),
             indexById: new Map(),
             linkById: new Map(),
-            itemById: new Map(),
             topByIndex: new Map(),
             activationOffset: 0,
             observer: null,
@@ -341,10 +341,6 @@ const initializeTOC = (() => {
             if (!href || href.charAt(0) !== "#") return;
             const id = href.slice(1);
             state.linkById.set(id, link);
-            const item = link.closest("li");
-            if (item) {
-                state.itemById.set(id, item);
-            }
         });
 
         if (toc.dataset.binded !== "1") {
@@ -803,8 +799,8 @@ function Comments_Submit() {
     );
 }
 
-// 保存 mediumZoom 实例引用（全局，供 LazyLoad 使用）
-window.mediumZoomInstance = null;
+// mediumZoom 实例挂载到 PS.zoom（向后兼容保留 window.mediumZoomInstance）
+const PS = window.PS || {};
 
 function runShortcodes(root) {
     history.scrollRestoration = 'auto';
@@ -819,16 +815,17 @@ function runShortcodes(root) {
     const images = scope.querySelectorAll('[data-zoomable]:not([data-lazy-src])');
 
     // 确保实例始终存在（即使当前没有图片）
-    if (!window.mediumZoomInstance) {
-        window.mediumZoomInstance = mediumZoom({
+    if (!PS.zoom) {
+        PS.zoom = mediumZoom({
             background: 'rgba(0, 0, 0, 0.85)',
             margin: 24
         });
+        window.mediumZoomInstance = PS.zoom; // 向后兼容
     }
 
     // 增量绑定新图片
     if (images.length > 0) {
-        window.mediumZoomInstance.attach(images);
+        PS.zoom.attach(images);
     }
 
     Comments_Submit();
@@ -1039,7 +1036,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 导出到全局
+    // 导出到 PS.theme（向后兼容保留 window.setTheme/toggleTheme）
+    if (window.PS) {
+        window.PS.theme = { set: setTheme, toggle: toggleTheme };
+    }
     window.setTheme = setTheme;
     window.toggleTheme = toggleTheme;
 
@@ -1223,11 +1223,12 @@ const NavIndicator = (() => {
         }
     }
 
-    // 导出到全局
-    window.NavIndicator = {
-        init,
-        update
-    };
+    // 导出到 PS.nav（向后兼容保留 window.NavIndicator）
+    const navAPI = { init, update };
+    if (window.PS) {
+        window.PS.nav = navAPI;
+    }
+    window.NavIndicator = navAPI;
 
     // 自动初始化
     if (document.readyState === 'loading') {

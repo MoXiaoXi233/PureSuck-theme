@@ -8,16 +8,14 @@ if (!defined('__TYPECHO_ROOT_DIR__'))
 function psGetRenderOptionFingerprint()
 {
     $options = Typecho_Widget::widget('Widget_Options');
-    $runtime = getPSRuntimeConfig();
 
+    // 只包含真正影响渲染输出的配置
     $fingerprint = [
-        'theme_version' => defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '0',
-        'theme_url' => (string)$options->themeUrl,
-        'show_toc' => (string)($options->showTOC ?? '1'),
-        'runtime' => $runtime['features'] ?? []
+        'v' => defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '0',
+        'toc' => (string)($options->showTOC ?? '1')
     ];
 
-    return md5(json_encode($fingerprint, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    return md5(json_encode($fingerprint));
 }
 
 function psRenderContentPipeline($content)

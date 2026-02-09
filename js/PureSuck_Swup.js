@@ -389,8 +389,10 @@
             }
         });
 
-        if (window.NavIndicator && typeof window.NavIndicator.update === 'function') {
-            window.NavIndicator.update();
+        // 更新导航指示器（优先使用 PS.nav）
+        const nav = PS.nav || window.NavIndicator;
+        if (nav && typeof nav.update === 'function') {
+            nav.update();
         }
     }
 
@@ -743,8 +745,10 @@
             rememberLastPostKey(postKey);
             markSharedElement(postCard, postKey);
 
-            if (window.LazyLoadManager && typeof window.LazyLoadManager.loadForVT === 'function') {
-                window.LazyLoadManager.loadForVT(postCard);
+            // 预加载卡片图片（优先使用 PS.lazy）
+            const lazy = PS.lazy || window.LazyLoadManager;
+            if (lazy && typeof lazy.loadForVT === 'function') {
+                lazy.loadForVT(postCard);
             }
         }, true);
 
@@ -782,8 +786,10 @@
                 if (typeof window.runShortcodes === 'function') {
                     window.runShortcodes(root);
                 }
-                if (window.LazyLoadManager && typeof window.LazyLoadManager.observe === 'function') {
-                    window.LazyLoadManager.observe(root);
+                // 优先使用 PS.lazy
+                const lazy = PS.lazy || window.LazyLoadManager;
+                if (lazy && typeof lazy.observe === 'function') {
+                    lazy.observe(root);
                 }
                 updateNavCurrentState();
                 if (window.OwoManager && typeof window.OwoManager.init === 'function') {
@@ -895,7 +901,8 @@
             });
 
             state.swup = swup;
-            window.swupInstance = swup;
+            PS.swup = swup;                // 收敛到 PS.swup
+            window.swupInstance = swup;    // 向后兼容
 
             swup.hooks.on('visit:start', function onVisitStart() {
                 cleanupTransitionState({ keepSharedMarker: true });
@@ -923,8 +930,10 @@
 
                 startEnterTransition(toType, enterMode, { fromType: state.lastFromType });
 
-                if (window.LazyLoadManager && typeof window.LazyLoadManager.observe === 'function') {
-                    window.LazyLoadManager.observe(getSwupRoot());
+                // 优先使用 PS.lazy
+                const lazy = PS.lazy || window.LazyLoadManager;
+                if (lazy && typeof lazy.observe === 'function') {
+                    lazy.observe(getSwupRoot());
                 }
             });
 
