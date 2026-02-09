@@ -29,3 +29,6 @@ require_once __DIR__ . '/functions/common.php';
 
 // 渲染管道：协调各模块处理内容
 require_once __DIR__ . '/functions/render.php';
+
+// OWO 表情面板：服务端渲染
+require_once __DIR__ . '/functions/owo.php';

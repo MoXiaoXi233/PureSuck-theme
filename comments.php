@@ -95,8 +95,8 @@
                         data-owo-id="comment-textarea-<?php $this->cid(); ?>" required><?php $this->remember('text'); ?></textarea>
                     <div class="CtBoxBar">
                         <div class="left-bar">
-                            <div class="OwO-bar">
-                                <div class="OwO" data-owo-id="comment-owo-<?php $this->cid(); ?>"></div>
+                            <div class="OwO-wrapper">
+                                <?= renderOwoPanel('OωO表情'); ?>
                             </div>
                             <!-- 未来可以在这里添加更多内容 -->
                         </div>
