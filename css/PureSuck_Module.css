@@ -1633,28 +1633,26 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     overflow: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    transition: transform .28s ease, opacity .28s ease, box-shadow .28s ease;
 }
 
-.toc-section.sticky {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    max-height: calc(100vh - 8px);
+.toc-section.reveal-enter {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+}
+
+.toc-section.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+
+.right-sidebar.ps-has-toc .toc-section.sticky {
+    position: fixed;
+    top: var(--ps-toc-top-offset, 8px);
+    max-height: calc(100vh - var(--ps-toc-top-offset, 8px) - 8px);
     overflow: auto;
     padding: 0;
-    z-index: 100;
-}
-
-/* TOC 固定时，隐藏 sidebar 中 TOC 之前的所有元素 */
-.toc-section.sticky~.cloud-section,
-.toc-section.sticky~.search-section {
-    display: none;
-}
-
-/* 或者使用相邻选择器 */
-.right-sidebar:has(.toc-section.sticky) .cloud-section,
-.right-sidebar:has(.toc-section.sticky) .search-section {
-    display: none;
+    z-index: 120;
 }
 
 .toc-section::-webkit-scrollbar {
@@ -1817,6 +1815,11 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
         top: 0;
         align-self: start;
         padding: 20px 35px 50px 30px;
+    }
+
+    .right-sidebar.ps-has-toc {
+        position: relative;
+        top: auto;
     }
 
     .search-input {

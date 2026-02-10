@@ -5,6 +5,60 @@
  * TOC 鐩綍楂樹寒 - 绠€鍖栭噸鏋勭増
  * 鏍稿績鍘熷垯锛氱畝鍗曘€佺洿鎺ャ€佸揩閫熷搷搴?
  */
+const TOC_VISIBLE_CLASS = 'is-visible';
+const TOC_REVEAL_ENTER_CLASS = 'reveal-enter';
+const TOC_REVEAL_TIMER_KEY = '__psTocRevealTimer';
+
+function resetTocStickySidebar(sidebar) {
+    const target = sidebar && sidebar.classList ? sidebar : document.querySelector('.right-sidebar');
+    if (!target) return;
+
+    target.classList.remove('ps-has-toc');
+}
+
+function clearTocPinnedStyle(section) {
+    if (!section) return;
+    section.style.left = '';
+    section.style.width = '';
+}
+
+function hideTocSection(section) {
+    if (!section) return;
+
+    if (section[TOC_REVEAL_TIMER_KEY]) {
+        window.cancelAnimationFrame(section[TOC_REVEAL_TIMER_KEY]);
+        section[TOC_REVEAL_TIMER_KEY] = 0;
+    }
+
+    section.classList.remove(TOC_VISIBLE_CLASS, TOC_REVEAL_ENTER_CLASS, 'sticky', 'sticky-preparing');
+    section.style.transform = '';
+    section.style.display = 'none';
+    clearTocPinnedStyle(section);
+    resetTocStickySidebar(section.closest('.right-sidebar'));
+}
+
+function showTocSection(section) {
+    if (!section) return;
+    if (section.classList.contains(TOC_VISIBLE_CLASS) && section.style.display !== 'none') return;
+
+    section.style.display = 'block';
+    section.classList.add(TOC_REVEAL_ENTER_CLASS);
+    section.classList.remove(TOC_VISIBLE_CLASS);
+
+    if (section[TOC_REVEAL_TIMER_KEY]) {
+        window.cancelAnimationFrame(section[TOC_REVEAL_TIMER_KEY]);
+        section[TOC_REVEAL_TIMER_KEY] = 0;
+    }
+
+    section[TOC_REVEAL_TIMER_KEY] = window.requestAnimationFrame(() => {
+        section[TOC_REVEAL_TIMER_KEY] = window.requestAnimationFrame(() => {
+            section.classList.add(TOC_VISIBLE_CLASS);
+            section.classList.remove(TOC_REVEAL_ENTER_CLASS);
+            section[TOC_REVEAL_TIMER_KEY] = 0;
+        });
+    });
+}
+
 const initializeTOC = (() => {
     let state = null;
     let hashTimer = 0;
@@ -146,13 +200,13 @@ const initializeTOC = (() => {
         const content = document.querySelector('.inner-post-wrapper');
 
         if (!toc || !content) {
-            if (tocSection) tocSection.style.display = 'none';
+            hideTocSection(tocSection);
             return;
         }
 
         const headings = Array.from(content.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'));
         if (!headings.length) {
-            if (tocSection) tocSection.style.display = 'none';
+            hideTocSection(tocSection);
             return;
         }
 
@@ -190,7 +244,7 @@ const initializeTOC = (() => {
             observer: null
         };
 
-        if (tocSection) tocSection.style.display = 'block';
+        showTocSection(tocSection);
         if (indicator) indicator.style.transition = 'transform 0.25s ease-out';
 
         if (!toc.dataset.tocBound) {
@@ -236,24 +290,28 @@ function ensureRuntimeTocSection(scope, pageType) {
     const rightSidebar = document.querySelector('.right-sidebar');
     let tocSection = document.getElementById('toc-section');
     if (!rightSidebar || !tocEnabled) {
-        if (tocSection) tocSection.style.display = 'none';
+        hideTocSection(tocSection);
+        resetTocStickySidebar(rightSidebar);
         return false;
     }
 
     if (pageType !== 'post' && pageType !== 'page') {
-        if (tocSection) tocSection.style.display = 'none';
+        hideTocSection(tocSection);
+        resetTocStickySidebar(rightSidebar);
         return false;
     }
 
     const contentRoot = (scope && scope.querySelector ? scope : document).querySelector('.inner-post-wrapper');
     if (!contentRoot) {
-        if (tocSection) tocSection.style.display = 'none';
+        hideTocSection(tocSection);
+        resetTocStickySidebar(rightSidebar);
         return false;
     }
 
     const headings = Array.from(contentRoot.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'));
     if (!headings.length) {
-        if (tocSection) tocSection.style.display = 'none';
+        hideTocSection(tocSection);
+        resetTocStickySidebar(rightSidebar);
         return false;
     }
 
@@ -301,7 +359,8 @@ function ensureRuntimeTocSection(scope, pageType) {
 
     const toc = tocSection.querySelector('.toc');
     if (!toc) {
-        tocSection.style.display = 'none';
+        hideTocSection(tocSection);
+        resetTocStickySidebar(rightSidebar);
         return false;
     }
 
@@ -314,7 +373,8 @@ function ensureRuntimeTocSection(scope, pageType) {
         tocSection.dataset.psTocSig = tocSignature;
     }
 
-    tocSection.style.display = 'block';
+    showTocSection(tocSection);
+    rightSidebar.classList.add('ps-has-toc');
     return true;
 }
 
@@ -639,137 +699,103 @@ function cleanupTabs(root) {
  * TOC Sticky 鎺у埗鍣?- 鎬ц兘浼樺寲鐗?
  */
 const initializeStickyTOC = (() => {
-    let state = {
-        section: null,
-        sidebar: null,
-        threshold: 0,
-        observer: null,
-        sentinel: null,
-        bound: false,
-        resizeTimer: 0,  // 鉁?闃叉姈瀹氭椂鍣?
-        heightCache: new WeakMap()  // 鉁?楂樺害缂撳瓨
-    };
+    let bound = false;
+    let section = null;
+    let startY = 0;
+    let topOffset = 8;
+    let ticking = false;
 
-    // 鉁?鍚屾璁＄畻闃堝€硷紙浣跨敤缂撳瓨鍑忓皯閲嶆帓锛屼絾涓嶅欢杩燂級
-    function updateThreshold() {
-        if (!state.section || !state.sidebar) return;
-
-        const children = Array.from(state.sidebar.children);
-        let totalHeight = 0;
-
-        children.forEach(el => {
-            if (el === state.section) return;
-
-            // 鉁?浼樺厛浣跨敤缂撳瓨鐨勯珮搴?
-            let height = state.heightCache.get(el);
-            if (height == null) {
-                height = el.offsetHeight;
-                state.heightCache.set(el, height);
-            }
-            totalHeight += height;
-        });
-
-        state.threshold = totalHeight + 50;
+    function pinSection(target) {
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        target.style.left = Math.round(rect.left) + 'px';
+        target.style.width = Math.round(rect.width) + 'px';
     }
 
-    // 鉁?resize 鏃舵竻闄ょ紦瀛?
-    function clearHeightCache() {
-        state.heightCache = new WeakMap();
+    function getDesiredTopOffset(sidebar) {
+        if (!sidebar || !window.getComputedStyle) return 8;
+        const paddingTop = parseFloat(window.getComputedStyle(sidebar).paddingTop) || 0;
+        return Math.max(0, Math.round(paddingTop || 8));
     }
 
-    function handleIntersection(entries) {
-        if (!state.section || entries.length === 0) return;
+    function measureStartY(target, offset) {
+        if (!target) return 0;
 
-        const [entry] = entries;
-        const shouldStick = !entry.isIntersecting;
+        const wasSticky = target.classList.contains('sticky');
+        if (wasSticky) target.classList.remove('sticky');
+        clearTocPinnedStyle(target);
 
-        // 鉁?鐩存帴鍒囨崲锛屾棤闇€ RAF锛圛ntersectionObserver 宸茬粡鏄紓姝ョ殑锛?
-        state.section.classList.toggle("sticky", shouldStick);
+        const top = target.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0);
+        return Math.max(0, Math.round(top - offset));
     }
 
-    function createOrUpdateSentinel() {
-        if (!state.section || !state.sidebar) return;
+    function syncStickyState() {
+        if (!section) return;
+        const shouldStick = (window.scrollY || window.pageYOffset || 0) >= startY;
+        const isSticky = section.classList.contains('sticky');
 
-        if (state.observer) {
-            state.observer.disconnect();
-        }
-
-        // 鉁?鍚屾璁＄畻闃堝€硷紙浣跨敤缂撳瓨锛屾棤寤惰繜锛?
-        updateThreshold();
-
-        if (!state.sentinel) {
-            state.sentinel = document.createElement('div');
-            state.sentinel.id = 'toc-sticky-sentinel';
-            state.sentinel.style.cssText = 'position:absolute;left:0;width:1px;height:1px;pointer-events:none;visibility:hidden';
-            document.body.appendChild(state.sentinel);
-        }
-
-        state.sentinel.style.top = state.threshold + 'px';
-
-        state.observer = new IntersectionObserver(handleIntersection, {
-            root: null,
-            threshold: 0,
-            rootMargin: '0px'
-        });
-        state.observer.observe(state.sentinel);
-    }
-
-    function syncState() {
-        if (!state.section) return;
-        const shouldStick = window.scrollY >= state.threshold;
-        state.section.classList.toggle("sticky", shouldStick);
-    }
-
-    // 鉁?闃叉姈鐨?resize 澶勭悊
-    function handleResize() {
-        if (state.resizeTimer) {
-            clearTimeout(state.resizeTimer);
-        }
-        state.resizeTimer = setTimeout(() => {
-            state.resizeTimer = 0;
-            clearHeightCache();  // 鉁?resize 鏃舵竻闄ょ紦瀛?
-            createOrUpdateSentinel();
-            syncState();
-        }, 150);  // 150ms 闃叉姈
-    }
-
-    return function initializeStickyTOC() {
-        const tocSection = document.getElementById("toc-section");
-        const rightSidebar = document.querySelector(".right-sidebar");
-        if (!tocSection || !rightSidebar) return;
-
-        state.section = tocSection;
-        state.sidebar = rightSidebar;
-
-        // 鉁?PJAX 鍒囨崲鏃跺彧鏇存柊蹇呰鐨勯儴鍒?
-        if (state.bound) {
-            createOrUpdateSentinel();
-            syncState();
-            // 鉁?鍙湪 hash 璺宠浆鏃跺欢杩熸鏌?
-            if (window.location.hash) {
-                setTimeout(syncState, 100);
-            }
+        if (shouldStick && !isSticky) {
+            pinSection(section);
+            section.classList.add('sticky');
             return;
         }
 
-        state.bound = true;
+        if (!shouldStick && isSticky) {
+            section.classList.remove('sticky');
+            clearTocPinnedStyle(section);
+            return;
+        }
 
-        createOrUpdateSentinel();
-        syncState();
+        if (shouldStick && isSticky) {
+            pinSection(section);
+        }
+    }
 
-        window.addEventListener('load', () => {
-            syncState();
-            if (window.location.hash) {
-                setTimeout(syncState, 100);
+    function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+            ticking = false;
+            syncStickyState();
+        });
+    }
+
+    function refresh() {
+        const tocSection = document.getElementById('toc-section');
+        const rightSidebar = document.querySelector('.right-sidebar');
+        if (!rightSidebar) return;
+
+        if (!tocSection || tocSection.style.display === 'none') {
+            rightSidebar.classList.remove('ps-has-toc');
+            if (section) {
+                section.classList.remove('sticky');
+                clearTocPinnedStyle(section);
             }
-        }, { once: true });
+            section = null;
+            return;
+        }
 
+        rightSidebar.classList.add('ps-has-toc');
+        section = tocSection;
+        topOffset = getDesiredTopOffset(rightSidebar);
+        startY = measureStartY(section, topOffset);
+        section.style.setProperty('--ps-toc-top-offset', topOffset + 'px');
+        syncStickyState();
+    }
+
+    return function initializeStickyTOC() {
+        refresh();
+
+        if (bound) return;
+        bound = true;
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', refresh, { passive: true });
+        window.addEventListener('orientationchange', refresh, { passive: true });
         window.addEventListener('hashchange', () => {
-            setTimeout(syncState, 100);
+            window.setTimeout(refresh, 100);
         }, { passive: true });
-
-        window.addEventListener("resize", handleResize, { passive: true });
-        window.addEventListener("orientationchange", handleResize, { passive: true });
+        window.addEventListener('load', refresh, { once: true });
     };
 })();
 
@@ -1045,30 +1071,7 @@ function runShortcodes(root, options) {
         const hasTocSection = ensureRuntimeTocSection(scope, pageType);
         if (!hasTocSection) return;
         initializeTOC();
-        if (!cfg.isSwup) {
-            initializeStickyTOC();
-            return;
-        }
-
-        let started = false;
-        let fallbackTimer = 0;
-        const startSticky = function () {
-            if (started) return;
-            started = true;
-            window.removeEventListener('scroll', startSticky, listenerOptions);
-            window.removeEventListener('wheel', startSticky, listenerOptions);
-            window.removeEventListener('touchstart', startSticky, listenerOptions);
-            if (fallbackTimer) {
-                clearTimeout(fallbackTimer);
-                fallbackTimer = 0;
-            }
-            initializeStickyTOC();
-        };
-        const listenerOptions = { passive: true, once: true };
-        window.addEventListener('scroll', startSticky, listenerOptions);
-        window.addEventListener('wheel', startSticky, listenerOptions);
-        window.addEventListener('touchstart', startSticky, listenerOptions);
-        fallbackTimer = window.setTimeout(startSticky, 1200);
+        initializeStickyTOC();
     };
 
     const initHeavyWidgets = function () {
