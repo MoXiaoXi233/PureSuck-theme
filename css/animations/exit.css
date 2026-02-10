@@ -7,7 +7,7 @@
     }
     to {
         opacity: 0;
-        transform: translate3d(0, calc(var(--ps-shift-s) * -1), 0) scale(var(--ps-scale-exit));
+        transform: translate3d(0, var(--ps-shift-s), 0) scale(var(--ps-scale-exit));
     }
 }
 
@@ -18,7 +18,7 @@
     }
     to {
         opacity: 0;
-        transform: translate3d(0, calc(var(--ps-shift-m) * -1), 0) scale(var(--ps-scale-exit));
+        transform: translate3d(0, var(--ps-shift-m), 0) scale(var(--ps-scale-exit));
     }
 }
 
@@ -29,7 +29,7 @@
     }
     to {
         opacity: 0;
-        transform: translate3d(0, calc(var(--ps-shift-m) * -1), 0) scale(var(--ps-scale-exit-page));
+        transform: translate3d(0, var(--ps-shift-m), 0) scale(var(--ps-scale-exit-page));
     }
 }
 
@@ -40,7 +40,7 @@
     }
     to {
         opacity: 0;
-        transform: translate3d(0, calc(var(--ps-shift-s) * -1), 0);
+        transform: translate3d(0, var(--ps-shift-s), 0);
     }
 }
 
