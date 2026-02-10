@@ -136,7 +136,7 @@ function parseShortcodes($content)
                     $eventText = $eventMatches[3];
                     return "<div timeline-event date=\"$date\" title=\"$title\">$eventText</div>";
                 }, $innerContent);
-                return "<div id=\"timeline\">$innerContent</div>";
+                return "<div class=\"timeline\">$innerContent</div>";
             }
         ],
         [
@@ -283,15 +283,18 @@ function parseWindows($content)
 
 function parseTimeline($content)
 {
-    if (strpos($content, 'timeline-event') === false) {
+    if (strpos($content, 'timeline-event') === false && strpos($content, 'id="timeline"') === false) {
         return $content;
     }
+
+    // Backward compatibility for previously rendered wrapper markup.
+    $content = str_replace('<div id="timeline">', '<div class="timeline">', $content);
 
     $content = preg_replace_callback('/<div timeline-event date="(.*?)" title="(.*?)">(.*?)<\/div>/', function ($matches) {
         $date = $matches[1];
         $title = $matches[2];
         $innerContent = $matches[3];
-        return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">' . $date . '</div><p class="timeline-title">' . $title . '</p><p class="timeline-description">' . $innerContent . '</p></div></div>';
+        return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">' . $date . '</div><div class="timeline-title">' . $title . '</div><div class="timeline-description">' . $innerContent . '</div></div></div>';
     }, $content);
     return $content;
 }
