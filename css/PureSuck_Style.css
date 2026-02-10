@@ -2512,15 +2512,14 @@ input:-webkit-autofill:active {
 }
 
 /* Timeline 链接颜色覆盖 */
-.timeline .timeline-title a {
+#timeline .timeline-title a {
 	color: var(--text-color) !important;
 }
 
-.timeline .timeline-title a:hover {
+#timeline .timeline-title a:hover {
 	color: var(--themehovercolor) !important;
 }
 
-/* 渲染性能优化 - 跳过屏幕外内容渲染 */
 .post-content,
 .post-comments,
 #comments-list {
