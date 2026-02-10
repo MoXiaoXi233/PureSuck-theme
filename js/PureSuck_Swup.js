@@ -201,7 +201,7 @@
         document.documentElement.classList.remove.apply(document.documentElement.classList, TRANSITION_CLASSES);
 
         const root = getSwupRoot();
-        root.classList.remove('ps-vt-active');
+        root.classList.remove('ps-vt-mode');
         root.classList.remove('ps-enter-prime');
 
         if (!config.keepSharedMarker) clearSharedMarkers();
@@ -229,7 +229,7 @@
         html.classList.add(mode === 'vt' ? 'ps-mode-vt' : 'ps-mode-card');
         html.classList.add((phase === 'enter' ? 'ps-enter-' : 'ps-exit-') + pageType);
 
-        getSwupRoot().classList.toggle('ps-vt-active', mode === 'vt');
+        getSwupRoot().classList.toggle('ps-vt-mode', mode === 'vt');
     }
 
     function startPrimeGuard() {
