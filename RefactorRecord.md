@@ -857,3 +857,44 @@
 ### 28.7 结论
 - TOC 布局与 PHP 结构已一致，Swup 场景可正常显示。
 - 性能保持 PASS 且 `281` 路径长任务归零，符合“优化逻辑与时序、不降级实现”的要求。
+
+## 29. 第二十九轮：图片加载策略收敛到 PHP 输出（2026-02-10）
+
+### 29.1 目标
+- 按需求移除 Swup/JS 对图片加载的运行时处理，避免累赘逻辑。
+- 将图片加载策略固定在 PHP 渲染输出层，保持实现简洁可控。
+
+### 29.2 本轮修改文件
+- `js/PureSuck_Module.js`
+- `functions/article.php`
+- `functions/render.php`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 29.3 具体修改
+- JS 侧（`js/PureSuck_Module.js`）
+  - `runShortcodes` 中移除 `optimizeContentImages` 调用与 cleanup。
+  - 删除未再使用的 `optimizeContentImages` 函数整段。
+  - 保留图片缩放（medium-zoom）能力，不再承担加载时序调度。
+- PHP 侧（`functions/article.php`）
+  - `addZoomableToImages()` 统一输出策略：
+    - 首张正文图默认 `loading="eager"` + `fetchpriority="auto"`
+    - 其余正文图默认 `loading="lazy"` + `fetchpriority="low"`
+    - 补齐 `decoding="async"`
+    - 继续保留 `data-zoomable` 与排除列表（如头像卡片）。
+- 缓存失效（`functions/render.php`）
+  - 渲染缓存键 `render_post_content:v2` -> `v3`，确保新输出立即生效。
+
+### 29.4 验证
+- 页面检查（`/index.php/archives/281/`）：
+  - 首图：`loading=eager`, `decoding=async`, `fetchpriority=auto`
+  - 后续正文图：`loading=lazy`, `decoding=async`, `fetchpriority=low`
+  - 排除图片（friends avatar）不受影响。
+
+### 29.5 性能（20 runs）
+- Targeted 281：`p95/p99=8.5/16.7`, `1%low=59.88`, `slow>16.67=1.12%`, `longTasks=1`
+- General：`p95/p99=8.5/16.6`, `1%low=60.24`, `slow>16.67=0.89%`, `longTasks=0`
+
+### 29.6 结论
+- 图片加载策略已完全收敛到 PHP 输出，Swup/JS 图片调度已移除。
+- 代码复杂度下降，性能保持稳定，符合“别做多余运行时处理”的要求。

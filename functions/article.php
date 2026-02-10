@@ -945,7 +945,8 @@ function addZoomableToImages($content)
         'github-card-media-img',
     );
 
-    $content = preg_replace_callback('/<img[^>]+>/', function ($matches) use ($exclude_elements) {
+    $imageIndex = 0;
+    $content = preg_replace_callback('/<img[^>]+>/', function ($matches) use ($exclude_elements, &$imageIndex) {
         $img = $matches[0];
 
         $should_exclude = false;
@@ -964,8 +965,15 @@ function addZoomableToImages($content)
 
             // 添加原生 loading="lazy"（如果没有显式指定 eager）
             if (strpos($img, 'loading=') === false) {
-                $img = preg_replace('/<img/', '<img loading="lazy"', $img);
+                $img = preg_replace('/<img/', '<img loading="' . ($imageIndex === 0 ? 'eager' : 'lazy') . '"', $img);
             }
+            if (strpos($img, 'decoding=') === false) {
+                $img = preg_replace('/<img/', '<img decoding="async"', $img);
+            }
+            if (strpos($img, 'fetchpriority=') === false) {
+                $img = preg_replace('/<img/', '<img fetchpriority="' . ($imageIndex === 0 ? 'auto' : 'low') . '"', $img);
+            }
+            $imageIndex++;
         }
 
         return $img;

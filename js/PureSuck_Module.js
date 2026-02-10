@@ -886,98 +886,6 @@ function runWhenIdle(task, options) {
     };
 }
 
-function optimizeContentImages(root, options) {
-    const cfg = Object.assign(
-        {
-            pageType: '',
-            isSwup: false
-        },
-        options || {}
-    );
-
-    const scope = root && root.querySelector ? root : document;
-    const swupRoot = document.getElementById('swup');
-    const pageType = cfg.pageType || (swupRoot && swupRoot.dataset ? swupRoot.dataset.psPageType || '' : '');
-    if (pageType !== 'post' && pageType !== 'page') {
-        return function noopImageCleanup() {};
-    }
-
-    const contentScope = scope.querySelector('.inner-post-wrapper') || scope;
-    const allImages = Array.from(contentScope.querySelectorAll('img'));
-    if (!allImages.length) {
-        return function noopImageCleanup() {};
-    }
-
-    const candidates = [];
-    allImages.forEach((img) => {
-        if (!(img instanceof HTMLImageElement)) return;
-        if (img.closest('.friendsboard-item, .github-card, .ps-post-card, .avatar')) return;
-        if (img.classList.contains('no-zoom')) return;
-        candidates.push(img);
-    });
-
-    if (!candidates.length) {
-        return function noopImageCleanup() {};
-    }
-
-    const first = candidates[0];
-    candidates.forEach((img, index) => {
-        const isFirst = index === 0;
-
-        if (!img.hasAttribute('decoding')) {
-            img.setAttribute('decoding', 'async');
-        }
-        if (!img.hasAttribute('loading')) {
-            img.setAttribute('loading', isFirst ? 'eager' : 'lazy');
-        }
-        if (!img.hasAttribute('fetchpriority')) {
-            img.setAttribute('fetchpriority', isFirst ? 'auto' : 'low');
-        }
-    });
-
-    const cover = scope.querySelector('.post-media img');
-    if (cover instanceof HTMLImageElement) {
-        if (!cover.hasAttribute('decoding')) {
-            cover.setAttribute('decoding', 'async');
-        }
-        if (!cover.hasAttribute('fetchpriority') || cfg.isSwup) {
-            cover.setAttribute('fetchpriority', 'auto');
-        }
-    }
-
-    const decodeTargets = candidates.filter((img, index) => {
-        if (cfg.isSwup) {
-            if (index > 0) return false;
-        } else if (index > 2) {
-            return false;
-        }
-        if (img.complete) return false;
-        const rect = img.getBoundingClientRect();
-        return rect.top < window.innerHeight * 1.25 && rect.bottom > -120;
-    });
-
-    if (!decodeTargets.length) {
-        return function noopImageCleanup() {};
-    }
-
-    const cancelDecode = runWhenIdle(() => {
-        decodeTargets.forEach((img) => {
-            if (!(img instanceof HTMLImageElement)) return;
-            if (typeof img.decode !== 'function') return;
-            img.decode().catch(() => {});
-        });
-    }, {
-        timeout: cfg.isSwup ? 2000 : 1400,
-        delay: cfg.isSwup ? 820 : 60
-    });
-
-    return function cleanupImageOptimization() {
-        if (typeof cancelDecode === 'function') {
-            cancelDecode();
-        }
-    };
-}
-
 function optimizeContentEmbeds(root, options) {
     const cfg = Object.assign(
         {
@@ -1108,10 +1016,6 @@ function runShortcodes(root, options) {
     history.scrollRestoration = 'auto';
     handleGoTopButton(root);
     Comments_Submit();
-    const imageCleanup = optimizeContentImages(root, {
-        pageType,
-        isSwup: Boolean(cfg.isSwup)
-    });
     const embedCleanup = optimizeContentEmbeds(root, {
         pageType,
         isSwup: Boolean(cfg.isSwup)
@@ -1119,9 +1023,6 @@ function runShortcodes(root, options) {
 
     const cleanupWidgets = function () {
         cleanupTabs(root);
-        if (typeof imageCleanup === 'function') {
-            imageCleanup();
-        }
         if (typeof embedCleanup === 'function') {
             embedCleanup();
         }
