@@ -344,3 +344,516 @@
 - 全局命名空间：所有功能通过 `PS.*` 可访问，旧别名同时可用
 - TOC：标题高亮、侧边栏滑块定位正常
 - 缓存：文章渲染缓存命中正常，配置变更后缓存正确失效
+
+## 17. 第十七轮：Swup 性能专项（2026-02-10）
+
+### 17.1 目标
+- 修复 `.perf` trace 窗口偶发 `enter-shell=0ms` 与任务空表问题。
+- 针对“首页 -> /index.php/archives/281/”路径继续压缩掉帧。
+- 以 DevPlan/DevRule 的性能阶段要求做可量化验证。
+
+### 17.2 本轮修改文件
+- `.perf/scripts/perf/swup-trace-runner.mjs`
+- `.perf/scripts/perf/swup-metrics-runner.mjs`
+- `js/PureSuck_Module.js`
+- `js/PureSuck_Swup.js`
+- `css/animations/enter.css`
+- `css/animations/exit.css`
+
+### 17.3 关键改动
+- trace runner：
+  - 窗口解析改为多源优先级（trace-metric-mark > trace-probe-mark > trace-mark > probe/metrics fallback）。
+  - 结果输出增加 `window.source/hasProbeWindow/hasMetricWindow/analysisStartUs/analysisEndUs`。
+  - 当窗口摘要为空时增加 padded + trace tail 兜底，避免空报表。
+  - 在采样阶段将 metrics/probe 时间戳注入为 trace mark，降低跨时钟域偏差。
+- metrics runner：
+  - 新增 `--target-url` 参数，支持定向场景回归（如固定 `/archives/281/`）。
+- 模块初始化与交互：
+  - TOC 观察器改为低分配路径（移除 `Math.min(...Set)` 热路径、简化状态结构）。
+  - Tabs 支持“近视口初始化 + observer 延迟绑定”。
+  - `runShortcodes` cleanup 增加 tabs observer/resize observer 回收。
+  - `page:view` 对 post/page 增加模块初始化延后，避开 enter-shell 关键窗口。
+- 动画减负：
+  - post 主卡进入/退出去掉 scale，减少大容器动画栅格化压力。
+
+### 17.4 验证与结果
+- 语法检查：
+  - `node --check js/PureSuck_Core.js` 通过
+  - `node --check js/PureSuck_Swup.js` 通过
+  - `node --check js/PureSuck_Module.js` 通过
+  - `node --check .perf/scripts/perf/swup-trace-runner.mjs` 通过
+  - `node --check .perf/scripts/perf/swup-metrics-runner.mjs` 通过
+
+- Trace（修复后）：
+  - 命令：`npm run perf:trace:enter-shell -- --base-url http://localhost/ --build-ref 570280e --variant perf-fix-round2f-final --annotation-tag homepage-to-archives281`
+  - 产物：
+    - `.perf/artifacts/perf/trace/enter-shell/swup-trace-2026-02-10T21-22-32-360Z.json`
+    - `.perf/artifacts/perf/trace/enter-shell/swup-trace-2026-02-10T21-22-32-360Z.md`
+  - 结果：`enter-shell ms = 139.4 (source=trace-metric-mark)`，不再出现 0ms/空窗口。
+
+- Metrics（定向路径：`首页 -> /index.php/archives/281/`，20 runs）：
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --runs 20 --build-ref 570280e --variant perf-fix-round2f-final --annotation-tag homepage-to-archives281`
+  - 产物：
+    - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-22-00-911Z.json`
+    - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-22-00-911Z.md`
+  - 指标：
+    - `frameTime p95/p99 = 8.9 / 33.3 ms`
+    - `1% low FPS = 30.03`
+    - `slow >16.67ms = 2.07%`
+    - `long tasks = 1`
+  - 判定：按 `.perf/performance.md` 阈值为 `WATCH`（已从此前 FAIL 边缘改善，但仍未达到 PASS）。
+
+- Metrics（默认路径：首页首篇文章，20 runs）：
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --runs 20 --build-ref 570280e --variant perf-fix-round2f-final-general --annotation-tag homepage-default-firstpost`
+  - 产物：
+    - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-24-25-588Z.json`
+    - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-24-25-588Z.md`
+  - 指标：
+    - `frameTime p95/p99 = 8.7 / 17.0 ms`
+    - `1% low FPS = 58.82`
+    - `slow >16.67ms = 1.25%`
+    - `long tasks = 0`
+  - 判定：`PASS`。
+
+### 17.5 风险与回滚点
+- post/page 模块初始化延后会导致少量增强功能晚于首帧出现（内容可读性不受影响）。
+- 动画去 scale 会让转场观感更克制；可通过 CSS keyframes 回滚。
+- `.perf` 脚本新增参数/窗口逻辑仅影响本地测试工具链，不影响线上主题功能。
+
+## 18. 第十八轮：281 路径瓶颈定位与修复（2026-02-10）
+
+### 18.1 用户要求
+- 按性能目标继续优化。
+- 不做转场降级，必须定位真实瓶颈。
+
+### 18.2 瓶颈定位结论
+- 使用定向 trace（`--target-url /index.php/archives/281/`）定位到 enter-shell 主瓶颈不是动画本身，而是大规模布局：
+  - `Layout total=191.06ms, max=174.89ms`
+  - 最大 RunTask 链路中可见 `Swup scroll-plugin` 调用点（伴随大 layout）。
+- 进一步验证后确认：核心问题是“重内容页进入时的同步布局成本过高”，尤其在 `/archives/281/` 这种长文页面。
+
+### 18.3 本轮改动
+- `.perf/scripts/perf/swup-trace-runner.mjs`
+  - 新增 `--target-url` 支持，trace 可精准命中指定页面。
+- `js/PureSuck_Swup.js`
+  - `SwupScrollPlugin` 改为受特性开关控制，默认不启用（`swupScrollPlugin=false`）。
+  - `runShortcodes` 调用传入 `isSwup` 上下文。
+- `js/PureSuck_Module.js`
+  - 新增 `optimizeContentImages()`：内容页图片在运行时按首图/非首图设置 `loading`、`decoding`、`fetchpriority`，并在 idle 小批量 `decode()`。
+  - `runShortcodes()` 增加 `isSwup` 参数并接入图片优化 cleanup。
+- `css/PureSuck_Style.css`
+  - 将正文性能策略从 `.post-content` 根节点改为“块级 content-visibility”：
+    - `.post-content > :not(h1..h6)` 按需布局
+    - 对 `figure/pre/table/pic-grid` 设更合理 `contain-intrinsic-size`
+
+### 18.4 验证结果
+- Trace（定向 281，修复后）
+  - 命令：`npm run perf:trace:enter-shell -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --build-ref 570280e --variant perf-bottleneck-281-block-cv --annotation-tag homepage-to-archives281`
+  - 产物：`.perf/artifacts/perf/trace/enter-shell/swup-trace-2026-02-10T21-37-17-261Z.json`
+  - 指标变化（对比定位时）：
+    - `enter-shell`: `232.8ms -> 134.4ms`
+    - `Layout total`: `191.06ms -> 40.34ms`
+    - `Layout max`: `174.89ms -> 21.58ms`
+
+- Metrics（定向 281，20 runs）
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --runs 20 --build-ref 570280e --variant perf-bottleneck-281-block-cv --annotation-tag homepage-to-archives281`
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-38-15-819Z.json`
+  - 结果：
+    - `frameTime p95/p99 = 8.8 / 24.9 ms`
+    - `1% low FPS = 40.16`
+    - `slow >16.67ms = 1.62%`
+    - `long tasks = 0`
+  - 判定：`PASS`。
+
+- Metrics（默认路径，20 runs）
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --runs 20 --build-ref 570280e --variant perf-bottleneck-281-block-cv-general --annotation-tag homepage-default-firstpost`
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-39-06-620Z.json`
+  - 结果：`p95/p99=8.8/16.8`, `1% low=59.52`, `slow>16.67=1.08%`, `longTasks=0`（持续 PASS）。
+
+### 18.5 风险与说明
+- 默认关闭 `SwupScrollPlugin` 可能改变历史滚动恢复与同页锚点细节行为；当前主题已有基础滚动逻辑兜底。
+- 块级 `content-visibility` 为性能优先策略，对极端场景下的首屏外内容测量行为会有影响（但本轮未观察到功能回归）。
+
+## 19. 第十九轮：持续迭代（定位 -> 优化 -> 回归，2026-02-10）
+
+### 19.1 目标
+- 回应“不要可选开关绕过问题”，改为稳定实现。
+- 持续迭代 `/archives/281/` 路径，进一步拉高性能余量。
+
+### 19.2 本轮关键调整
+- `js/PureSuck_Swup.js`
+  - 移除 `SwupScrollPlugin` 依赖路径，改为内置轻量滚动管理：
+    - `getHashTarget()` + `restoreNavigationScroll(toType)`
+    - 在 `page:view` 统一处理 hash 锚点与 post/page 顶部恢复
+- `header.php`
+  - 移除 `js/lib/Swup/scroll-plugin.js` 的脚本加载。
+- `css/PureSuck_Style.css`
+  - 正文性能策略继续收敛：`.post-content > *` 全子块按需布局（content-visibility）。
+- `css/animations/transitions.css`
+  - 去掉动画阶段全局 `will-change`，避免大面积层提升。
+- `js/PureSuck_Module.js`
+  - 新增 `optimizeContentEmbeds()`：
+    - post/page 中 iframe 延后激活（近视口延后、远视口 IO 触发）
+    - cleanup 不再在离开页面前强制恢复 deferred iframe 的 `src`，避免导航临界区尖峰。
+
+### 19.3 迭代结果（定向 281）
+- 最终命令：
+  - `npm run perf:metrics:baseline -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --runs 20 --build-ref 570280e --variant perf-bottleneck-281-embed-cleanup-no-restore --annotation-tag homepage-to-archives281`
+- 产物：
+  - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-55-48-258Z.json`
+  - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-55-48-258Z.md`
+- 指标（对比前一轮 `p99=24.9 / 1%low=40.16 / slow=1.62%`）：
+  - `frameTime p95/p99 = 8.7 / 17.06 ms`
+  - `1% low FPS = 58.62`
+  - `slow >16.67ms = 1.41%`
+  - `long tasks = 0`
+- 判定：`PASS`，且余量明显提升。
+
+### 19.4 默认路径回归
+- 命令：
+  - `npm run perf:metrics:baseline -- --base-url http://localhost/ --runs 20 --build-ref 570280e --variant perf-bottleneck-281-embed-cleanup-no-restore-general --annotation-tag homepage-default-firstpost`
+- 产物：
+  - `.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T21-56-39-070Z.json`
+- 结果：`p95/p99=8.8/16.76`, `1%low=59.68`, `slow>16.67=1.08%`, `longTasks=0`（持续 PASS）。
+
+## 20. 第二十轮：恢复 ScrollPlugin 并继续压测（2026-02-10）
+
+### 20.1 目标
+- 按用户要求继续使用 `SwupScrollPlugin`，不走自写滚动方案。
+- 在不降级体验的前提下，继续压 `home -> /index.php/archives/281/` 路径帧稳定性。
+
+### 20.2 本轮修改文件
+- `header.php`
+- `js/PureSuck_Swup.js`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 20.3 关键改动
+- `header.php`
+  - 恢复 `js/lib/Swup/scroll-plugin.js` 脚本加载。
+- `js/PureSuck_Swup.js`
+  - 恢复 `SwupScrollPlugin` 挂载为默认滚动路径（非“可选关闭”）。
+  - 新增 `scrollFunction` 高性能执行策略：
+    - 当处于 `ps-phase-enter + ps-content-shell` 且尚未 `ps-content-reveal` 时，延后执行滚动。
+    - 通过 `MutationObserver + timeout` 双兜底释放，避免卡死。
+  - `animateScroll` 调整为：
+    - `betweenPages: false`
+    - `samePageWithHash: true`
+    - `samePage: false`
+  - 保留仅在插件缺失时启用的 fallback（`restoreNavigationScrollFallback`），避免脚本缺失时滚动失效。
+- 试验并回滚：
+  - `moduleInitDelay` 曾从 `170ms` 调整到 `220ms`，回归后轻微退化，已回滚到 `170ms`。
+
+### 20.4 验证与结果
+- 语法检查：
+  - `node --check js/PureSuck_Swup.js` 通过。
+- Trace（定向 281）：
+  - 命令：`npm run perf:trace:enter-shell -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --build-ref local --variant perf-scroll-plugin-return-final --annotation-tag swup-scroll-plugin`
+  - 产物：`.perf/artifacts/perf/trace/enter-shell/swup-trace-2026-02-10T22-09-49-514Z.json`
+  - 结果：`enter-shell=137.4ms`，`Layout total=40.02ms`。
+- Metrics（定向 281，20 runs）：
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --runs 20 --build-ref local --variant perf-scroll-plugin-return-final --annotation-tag swup-scroll-plugin`
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-09-38-644Z.json`
+  - 结果：
+    - `frameTime p95/p99 = 8.4 / 16.6 ms`
+    - `1% low FPS = 60.24`
+    - `slow >16.67ms = 0.87%`
+    - `long tasks = 0`
+- Metrics（默认路径，20 runs）：
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --runs 20 --build-ref local --variant perf-scroll-plugin-return-final-general --annotation-tag swup-scroll-plugin`
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-09-38-360Z.json`
+  - 结果：`p95/p99=8.4/16.51`, `1%low=60.57`, `slow>16.67=0.73%`, `longTasks=0`。
+
+### 20.5 对照上一轮变化
+- 对比第 19 轮定向 281（`p99=17.06`, `1%low=58.62`, `slow=1.41%`）：
+  - 本轮提升到 `p99=16.6`, `1%low=60.24`, `slow=0.87%`。
+- 结论：在保留 `SwupScrollPlugin` 前提下，性能仍可继续提升，且当前版本优于上一轮。
+
+## 21. 第二十一轮：VT 抽搐轨迹修复（2026-02-10）
+
+### 21.1 目标
+- 修复“共享元素 VT 到最高处再回弹”的抽搐动画。
+- 保留早期版本更稳定的 morph 观感，不降低导航性能。
+
+### 21.2 本轮修改文件
+- `css/animations/vt.css`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 21.3 关键改动
+- 原因定位：
+  - 共享元素 VT 已有浏览器原生几何 morph；
+  - 同时在 `::view-transition-old/new(*)` 额外叠加了 `translateY + scale`，导致轨迹叠加打架，出现“冲顶后回拉”。
+- 修复策略：
+  - 在 `css/animations/vt.css` 中移除共享元素 keyframes 的 `transform` 位移/缩放；
+  - 保留轻微透明度过渡，改为“纯 morph + 软淡变”。
+
+### 21.4 验证与结果
+- Metrics（定向 281，20 runs）：
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --target-url http://localhost/index.php/archives/281/ --runs 20 --build-ref local --variant vt-no-translate-final --annotation-tag vt-jitter-fix`
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-15-58-941Z.json`
+  - 结果：`p95/p99=8.4/16.6`, `1%low=60.24`, `slow>16.67=0.98%`, `longTasks=0`。
+- Metrics（默认路径，20 runs）：
+  - 命令：`npm run perf:metrics:baseline -- --base-url http://localhost/ --runs 20 --build-ref local --variant vt-no-translate-final-general --annotation-tag vt-jitter-fix`
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-16-45-428Z.json`
+  - 结果：`p95/p99=8.4/8.7`, `1%low=114.94`, `slow>16.67=0.61%`, `longTasks=0`。
+
+### 21.5 结论
+- VT 共享元素“回弹抽搐”问题由叠加 transform 导致，已消除。
+- 性能未出现回退，可继续在该基线上迭代门槛。
+
+## 22. 第二十二轮：VT 抽搐二次修复（2026-02-10）
+
+### 22.1 目标
+- 继续处理“仍有抽搐”的反馈，去除所有潜在二次轨迹来源。
+
+### 22.2 本轮修改文件
+- `js/PureSuck_Swup.js`
+- `css/animations/vt.css`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 22.3 关键改动
+- 滚动时序修复（`js/PureSuck_Swup.js`）：
+  - 在 `createDeferredScrollFunction()` 中区分 VT 与非 VT：
+    - VT 模式：滚动恢复等待 `ps-phase-enter` 结束后再执行；
+    - 非 VT 模式：保持“内容 reveal 后尽快执行”。
+  - 目的：避免转场中途视口跳动导致共享元素轨迹被拉扯。
+- 共享元素动画彻底收敛（`css/animations/vt.css`）：
+  - 移除 `::view-transition-old/new(*)` 自定义 keyframes；
+  - 设为 `animation: none`，仅保留浏览器原生 morph（纯轨迹）。
+
+### 22.4 验证与结果
+- 延后 VT 滚动版本（定向 281）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-20-10-585Z.json`
+  - 结果：`p95/p99=8.4/8.6`, `1%low=116.28`, `slow>16.67=0.87%`, `longTasks=0`。
+- 纯 morph 版本（定向 281）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-22-02-018Z.json`
+  - 结果：`p95/p99=8.4/16.7`, `1%low=59.88`, `slow>16.67=1.08%`, `longTasks=0`。
+- 纯 morph 版本（默认路径）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-22-01-813Z.json`
+  - 结果：`p95/p99=8.4/16.6`, `1%low=60.24`, `slow>16.67=0.78%`, `longTasks=0`。
+
+### 22.5 结论
+- 本轮已将“共享元素二次动画 + 转场中滚动干扰”两条干扰链路全部收敛。
+- 当前实现为“ScrollPlugin + VT 纯 morph + 延后滚动恢复”，满足不降级前提。
+
+## 23. 第二十三轮：回滚 Scroll 定制逻辑（2026-02-10）
+
+### 23.1 目标
+- 按反馈“尽量去除 scroll 相关修改”，移除自定义滚动时序与执行逻辑。
+- 保留 `SwupScrollPlugin`，回到插件近原生行为。
+
+### 23.2 本轮修改文件
+- `js/PureSuck_Swup.js`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 23.3 关键改动
+- 删除自定义滚动执行链路：
+  - 移除 `isRootScrollTarget` / `scrollTargetTo` / `performManagedScroll` / `createDeferredScrollFunction`。
+- `createScrollPluginOptions()` 回退为基础配置：
+  - `doScrollingRightAway: true`
+  - `animateScroll: { betweenPages: false, samePageWithHash: true, samePage: true }`
+  - 不再注入自定义 `scrollFunction`。
+
+### 23.4 验证与结果
+- 语法检查：
+  - `node --check js/PureSuck_Swup.js` 通过。
+- Metrics（定向 281，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-24-28-325Z.json`
+  - 结果：`p95/p99=8.4/16.62`, `1%low=60.18`, `slow>16.67=1.0%`, `longTasks=0`。
+- Metrics（默认路径，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-25-13-363Z.json`
+  - 结果：`p95/p99=8.4/8.69`, `1%low=115.02`, `slow>16.67=0.59%`, `longTasks=0`。
+
+### 23.5 结论
+- Scroll 相关定制逻辑已大幅收敛，当前以插件默认行为为主。
+- 性能保持稳定，无回退。
+
+## 24. 第二十四轮：Scroll 继续回退到插件默认（2026-02-10）
+
+### 24.1 目标
+- 按反馈“这一块还是有问题，继续回”，进一步去除 scroll 相关改动。
+
+### 24.2 本轮修改文件
+- `js/PureSuck_Swup.js`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 24.3 关键改动
+- `js/PureSuck_Swup.js`：
+  - 删除 `hasScrollPlugin` 状态字段。
+  - 删除 fallback 滚动函数：
+    - `getHashTargetFromCurrentLocation`
+    - `restoreNavigationScrollFallback`
+  - 删除 `createScrollPluginOptions` 配置函数。
+  - `SwupScrollPlugin` 改为无参数初始化：`new window.SwupScrollPlugin()`。
+  - 移除 `page:view` 中的插件缺失分支滚动逻辑。
+
+### 24.4 验证与结果
+- 语法检查：
+  - `node --check js/PureSuck_Swup.js` 通过。
+- Metrics（定向 281，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-28-04-103Z.json`
+  - 结果：`p95/p99=8.7/25.0`, `1%low=40.0`, `slow>16.67=1.52%`, `longTasks=0`。
+- Metrics（默认路径，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-28-03-715Z.json`
+  - 结果：`p95/p99=8.6/16.7`, `1%low=59.88`, `slow>16.67=1.07%`, `longTasks=0`。
+
+### 24.5 结论
+- Scroll 已回退到最接近插件原生默认行为的状态。
+- 目标路径性能回退到 PASS 边缘，但满足“继续回”的回退方向。
+
+## 25. 第二十五轮：卡片转场回退到早期基线（2026-02-10）
+
+### 25.1 目标
+- 按“卡片效果不如最初，尽量回去”的反馈，优先恢复早期视觉观感。
+
+### 25.2 本轮处理
+- 将 `js/PureSuck_Swup.js` 回退到早期稳定基线（`3647e72` 对应版本），恢复当时的卡片转场状态机与节奏。
+- 动画文件（`enter/exit/transitions/vt`）保持在同一早期基线风格下。
+
+### 25.3 验证结果
+- Metrics（定向 281，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-32-36-863Z.json`
+  - 结果：`p95/p99=8.7/24.9`, `1%low=40.16`, `slow>16.67=1.70%`, `longTasks=2`。
+- Metrics（默认路径，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-32-36-326Z.json`
+  - 结果：`p95/p99=8.7/24.9`, `1%low=40.16`, `slow>16.67=1.31%`, `longTasks=0`。
+
+### 25.4 结论
+- 视觉回退方向已落实（更接近早期卡片观感）。
+- 性能较前一轮“优化态”明显回落，属于“以视觉优先换性能余量”的回退结果。
+
+## 26. 第二十六轮：不改效果的根因优化（2026-02-10）
+
+### 26.1 目标
+- 按“找根因，但不要急着砍”执行优化。
+- 保持当前卡片实现与视觉不变，仅优化初始化时序与替换范围。
+
+### 26.2 根因定位
+- 在 `home -> /archives/281/` 导航窗口（mark window）中，热点集中在：
+  - `Layout`
+  - `UpdateLayoutTree`
+  - `IntersectionObserverController::computeIntersections`
+- 说明瓶颈主要来自转场窗口内的布局/观察器计算叠加，而非单一动效参数。
+
+### 26.3 本轮修改文件
+- `js/PureSuck_Swup.js`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 26.4 改动内容（不影响实现）
+- `Swup` 替换容器收敛为主内容：
+  - `containers: ['#swup']`（不再替换 `#right-sidebar`）。
+- `runShortcodes` 在 Swup 场景启用现有延迟机制（模块已有能力）：
+  - `deferHeavy: true`（仅 Swup）
+  - 传入 `pageType/isSwup` 上下文
+  - 保存并执行 cleanup，避免 observer/timer 残留。
+
+### 26.5 验证结果
+- Metrics（定向 281，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-40-32-292Z.json`
+  - 指标：`p95/p99=8.5/20.04`, `1%low=51.78`, `slow>16.67=1.12%`, `longTasks=0`。
+- Metrics（默认路径，20 runs）：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-40-31-964Z.json`
+  - 指标：`p95/p99=8.5/16.6`, `1%low=60.24`, `slow>16.67=0.96%`, `longTasks=0`。
+- Trace（定向 281，对比优化前）：
+  - `Layout total: 86.87ms -> 64.45ms`
+  - `IntersectionObserver::computeIntersections total: 40.24ms -> 35.88ms`
+
+### 26.6 结论
+- 在保持卡片风格不变前提下，性能显著回升（尤其 `p99` 与长任务）。
+- 优化属于“逻辑与时序”层，不是降级或砍功能。
+
+## 27. 第二十七轮：Swup 下 TOC 修复并持续优化（2026-02-10）
+
+### 27.1 目标
+- 修复“Swup 导航后 TOC 不显示”。
+- 继续遵循“优化逻辑与时序，不砍功能、不改卡片效果”。
+
+### 27.2 根因
+- 当前架构中 `#right-sidebar` 不参与 Swup 内容替换，服务端输出的 TOC 区块不会随页面切换更新。
+- `runShortcodes` 仅在已有 `#toc-section` 时初始化 TOC，导致部分 Swup 场景没有可初始化目标。
+
+### 27.3 本轮修改文件
+- `functions/common.php`
+- `js/PureSuck_Core.js`
+- `js/PureSuck_Module.js`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 27.4 修复与优化内容
+- 运行时配置补充：
+  - `functions/common.php` 增加 `features.showTOC`。
+  - `js/PureSuck_Core.js` 增加 `defaultFeatures.showTOC`。
+- TOC 运行时同步（`js/PureSuck_Module.js`）：
+  - 新增 `ensureRuntimeTocSection(scope, pageType)`：
+    - 在 `post/page` 且有标题时自动确保 `#toc-section` 存在；
+    - 动态生成 `.toc-a` 链接结构；
+    - 非内容页自动隐藏 TOC，避免残留。
+  - 增加 TOC 签名缓存（`data-ps-toc-sig`），仅在内容变化时重建 TOC DOM。
+- 时序优化（不影响实现）：
+  - Swup 场景下图片 `decode()` 延后并减小批次（降低导航窗口内 `ImageDecodeTask` 冲击）。
+  - `initializeStickyTOC()` 改为“首次滚动或兜底定时”触发，减少转场关键窗口的观察器压力。
+
+### 27.5 功能验证
+- 自动化检查（Swup 跳转到 `/archives/281/`）：
+  - `hasSection=true`
+  - `tocLinks=26`
+  - `display=block`
+  - `sticky` 逻辑可激活（sentinel 可创建）
+
+### 27.6 性能结果（20 runs）
+- Targeted 281：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-49-24-104Z.json`
+  - 指标：`p95/p99=8.9/17.02`, `1%low=58.75`, `slow>16.67=1.18%`, `longTasks=1`
+- General：
+  - 产物：`.perf/artifacts/perf/metrics/desktop-baseline/swup-metrics-2026-02-10T22-49-23-693Z.json`
+  - 指标：`p95/p99=8.81/16.66`, `1%low=60.01`, `slow>16.67=1.01%`, `longTasks=0`
+
+### 27.7 结论
+- TOC 在 Swup 场景恢复可用。
+- 在不改变卡片实现前提下，性能保持在可接受区间并较前序回退态明显改善。
+
+## 28. 第二十八轮：TOC 布局回归与关键路径错峰优化（2026-02-10）
+
+### 28.1 目标
+- 修复 Swup 下 TOC 布局不一致（PHP 原始结构与 JS 运行时结构对齐）。
+- 在不降级实现前提下继续压 `home -> /archives/281/` 的进入阶段尖峰。
+
+### 28.2 根因
+- JS 运行时 TOC 生成曾使用 `li.h{level}`，但 PHP/CSS 约定为 `li.li.li-{level}`。
+- 类名不一致导致层级缩进与样式规则无法命中，表现为目录布局错误。
+
+### 28.3 本轮修改文件
+- `js/PureSuck_Module.js`
+- `.perf/record.md`
+- `RefactorRecord.md`
+
+### 28.4 修复与优化
+- TOC 结构对齐：
+  - 运行时 TOC 项 class 改为 `li li-{level}`，与 `functions/article.php` 输出一致。
+- 关键路径错峰（不砍功能）：
+  - 将 `ensureRuntimeTocSection(scope, pageType)` 从 `runShortcodes` 同步入口移到 `initTOCEnhance()` 中执行；
+  - 保持 TOC 功能完整，仅调整执行时机，减少 Swup 进入关键窗口同步 DOM 构建负担。
+
+### 28.5 功能验证
+- Playwright 自动化（首页经 Swup 进入 `/index.php/archives/281/`）：
+  - `hasSection=true`, `display=block`
+  - `items=26`
+  - `withLi=26`, `withLevel=26`, `bad=0`
+
+### 28.6 性能验证（20 runs）
+- 说明：并行执行两组基线会引入资源争用，出现假回退；本轮采用串行结果作为决策依据。
+- 串行基线（修复后）
+  - Targeted 281：`p95/p99=8.5/16.74`, `1%low=59.73`, `slow>16.67=1.06%`, `longTasks=1`
+  - General：`p95/p99=8.6/16.6`, `1%low=60.24`, `slow>16.67=0.87%`, `longTasks=0`
+- 错峰优化后
+  - Targeted 281：`p95/p99=8.6/16.6`, `1%low=60.24`, `slow>16.67=0.99%`, `longTasks=0`
+  - General：`p95/p99=8.7/16.6`, `1%low=60.24`, `slow>16.67=0.96%`, `longTasks=0`
+
+### 28.7 结论
+- TOC 布局与 PHP 结构已一致，Swup 场景可正常显示。
+- 性能保持 PASS 且 `281` 路径长任务归零，符合“优化逻辑与时序、不降级实现”的要求。

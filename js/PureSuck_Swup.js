@@ -40,7 +40,8 @@
         initialEnterPlayed: false,
         clickedPostKey: '',
         lastPostKey: '',
-        timers: { cleanup: 0, safety: 0, prime: 0, reveal: 0 }
+        timers: { cleanup: 0, safety: 0, prime: 0, reveal: 0 },
+        deferredShortcodesCleanup: null
     };
 
     function getSwupRoot() {
@@ -774,16 +775,47 @@
         PS.registerModule({
             id: 'ps-theme-enhance',
             priority: 100,
-            init: function initThemeEnhance(root) {
+            init: function initThemeEnhance(root, context) {
+                if (typeof state.deferredShortcodesCleanup === 'function') {
+                    try {
+                        state.deferredShortcodesCleanup();
+                    } catch (error) {
+                        PS.log('shortcodes cleanup failed:', error);
+                    }
+                    state.deferredShortcodesCleanup = null;
+                }
+
                 if (typeof window.runShortcodes === 'function') {
-                    window.runShortcodes(root);
+                    state.deferredShortcodesCleanup = window.runShortcodes(root, {
+                        deferHeavy: Boolean(context && context.isSwup),
+                        pageType: context && context.pageType ? context.pageType : getPageType(),
+                        isSwup: Boolean(context && context.isSwup)
+                    });
                 }
                 updateNavCurrentState();
                 if (window.OwoManager && typeof window.OwoManager.init === 'function') {
                     window.OwoManager.init();
                 }
+                return function cleanupThemeEnhance() {
+                    if (typeof state.deferredShortcodesCleanup === 'function') {
+                        try {
+                            state.deferredShortcodesCleanup();
+                        } catch (error) {
+                            PS.log('shortcodes cleanup failed:', error);
+                        }
+                        state.deferredShortcodesCleanup = null;
+                    }
+                };
             },
             destroy: function destroyThemeEnhance() {
+                if (typeof state.deferredShortcodesCleanup === 'function') {
+                    try {
+                        state.deferredShortcodesCleanup();
+                    } catch (error) {
+                        PS.log('shortcodes cleanup failed:', error);
+                    }
+                    state.deferredShortcodesCleanup = null;
+                }
                 if (window.OwoManager && typeof window.OwoManager.destroy === 'function') {
                     window.OwoManager.destroy();
                 }
@@ -873,7 +905,7 @@
 
         try {
             const swup = new window.Swup({
-                containers: ['#swup', '#right-sidebar'],
+                containers: ['#swup'],
                 plugins: createPlugins(),
                 cache: true,
                 native: true,

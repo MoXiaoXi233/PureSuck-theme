@@ -2502,9 +2502,21 @@ input:-webkit-autofill:active {
 	color: var(--themehovercolor) !important;
 }
 
-.post-content,
 .post-comments,
 #comments-list {
 	content-visibility: auto;
 	contain-intrinsic-size: auto 500px;
+}
+
+/* 长文性能优化：改为块级按需布局，避免整段正文一次性全量 layout */
+.post-content > * {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 140px;
+}
+
+.post-content > figure,
+.post-content > pre,
+.post-content > .table-scroll,
+.post-content > .pic-grid {
+	contain-intrinsic-size: auto 320px;
 }

@@ -1,14 +1,21 @@
-/** 这个JS包含了各种需要处理的的内容 **/
-/** 回到顶部按钮，TOC目录，内部卡片部分内容解析都在这里 **/
+﻿/** 杩欎釜JS鍖呭惈浜嗗悇绉嶉渶瑕佸鐞嗙殑鐨勫唴瀹?**/
+/** 鍥炲埌椤堕儴鎸夐挳锛孴OC鐩綍锛屽唴閮ㄥ崱鐗囬儴鍒嗗唴瀹硅В鏋愰兘鍦ㄨ繖閲?**/
 
 /**
- * TOC 目录高亮 - 简化重构版
- * 核心原则：简单、直接、快速响应
+ * TOC 鐩綍楂樹寒 - 绠€鍖栭噸鏋勭増
+ * 鏍稿績鍘熷垯锛氱畝鍗曘€佺洿鎺ャ€佸揩閫熷搷搴?
  */
 const initializeTOC = (() => {
     let state = null;
     let hashTimer = 0;
-    let isClickScrolling = false;  // 点击滚动中，暂停 Observer 响应
+    let isClickScrolling = false;
+
+    function findNextVisibleIndex(visible, start) {
+        for (let i = start; i < visible.length; i += 1) {
+            if (visible[i] === 1) return i;
+        }
+        return -1;
+    }
 
     function destroy() {
         if (!state) return;
@@ -25,65 +32,80 @@ const initializeTOC = (() => {
             state.activeLink.classList.remove('li-active');
         }
 
+        if (state.headings && state.headings.length) {
+            state.headings.forEach((heading) => {
+                if (!heading || !heading.dataset) return;
+                delete heading.dataset.psTocIndex;
+            });
+        }
+
         state = null;
     }
 
-    function setActive(index) {
+    function setActive(index, options) {
         if (!state || index < 0 || index >= state.headings.length) return;
         if (state.activeIndex === index) return;
 
-        // 移除旧激活状态
+        const cfg = Object.assign({ scrollBehavior: 'auto' }, options || {});
+
         if (state.activeLink) {
             state.activeLink.classList.remove('li-active');
         }
 
-        const heading = state.headings[index];
-        const link = state.linkById.get(heading.id);
+        const item = state.items[index];
+        const link = item && item.link ? item.link : null;
         if (!link) return;
 
-        // 设置新激活状态
         link.classList.add('li-active');
         state.activeLink = link;
         state.activeIndex = index;
 
-        // 更新侧边栏指示器位置
-        const li = state.liById.get(heading.id);
+        const li = item && item.li ? item.li : null;
         if (state.indicator && li) {
             state.indicator.style.transform = `translateY(${li.offsetTop}px)`;
         }
 
-        // 自动滚动 TOC 容器，让激活项可见
         if (state.tocSection && li) {
-            const cr = state.tocSection.getBoundingClientRect();
-            const ir = li.getBoundingClientRect();
+            const containerRect = state.tocSection.getBoundingClientRect();
+            const itemRect = li.getBoundingClientRect();
 
-            if (ir.top < cr.top || ir.bottom > cr.bottom) {
+            if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
                 state.tocSection.scrollBy({
-                    top: ir.top - cr.top - cr.height / 2 + ir.height / 2,
-                    behavior: 'smooth'
+                    top: itemRect.top - containerRect.top - containerRect.height / 2 + itemRect.height / 2,
+                    behavior: cfg.scrollBehavior
                 });
             }
         }
     }
 
     function handleIntersect(entries) {
-        if (!state || isClickScrolling) return;  // 点击滚动中不响应
+        if (!state || isClickScrolling) return;
 
-        // 直接处理，不加 RAF 节流
-        entries.forEach(entry => {
-            const index = state.indexMap.get(entry.target);
-            if (index == null) return;
+        let changed = false;
+        entries.forEach((entry) => {
+            const index = Number(entry.target && entry.target.dataset ? entry.target.dataset.psTocIndex : -1);
+            if (!Number.isInteger(index) || index < 0 || index >= state.headings.length) return;
 
-            if (entry.isIntersecting) {
-                state.visible.add(index);
-            } else {
-                state.visible.delete(index);
+            const nextVisible = entry.isIntersecting ? 1 : 0;
+            if (state.visible[index] === nextVisible) return;
+            state.visible[index] = nextVisible;
+            changed = true;
+
+            if (nextVisible === 1) {
+                if (state.firstVisible === -1 || index < state.firstVisible) {
+                    state.firstVisible = index;
+                }
+                return;
+            }
+
+            if (index === state.firstVisible) {
+                const nextAfter = findNextVisibleIndex(state.visible, index + 1);
+                state.firstVisible = nextAfter !== -1 ? nextAfter : findNextVisibleIndex(state.visible, 0);
             }
         });
 
-        // 选择最靠前的可见标题
-        if (state.visible.size > 0) {
-            setActive(Math.min(...state.visible));
+        if (changed && state.firstVisible >= 0) {
+            setActive(state.firstVisible);
         }
     }
 
@@ -101,26 +123,22 @@ const initializeTOC = (() => {
         const target = document.getElementById(targetId);
         if (!target) return;
 
-        // 立即更新激活状态
-        const index = state.headings.findIndex(h => h.id === targetId);
-        if (index >= 0) setActive(index);
+        const index = Object.prototype.hasOwnProperty.call(state.idToIndex, targetId)
+            ? state.idToIndex[targetId]
+            : -1;
+        if (index >= 0) setActive(index, { scrollBehavior: 'smooth' });
 
-        // 暂停 Observer 响应，避免滚动过程中来回跳
         isClickScrolling = true;
-
-        // 平滑滚动到目标
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // 延迟更新 URL hash，并恢复 Observer 响应
         clearTimeout(hashTimer);
         hashTimer = setTimeout(() => {
             history.replaceState(null, '', href);
-            isClickScrolling = false;  // 滚动结束，恢复响应
-        }, 600);  // 给足够时间让滚动完成
+            isClickScrolling = false;
+        }, 600);
     }
 
     return function initializeTOC() {
-        // 每次初始化前必须清理
         destroy();
 
         const tocSection = document.getElementById('toc-section');
@@ -132,7 +150,6 @@ const initializeTOC = (() => {
             return;
         }
 
-        // 只选择有 id 的标题
         const headings = Array.from(content.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'));
         if (!headings.length) {
             if (tocSection) tocSection.style.display = 'none';
@@ -140,68 +157,59 @@ const initializeTOC = (() => {
         }
 
         const indicator = document.querySelector('.siderbar');
-        const linkById = new Map();
-        const liById = new Map();
-        const indexMap = new Map();
+        const idToIndex = Object.create(null);
+        const items = new Array(headings.length);
 
-        // 建立映射
         headings.forEach((heading, index) => {
-            indexMap.set(heading, index);
+            heading.dataset.psTocIndex = String(index);
+            idToIndex[heading.id] = index;
 
-            // 使用 CSS.escape 安全转义 ID
             const escapedId = CSS.escape(heading.id);
             const link = toc.querySelector(`.toc-a[href="#${escapedId}"]`);
+            let li = null;
+
             if (link) {
-                linkById.set(heading.id, link);
                 link.setAttribute('no-pjax', '');
                 link.classList.remove('li-active');
-
-                const li = link.closest('li');
-                if (li) liById.set(heading.id, li);
+                li = link.closest('li');
             }
+
+            items[index] = { heading, link, li };
         });
 
         state = {
             headings,
-            linkById,
-            liById,
-            indexMap,
+            items,
+            idToIndex,
             indicator,
             tocSection,
-            visible: new Set(),
+            visible: new Uint8Array(headings.length),
+            firstVisible: -1,
             activeIndex: -1,
             activeLink: null,
             observer: null
         };
 
-        // 显示 TOC
         if (tocSection) tocSection.style.display = 'block';
         if (indicator) indicator.style.transition = 'transform 0.25s ease-out';
 
-        // 绑定点击（只绑定一次）
         if (!toc.dataset.tocBound) {
             toc.addEventListener('click', handleClick, true);
             toc.dataset.tocBound = '1';
         }
 
-        // 创建 IntersectionObserver
-        // rootMargin: 顶部留 100px 触发区，底部排除 66%
         state.observer = new IntersectionObserver(handleIntersect, {
             rootMargin: '-100px 0px -66% 0px',
             threshold: 0
         });
 
-        headings.forEach(h => state.observer.observe(h));
+        headings.forEach((heading) => state.observer.observe(heading));
 
-        // 初始化：激活第一个可见的或第一个
         requestAnimationFrame(() => {
             if (!state) return;
-            // 找到当前视口内最靠前的标题
-            const scrollTop = window.scrollY;
             let initialIndex = 0;
-            for (let i = 0; i < headings.length; i++) {
-                const rect = headings[i].getBoundingClientRect();
-                if (rect.top <= 120) {
+            for (let i = 0; i < headings.length; i += 1) {
+                if (headings[i].getBoundingClientRect().top <= 120) {
                     initialIndex = i;
                 }
             }
@@ -209,6 +217,106 @@ const initializeTOC = (() => {
         });
     };
 })();
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function ensureRuntimeTocSection(scope, pageType) {
+    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+    const tocEnabled = PS && typeof PS.isFeatureEnabled === 'function'
+        ? PS.isFeatureEnabled('showTOC', true)
+        : true;
+
+    const rightSidebar = document.querySelector('.right-sidebar');
+    let tocSection = document.getElementById('toc-section');
+    if (!rightSidebar || !tocEnabled) {
+        if (tocSection) tocSection.style.display = 'none';
+        return false;
+    }
+
+    if (pageType !== 'post' && pageType !== 'page') {
+        if (tocSection) tocSection.style.display = 'none';
+        return false;
+    }
+
+    const contentRoot = (scope && scope.querySelector ? scope : document).querySelector('.inner-post-wrapper');
+    if (!contentRoot) {
+        if (tocSection) tocSection.style.display = 'none';
+        return false;
+    }
+
+    const headings = Array.from(contentRoot.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]'));
+    if (!headings.length) {
+        if (tocSection) tocSection.style.display = 'none';
+        return false;
+    }
+
+    const tocSignature = headings.map((heading) => {
+        const tag = (heading.tagName || '').toUpperCase();
+        const id = heading.id || '';
+        const text = (heading.textContent || '').trim();
+        return tag + ':' + id + ':' + text.length;
+    }).join('|');
+
+    const buildTocHtml = function () {
+        const lines = [];
+        lines.push('<div class="dir"><ul id="toc">');
+        headings.forEach((heading) => {
+            const levelMatch = /^H([1-6])$/i.exec(heading.tagName || '');
+            const level = levelMatch ? levelMatch[1] : '2';
+            const text = escapeHtml((heading.textContent || '').trim() || heading.id);
+            const id = escapeHtml(heading.id);
+            lines.push(
+                '<li class="li li-' + level + '">'
+                + '<a href="#' + id + '" id="link-' + id + '" class="toc-a">' + text + '</a>'
+                + '</li>'
+            );
+        });
+        lines.push('</ul><div class="sider"><span class="siderbar"></span></div></div>');
+        return lines.join('');
+    };
+
+    if (!tocSection) {
+        tocSection = document.createElement('div');
+        tocSection.className = 'toc-section';
+        tocSection.id = 'toc-section';
+        tocSection.dataset.psRuntimeToc = '1';
+        tocSection.innerHTML = [
+            '<header class="section-header">',
+            '  <span class="icon-article"></span>',
+            '  <span class="title">文章目录</span>',
+            '</header>',
+            '<section class="section-body">',
+            '  <div class="toc"></div>',
+            '</section>'
+        ].join('');
+        rightSidebar.appendChild(tocSection);
+    }
+
+    const toc = tocSection.querySelector('.toc');
+    if (!toc) {
+        tocSection.style.display = 'none';
+        return false;
+    }
+
+    const existingLinks = toc.querySelectorAll('.toc-a').length;
+    const shouldRebuild = tocSection.dataset.psTocSig !== tocSignature
+        || existingLinks !== headings.length;
+
+    if (shouldRebuild) {
+        toc.innerHTML = buildTocHtml();
+        tocSection.dataset.psTocSig = tocSignature;
+    }
+
+    tocSection.style.display = 'block';
+    return true;
+}
 
 const GoTopButton = (() => {
     let bound = false;
@@ -223,7 +331,7 @@ const GoTopButton = (() => {
         anchor = button ? button.querySelector('.go') : null;
     }
 
-    // ✅ 使用 IntersectionObserver 替代滚动监听，消除强制重排
+    // 鉁?浣跨敤 IntersectionObserver 鏇夸唬婊氬姩鐩戝惉锛屾秷闄ゅ己鍒堕噸鎺?
     function createSentinel() {
         if (sentinel) return sentinel;
 
@@ -238,7 +346,7 @@ const GoTopButton = (() => {
     function handleIntersect(entries) {
         if (!button) return;
         const [entry] = entries;
-        // sentinel 不可见时（滚动超过 100px），显示按钮
+        // sentinel 涓嶅彲瑙佹椂锛堟粴鍔ㄨ秴杩?100px锛夛紝鏄剧ず鎸夐挳
         if (entry.isIntersecting) {
             button.classList.remove('visible');
         } else {
@@ -287,7 +395,7 @@ const GoTopButton = (() => {
             document.addEventListener('click', onClick, true);
         }
 
-        // ✅ 每次初始化时重新设置 observer（支持 Swup 页面切换）
+        // 鉁?姣忔鍒濆鍖栨椂閲嶆柊璁剧疆 observer锛堟敮鎸?Swup 椤甸潰鍒囨崲锛?
         initObserver();
     };
 })();
@@ -310,24 +418,24 @@ function bindCollapsiblePanels(root) {
 
         if (!button || !contentDiv) return;
 
-        // ✅ 预缓存 scrollHeight，避免点击时同步读取影响 INP
+        // 鉁?棰勭紦瀛?scrollHeight锛岄伩鍏嶇偣鍑绘椂鍚屾璇诲彇褰卞搷 INP
         let cachedScrollHeight = 0;
 
         const updateCache = () => {
             cachedScrollHeight = contentDiv.scrollHeight;
         };
 
-        // 使用 requestIdleCallback 预缓存
+        // 浣跨敤 requestIdleCallback 棰勭紦瀛?
         if (typeof requestIdleCallback === 'function') {
             requestIdleCallback(updateCache, { timeout: 500 });
         } else {
             setTimeout(updateCache, 100);
         }
 
-        // 使用 ResizeObserver 监听内容变化时更新缓存
+        // 浣跨敤 ResizeObserver 鐩戝惉鍐呭鍙樺寲鏃舵洿鏂扮紦瀛?
         if (window.ResizeObserver) {
             const resizeObserver = new ResizeObserver(() => {
-                // 只在展开状态下更新缓存
+                // 鍙湪灞曞紑鐘舵€佷笅鏇存柊缂撳瓨
                 if (contentDiv.style.maxHeight && contentDiv.style.maxHeight !== '0px') {
                     cachedScrollHeight = contentDiv.scrollHeight;
                 }
@@ -345,10 +453,10 @@ function bindCollapsiblePanels(root) {
                     icon.classList.add('icon-down-open');
                 }
             } else {
-                // ✅ 使用缓存值，如果缓存为空则降级读取
+                // 鉁?浣跨敤缂撳瓨鍊硷紝濡傛灉缂撳瓨涓虹┖鍒欓檷绾ц鍙?
                 const height = cachedScrollHeight || contentDiv.scrollHeight;
                 contentDiv.style.maxHeight = height + "px";
-                // 更新缓存以备下次使用
+                // 鏇存柊缂撳瓨浠ュ涓嬫浣跨敤
                 if (!cachedScrollHeight) {
                     cachedScrollHeight = height;
                 }
@@ -361,86 +469,174 @@ function bindCollapsiblePanels(root) {
     });
 }
 
+let tabInitObserver = null;
+
+function isElementNearViewport(el, margin) {
+    if (!el || typeof el.getBoundingClientRect !== 'function') return true;
+    const rect = el.getBoundingClientRect();
+    const pad = Number.isFinite(margin) ? margin : 0;
+    return rect.top <= window.innerHeight + pad && rect.bottom >= -pad;
+}
+
+function initTabContainer(container) {
+    if (!container || container.dataset.binded === "1") return;
+
+    const tabHeader = container.querySelector('.tab-header');
+    if (!tabHeader) return;
+
+    const tabLinks = Array.from(tabHeader.querySelectorAll('.tab-link'));
+    const tabPanes = Array.from(container.querySelectorAll('.tab-pane'));
+    const indicator = tabHeader.querySelector('.tab-indicator');
+    if (!tabLinks.length || !indicator) return;
+
+    container.dataset.binded = "1";
+    delete container.dataset.tabObserved;
+
+    tabLinks.forEach((link, index) => {
+        link.dataset.psTabIndex = String(index);
+    });
+
+    const cachedWidths = new Array(tabLinks.length).fill(0);
+    const cachedOffsets = new Array(tabLinks.length).fill(0);
+    let activeIndex = tabLinks.findIndex(l => l.classList.contains('active'));
+    if (activeIndex < 0) activeIndex = 0;
+    let resizeObserver = null;
+
+    const updateCache = () => {
+        for (let i = 0; i < tabLinks.length; i += 1) {
+            const link = tabLinks[i];
+            cachedWidths[i] = link.offsetWidth;
+            cachedOffsets[i] = link.offsetLeft;
+        }
+    };
+
+    const updateIndicator = index => {
+        if (index < 0 || index >= tabLinks.length) return;
+        requestAnimationFrame(() => {
+            const width = cachedWidths[index] || tabLinks[index].offsetWidth;
+            const offset = cachedOffsets[index] || tabLinks[index].offsetLeft;
+            const x = offset + width * 0.125;
+            indicator.style.width = `${width * 0.75}px`;
+            indicator.style.transform = `translateX(${x}px)`;
+        });
+    };
+
+    const applyActiveState = (nextIndex, shouldFocus) => {
+        if (nextIndex < 0 || nextIndex >= tabLinks.length) return;
+        if (activeIndex === nextIndex) return;
+
+        tabHeader.classList.remove('dir-left', 'dir-right');
+        tabHeader.classList.add(nextIndex > activeIndex ? 'dir-right' : 'dir-left');
+
+        tabLinks.forEach((link, index) => {
+            const isActive = index === nextIndex;
+            link.classList.toggle('active', isActive);
+            link.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+
+        tabPanes.forEach((pane, index) => {
+            pane.classList.toggle('active', index === nextIndex);
+        });
+
+        activeIndex = nextIndex;
+        if (shouldFocus && typeof tabLinks[nextIndex].focus === 'function') {
+            tabLinks[nextIndex].focus();
+        }
+        updateIndicator(nextIndex);
+    };
+
+    const updateLayout = () => {
+        updateCache();
+        updateIndicator(activeIndex);
+    };
+
+    if (window.ResizeObserver) {
+        resizeObserver = new ResizeObserver(updateLayout);
+        resizeObserver.observe(tabHeader);
+    }
+
+    tabHeader.addEventListener('click', e => {
+        const target = e.target.closest('.tab-link');
+        if (!target) return;
+        const newIndex = Number(target.dataset.psTabIndex || -1);
+        if (newIndex < 0 || newIndex >= tabLinks.length) return;
+        applyActiveState(newIndex, true);
+    });
+
+    if (!tabLinks[activeIndex].classList.contains('active')) {
+        applyActiveState(activeIndex, false);
+    } else {
+        tabLinks[activeIndex].setAttribute('tabindex', '0');
+    }
+    updateLayout();
+
+    container.__psTabCleanup = function cleanupTabContainer() {
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+            resizeObserver = null;
+        }
+    };
+}
+
+function getTabInitObserver() {
+    if (tabInitObserver || !window.IntersectionObserver) return tabInitObserver;
+    tabInitObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const container = entry.target;
+            tabInitObserver.unobserve(container);
+            initTabContainer(container);
+        });
+    }, {
+        root: null,
+        rootMargin: '240px 0px',
+        threshold: 0
+    });
+    return tabInitObserver;
+}
+
 function bindTabs(root) {
     const scope = root && root.querySelector ? root : document;
     const tabContainers = scope.querySelectorAll('.tab-container');
 
     tabContainers.forEach(container => {
         if (container.dataset.binded === "1") return;
-        container.dataset.binded = "1";
+        if (container.dataset.tabObserved === "1") return;
 
-        const tabHeader = container.querySelector('.tab-header');
-        if (!tabHeader) return;
-
-        const tabLinks = Array.from(tabHeader.querySelectorAll('.tab-link'));
-        const tabPanes = Array.from(container.querySelectorAll('.tab-pane'));
-        const indicator = tabHeader.querySelector('.tab-indicator');
-
-        if (!tabLinks.length || !indicator) return;
-
-        let cachedWidths = [];
-        let cachedOffsets = [];
-
-        // ✅ 单次遍历同时读取 offsetWidth 和 offsetLeft，减少强制重排
-        const updateCache = () => {
-            const metrics = tabLinks.map(l => ({ w: l.offsetWidth, o: l.offsetLeft }));
-            cachedWidths = metrics.map(m => m.w);
-            cachedOffsets = metrics.map(m => m.o);
-        };
-
-        const updateIndicator = index => {
-            requestAnimationFrame(() => {
-                // ✅ 使用 transform 代替 left，性能更好（GPU加速）
-                const x = cachedOffsets[index] + cachedWidths[index] * 0.125;
-                indicator.style.width = `${cachedWidths[index] * 0.75}px`;
-                indicator.style.transform = `translateX(${x}px)`;
-            });
-        };
-
-        const updateLayout = () => {
-            updateCache();
-            const activeIndex = tabLinks.findIndex(l => l.classList.contains('active'));
-            updateIndicator(activeIndex >= 0 ? activeIndex : 0);
-        };
-
-        if (window.ResizeObserver) {
-            new ResizeObserver(updateLayout).observe(tabHeader);
+        if (isElementNearViewport(container, 220) || !window.IntersectionObserver) {
+            initTabContainer(container);
+            return;
         }
 
-        tabHeader.addEventListener('click', e => {
-            const target = e.target.closest('.tab-link');
-            if (!target) return;
+        const observer = getTabInitObserver();
+        if (!observer) {
+            initTabContainer(container);
+            return;
+        }
 
-            const newIndex = tabLinks.indexOf(target);
-            const oldIndex = tabLinks.findIndex(l => l.classList.contains('active'));
-            if (newIndex === oldIndex) return;
+        container.dataset.tabObserved = "1";
+        observer.observe(container);
+    });
+}
 
-            tabHeader.classList.remove('dir-left', 'dir-right');
-            tabHeader.classList.add(newIndex > oldIndex ? 'dir-right' : 'dir-left');
+function cleanupTabs(root) {
+    const scope = root && root.querySelector ? root : document;
+    const tabContainers = scope.querySelectorAll('.tab-container');
 
-            tabLinks.forEach(l => {
-                l.classList.remove('active');
-                l.setAttribute('tabindex', '-1');
-            });
-
-            tabPanes.forEach(p => p.classList.remove('active'));
-
-            target.classList.add('active');
-            target.setAttribute('tabindex', '0');
-            target.focus();
-
-            if (tabPanes[newIndex]) {
-                tabPanes[newIndex].classList.add('active');
-            }
-            updateIndicator(newIndex);
-        });
-
-        updateLayout();
+    tabContainers.forEach(container => {
+        if (tabInitObserver && container.dataset.tabObserved === "1") {
+            tabInitObserver.unobserve(container);
+        }
+        if (typeof container.__psTabCleanup === 'function') {
+            container.__psTabCleanup();
+            delete container.__psTabCleanup;
+        }
+        delete container.dataset.tabObserved;
     });
 }
 
 /**
- * TOC Sticky 控制器 - 性能优化版
+ * TOC Sticky 鎺у埗鍣?- 鎬ц兘浼樺寲鐗?
  */
 const initializeStickyTOC = (() => {
     let state = {
@@ -450,11 +646,11 @@ const initializeStickyTOC = (() => {
         observer: null,
         sentinel: null,
         bound: false,
-        resizeTimer: 0,  // ✅ 防抖定时器
-        heightCache: new WeakMap()  // ✅ 高度缓存
+        resizeTimer: 0,  // 鉁?闃叉姈瀹氭椂鍣?
+        heightCache: new WeakMap()  // 鉁?楂樺害缂撳瓨
     };
 
-    // ✅ 同步计算阈值（使用缓存减少重排，但不延迟）
+    // 鉁?鍚屾璁＄畻闃堝€硷紙浣跨敤缂撳瓨鍑忓皯閲嶆帓锛屼絾涓嶅欢杩燂級
     function updateThreshold() {
         if (!state.section || !state.sidebar) return;
 
@@ -464,7 +660,7 @@ const initializeStickyTOC = (() => {
         children.forEach(el => {
             if (el === state.section) return;
 
-            // ✅ 优先使用缓存的高度
+            // 鉁?浼樺厛浣跨敤缂撳瓨鐨勯珮搴?
             let height = state.heightCache.get(el);
             if (height == null) {
                 height = el.offsetHeight;
@@ -476,7 +672,7 @@ const initializeStickyTOC = (() => {
         state.threshold = totalHeight + 50;
     }
 
-    // ✅ resize 时清除缓存
+    // 鉁?resize 鏃舵竻闄ょ紦瀛?
     function clearHeightCache() {
         state.heightCache = new WeakMap();
     }
@@ -487,7 +683,7 @@ const initializeStickyTOC = (() => {
         const [entry] = entries;
         const shouldStick = !entry.isIntersecting;
 
-        // ✅ 直接切换，无需 RAF（IntersectionObserver 已经是异步的）
+        // 鉁?鐩存帴鍒囨崲锛屾棤闇€ RAF锛圛ntersectionObserver 宸茬粡鏄紓姝ョ殑锛?
         state.section.classList.toggle("sticky", shouldStick);
     }
 
@@ -498,7 +694,7 @@ const initializeStickyTOC = (() => {
             state.observer.disconnect();
         }
 
-        // ✅ 同步计算阈值（使用缓存，无延迟）
+        // 鉁?鍚屾璁＄畻闃堝€硷紙浣跨敤缂撳瓨锛屾棤寤惰繜锛?
         updateThreshold();
 
         if (!state.sentinel) {
@@ -524,17 +720,17 @@ const initializeStickyTOC = (() => {
         state.section.classList.toggle("sticky", shouldStick);
     }
 
-    // ✅ 防抖的 resize 处理
+    // 鉁?闃叉姈鐨?resize 澶勭悊
     function handleResize() {
         if (state.resizeTimer) {
             clearTimeout(state.resizeTimer);
         }
         state.resizeTimer = setTimeout(() => {
             state.resizeTimer = 0;
-            clearHeightCache();  // ✅ resize 时清除缓存
+            clearHeightCache();  // 鉁?resize 鏃舵竻闄ょ紦瀛?
             createOrUpdateSentinel();
             syncState();
-        }, 150);  // 150ms 防抖
+        }, 150);  // 150ms 闃叉姈
     }
 
     return function initializeStickyTOC() {
@@ -545,11 +741,11 @@ const initializeStickyTOC = (() => {
         state.section = tocSection;
         state.sidebar = rightSidebar;
 
-        // ✅ PJAX 切换时只更新必要的部分
+        // 鉁?PJAX 鍒囨崲鏃跺彧鏇存柊蹇呰鐨勯儴鍒?
         if (state.bound) {
             createOrUpdateSentinel();
             syncState();
-            // ✅ 只在 hash 跳转时延迟检查
+            // 鉁?鍙湪 hash 璺宠浆鏃跺欢杩熸鏌?
             if (window.location.hash) {
                 setTimeout(syncState, 100);
             }
@@ -606,7 +802,7 @@ function Comments_Submit() {
     const form = document.getElementById("cf");
     if (!form) return;
 
-    // 防止 PJAX 重复绑定
+    // 闃叉 PJAX 閲嶅缁戝畾
     if (form.dataset.binded === "1") return;
     form.dataset.binded = "1";
 
@@ -621,15 +817,15 @@ function Comments_Submit() {
     form.dataset.psSubmitting = "0";
     bindCommentReset();
 
-    // 只监听 submit（关键）
+    // 鍙洃鍚?submit锛堝叧閿級
     form.addEventListener("submit", function (e) {
-        // 防止重复提交
+        // 闃叉閲嶅鎻愪氦
         if (form.dataset.psSubmitting === "1") {
             e.preventDefault();
             return;
         }
 
-        // 内容为空，交给浏览器 / Typecho 提示
+        // 鍐呭涓虹┖锛屼氦缁欐祻瑙堝櫒 / Typecho 鎻愮ず
         if (textarea.value.trim() === "") {
             return;
         }
@@ -637,10 +833,10 @@ function Comments_Submit() {
         form.dataset.psSubmitting = "1";
 
         submitButton.disabled = true;
-        submitButton.textContent = "提交中…";
+        submitButton.textContent = "提交中...";
     });
 
-    // HTML5 校验失败时恢复
+    // HTML5 鏍￠獙澶辫触鏃舵仮澶?
     form.addEventListener(
         "invalid",
         function () {
@@ -650,43 +846,389 @@ function Comments_Submit() {
     );
 }
 
-// 保存 mediumZoom 实例引用
-window.mediumZoomInstance = null;
+function runWhenIdle(task, options) {
+    const cfg = Object.assign({ timeout: 1200, delay: 0 }, options || {});
+    let canceled = false;
+    let timerId = 0;
+    let idleId = 0;
 
-function runShortcodes(root) {
-    history.scrollRestoration = 'auto';
-    bindCollapsiblePanels(root);
-    bindTabs(root);
-    handleGoTopButton(root);
-    initializeTOC();
-    initializeStickyTOC();  // 确保 Swup 切换后 TOC sticky 也能工作
+    const runner = function () {
+        if (canceled) return;
+        if (typeof window.requestIdleCallback === 'function') {
+            idleId = window.requestIdleCallback(function () {
+                if (canceled) return;
+                task();
+            }, { timeout: cfg.timeout });
+            return;
+        }
+        timerId = window.setTimeout(function () {
+            if (canceled) return;
+            task();
+        }, 0);
+    };
 
-    // mediumZoom 初始化
+    if (cfg.delay > 0) {
+        timerId = window.setTimeout(runner, cfg.delay);
+    } else {
+        runner();
+    }
+
+    return function cancelIdleTask() {
+        canceled = true;
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = 0;
+        }
+        if (idleId && typeof window.cancelIdleCallback === 'function') {
+            window.cancelIdleCallback(idleId);
+            idleId = 0;
+        }
+    };
+}
+
+function optimizeContentImages(root, options) {
+    const cfg = Object.assign(
+        {
+            pageType: '',
+            isSwup: false
+        },
+        options || {}
+    );
+
     const scope = root && root.querySelector ? root : document;
+    const swupRoot = document.getElementById('swup');
+    const pageType = cfg.pageType || (swupRoot && swupRoot.dataset ? swupRoot.dataset.psPageType || '' : '');
+    if (pageType !== 'post' && pageType !== 'page') {
+        return function noopImageCleanup() {};
+    }
+
+    const contentScope = scope.querySelector('.inner-post-wrapper') || scope;
+    const allImages = Array.from(contentScope.querySelectorAll('img'));
+    if (!allImages.length) {
+        return function noopImageCleanup() {};
+    }
+
+    const candidates = [];
+    allImages.forEach((img) => {
+        if (!(img instanceof HTMLImageElement)) return;
+        if (img.closest('.friendsboard-item, .github-card, .ps-post-card, .avatar')) return;
+        if (img.classList.contains('no-zoom')) return;
+        candidates.push(img);
+    });
+
+    if (!candidates.length) {
+        return function noopImageCleanup() {};
+    }
+
+    const first = candidates[0];
+    candidates.forEach((img, index) => {
+        const isFirst = index === 0;
+
+        if (!img.hasAttribute('decoding')) {
+            img.setAttribute('decoding', 'async');
+        }
+        if (!img.hasAttribute('loading')) {
+            img.setAttribute('loading', isFirst ? 'eager' : 'lazy');
+        }
+        if (!img.hasAttribute('fetchpriority')) {
+            img.setAttribute('fetchpriority', isFirst ? 'auto' : 'low');
+        }
+    });
+
+    const cover = scope.querySelector('.post-media img');
+    if (cover instanceof HTMLImageElement) {
+        if (!cover.hasAttribute('decoding')) {
+            cover.setAttribute('decoding', 'async');
+        }
+        if (!cover.hasAttribute('fetchpriority') || cfg.isSwup) {
+            cover.setAttribute('fetchpriority', 'auto');
+        }
+    }
+
+    const decodeTargets = candidates.filter((img, index) => {
+        if (cfg.isSwup) {
+            if (index > 0) return false;
+        } else if (index > 2) {
+            return false;
+        }
+        if (img.complete) return false;
+        const rect = img.getBoundingClientRect();
+        return rect.top < window.innerHeight * 1.25 && rect.bottom > -120;
+    });
+
+    if (!decodeTargets.length) {
+        return function noopImageCleanup() {};
+    }
+
+    const cancelDecode = runWhenIdle(() => {
+        decodeTargets.forEach((img) => {
+            if (!(img instanceof HTMLImageElement)) return;
+            if (typeof img.decode !== 'function') return;
+            img.decode().catch(() => {});
+        });
+    }, {
+        timeout: cfg.isSwup ? 2000 : 1400,
+        delay: cfg.isSwup ? 820 : 60
+    });
+
+    return function cleanupImageOptimization() {
+        if (typeof cancelDecode === 'function') {
+            cancelDecode();
+        }
+    };
+}
+
+function optimizeContentEmbeds(root, options) {
+    const cfg = Object.assign(
+        {
+            pageType: '',
+            isSwup: false
+        },
+        options || {}
+    );
+
+    const scope = root && root.querySelector ? root : document;
+    const swupRoot = document.getElementById('swup');
+    const pageType = cfg.pageType || (swupRoot && swupRoot.dataset ? swupRoot.dataset.psPageType || '' : '');
+    if (pageType !== 'post' && pageType !== 'page') {
+        return function noopEmbedCleanup() {};
+    }
+
+    const contentScope = scope.querySelector('.post-content') || scope;
+    const embeds = Array.from(contentScope.querySelectorAll('iframe[src]'));
+    if (!embeds.length) {
+        return function noopEmbedCleanup() {};
+    }
+
+    const deferred = [];
+    const revealTimers = [];
+    let observer = null;
+
+    function deferEmbed(iframe) {
+        const src = iframe.getAttribute('src');
+        if (!src || src === 'about:blank') return;
+        iframe.dataset.psDeferredSrc = src;
+        iframe.setAttribute('src', 'about:blank');
+        deferred.push(iframe);
+    }
+
+    function activateEmbed(iframe) {
+        const src = iframe && iframe.dataset ? iframe.dataset.psDeferredSrc : '';
+        if (!src) return;
+        iframe.setAttribute('src', src);
+        delete iframe.dataset.psDeferredSrc;
+        if (observer) {
+            observer.unobserve(iframe);
+        }
+    }
+
+    embeds.forEach((iframe) => {
+        if (!(iframe instanceof HTMLIFrameElement)) return;
+
+        if (!iframe.hasAttribute('loading')) {
+            iframe.setAttribute('loading', 'lazy');
+        }
+        if (!iframe.hasAttribute('fetchpriority')) {
+            iframe.setAttribute('fetchpriority', 'low');
+        }
+
+        const rect = iframe.getBoundingClientRect();
+        const nearViewport = rect.top <= window.innerHeight * 1.1 && rect.bottom >= -140;
+
+        if (!cfg.isSwup && nearViewport) {
+            return;
+        }
+
+        deferEmbed(iframe);
+
+        if (cfg.isSwup && nearViewport) {
+            const timer = window.setTimeout(() => {
+                activateEmbed(iframe);
+            }, 340);
+            revealTimers.push(timer);
+        }
+    });
+
+    const needObserve = deferred.filter((iframe) => {
+        const rect = iframe.getBoundingClientRect();
+        return !(cfg.isSwup && rect.top <= window.innerHeight * 1.1 && rect.bottom >= -140);
+    });
+
+    if (needObserve.length && window.IntersectionObserver) {
+        observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                activateEmbed(entry.target);
+            });
+        }, {
+            root: null,
+            rootMargin: '360px 0px',
+            threshold: 0
+        });
+        needObserve.forEach((iframe) => observer.observe(iframe));
+    } else {
+        needObserve.forEach((iframe) => activateEmbed(iframe));
+    }
+
+    return function cleanupEmbedOptimization() {
+        revealTimers.forEach((timer) => {
+            clearTimeout(timer);
+        });
+        if (observer) {
+            observer.disconnect();
+            observer = null;
+        }
+        deferred.forEach((iframe) => {
+            if (!iframe || !iframe.dataset) return;
+            delete iframe.dataset.psDeferredSrc;
+        });
+    };
+}
+
+function runShortcodes(root, options) {
+    const cfg = Object.assign(
+        {
+            deferHeavy: false,
+            pageType: '',
+            isSwup: false,
+            deferDelay: 280,
+            idleTimeout: 1200
+        },
+        options || {}
+    );
+
+    const scope = root && root.querySelector ? root : document;
+    const swupRoot = document.getElementById('swup');
+    const pageType = cfg.pageType || (swupRoot && swupRoot.dataset ? swupRoot.dataset.psPageType || '' : '');
+    const isContentPage = pageType === 'post' || pageType === 'page';
+    const hasCollapsible = Boolean(scope.querySelector('.collapsible-panel'));
+    const hasTabs = Boolean(scope.querySelector('.tab-container'));
     const images = scope.querySelectorAll('[data-zoomable]');
 
-    // 确保实例始终存在（即使当前没有图片）
-    if (!window.mediumZoomInstance) {
-        window.mediumZoomInstance = mediumZoom({
-            background: 'rgba(0, 0, 0, 0.85)',
-            margin: 24
-        });
-    }
-
-    // 增量绑定新图片
-    if (images.length > 0) {
-        window.mediumZoomInstance.attach(images);
-    }
-
+    history.scrollRestoration = 'auto';
+    handleGoTopButton(root);
     Comments_Submit();
+    const imageCleanup = optimizeContentImages(root, {
+        pageType,
+        isSwup: Boolean(cfg.isSwup)
+    });
+    const embedCleanup = optimizeContentEmbeds(root, {
+        pageType,
+        isSwup: Boolean(cfg.isSwup)
+    });
+
+    const cleanupWidgets = function () {
+        cleanupTabs(root);
+        if (typeof imageCleanup === 'function') {
+            imageCleanup();
+        }
+        if (typeof embedCleanup === 'function') {
+            embedCleanup();
+        }
+    };
+
+    const initContentEnhance = function () {
+        const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+        if (PS && !PS.zoom) {
+            PS.zoom = mediumZoom({
+                background: 'rgba(0, 0, 0, 0.85)',
+                margin: 24
+            });
+        }
+        if (PS && PS.zoom && images.length > 0) {
+            PS.zoom.attach(images);
+        }
+    };
+
+    const initTOCEnhance = function () {
+        const hasTocSection = ensureRuntimeTocSection(scope, pageType);
+        if (!hasTocSection) return;
+        initializeTOC();
+        if (!cfg.isSwup) {
+            initializeStickyTOC();
+            return;
+        }
+
+        let started = false;
+        let fallbackTimer = 0;
+        const startSticky = function () {
+            if (started) return;
+            started = true;
+            window.removeEventListener('scroll', startSticky, listenerOptions);
+            window.removeEventListener('wheel', startSticky, listenerOptions);
+            window.removeEventListener('touchstart', startSticky, listenerOptions);
+            if (fallbackTimer) {
+                clearTimeout(fallbackTimer);
+                fallbackTimer = 0;
+            }
+            initializeStickyTOC();
+        };
+        const listenerOptions = { passive: true, once: true };
+        window.addEventListener('scroll', startSticky, listenerOptions);
+        window.addEventListener('wheel', startSticky, listenerOptions);
+        window.addEventListener('touchstart', startSticky, listenerOptions);
+        fallbackTimer = window.setTimeout(startSticky, 1200);
+    };
+
+    const initHeavyWidgets = function () {
+        if (hasCollapsible) {
+            bindCollapsiblePanels(root);
+        }
+        if (hasTabs) {
+            bindTabs(root);
+        }
+    };
+
+    if (!cfg.deferHeavy) {
+        initTOCEnhance();
+        initContentEnhance();
+        initHeavyWidgets();
+        return function cleanupShortcodesImmediate() {
+            cleanupWidgets();
+        };
+    }
+
+    const cancels = [];
+    const tocDeferDelay = cfg.isSwup && isContentPage ? (cfg.deferDelay + 360) : cfg.deferDelay;
+    cancels.push(
+        runWhenIdle(initTOCEnhance, {
+            timeout: Math.max(cfg.idleTimeout, 1800),
+            delay: tocDeferDelay
+        })
+    );
+    cancels.push(
+        runWhenIdle(initContentEnhance, {
+            timeout: cfg.idleTimeout,
+            delay: cfg.deferDelay
+        })
+    );
+    cancels.push(
+        runWhenIdle(initHeavyWidgets, {
+            timeout: Math.max(cfg.idleTimeout, 1500),
+            delay: cfg.deferDelay + 420
+        })
+    );
+
+    return function cleanupDeferredTasks() {
+        cancels.forEach(function (cancel) {
+            if (typeof cancel === 'function') cancel();
+        });
+        cleanupWidgets();
+    };
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    runShortcodes();
+    const root = document.getElementById('swup') || document;
+    const pageType = root && root.dataset ? root.dataset.psPageType || '' : '';
+    runShortcodes(root, {
+        deferHeavy: pageType === 'post' || pageType === 'page',
+        pageType,
+        isSwup: false
+    });
 });
 
 /**
- * 主题切换 - 控制深色、浅色模式，带个跨域联动
+ * 涓婚鍒囨崲 - 鎺у埗娣辫壊銆佹祬鑹叉ā寮忥紝甯︿釜璺ㄥ煙鑱斿姩
  */
 
 (function() {
@@ -728,24 +1270,24 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             setTimeout(() => {
                 root.classList.remove('ps-theme-vt');
-            }, 380);  // 与 VT 动画时长保持一致
+            }, 380);  // 涓?VT 鍔ㄧ敾鏃堕暱淇濇寔涓€鑷?
         }
     }
 
     /**
-     * 获取根域名（用于跨子域 Cookie）
-     * @returns {string} 根域名，如 .xxx.cn
+     * 鑾峰彇鏍瑰煙鍚嶏紙鐢ㄤ簬璺ㄥ瓙鍩?Cookie锛?
+     * @returns {string} 鏍瑰煙鍚嶏紝濡?.xxx.cn
      */
     function getRootDomain() {
         const host = window.location.hostname;
         const parts = host.split('.');
-        if (parts.length <= 2) return host; // localhost 或 xxx.com
+        if (parts.length <= 2) return host; // localhost 鎴?xxx.com
         return '.' + parts.slice(-2).join('.');
     }
 
     /**
-     * 写入跨子域 Cookie
-     * @param {string} theme - 主题值
+     * 鍐欏叆璺ㄥ瓙鍩?Cookie
+     * @param {string} theme - 涓婚鍊?
      */
     function setThemeCookie(theme) {
         const rootDomain = getRootDomain();
@@ -753,9 +1295,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 读取 Cookie
-     * @param {string} name - Cookie 名称
-     * @returns {string|null} Cookie 值
+     * 璇诲彇 Cookie
+     * @param {string} name - Cookie 鍚嶇О
+     * @returns {string|null} Cookie 鍊?
      */
     function getCookie(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -763,8 +1305,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 应用主题属性
-     * @param {string} themeValue - 主题值
+     * 搴旂敤涓婚灞炴€?
+     * @param {string} themeValue - 涓婚鍊?
      */
     function applyThemeAttribute(themeValue) {
         const root = document.documentElement;
@@ -782,8 +1324,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 更新主题图标
-     * @param {string} theme - 主题值
+     * 鏇存柊涓婚鍥炬爣
+     * @param {string} theme - 涓婚鍊?
      */
     function updateIcon(theme) {
         const iconElement = document.getElementById('theme-icon');
@@ -801,18 +1343,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 设置主题
-     * @param {string} theme - 主题值 ('light' | 'dark' | 'auto')
+     * 璁剧疆涓婚
+     * @param {string} theme - 涓婚鍊?('light' | 'dark' | 'auto')
      */
     function applyTheme(theme) {
         if (theme === 'auto') {
-            // 自动模式：跟随系统
+            // 鑷姩妯″紡锛氳窡闅忕郴缁?
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             applyThemeAttribute(systemTheme);
             localStorage.setItem('theme', 'auto');
             setThemeCookie('auto');
         } else {
-            // 明暗模式
+            // 鏄庢殫妯″紡
             applyThemeAttribute(theme);
             localStorage.setItem('theme', theme);
             setThemeCookie(theme);
@@ -837,7 +1379,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 切换主题
+     * 鍒囨崲涓婚
      */
     function toggleTheme() {
         const currentTheme = localStorage.getItem('theme') || 'auto';
@@ -846,17 +1388,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (currentTheme === 'light') {
             newTheme = 'dark';
             if (typeof MoxToast === 'function') {
-                MoxToast({ message: '已切换至深色模式' });
+                MoxToast({ message: '宸插垏鎹㈣嚦娣辫壊妯″紡' });
             }
         } else if (currentTheme === 'dark') {
             newTheme = 'auto';
             if (typeof MoxToast === 'function') {
-                MoxToast({ message: '模式将跟随系统 ㆆᴗㆆ' });
+                MoxToast({ message: '模式将跟随系统' });
             }
         } else {
             newTheme = 'light';
             if (typeof MoxToast === 'function') {
-                MoxToast({ message: '已切换至浅色模式' });
+                MoxToast({ message: '宸插垏鎹㈣嚦娴呰壊妯″紡' });
             }
         }
 
@@ -864,17 +1406,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 初始化主题系统
+     * 鍒濆鍖栦富棰樼郴缁?
      */
     function initTheme() {
-        // 优先读取 Cookie（跨站同步）
+        // 浼樺厛璇诲彇 Cookie锛堣法绔欏悓姝ワ級
         const cookieTheme = getCookie('theme');
         const savedTheme = cookieTheme || localStorage.getItem('theme') || 'auto';
         applyTheme(savedTheme);
     }
 
     /**
-     * 监听系统主题变化
+     * 鐩戝惉绯荤粺涓婚鍙樺寲
      */
     function watchSystemTheme() {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
@@ -886,11 +1428,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 导出到全局
+    // 瀵煎嚭鍒?PS 鍛藉悕绌洪棿锛堜繚鐣欏叏灞€鍒悕鐢ㄤ簬鍏煎锛?    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+    if (PS && PS.theme) {
+        PS.theme.set = setTheme;
+        PS.theme.toggle = toggleTheme;
+    }
     window.setTheme = setTheme;
     window.toggleTheme = toggleTheme;
 
-    // 初始化
+    // 鍒濆鍖?
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
@@ -903,17 +1449,17 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 
 /**
- * 导航指示器 - 动态控制导航高亮
+ * 瀵艰埅鎸囩ず鍣?- 鍔ㄦ€佹帶鍒跺鑸珮浜?
  */
 const NavIndicator = (() => {
     let indicator = null;
     let navContainer = null;
     let navItems = [];
-    // ✅ 添加位置缓存
+    // 鉁?娣诲姞浣嶇疆缂撳瓨
     let metricsCache = new Map();
 
     /**
-     * 创建指示器元素
+     * 鍒涘缓鎸囩ず鍣ㄥ厓绱?
      */
     function createIndicator() {
         const el = document.createElement('div');
@@ -922,7 +1468,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * ✅ 批量缓存所有导航项位置（读操作）
+     * 鉁?鎵归噺缂撳瓨鎵€鏈夊鑸」浣嶇疆锛堣鎿嶄綔锛?
      */
     function cacheAllMetrics() {
         if (!navContainer) return;
@@ -930,7 +1476,7 @@ const NavIndicator = (() => {
         metricsCache.clear();
         const containerRect = navContainer.getBoundingClientRect();
 
-        // 批量读取所有导航项的位置
+        // 鎵归噺璇诲彇鎵€鏈夊鑸」鐨勪綅缃?
         navItems.forEach(item => {
             const rect = item.getBoundingClientRect();
             metricsCache.set(item, {
@@ -943,16 +1489,16 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 更新指示器位置和大小（写操作，使用缓存）
+     * 鏇存柊鎸囩ず鍣ㄤ綅缃拰澶у皬锛堝啓鎿嶄綔锛屼娇鐢ㄧ紦瀛橈級
      */
     function updateIndicator(targetItem) {
         if (!indicator || !targetItem) return;
 
-        // 优先使用缓存
+        // 浼樺厛浣跨敤缂撳瓨
         let metrics = metricsCache.get(targetItem);
 
         if (!metrics) {
-            // 缓存未命中，降级读取并缓存
+            // 缂撳瓨鏈懡涓紝闄嶇骇璇诲彇骞剁紦瀛?
             const containerRect = navContainer.getBoundingClientRect();
             const itemRect = targetItem.getBoundingClientRect();
             metrics = {
@@ -964,7 +1510,7 @@ const NavIndicator = (() => {
             metricsCache.set(targetItem, metrics);
         }
 
-        // 单次 RAF 足够（双重 RAF 会导致 2 帧延迟）
+        // 鍗曟 RAF 瓒冲锛堝弻閲?RAF 浼氬鑷?2 甯у欢杩燂級
         requestAnimationFrame(() => {
             indicator.style.width = `${metrics.width}px`;
             indicator.style.height = `${metrics.height}px`;
@@ -974,7 +1520,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 隐藏指示器
+     * 闅愯棌鎸囩ず鍣?
      */
     function hideIndicator() {
         if (!indicator) return;
@@ -982,7 +1528,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 获取当前激活的导航项
+     * 鑾峰彇褰撳墠婵€娲荤殑瀵艰埅椤?
      */
     function getActiveNavItem() {
         const currentPath = window.location.pathname;
@@ -1000,42 +1546,42 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 初始化导航指示器
+     * 鍒濆鍖栧鑸寚绀哄櫒
      */
     function init() {
         navContainer = document.querySelector('.header-nav');
         if (!navContainer) return;
 
-        // 检查是否已存在指示器
+        // 妫€鏌ユ槸鍚﹀凡瀛樺湪鎸囩ず鍣?
         if (navContainer.querySelector('.nav-indicator')) {
             return;
         }
 
-        // 创建并添加指示器
+        // 鍒涘缓骞舵坊鍔犳寚绀哄櫒
         indicator = createIndicator();
         navContainer.appendChild(indicator);
 
-        // 获取所有导航项
+        // 鑾峰彇鎵€鏈夊鑸」
         navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
 
-        // ✅ 初始化时批量缓存所有位置
+        // 鉁?鍒濆鍖栨椂鎵归噺缂撳瓨鎵€鏈変綅缃?
         requestAnimationFrame(() => {
             cacheAllMetrics();
 
-            // 初始定位
+            // 鍒濆瀹氫綅
             const activeItem = getActiveNavItem();
             if (activeItem) {
                 updateIndicator(activeItem);
             }
         });
 
-        // ✅ 监听窗口大小变化 - 使用 200ms 防抖，resize 时清除并重建缓存
+        // 鉁?鐩戝惉绐楀彛澶у皬鍙樺寲 - 浣跨敤 200ms 闃叉姈锛宺esize 鏃舵竻闄ゅ苟閲嶅缓缂撳瓨
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                metricsCache.clear();  // ✅ 清除缓存
-                cacheAllMetrics();     // ✅ 重建缓存
+                metricsCache.clear();  // 鉁?娓呴櫎缂撳瓨
+                cacheAllMetrics();     // 鉁?閲嶅缓缂撳瓨
                 const activeItem = getActiveNavItem();
                 if (activeItem) {
                     updateIndicator(activeItem);
@@ -1045,7 +1591,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 更新指示器（供 Swup 调用）
+     * 鏇存柊鎸囩ず鍣紙渚?Swup 璋冪敤锛?
      */
     function update() {
         if (!navContainer) {
@@ -1053,16 +1599,16 @@ const NavIndicator = (() => {
             return;
         }
 
-        // 重新获取导航项（Swup 可能会替换内容）
+        // 閲嶆柊鑾峰彇瀵艰埅椤癸紙Swup 鍙兘浼氭浛鎹㈠唴瀹癸級
         navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
 
-        // ✅ Swup 切换后清除并重建缓存
+        // 鉁?Swup 鍒囨崲鍚庢竻闄ゅ苟閲嶅缓缂撳瓨
         metricsCache.clear();
 
         const activeItem = getActiveNavItem();
         if (activeItem) {
             requestAnimationFrame(() => {
-                cacheAllMetrics();  // ✅ 重建缓存
+                cacheAllMetrics();  // 鉁?閲嶅缓缂撳瓨
                 updateIndicator(activeItem);
             });
         } else {
@@ -1070,13 +1616,18 @@ const NavIndicator = (() => {
         }
     }
 
-    // 导出到全局
-    window.NavIndicator = {
+    // 瀵煎嚭鍒?PS 鍛藉悕绌洪棿锛堜繚鐣欏叏灞€鍒悕鐢ㄤ簬鍏煎锛?    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+    const navApi = {
         init,
         update
     };
+    if (PS && PS.nav) {
+        PS.nav.init = init;
+        PS.nav.update = update;
+    }
+    window.NavIndicator = navApi;
 
-    // 自动初始化
+    // 鑷姩鍒濆鍖?
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

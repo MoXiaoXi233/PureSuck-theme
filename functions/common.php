@@ -147,7 +147,8 @@ function getPSRuntimeConfig($archive = null)
         'swup' => psOptionEnabled($options->enableSwup ?? '1', true),
         'viewTransition' => psOptionEnabled($options->enableViewTransition ?? '1', true),
         'swupPreload' => psOptionEnabled($options->enableSwupPreload ?? '1', true),
-        'perfDebug' => psOptionEnabled($options->enablePerfDebug ?? '0', false)
+        'perfDebug' => psOptionEnabled($options->enablePerfDebug ?? '0', false),
+        'showTOC' => psOptionEnabled($options->showTOC ?? '1', true)
     ];
 
     $pageType = 'list';

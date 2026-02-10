@@ -97,11 +97,6 @@
                 <div class="toc"><?= $tocHtml; ?></div>
             </section>
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                initializeStickyTOC();
-            });
-        </script>
     <?php endif; ?>
 
 </div>
