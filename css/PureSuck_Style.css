@@ -2494,11 +2494,11 @@ input:-webkit-autofill:active {
 }
 
 /* Timeline 链接颜色覆盖 */
-#timeline .timeline-title a {
+.timeline .timeline-title a {
 	color: var(--text-color) !important;
 }
 
-#timeline .timeline-title a:hover {
+.timeline .timeline-title a:hover {
 	color: var(--themehovercolor) !important;
 }
 
