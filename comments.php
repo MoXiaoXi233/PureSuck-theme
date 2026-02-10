@@ -108,7 +108,5 @@
     </div>
 
 <?php else: ?>
-    <div>
-        <h3><?php _e('评论已关闭'); ?></h3>
-        <div>
-        <?php endif; ?>
+    <h3><?php _e('评论已关闭'); ?></h3>
+<?php endif; ?>

@@ -82,7 +82,7 @@ $this->need('header.php');
                         // 输出归档
                         foreach ($archives as $year => $items) {
                             echo '<h3 class="timeline-year">' . $year . '</h3>'; // 输出年份
-                            echo '<div id="timeline">'; // 开始时间线
+                            echo '<div class="timeline">'; // 开始时间线
                             foreach ($items as $monthDay => $posts) {
                                 foreach ($posts as $item) {
                                     echo '<div class="timeline-item">';

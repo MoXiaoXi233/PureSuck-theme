@@ -1162,13 +1162,13 @@
 
 /* 时间线 */
 
-#timeline {
+.timeline {
     position: relative;
     margin: 28px 0;
     padding-left: 40px;
 }
 
-#timeline::before {
+.timeline::before {
     content: '';
     position: absolute;
     top: 0;
@@ -1236,11 +1236,11 @@
     transition: background-color .25s ease, opacity .25s ease;
 }
 
-#timeline:hover .timeline-item {
+.timeline:hover .timeline-item {
     opacity: 0.45;
 }
 
-#timeline:hover .timeline-item:hover {
+.timeline:hover .timeline-item:hover {
     opacity: 1;
 }
 
@@ -1293,7 +1293,7 @@ timeline-description {
 }
 
 @media (hover: none) {
-    #timeline:hover .timeline-item {
+    .timeline:hover .timeline-item {
         opacity: 1;
     }
 }
