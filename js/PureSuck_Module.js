@@ -51,6 +51,19 @@ const initializeTOC = (() => {
         if (state.indicator && li) {
             state.indicator.style.transform = `translateY(${li.offsetTop}px)`;
         }
+
+        // 自动滚动 TOC 容器，让激活项可见
+        if (state.tocSection && li) {
+            const cr = state.tocSection.getBoundingClientRect();
+            const ir = li.getBoundingClientRect();
+
+            if (ir.top < cr.top || ir.bottom > cr.bottom) {
+                state.tocSection.scrollBy({
+                    top: ir.top - cr.top - cr.height / 2 + ir.height / 2,
+                    behavior: 'smooth'
+                });
+            }
+        }
     }
 
     function handleIntersect(entries) {
@@ -154,6 +167,7 @@ const initializeTOC = (() => {
             liById,
             indexMap,
             indicator,
+            tocSection,
             visible: new Set(),
             activeIndex: -1,
             activeLink: null,
