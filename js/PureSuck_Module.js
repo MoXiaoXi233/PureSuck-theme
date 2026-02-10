@@ -650,7 +650,7 @@ function Comments_Submit() {
     );
 }
 
-// 保存 mediumZoom 实例引用（全局，供 LazyLoad 使用）
+// 保存 mediumZoom 实例引用
 window.mediumZoomInstance = null;
 
 function runShortcodes(root) {
@@ -662,9 +662,8 @@ function runShortcodes(root) {
     initializeStickyTOC();  // 确保 Swup 切换后 TOC sticky 也能工作
 
     // mediumZoom 初始化
-    // 只绑定已加载完成的图片（排除懒加载中的图片）
     const scope = root && root.querySelector ? root : document;
-    const images = scope.querySelectorAll('[data-zoomable]:not([data-lazy-src])');
+    const images = scope.querySelectorAll('[data-zoomable]');
 
     // 确保实例始终存在（即使当前没有图片）
     if (!window.mediumZoomInstance) {

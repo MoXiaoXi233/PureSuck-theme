@@ -742,10 +742,6 @@
             state.clickedPostKey = postKey;
             rememberLastPostKey(postKey);
             markSharedElement(postCard, postKey);
-
-            if (window.LazyLoadManager && typeof window.LazyLoadManager.loadForVT === 'function') {
-                window.LazyLoadManager.loadForVT(postCard);
-            }
         }, true);
 
         document.addEventListener('submit', (event) => {
@@ -781,9 +777,6 @@
             init: function initThemeEnhance(root) {
                 if (typeof window.runShortcodes === 'function') {
                     window.runShortcodes(root);
-                }
-                if (window.LazyLoadManager && typeof window.LazyLoadManager.observe === 'function') {
-                    window.LazyLoadManager.observe(root);
                 }
                 updateNavCurrentState();
                 if (window.OwoManager && typeof window.OwoManager.init === 'function') {
@@ -922,10 +915,6 @@
                 }
 
                 startEnterTransition(toType, enterMode, { fromType: state.lastFromType });
-
-                if (window.LazyLoadManager && typeof window.LazyLoadManager.observe === 'function') {
-                    window.LazyLoadManager.observe(getSwupRoot());
-                }
             });
 
             swup.hooks.on('page:view', function onPageView() {

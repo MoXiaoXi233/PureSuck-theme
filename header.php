@@ -125,9 +125,6 @@
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
-    <!-- 懒加载管理器（必须在 Swup 之前加载） -->
-    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_LazyLoad.js'); ?>"></script>
-
     <?php if ($psSwupEnabled): ?>
         <!-- Swup 4：页面过渡动画 -->
         <script defer src="<?php getStaticURL('Swup.umd.min.js'); ?>"></script>

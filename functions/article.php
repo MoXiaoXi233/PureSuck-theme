@@ -894,8 +894,7 @@ function renderPostcard($input)
     if (isset($widget->fields) && !empty($widget->fields->img)) {
         $coverUrl = htmlspecialchars($widget->fields->img, ENT_QUOTES, 'UTF-8');
         $coverHtml = '<span class="ps-post-card-cover">'
-            . '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"'
-            . ' data-lazy-src="' . $coverUrl . '" alt="' . $title . '"'
+            . '<img src="' . $coverUrl . '" alt="' . $title . '"'
             . ' class="ps-post-card-cover-img no-zoom no-figcaption" loading="lazy" decoding="async">'
             . '</span>';
     }
@@ -958,21 +957,14 @@ function addZoomableToImages($content)
         }
 
         if (!$should_exclude) {
+            // 添加 data-zoomable 属性
             if (strpos($img, 'data-zoomable') === false) {
                 $img = preg_replace('/<img/', '<img data-zoomable', $img);
             }
 
-            if (strpos($img, 'data-lazy-src') === false && strpos($img, 'loading="eager"') === false) {
-                if (preg_match('/src=["\']([^"\']+)["\']/', $img, $srcMatch)) {
-                    $originalSrc = $srcMatch[1];
-                    $placeholder = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                    $img = preg_replace('/src=["\'][^"\']+["\']/', 'src="' . $placeholder . '" data-lazy-src="' . htmlspecialchars($originalSrc, ENT_QUOTES) . '"', $img);
-                }
-
-                if (preg_match('/srcset=["\']([^"\']+)["\']/', $img, $srcsetMatch)) {
-                    $originalSrcset = $srcsetMatch[1];
-                    $img = preg_replace('/srcset=["\'][^"\']+["\']/', 'data-lazy-srcset="' . htmlspecialchars($originalSrcset, ENT_QUOTES) . '"', $img);
-                }
+            // 添加原生 loading="lazy"（如果没有显式指定 eager）
+            if (strpos($img, 'loading=') === false) {
+                $img = preg_replace('/<img/', '<img loading="lazy"', $img);
             }
         }
 

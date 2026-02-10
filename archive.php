@@ -53,8 +53,7 @@
                     <!-- 大图样式 -->
                     <?php if ($hasImg): ?>
                         <figure class="post-media <?= $this->is('post') ? 'single' : ''; ?>">
-                            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                                data-lazy-src="<?php $this->fields->img(); ?>"
+                            <img src="<?php $this->fields->img(); ?>"
                                 alt="头图" width="2000" height="800" decoding="async">
                         </figure>
                     <?php endif; ?>

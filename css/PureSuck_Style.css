@@ -2118,24 +2118,6 @@ textarea:focus-within+.CtBoxBar {
 	object-position: center;
 }
 
-/* 懒加载样式 */
-/* 懒加载淡入 */
-img.lazy-loaded {
-	animation: lazy-fade-in 0.25s ease-out;
-}
-
-@keyframes lazy-fade-in {
-	from { opacity: 0; }
-	to { opacity: 1; }
-}
-
-/* 减少动画偏好 */
-@media (prefers-reduced-motion: reduce) {
-	img.lazy-loaded {
-		animation: none;
-	}
-}
-
 /* 版权信息卡片 */
 .license-info-card {
 	--_theme-soft: color-mix(in srgb, var(--themecolor) 14%, transparent);
@@ -2337,22 +2319,6 @@ img.lazy-loaded {
 .medium-zoom-overlay,
 .medium-zoom-image--opened {
 	z-index: 999;
-}
-
-/* 根源修复：medium-zoom 图片禁用懒加载动画 */
-.medium-zoom-image,
-.medium-zoom-image--opened {
-	animation: none !important;
-}
-
-/* 原图隐藏/显示时平滑过渡，避免闪烁 */
-.medium-zoom-image {
-	transition: opacity 0.15s ease;
-}
-
-.medium-zoom-image--hidden {
-	opacity: 0;
-	pointer-events: none;
 }
 
 

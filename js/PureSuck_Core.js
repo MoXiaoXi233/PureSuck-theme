@@ -235,7 +235,6 @@
     // 收敛的全局命名空间（Phase 2.5）
     PS.swup = null;      // Swup 实例
     PS.zoom = null;      // mediumZoom 实例
-    PS.lazy = null;      // LazyLoadManager
     PS.theme = {         // 主题切换
         set: null,
         toggle: null
