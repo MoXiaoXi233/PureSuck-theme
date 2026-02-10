@@ -2339,6 +2339,22 @@ img.lazy-loaded {
 	z-index: 999;
 }
 
+/* 根源修复：medium-zoom 图片禁用懒加载动画 */
+.medium-zoom-image,
+.medium-zoom-image--opened {
+	animation: none !important;
+}
+
+/* 原图隐藏/显示时平滑过渡，避免闪烁 */
+.medium-zoom-image {
+	transition: opacity 0.15s ease;
+}
+
+.medium-zoom-image--hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
 
 /* 解决自动填充背景颜色问题 */
 input:-webkit-autofill,
