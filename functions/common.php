@@ -307,26 +307,114 @@ function themeConfig($form)
         }
     }
 
+    $themeOptionsUrl = '';
+    ob_start();
+    $themeOptionsUrlCandidate = Helper::options()->adminUrl('options-theme.php');
+    $themeOptionsUrlBuffered = trim((string)ob_get_clean());
+    if (is_string($themeOptionsUrlCandidate) && $themeOptionsUrlCandidate !== '') {
+        $themeOptionsUrl = $themeOptionsUrlCandidate;
+    } elseif ($themeOptionsUrlBuffered !== '') {
+        $themeOptionsUrl = $themeOptionsUrlBuffered;
+    }
+    if ($themeOptionsUrl === '') {
+        $themeOptionsUrl = 'options-theme.php';
+    }
+    $themeOptionsUrl = htmlspecialchars($themeOptionsUrl, ENT_QUOTES, 'UTF-8');
+
+    echo '
+    <style id="ps-theme-config-lite">
+        .ps-theme-config-lite {
+            margin: 12px 0 16px;
+            padding: 12px 14px;
+            border: 1px solid #efeaeb;
+            border-left: 4px solid #ea868f;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .ps-theme-config-lite h2 {
+            margin: 0 0 6px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .ps-theme-config-lite p {
+            margin: 0;
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .ps-theme-config-lite .ps-theme-config-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ps-theme-meta-lite {
+            margin: 10px 0 12px;
+            line-height: 1.7;
+            color: #666;
+        }
+
+        .ps-theme-meta-lite .ps-current-version {
+            color: #b45864;
+            font-weight: 600;
+        }
+
+        .ps-theme-meta-lite .ps-version-new {
+            color: #d95f5f;
+        }
+
+        .ps-theme-meta-lite .ps-version-latest {
+            color: #4ca36c;
+        }
+
+        .ps-theme-backup-lite {
+            margin: 8px 0 14px;
+            padding: 10px 12px;
+            border: 1px solid #efefef;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .ps-theme-backup-lite p {
+            margin: 0 0 8px;
+            color: #666;
+        }
+    </style>
+    <div class="ps-theme-config-lite">
+        <h2>PureSuck 主题配置</h2>
+        <p>干净，纯洁，淡雅朴素的 Typecho 主题</p>
+        <p>希望这份干净的爱恋能得到你的喜欢</p>
+        <div class="ps-theme-config-actions">
+            <a class="btn btn-s" href="https://www.moxiify.cn" target="_blank" rel="noopener noreferrer">作者主页</a>
+            <a class="btn btn-s" href="https://github.com/MoXiaoXi233/PureSuck-theme" target="_blank" rel="noopener noreferrer">主题文档</a>
+        </div>
+    </div>';
+
     // 获取最新版本号
     $currentVersion = defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '1.3.2';
     $latestVersion = getLatestGitHubRelease('MoXiaoXi233', 'PureSuck-theme');
-    $versionHtml = '<h3>当前主题版本：<span style="color: #b45864;">' . htmlspecialchars($currentVersion) . '</span>';
+    $versionHtml = '<div class="ps-theme-meta-lite">当前主题版本：<span class="ps-current-version">' . htmlspecialchars($currentVersion) . '</span>';
 
     if ($latestVersion) {
         if (version_compare($latestVersion, $currentVersion, '>')) {
-            $versionHtml .= ' <span style="color: #ff6b6b; font-size: 0.9em;">(有新版本: ' . htmlspecialchars($latestVersion) . ')</span>';
+            $versionHtml .= ' <span class="ps-version-new">(有新版本: ' . htmlspecialchars($latestVersion) . ')</span>';
         } else {
-            $versionHtml .= ' <span style="color: #51cf66; font-size: 0.9em;">(已是最新)</span>';
+            $versionHtml .= ' <span class="ps-version-latest">(已是最新)</span>';
         }
     }
 
-    $versionHtml .= '</h3>';
+    $versionHtml .= '</div>';
 
     echo $versionHtml . '
-    <h4>主题开源页面及文档：<span style="color: #b45864;"><a href="https://github.com/MoXiaoXi233/PureSuck-theme" style="color: #3273dc; text-decoration: none;">PureSuck-theme</a></span></h4>
-    <h5>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</h5>
+    <div class="ps-theme-backup-lite">
+    <p>主题开源页面及文档：<a href="https://github.com/MoXiaoXi233/PureSuck-theme" target="_blank" rel="noopener noreferrer">PureSuck-theme</a></p>
+    <p>*备份功能只在 SQL 环境下测试正常，遇到问题请清空配置重新填写*</p>
     <form class="protected home" action="?' . $name . 'bf" method="post">
-    <input type="submit" name="type" class="btn btn-s" value="备份模板设置数据" />  <input type="submit" name="type" class="btn btn-s" value="还原模板设置数据" />  <input type="submit" name="type" class="btn btn-s" value="删除备份数据" /></form>';
+    <input type="submit" name="type" class="btn btn-s" value="备份模板设置数据" />  <input type="submit" name="type" class="btn btn-s" value="还原模板设置数据" />  <input type="submit" name="type" class="btn btn-s" value="删除备份数据" /></form>
+    </div>';
 
     // 网页 icon URL 配置项
     $logoUrl = new \Typecho\Widget\Helper\Form\Element\Text(
