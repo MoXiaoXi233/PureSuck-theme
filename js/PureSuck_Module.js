@@ -7,7 +7,10 @@
  */
 const TOC_VISIBLE_CLASS = 'is-visible';
 const TOC_REVEAL_ENTER_CLASS = 'reveal-enter';
+const TOC_REVEAL_LEAVE_CLASS = 'reveal-leave';
 const TOC_REVEAL_TIMER_KEY = '__psTocRevealTimer';
+const TOC_HIDE_TIMER_KEY = '__psTocHideTimer';
+const TOC_HIDE_HANDLER_KEY = '__psTocHideHandler';
 
 function resetTocStickySidebar(sidebar) {
     const target = sidebar && sidebar.classList ? sidebar : document.querySelector('.right-sidebar');
@@ -22,19 +25,65 @@ function clearTocPinnedStyle(section) {
     section.style.width = '';
 }
 
-function hideTocSection(section) {
+function clearTocHideTask(section) {
     if (!section) return;
+    if (section[TOC_HIDE_TIMER_KEY]) {
+        clearTimeout(section[TOC_HIDE_TIMER_KEY]);
+        section[TOC_HIDE_TIMER_KEY] = 0;
+    }
+    if (section[TOC_HIDE_HANDLER_KEY]) {
+        section.removeEventListener('transitionend', section[TOC_HIDE_HANDLER_KEY]);
+        section[TOC_HIDE_HANDLER_KEY] = null;
+    }
+}
+
+function finalizeHideTocSection(section) {
+    if (!section) return;
+    clearTocHideTask(section);
+    section.classList.remove(
+        TOC_VISIBLE_CLASS,
+        TOC_REVEAL_ENTER_CLASS,
+        TOC_REVEAL_LEAVE_CLASS,
+        'sticky',
+        'sticky-preparing'
+    );
+    section.style.transform = '';
+    section.style.display = 'none';
+    clearTocPinnedStyle(section);
+    resetTocStickySidebar(section.closest('.right-sidebar'));
+}
+
+function hideTocSection(section, options) {
+    if (!section) return;
+    const cfg = Object.assign({ immediate: false }, options || {});
 
     if (section[TOC_REVEAL_TIMER_KEY]) {
         window.cancelAnimationFrame(section[TOC_REVEAL_TIMER_KEY]);
         section[TOC_REVEAL_TIMER_KEY] = 0;
     }
 
-    section.classList.remove(TOC_VISIBLE_CLASS, TOC_REVEAL_ENTER_CLASS, 'sticky', 'sticky-preparing');
-    section.style.transform = '';
-    section.style.display = 'none';
+    clearTocHideTask(section);
+
+    if (cfg.immediate || section.style.display === 'none') {
+        finalizeHideTocSection(section);
+        return;
+    }
+
+    section.classList.remove('sticky', 'sticky-preparing', TOC_REVEAL_ENTER_CLASS, TOC_VISIBLE_CLASS);
+    section.classList.add(TOC_REVEAL_LEAVE_CLASS);
     clearTocPinnedStyle(section);
-    resetTocStickySidebar(section.closest('.right-sidebar'));
+
+    const onEnd = function (event) {
+        if (event && event.target !== section) return;
+        if (event && event.propertyName && event.propertyName !== 'opacity' && event.propertyName !== 'transform') return;
+        finalizeHideTocSection(section);
+    };
+
+    section[TOC_HIDE_HANDLER_KEY] = onEnd;
+    section.addEventListener('transitionend', onEnd);
+    section[TOC_HIDE_TIMER_KEY] = window.setTimeout(() => {
+        finalizeHideTocSection(section);
+    }, 360);
 }
 
 function showTocSection(section) {
@@ -43,17 +92,18 @@ function showTocSection(section) {
 
     section.style.display = 'block';
     section.classList.add(TOC_REVEAL_ENTER_CLASS);
-    section.classList.remove(TOC_VISIBLE_CLASS);
+    section.classList.remove(TOC_VISIBLE_CLASS, TOC_REVEAL_LEAVE_CLASS);
 
     if (section[TOC_REVEAL_TIMER_KEY]) {
         window.cancelAnimationFrame(section[TOC_REVEAL_TIMER_KEY]);
         section[TOC_REVEAL_TIMER_KEY] = 0;
     }
+    clearTocHideTask(section);
 
     section[TOC_REVEAL_TIMER_KEY] = window.requestAnimationFrame(() => {
         section[TOC_REVEAL_TIMER_KEY] = window.requestAnimationFrame(() => {
             section.classList.add(TOC_VISIBLE_CLASS);
-            section.classList.remove(TOC_REVEAL_ENTER_CLASS);
+            section.classList.remove(TOC_REVEAL_ENTER_CLASS, TOC_REVEAL_LEAVE_CLASS);
             section[TOC_REVEAL_TIMER_KEY] = 0;
         });
     });

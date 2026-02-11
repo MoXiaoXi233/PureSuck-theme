@@ -1646,6 +1646,12 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     transform: translate3d(0, 0, 0);
 }
 
+.toc-section.reveal-leave {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+    pointer-events: none;
+}
+
 .right-sidebar.ps-has-toc .toc-section.sticky {
     position: fixed;
     top: var(--ps-toc-top-offset, 8px);
