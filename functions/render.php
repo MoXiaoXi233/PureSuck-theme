@@ -48,12 +48,6 @@ function renderPostContent($content)
     $source = (string)$content;
     if (trim($source) === '') {
         $GLOBALS['toc_html'] = '';
-        $GLOBALS['ps_render_context'] = [
-            'cache_hit' => false,
-            'cache_key' => '',
-            'content_hash' => '',
-            'toc' => ''
-        ];
         return $source;
     }
 
@@ -72,25 +66,12 @@ function renderPostContent($content)
         array_key_exists('content', $cache['data'])
     ) {
         $GLOBALS['toc_html'] = (string)($cache['data']['toc'] ?? '');
-        $GLOBALS['ps_render_context'] = [
-            'cache_hit' => true,
-            'cache_key' => $cacheKey,
-            'content_hash' => $contentHash,
-            'toc' => (string)($cache['data']['toc'] ?? '')
-        ];
         return (string)$cache['data']['content'];
     }
 
     $content = psRenderContentPipeline($source);
     $toc = (string)($GLOBALS['toc_html'] ?? '');
     setCache($cacheKey, ['content' => $content, 'toc' => $toc], 'render');
-
-    $GLOBALS['ps_render_context'] = [
-        'cache_hit' => false,
-        'cache_key' => $cacheKey,
-        'content_hash' => $contentHash,
-        'toc' => $toc
-    ];
 
     return $content;
 }

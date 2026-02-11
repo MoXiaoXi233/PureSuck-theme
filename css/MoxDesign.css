@@ -1,121 +1,71 @@
+:root {
+    --mox-motion-fast: 0.2s;
+    --mox-motion-base: 0.28s;
+    --mox-motion-slow: 0.36s;
+    --mox-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --mox-ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --mox-ease-notice: cubic-bezier(0.2, 0.9, 0.3, 1);
+    --mox-ease-notice-out: cubic-bezier(0.4, 0, 1, 1);
+    --mox-shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
+    --mox-shadow-card: 0 0 6px #00000008;
+    --mox-shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
 #mox-toast {
     visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+    width: auto;
     min-width: 250px;
-    background-color: var(--card2-color);
-    color: var(--text-color);
-    text-align: center;
-    border-radius: 0.75rem;
+    max-width: calc(100vw - 24px);
     padding: 12px;
     border: 1px solid var(--border-color);
-    position: fixed;
-    z-index: 1;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    bottom: 45px;
-    font-size: 0.95rem;
-    box-shadow: 0 0 6px #00000008;
+    border-radius: 0.75rem;
+    background-color: color-mix(in srgb, var(--card2-color) 96%, var(--card-color));
+    color: var(--text-color);
+    text-align: center;
     line-height: normal;
-}
-
-#mox-toast.show {
-    visibility: visible;
-    animation: fadein 0.5s;
-}
-
-#mox-toast.hide {
-    animation: fadeout 0.5s;
+    font-size: 0.95rem;
+    position: fixed;
+    z-index: 1250;
+    left: 50%;
+    box-shadow: var(--mox-shadow-soft);
+    transition:
+        opacity var(--mox-motion-base) var(--mox-ease-out),
+        transform var(--mox-motion-base) var(--mox-ease-out),
+        border-color var(--mox-motion-base) ease,
+        background-color var(--mox-motion-base) ease,
+        color var(--mox-motion-base) ease,
+        box-shadow var(--mox-motion-base) ease,
+        visibility 0s linear var(--mox-motion-base);
 }
 
 #mox-toast.bottom {
     bottom: 45px;
+    top: auto;
+    transform: translate(-50%, -50%) scale(0.88, 0.74);
+    transform-origin: center bottom;
 }
 
 #mox-toast.top {
     top: 45px;
+    bottom: auto;
+    transform: translate(-50%, -50%) scale(0.88, 0.74);
+    transform-origin: center top;
 }
 
-@keyframes fadein {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+#mox-toast.show {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1, 1);
+    border-color: color-mix(in srgb, var(--themecolor) 22%, var(--border-color));
+    transition-delay: 0s;
 }
 
-@keyframes fadeout {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0;
-    }
-}
-
-#mox-toast.bottom.show {
-    animation: fadein-bottom 0.5s;
-}
-
-#mox-toast.bottom.hide {
-    animation: fadeout-bottom 0.5s;
-}
-
-#mox-toast.top.show {
-    animation: fadein-top 0.5s;
-}
-
-#mox-toast.top.hide {
-    animation: fadeout-top 0.5s;
-}
-
-@keyframes fadein-bottom {
-    from {
-        bottom: 0;
-        opacity: 0;
-    }
-
-    to {
-        bottom: 45px;
-        opacity: 1;
-    }
-}
-
-@keyframes fadeout-bottom {
-    from {
-        bottom: 45px;
-        opacity: 1;
-    }
-
-    to {
-        bottom: 0;
-        opacity: 0;
-    }
-}
-
-@keyframes fadein-top {
-    from {
-        top: 0;
-        opacity: 0;
-    }
-
-    to {
-        top: 45px;
-        opacity: 1;
-    }
-}
-
-@keyframes fadeout-top {
-    from {
-        top: 45px;
-        opacity: 1;
-    }
-
-    to {
-        top: 0;
-        opacity: 0;
-    }
+#mox-toast.hide {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95, 0.82);
 }
 
 .mox-notification-container {
@@ -134,29 +84,148 @@
     padding: 15px;
     border: 1px solid var(--border-color);
     border-radius: 0.75rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
     display: flex;
     align-items: center;
-    background-color: var(--card2-color);
     color: var(--text-color);
     font-size: 0.95rem;
-    transform: translateX(100%);
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: var(--mox-shadow-card);
     opacity: 0;
+    transform: translateX(24px) scale(0.94);
+    filter: blur(1.2px) saturate(0.95);
+    backface-visibility: hidden;
+    transition:
+        transform 0.34s var(--mox-ease-notice),
+        opacity 0.24s ease-out,
+        border-color var(--mox-motion-fast) ease,
+        background-color var(--mox-motion-fast) ease,
+        box-shadow var(--mox-motion-fast) ease,
+        filter var(--mox-motion-fast) ease;
+}
+
+.mox-notification::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.2;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--pure-color) 20%, transparent),
+        transparent 42%
+    );
+    transition: opacity var(--mox-motion-fast) ease;
+}
+
+.mox-notification.from-left {
+    transform: translateX(-24px) scale(0.94);
 }
 
 .mox-notification.show {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
+    filter: blur(0) saturate(1);
+    border-color: color-mix(in srgb, var(--themecolor) 16%, var(--border-color));
+    animation: mox-notice-in-right 0.42s var(--mox-ease-notice) both;
+}
+
+.mox-notification.from-left.show {
+    animation-name: mox-notice-in-left;
 }
 
 .mox-notification.hide {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(22px) scale(0.92);
+    filter: blur(1.2px) saturate(0.95);
+    animation: mox-notice-out-right 0.28s var(--mox-ease-notice-out) both;
+    pointer-events: none;
 }
 
-.mox-icon {
+.mox-notification.from-left.hide {
+    transform: translateX(-22px) scale(0.92);
+    animation-name: mox-notice-out-left;
+}
+
+.mox-notification.show:hover {
+    transform: translateX(0) scale(1);
+    border-color: color-mix(in srgb, var(--themecolor) 24%, var(--border-color));
+    background-color: color-mix(in srgb, var(--themecolor) 2%, var(--card2-color));
+    box-shadow: var(--mox-shadow-card-hover);
+}
+
+.mox-notification.show:hover::before {
+    opacity: 0.28;
+}
+
+@keyframes mox-notice-in-right {
+    0% {
+        opacity: 0;
+        transform: translateX(26px) scale(0.93);
+        filter: blur(1.2px) saturate(0.95);
+    }
+    72% {
+        opacity: 1;
+        transform: translateX(-1px) scale(1.006);
+        filter: blur(0) saturate(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0) saturate(1);
+    }
+}
+
+@keyframes mox-notice-in-left {
+    0% {
+        opacity: 0;
+        transform: translateX(-26px) scale(0.93);
+        filter: blur(1.2px) saturate(0.95);
+    }
+    72% {
+        opacity: 1;
+        transform: translateX(1px) scale(1.006);
+        filter: blur(0) saturate(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0) saturate(1);
+    }
+}
+
+@keyframes mox-notice-out-right {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0) saturate(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(24px) scale(0.92);
+        filter: blur(1.2px) saturate(0.95);
+    }
+}
+
+@keyframes mox-notice-out-left {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0) saturate(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-24px) scale(0.92);
+        filter: blur(1.2px) saturate(0.95);
+    }
+}
+
+.mox-notification .icon {
     margin-right: 10px;
+}
+
+.mox-notification .icon img {
+    display: block;
 }
 
 .mox-content {
@@ -166,73 +235,182 @@
 .mox-title {
     font-weight: bold;
     margin-bottom: 5px;
+    letter-spacing: 0.01em;
 }
 
 .mox-message {
     font-size: 0.85rem;
+    color: var(--text2-color);
+    line-height: 1.55;
 }
 
 .mox-close-btn {
+    appearance: none;
+    background: transparent;
+    padding: 0;
     position: absolute;
     top: 5%;
     right: 5%;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    border: none;
     cursor: pointer;
     font-size: 24px;
+    line-height: normal;
+    color: color-mix(in srgb, var(--text-color) 82%, var(--text2-color));
+    display: block;
+    transition: color var(--mox-motion-fast) ease, opacity var(--mox-motion-fast) ease;
+    opacity: 0.68;
+}
+
+.mox-close-btn:hover {
+    color: var(--themehovercolor);
+    border: none;
+    background: transparent;
+    opacity: 1;
 }
 
 .mox-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.24);
+    z-index: 1230;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    backdrop-filter: blur(0px) saturate(1);
+    transition:
+        opacity var(--mox-motion-slow) var(--mox-ease-soft),
+        backdrop-filter var(--mox-motion-slow) var(--mox-ease-soft);
 }
+
 .mox-overlay.show {
     opacity: 1;
+    backdrop-filter: blur(3px) saturate(1.03);
 }
+
 .mox-window {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     width: 80%;
     max-width: 600px;
+    transform: translate(-50%, calc(-50% + 12px)) scale(0.97);
     background-color: var(--card2-color);
     color: var(--text-color);
     border-radius: 0.75rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1001;
+    box-shadow: 0 14px 42px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.07);
+    z-index: 1231;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--border-color);
+    overflow: hidden;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition:
+        transform var(--mox-motion-slow) var(--mox-ease-out),
+        opacity var(--mox-motion-base) var(--mox-ease-out),
+        border-color var(--mox-motion-base) ease,
+        background-color var(--mox-motion-base) ease;
 }
+
 .mox-window.show {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
 }
+
 .mox-window-header {
     padding: 15px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 0.98rem;
     border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--themecolor) 6%, var(--card2-color)),
+        var(--card2-color)
+    );
 }
+
 .mox-window-content {
     padding: 15px;
     flex-grow: 1;
+    overflow: auto;
+    color: var(--text2-color);
+    line-height: 1.75;
 }
+
 .mox-window-close-btn {
+    appearance: none;
+    background: transparent;
+    padding: 0;
     position: absolute;
     top: 5px;
     right: 20px;
+    width: auto;
+    height: auto;
+    border-radius: 0.3rem;
+    border: 1px solid transparent;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2-color);
     font-size: 25px;
+    line-height: 1;
+    transition:
+        color var(--mox-motion-fast) ease,
+        border-color var(--mox-motion-fast) ease,
+        background-color var(--mox-motion-fast) ease,
+        transform var(--mox-motion-fast) ease;
+    opacity: 0.8;
 }
+
+.mox-window-close-btn:hover {
+    color: var(--themehovercolor);
+    border-color: color-mix(in srgb, var(--themecolor) 35%, var(--border-color));
+    background-color: color-mix(in srgb, var(--themecolor) 8%, var(--card-color));
+    opacity: 1;
+}
+
+.mox-window-close-btn:active {
+    transform: scale(0.95);
+}
+
+body.mox-modal-open {
+    overflow: hidden;
+}
+
+[data-theme="dark"] .mox-notification,
+[data-theme="dark"] #mox-toast,
+[data-theme="dark"] .mox-window {
+    border-color: color-mix(in srgb, var(--themecolor) 12%, var(--border-color));
+}
+
+@media (hover: none) {
+    .mox-notification.show:hover {
+        transform: translateX(0) scale(1);
+        border-color: color-mix(in srgb, var(--themecolor) 16%, var(--border-color));
+        background-color: color-mix(in srgb, var(--card2-color) 96%, var(--card-color));
+        box-shadow: var(--mox-shadow-card);
+    }
+
+    .mox-notification.show:hover::before {
+        opacity: 0.24;
+    }
+}
+
 @media (min-width: 768px) {
     .mox-window {
         width: 600px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #mox-toast,
+    .mox-notification,
+    .mox-overlay,
+    .mox-window,
+    .mox-close-btn,
+    .mox-window-close-btn {
+        transition: none !important;
+        animation: none !important;
     }
 }

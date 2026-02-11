@@ -869,6 +869,7 @@
     function initSwup() {
         registerRuntimeModules();
         bindGlobalListeners();
+        PS.swup = null;
 
         if (typeof window.Swup !== 'function') {
             PS.setManagedBySwup(false);
@@ -898,7 +899,7 @@
             });
 
             state.swup = swup;
-            window.swupInstance = swup;
+            PS.swup = swup;
 
             swup.hooks.on('visit:start', function onVisitStart() {
                 cleanupTransitionState({ keepSharedMarker: true });
@@ -960,6 +961,7 @@
         } catch (error) {
             PS.setManagedBySwup(false);
             state.swup = null;
+            PS.swup = null;
             cleanupTransitionState({ keepSharedMarker: false });
             playInitialEnterFromPreload();
             PS.initModules(document, { reason: 'swup-fallback', isSwup: false, via: 'ssr' });

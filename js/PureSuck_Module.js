@@ -1172,6 +1172,10 @@ function runShortcodes(root, options) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+    const managedBySwup = Boolean(PS && PS.runtime && PS.runtime.managedBySwup);
+    if (managedBySwup) return;
+
     const root = document.getElementById('swup') || document;
     const pageType = root && root.dataset ? root.dataset.psPageType || '' : '';
     runShortcodes(root, {

@@ -1415,7 +1415,6 @@ timeline-description {
     transition:
         transform .42s cubic-bezier(0.345, 0.045, 0.345, 1),
         width .42s cubic-bezier(0.345, 0.045, 0.345, 1);
-    will-change: transform, width
 }
 
 .tab-header.dir-right .tab-indicator {
