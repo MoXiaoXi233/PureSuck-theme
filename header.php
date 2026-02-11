@@ -22,8 +22,6 @@
     </title>
 
     <?php generateDynamicCSS(); ?>
-    <?php $psRuntimeConfig = getPSRuntimeConfig($this); ?>
-    <?php $psSwupEnabled = !empty($psRuntimeConfig['features']['swup']); ?>
 
     <script>
         window.THEME_URL = '<?= $this->options->themeUrl; ?>';
@@ -41,9 +39,6 @@
             }
             document.documentElement.setAttribute('data-theme', initialTheme);
             try {
-                const psConfig = window.PS_CONFIG || {};
-                const features = psConfig.features || {};
-                const swupEnabled = features.swup !== false;
                 const canAnimateEnter = window.matchMedia && !window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
                 if (canAnimateEnter) {
@@ -51,9 +46,9 @@
                         // 列表首屏渐入属于基础动效，不依赖 Swup 是否启用
                         document.documentElement.classList.add('ps-preload-list-enter');
                     <?php elseif ($this->is('post')): ?>
-                        if (swupEnabled) document.documentElement.classList.add('ps-preload-post-enter');
+                        document.documentElement.classList.add('ps-preload-post-enter');
                     <?php elseif ($this->is('page')): ?>
-                        if (swupEnabled) document.documentElement.classList.add('ps-preload-page-enter');
+                        document.documentElement.classList.add('ps-preload-page-enter');
                     <?php endif; ?>
                 }
             } catch (e) { }
@@ -125,13 +120,11 @@
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
-    <?php if ($psSwupEnabled): ?>
         <!-- Swup 4：页面过渡动画 -->
         <script defer src="<?php getStaticURL('Swup.umd.min.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/preload-plugin.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/head-plugin.js'); ?>"></script>
-    <?php endif; ?>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
     <!-- 低优先级：按需加载（评论区） -->

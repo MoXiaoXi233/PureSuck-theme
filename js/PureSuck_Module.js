@@ -333,8 +333,8 @@ function escapeHtml(value) {
 
 function ensureRuntimeTocSection(scope, pageType) {
     const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
-    const tocEnabled = PS && typeof PS.isFeatureEnabled === 'function'
-        ? PS.isFeatureEnabled('showTOC', true)
+    const tocEnabled = PS && PS.features
+        ? Boolean(PS.features.showTOC)
         : true;
 
     const rightSidebar = document.querySelector('.right-sidebar');
@@ -1572,15 +1572,10 @@ const NavIndicator = (() => {
     }
 
     // 导出到 PS 命名空间，同时保留全局别名以兼容旧代码。
-    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
     const navApi = {
         init,
         update
     };
-    if (PS && PS.nav) {
-        PS.nav.init = init;
-        PS.nav.update = update;
-    }
     window.NavIndicator = navApi;
 
     // 自动初始化。

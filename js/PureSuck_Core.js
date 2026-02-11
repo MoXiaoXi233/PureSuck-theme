@@ -5,15 +5,9 @@
         ? window.PS_CONFIG
         : {};
 
-    const defaultFeatures = {
-        swup: true,
-        viewTransition: true,
-        swupPreload: true,
-        perfDebug: false,
-        showTOC: true
-    };
-
-    const features = Object.assign({}, defaultFeatures, rawConfig.features || {});
+    const rawFeatures = rawConfig.features && typeof rawConfig.features === 'object'
+        ? rawConfig.features
+        : {};
 
     function toBool(value, fallback) {
         if (typeof value === 'boolean') return value;
@@ -22,9 +16,9 @@
         return fallback;
     }
 
-    Object.keys(features).forEach((key) => {
-        features[key] = toBool(features[key], defaultFeatures[key]);
-    });
+    const features = {
+        showTOC: toBool(rawFeatures.showTOC, true)
+    };
 
     const runtime = {
         managedBySwup: false,
@@ -35,166 +29,6 @@
 
     const moduleMap = new Map();
     const cleanupMap = new Map();
-    const metricsState = {
-        seq: 0,
-        active: null,
-        latest: null,
-        history: []
-    };
-
-    function log() {
-        if (!features.perfDebug) return;
-        const args = Array.prototype.slice.call(arguments);
-        args.unshift('[PS]');
-        console.log.apply(console, args);
-    }
-
-    function nowMs() {
-        return Math.round((window.performance ? window.performance.now() : Date.now()) * 100) / 100;
-    }
-
-    function createBaseDurations() {
-        return {
-            visitToReplace: 0,
-            replaceToView: 0,
-            viewToEnterEnd: 0,
-            revealTotal: 0,
-            criticalToDefer: 0,
-            deferToIdle: 0,
-            visitTotal: 0
-        };
-    }
-
-    function cloneMetricsEntry(entry) {
-        if (!entry) return null;
-        try {
-            return JSON.parse(JSON.stringify(entry));
-        } catch (error) {
-            return null;
-        }
-    }
-
-    function buildDurations(entry) {
-        const marks = entry && entry.marks ? entry.marks : {};
-        const start = Number(marks.visitStart || 0);
-        const replace = Number(marks.contentReplace || 0);
-        const view = Number(marks.pageView || 0);
-        const enterStart = Number(marks.enterStart || 0);
-        const revealStart = Number(marks.revealStart || 0);
-        const enterEnd = Number(marks.enterEnd || 0);
-        const end = Number(marks.visitEnd || 0);
-
-        const safeDiff = function (from, to) {
-            if (!from || !to || to < from) return 0;
-            return Math.round((to - from) * 100) / 100;
-        };
-
-        return {
-            visitToReplace: safeDiff(start, replace),
-            replaceToView: safeDiff(replace, view),
-            viewToEnterEnd: safeDiff(view, enterEnd || end),
-            revealTotal: safeDiff(revealStart, enterEnd || end),
-            criticalToDefer: safeDiff(start, revealStart || enterStart || view),
-            deferToIdle: safeDiff(enterEnd || view, end),
-            visitTotal: safeDiff(start, end)
-        };
-    }
-
-    function buildMetricsEntry(meta) {
-        const config = Object.assign({}, meta || {});
-        const id = 'psv-' + String(Date.now()) + '-' + String(++metricsState.seq);
-        return {
-            id,
-            mode: config.mode || 'card',
-            reason: config.reason || 'visit',
-            fromType: config.fromType || '',
-            toType: config.toType || '',
-            url: config.url || window.location.href,
-            createdAt: new Date().toISOString(),
-            marks: {
-                visitStart: nowMs()
-            },
-            reveal: {
-                targets: 0,
-                batches: 0,
-                firstBatch: 0
-            },
-            durations: createBaseDurations()
-        };
-    }
-
-    function finalizeActiveMetrics(extra) {
-        if (!metricsState.active) return null;
-
-        const patch = Object.assign({}, extra || {});
-        if (!metricsState.active.marks.visitEnd) {
-            metricsState.active.marks.visitEnd = nowMs();
-        }
-
-        if (patch && typeof patch === 'object') {
-            if (patch.reveal && typeof patch.reveal === 'object') {
-                metricsState.active.reveal = Object.assign({}, metricsState.active.reveal, patch.reveal);
-                delete patch.reveal;
-            }
-            if (patch.mode) metricsState.active.mode = patch.mode;
-            if (patch.reason) metricsState.active.reason = patch.reason;
-            if (patch.fromType) metricsState.active.fromType = patch.fromType;
-            if (patch.toType) metricsState.active.toType = patch.toType;
-            if (patch.url) metricsState.active.url = patch.url;
-        }
-
-        metricsState.active.durations = buildDurations(metricsState.active);
-        metricsState.latest = cloneMetricsEntry(metricsState.active);
-        metricsState.history.push(metricsState.latest);
-        if (metricsState.history.length > 240) {
-            metricsState.history.splice(0, metricsState.history.length - 240);
-        }
-
-        const done = metricsState.latest;
-        metricsState.active = null;
-        return cloneMetricsEntry(done);
-    }
-
-    function createMetricsApi() {
-        return {
-            clear: function clearMetrics() {
-                metricsState.active = null;
-                metricsState.latest = null;
-                metricsState.history = [];
-                metricsState.seq = 0;
-            },
-            getLatest: function getLatestMetrics() {
-                return cloneMetricsEntry(metricsState.latest);
-            },
-            getHistory: function getMetricsHistory() {
-                return metricsState.history.map(cloneMetricsEntry).filter(Boolean);
-            },
-            beginVisit: function beginVisit(meta) {
-                if (metricsState.active) {
-                    finalizeActiveMetrics({ reason: 'visit-interrupted' });
-                }
-                metricsState.active = buildMetricsEntry(meta);
-                return metricsState.active.id;
-            },
-            markVisit: function markVisit(name, payload) {
-                if (!metricsState.active || !name) return;
-                metricsState.active.marks[name] = nowMs();
-                if (payload && typeof payload === 'object') {
-                    if (payload.reveal && typeof payload.reveal === 'object') {
-                        metricsState.active.reveal = Object.assign({}, metricsState.active.reveal, payload.reveal);
-                    }
-                    if (payload.mode) metricsState.active.mode = payload.mode;
-                    if (payload.reason) metricsState.active.reason = payload.reason;
-                    if (payload.fromType) metricsState.active.fromType = payload.fromType;
-                    if (payload.toType) metricsState.active.toType = payload.toType;
-                    if (payload.url) metricsState.active.url = payload.url;
-                }
-            },
-            finishVisit: function finishVisit(extra) {
-                return finalizeActiveMetrics(extra);
-            }
-        };
-    }
 
     function normalizeRoot(root) {
         if (root && root.nodeType === 1) {
@@ -269,7 +103,6 @@
             try {
                 return Boolean(module.match(context));
             } catch (error) {
-                log('module.match failed:', module.id, error);
                 return false;
             }
         }
@@ -284,9 +117,7 @@
         cleanupMap.delete(moduleId);
         try {
             cleanup(context && context.root ? context.root : runtime.currentRoot || document, context || runtime.lastContext || {});
-        } catch (error) {
-            log('cleanup failed:', moduleId, error);
-        }
+        } catch (error) { }
     }
 
     function registerModule(definition) {
@@ -307,9 +138,7 @@
                 if (typeof cleanup === 'function') {
                     cleanupMap.set(normalized.id, cleanup);
                 }
-            } catch (error) {
-                log('late init failed:', normalized.id, error);
-            }
+            } catch (error) { }
         }
 
         return normalized;
@@ -324,9 +153,7 @@
             if (typeof module.destroy === 'function') {
                 try {
                     module.destroy(context.root, context);
-                } catch (error) {
-                    log('module.destroy failed:', module.id, error);
-                }
+                } catch (error) { }
             }
         });
 
@@ -357,9 +184,7 @@
                 if (typeof cleanup === 'function') {
                     cleanupMap.set(module.id, cleanup);
                 }
-            } catch (error) {
-                log('module.init failed:', module.id, error);
-            }
+            } catch (error) { }
         });
 
         runtime.currentRoot = context.root;
@@ -374,11 +199,7 @@
     PS.config = rawConfig;
     PS.features = features;
     PS.runtime = runtime;
-    PS.log = log;
     PS.getPageType = getPageType;
-    PS.isFeatureEnabled = function (featureKey, fallback) {
-        return toBool(features[featureKey], fallback !== undefined ? fallback : true);
-    };
     PS.setManagedBySwup = function (value) {
         runtime.managedBySwup = Boolean(value);
     };
@@ -389,14 +210,9 @@
     // 收敛的全局命名空间（Phase 2.5）
     PS.swup = null;      // Swup 实例
     PS.zoom = null;      // mediumZoom 实例
-    PS.metrics = createMetricsApi();
     PS.theme = {         // 主题切换
         set: null,
         toggle: null
-    };
-    PS.nav = {           // 导航指示器
-        init: null,
-        update: null
     };
 
     window.PS = PS;

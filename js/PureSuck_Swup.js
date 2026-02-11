@@ -4,9 +4,7 @@
     const PS = window.PS || null;
     if (!PS || typeof PS.registerModule !== 'function') return;
 
-    if (PS.isFeatureEnabled('swup', true)) {
-        PS.setManagedBySwup(true);
-    }
+    PS.setManagedBySwup(true);
 
     const VT_ATTR = 'data-ps-vt-name';
     const TRANSITION_CLASSES = [
@@ -61,7 +59,6 @@
     }
 
     function canUseViewTransition() {
-        if (!PS.isFeatureEnabled('viewTransition', true)) return false;
         if (prefersReducedMotion()) return false;
         return typeof document.startViewTransition === 'function';
     }
@@ -779,9 +776,7 @@
                 if (typeof state.deferredShortcodesCleanup === 'function') {
                     try {
                         state.deferredShortcodesCleanup();
-                    } catch (error) {
-                        PS.log('shortcodes cleanup failed:', error);
-                    }
+                    } catch (error) { }
                     state.deferredShortcodesCleanup = null;
                 }
 
@@ -800,9 +795,7 @@
                     if (typeof state.deferredShortcodesCleanup === 'function') {
                         try {
                             state.deferredShortcodesCleanup();
-                        } catch (error) {
-                            PS.log('shortcodes cleanup failed:', error);
-                        }
+                        } catch (error) { }
                         state.deferredShortcodesCleanup = null;
                     }
                 };
@@ -811,9 +804,7 @@
                 if (typeof state.deferredShortcodesCleanup === 'function') {
                     try {
                         state.deferredShortcodesCleanup();
-                    } catch (error) {
-                        PS.log('shortcodes cleanup failed:', error);
-                    }
+                    } catch (error) { }
                     state.deferredShortcodesCleanup = null;
                 }
                 if (window.OwoManager && typeof window.OwoManager.destroy === 'function') {
@@ -831,9 +822,7 @@
             init: function initCustomCallback() {
                 try {
                     window.pjaxCustomCallback();
-                } catch (error) {
-                    PS.log('custom callback failed:', error);
-                }
+                } catch (error) { }
             }
         });
     }
@@ -848,10 +837,10 @@
             }));
         }
 
-        if (PS.isFeatureEnabled('swupPreload', true) && typeof window.SwupPreloadPlugin === 'function') {
+        if (typeof window.SwupPreloadPlugin === 'function') {
             plugins.push(new window.SwupPreloadPlugin({
                 preloadHoveredLinks: true,
-                preloadInitialPage: true,
+                preloadInitialPage: false,
                 preloadVisibleLinks: {
                     delay: 420,
                     threshold: 0.2,
@@ -881,17 +870,7 @@
         registerRuntimeModules();
         bindGlobalListeners();
 
-        if (!PS.isFeatureEnabled('swup', true)) {
-            PS.setManagedBySwup(false);
-            cleanupTransitionState({ keepSharedMarker: false });
-            syncSharedMarkerForCurrentPage();
-            playInitialEnterFromPreload();
-            PS.initModules(document, { reason: 'swup-disabled', isSwup: false, via: 'ssr' });
-            return;
-        }
-
         if (typeof window.Swup !== 'function') {
-            PS.log('Swup script missing, fallback to native navigation.');
             PS.setManagedBySwup(false);
             cleanupTransitionState({ keepSharedMarker: false });
             syncSharedMarkerForCurrentPage();
@@ -909,7 +888,6 @@
                 plugins: createPlugins(),
                 cache: true,
                 native: true,
-                preload: PS.isFeatureEnabled('swupPreload', true),
                 animateHistoryBrowsing: true,
                 animationSelector: false,
                 resolveUrl: function resolveUrl(url) {
@@ -980,7 +958,6 @@
             syncSharedMarkerForCurrentPage();
             playInitialEnterFromPreload();
         } catch (error) {
-            PS.log('Swup init failed, fallback to native navigation:', error);
             PS.setManagedBySwup(false);
             state.swup = null;
             cleanupTransitionState({ keepSharedMarker: false });

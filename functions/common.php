@@ -144,10 +144,6 @@ function getPSRuntimeConfig($archive = null)
     $options = Typecho_Widget::widget('Widget_Options');
 
     $features = [
-        'swup' => psOptionEnabled($options->enableSwup ?? '1', true),
-        'viewTransition' => psOptionEnabled($options->enableViewTransition ?? '1', true),
-        'swupPreload' => psOptionEnabled($options->enableSwupPreload ?? '1', true),
-        'perfDebug' => psOptionEnabled($options->enablePerfDebug ?? '0', false),
         'showTOC' => psOptionEnabled($options->showTOC ?? '1', true)
     ];
 
@@ -424,42 +420,6 @@ function themeConfig($form)
     );
     $form->addInput($footerInfo);
 
-    // Swup 页面过渡（可关闭，关闭后退回原生跳转）
-    $enableSwup = new Typecho_Widget_Helper_Form_Element_Radio(
-        'enableSwup',
-        array('1' => _t('开启'), '0' => _t('关闭')),
-        '1',
-        _t('Swup 增强导航'),
-        _t('关闭后将使用浏览器原生跳转，页面仍可正常使用。')
-    );
-    $form->addInput($enableSwup);
-
-    $enableViewTransition = new Typecho_Widget_Helper_Form_Element_Radio(
-        'enableViewTransition',
-        array('1' => _t('开启'), '0' => _t('关闭')),
-        '1',
-        _t('View Transitions 共享元素'),
-        _t('仅在浏览器支持时生效。关闭后自动使用普通卡片转场。')
-    );
-    $form->addInput($enableViewTransition);
-
-    $enableSwupPreload = new Typecho_Widget_Helper_Form_Element_Radio(
-        'enableSwupPreload',
-        array('1' => _t('开启'), '0' => _t('关闭')),
-        '1',
-        _t('Swup 预加载链接'),
-        _t('在鼠标悬停或链接可见时预取页面，弱网环境可关闭。')
-    );
-    $form->addInput($enableSwupPreload);
-
-    $enablePerfDebug = new Typecho_Widget_Helper_Form_Element_Radio(
-        'enablePerfDebug',
-        array('1' => _t('开启'), '0' => _t('关闭')),
-        '0',
-        _t('前端调试日志'),
-        _t('开启后会在浏览器控制台输出 PureSuck 运行日志。')
-    );
-    $form->addInput($enablePerfDebug);
 
     // Pjax回调函数（Swup）
     $PjaxScript = new \Typecho\Widget\Helper\Form\Element\Textarea(
