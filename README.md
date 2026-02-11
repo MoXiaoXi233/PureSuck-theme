@@ -73,6 +73,22 @@ Pure 意指纯洁、干净，后者取自爱人 RuoSuck，希望这份干净的�
 [window type="yellow" title="警告窗口"]这是一个信息窗口。<br>这是一个信息窗口的第二行。[/window]
 ```
 同样五色可选，type 处填写五种颜色之一，在 title 处填写标题，注意内部如果要换行请用`<br>`标签
+#### GitHub 卡片
+```
+[github url="https://github.com/MoXiaoXi233/PureSuck-theme"]
+[github url="MoXiaoXi233/PureSuck-theme"]
+[github url="https://github.com/MoXiaoXi233"]
+```
+支持仓库卡片和用户卡片，`url` 可以填写完整链接，也可以填写 `owner/repo`。  
+卡片数据由 GitHub API 获取，主题内有缓存；如果 API 访问受限会自动显示失败提示卡片。
+#### 文章卡片
+```
+[post url="https://your-site.com/hello-world/"]
+[post url="/hello-world/"]
+[post url="hello-world"]
+```
+用于在文章内引用站内文章，`url` 支持完整站内链接、相对路径或 slug。  
+如果链接解析不到文章，会显示 Not Found 卡片。
 #### 友链卡片
 ```
 [friend-card name="好友" ico="avatar.jpg" url="http://example.com"]这是好友的描述。[/friend-card]
@@ -140,9 +156,16 @@ MoxToast({
 });
 ```
 开发中····
-## 引用库
-[medium-zoom](https://github.com/francoischalifour/medium-zoom)  
-[OWO.JS](https://github.com/DIYgod/OwO)  
+## 依赖与致谢
+### 运行时实际依赖
+- [medium-zoom](https://github.com/francoischalifour/medium-zoom)（图片放大）
+- [swup](https://github.com/swup/swup)（页面切换 / PJAX）
+- [@swup/scroll-plugin](https://github.com/swup/scroll-plugin)（滚动恢复）
+- [@swup/preload-plugin](https://github.com/swup/preload-plugin)（链接预加载）
+- [@swup/head-plugin](https://github.com/swup/head-plugin)（head 同步更新）
+
+### 致谢
+- [OWO.JS](https://github.com/DIYgod/OwO)：本主题当前为自定义的 OWO SSR 交互实现，不直接引用上游脚本，感谢其设计思路与社区贡献。  
 
 ## License
 使用 MIT 协议开源，欢迎更多人参与/二次开发！  
