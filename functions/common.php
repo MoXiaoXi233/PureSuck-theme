@@ -38,7 +38,7 @@ function getColorScheme()
 }
 
 // 静态资源 URL 管理
-function getStaticURL($path)
+function resolveStaticURL($path)
 {
     $options = Typecho_Widget::widget('Widget_Options');
     $staticCdn = $options->staticCdn;
@@ -59,12 +59,19 @@ function getStaticURL($path)
     ];
 
     if ($staticCdn === 'local') {
-        echo $staticMap['local'][$path];
-    } elseif (isset($staticMap[$staticCdn][$path])) {
-        echo $staticMap[$staticCdn][$path];
-    } else {
-        echo $staticMap['local'][$path];
+        return $staticMap['local'][$path];
     }
+
+    if (isset($staticMap[$staticCdn][$path])) {
+        return $staticMap[$staticCdn][$path];
+    }
+
+    return $staticMap['local'][$path];
+}
+
+function getStaticURL($path)
+{
+    echo resolveStaticURL($path);
 }
 
 // 生成动态 CSS
@@ -161,7 +168,11 @@ function getPSRuntimeConfig($archive = null)
         'themeUrl' => $options->themeUrl,
         'siteUrl' => $options->siteUrl,
         'pageType' => $pageType,
-        'features' => $features
+        'features' => $features,
+        'assets' => [
+            'mediumZoom' => resolveStaticURL('medium-zoom.min.js'),
+            'owo' => $options->themeUrl . '/js/OwO.min.js'
+        ]
     ];
 }
 

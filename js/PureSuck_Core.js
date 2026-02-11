@@ -207,10 +207,10 @@
     PS.initModules = initModules;
     PS.destroyModules = destroyModules;
 
-    // 收敛的全局命名空间（Phase 2.5）
+    // 全局共享实例插槽，供运行时模块复用。
     PS.swup = null;      // Swup 实例
-    PS.zoom = null;      // mediumZoom 实例
-    PS.theme = {         // 主题切换
+    PS.zoom = null;      // medium-zoom 实例
+    PS.theme = {         // 主题控制接口
         set: null,
         toggle: null
     };

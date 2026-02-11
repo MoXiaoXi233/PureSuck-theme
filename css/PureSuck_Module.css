@@ -1668,6 +1668,20 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 .toc {
     right: 2%;
     top: 80px;
+    transition: opacity .18s ease, transform .18s ease;
+    transform-origin: top center;
+}
+
+.toc.toc-swap-out {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+    pointer-events: none;
+}
+
+.toc.toc-swap-in {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    pointer-events: none;
 }
 
 .dir {

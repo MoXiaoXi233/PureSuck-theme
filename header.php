@@ -115,8 +115,8 @@
     <!-- JS引入：按优先级分组加载（性能优化版） -->
 
     <!-- 高优先级：核心模块（首屏必需） -->
-    <script defer src="<?php getStaticURL('medium-zoom.min.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Core.js'); ?>"></script>
+    <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Global.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Module.js'); ?>"></script>
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
@@ -128,8 +128,6 @@
     <script defer src="<?php $this->options->themeUrl('/js/PureSuck_Swup.js'); ?>"></script>
 
     <!-- 低优先级：按需加载（评论区） -->
-    <script async src="<?php $this->options->themeUrl('/js/OwO.min.js'); ?>"></script>
-
     <?php if ($this->options->PjaxScript): ?>
         <script defer>
             // 注册用户自定义回调（Swup page:view 后执行）

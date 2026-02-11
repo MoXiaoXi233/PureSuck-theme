@@ -898,3 +898,56 @@
 ### 29.6 结论
 - 图片加载策略已完全收敛到 PHP 输出，Swup/JS 图片调度已移除。
 - 代码复杂度下降，性能保持稳定，符合“别做多余运行时处理”的要求。
+
+## 17. 第十轮：全局/页面增强按需加载收敛（2026-02-11）
+
+### 17.1 目标
+- 常驻能力与页面特需能力分层：
+  - 常驻：导航指示器、主题切换、返回顶部。
+  - 按需：TOC、评论增强、短代码/内容增强（Tab、折叠、嵌入、图片放大）。
+- 降低全站首屏脚本负担，避免非内容页加载无关逻辑。
+- 清理本轮涉及代码中的乱码注释，保持可维护性。
+
+### 17.2 本轮修改文件
+- `header.php`
+- `functions/common.php`
+- `js/PureSuck_Core.js`
+- `js/PureSuck_Swup.js`
+- `js/PureSuck_Module.js`（重写为按需调度器）
+- `js/PureSuck_Global.js`（新增）
+- `js/PureSuck_Content.js`（新增）
+- `js/PureSuck_Comment.js`（新增）
+- `js/PureSuck_TOC.js`（沿用分离后的 TOC 模块）
+
+### 17.3 对照 DevPlan 的完成项
+- Phase 2：模块生命周期继续收敛到 `PS.registerModule/init/destroy`。
+- Phase 2.5：将过大的 `PureSuck_Module.js` 收敛为调度职责，页面特需逻辑拆分独立模块。
+- Phase 3：通过按需加载减少无效脚本执行与下载。
+
+### 17.4 关键实现
+1. 运行时分层
+- 新增 `ps-global-ui` 常驻模块（`js/PureSuck_Global.js`）。
+- 新增 `ps-page-enhance` 调度模块（`js/PureSuck_Module.js`），按页面与 DOM 条件动态加载：
+  - `js/PureSuck_TOC.js`
+  - `js/PureSuck_Content.js`
+  - `js/PureSuck_Comment.js`
+
+2. 资源按需
+- 移除 `header.php` 对 `medium-zoom` 与 `OwO` 的全站静态引入。
+- `PureSuck_Content.js` 在存在 `[data-zoomable]` 时加载 `medium-zoom`。
+- `PureSuck_Comment.js` 在存在评论表情面板时加载 `OwO.min.js`。
+
+3. Swup 协同
+- 删除 `PureSuck_Swup.js` 内部对 `runShortcodes` 的直接耦合。
+- 保留 Swup 作为生命周期协调器，初始化改由模块系统统一处理。
+
+4. PHP 与 JS 协同
+- `PS_CONFIG` 增补 `assets`（`mediumZoom`、`owo`）用于前端按需加载路径解析。
+
+### 17.5 风险与回滚
+- 风险：按需加载涉及异步时序，极端慢网下个别增强初始化可能延后。
+- 回滚：若出现异常，可恢复 `header.php` 中对应脚本静态引入，或临时禁用 Swup 回退原生导航。
+
+### 17.6 已做验证
+- PHP 语法：`header.php`、`functions/common.php` 均通过 `php -l`。
+- JS 语法：`PureSuck_Core.js`、`PureSuck_Global.js`、`PureSuck_Module.js`、`PureSuck_Content.js`、`PureSuck_Comment.js`、`PureSuck_TOC.js`、`PureSuck_Swup.js` 均通过 `node --check`。
