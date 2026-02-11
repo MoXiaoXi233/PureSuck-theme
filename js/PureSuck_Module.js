@@ -1,9 +1,9 @@
-﻿/** 杩欎釜JS鍖呭惈浜嗗悇绉嶉渶瑕佸鐞嗙殑鐨勫唴瀹?**/
-/** 鍥炲埌椤堕儴鎸夐挳锛孴OC鐩綍锛屽唴閮ㄥ崱鐗囬儴鍒嗗唴瀹硅В鏋愰兘鍦ㄨ繖閲?**/
+/** 主题前端模块：集中处理通用交互逻辑。 **/
+/** 包括返回顶部、TOC、短代码组件、评论表单和主题切换。 **/
 
 /**
- * TOC 鐩綍楂樹寒 - 绠€鍖栭噸鏋勭増
- * 鏍稿績鍘熷垯锛氱畝鍗曘€佺洿鎺ャ€佸揩閫熷搷搴?
+ * TOC 高亮与定位。
+ * 使用 IntersectionObserver 跟踪当前标题。
  */
 const TOC_VISIBLE_CLASS = 'is-visible';
 const TOC_REVEAL_ENTER_CLASS = 'reveal-enter';
@@ -391,7 +391,7 @@ const GoTopButton = (() => {
         anchor = button ? button.querySelector('.go') : null;
     }
 
-    // 鉁?浣跨敤 IntersectionObserver 鏇夸唬婊氬姩鐩戝惉锛屾秷闄ゅ己鍒堕噸鎺?
+    // 用 IntersectionObserver 替代滚动监听，减少重排开销。
     function createSentinel() {
         if (sentinel) return sentinel;
 
@@ -406,7 +406,7 @@ const GoTopButton = (() => {
     function handleIntersect(entries) {
         if (!button) return;
         const [entry] = entries;
-        // sentinel 涓嶅彲瑙佹椂锛堟粴鍔ㄨ秴杩?100px锛夛紝鏄剧ず鎸夐挳
+        // sentinel 不可见时（滚动超过 100px）显示按钮。
         if (entry.isIntersecting) {
             button.classList.remove('visible');
         } else {
@@ -455,7 +455,7 @@ const GoTopButton = (() => {
             document.addEventListener('click', onClick, true);
         }
 
-        // 鉁?姣忔鍒濆鍖栨椂閲嶆柊璁剧疆 observer锛堟敮鎸?Swup 椤甸潰鍒囨崲锛?
+        // 每次初始化都重建 observer，兼容 Swup 切页。
         initObserver();
     };
 })();
@@ -478,24 +478,24 @@ function bindCollapsiblePanels(root) {
 
         if (!button || !contentDiv) return;
 
-        // 鉁?棰勭紦瀛?scrollHeight锛岄伩鍏嶇偣鍑绘椂鍚屾璇诲彇褰卞搷 INP
+        // 预缓存 scrollHeight，减少点击时的同步布局读取。
         let cachedScrollHeight = 0;
 
         const updateCache = () => {
             cachedScrollHeight = contentDiv.scrollHeight;
         };
 
-        // 浣跨敤 requestIdleCallback 棰勭紦瀛?
+        // 空闲时预计算高度缓存。
         if (typeof requestIdleCallback === 'function') {
             requestIdleCallback(updateCache, { timeout: 500 });
         } else {
             setTimeout(updateCache, 100);
         }
 
-        // 浣跨敤 ResizeObserver 鐩戝惉鍐呭鍙樺寲鏃舵洿鏂扮紦瀛?
+        // 内容尺寸变化时更新缓存。
         if (window.ResizeObserver) {
             const resizeObserver = new ResizeObserver(() => {
-                // 鍙湪灞曞紑鐘舵€佷笅鏇存柊缂撳瓨
+                // 仅在展开状态下更新缓存。
                 if (contentDiv.style.maxHeight && contentDiv.style.maxHeight !== '0px') {
                     cachedScrollHeight = contentDiv.scrollHeight;
                 }
@@ -513,10 +513,10 @@ function bindCollapsiblePanels(root) {
                     icon.classList.add('icon-down-open');
                 }
             } else {
-                // 鉁?浣跨敤缂撳瓨鍊硷紝濡傛灉缂撳瓨涓虹┖鍒欓檷绾ц鍙?
+                // 优先使用缓存高度，缺失时回退实时读取。
                 const height = cachedScrollHeight || contentDiv.scrollHeight;
                 contentDiv.style.maxHeight = height + "px";
-                // 鏇存柊缂撳瓨浠ュ涓嬫浣跨敤
+                // 写回缓存，供下次展开复用。
                 if (!cachedScrollHeight) {
                     cachedScrollHeight = height;
                 }
@@ -696,7 +696,7 @@ function cleanupTabs(root) {
 }
 
 /**
- * TOC Sticky 鎺у埗鍣?- 鎬ц兘浼樺寲鐗?
+ * TOC Sticky 控制器（性能优化版）。
  */
 const initializeStickyTOC = (() => {
     let bound = false;
@@ -828,7 +828,7 @@ function Comments_Submit() {
     const form = document.getElementById("cf");
     if (!form) return;
 
-    // 闃叉 PJAX 閲嶅缁戝畾
+    // 防止 Swup/PJAX 重复绑定。
     if (form.dataset.binded === "1") return;
     form.dataset.binded = "1";
 
@@ -843,15 +843,15 @@ function Comments_Submit() {
     form.dataset.psSubmitting = "0";
     bindCommentReset();
 
-    // 鍙洃鍚?submit锛堝叧閿級
+    // 只监听 submit 事件。
     form.addEventListener("submit", function (e) {
-        // 闃叉閲嶅鎻愪氦
+        // 防止重复提交。
         if (form.dataset.psSubmitting === "1") {
             e.preventDefault();
             return;
         }
 
-        // 鍐呭涓虹┖锛屼氦缁欐祻瑙堝櫒 / Typecho 鎻愮ず
+        // 内容为空时交给浏览器或 Typecho 原生校验。
         if (textarea.value.trim() === "") {
             return;
         }
@@ -862,7 +862,7 @@ function Comments_Submit() {
         submitButton.textContent = "提交中...";
     });
 
-    // HTML5 鏍￠獙澶辫触鏃舵仮澶?
+    // HTML5 校验失败时恢复按钮状态。
     form.addEventListener(
         "invalid",
         function () {
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * 涓婚鍒囨崲 - 鎺у埗娣辫壊銆佹祬鑹叉ā寮忥紝甯︿釜璺ㄥ煙鑱斿姩
+ * 主题切换：控制浅色、深色和跟随系统。
  */
 
 (function() {
@@ -1174,24 +1174,24 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             setTimeout(() => {
                 root.classList.remove('ps-theme-vt');
-            }, 380);  // 涓?VT 鍔ㄧ敾鏃堕暱淇濇寔涓€鑷?
+            }, 380);  // 与 VT 动画时长保持一致。
         }
     }
 
     /**
-     * 鑾峰彇鏍瑰煙鍚嶏紙鐢ㄤ簬璺ㄥ瓙鍩?Cookie锛?
-     * @returns {string} 鏍瑰煙鍚嶏紝濡?.xxx.cn
+     * 获取根域名（用于跨子域 Cookie）。
+     * @returns {string} 根域名，例如 .example.com
      */
     function getRootDomain() {
         const host = window.location.hostname;
         const parts = host.split('.');
-        if (parts.length <= 2) return host; // localhost 鎴?xxx.com
+        if (parts.length <= 2) return host; // localhost 或 example.com
         return '.' + parts.slice(-2).join('.');
     }
 
     /**
-     * 鍐欏叆璺ㄥ瓙鍩?Cookie
-     * @param {string} theme - 涓婚鍊?
+     * 写入跨子域 Cookie。
+     * @param {string} theme - 主题值
      */
     function setThemeCookie(theme) {
         const rootDomain = getRootDomain();
@@ -1199,9 +1199,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 璇诲彇 Cookie
-     * @param {string} name - Cookie 鍚嶇О
-     * @returns {string|null} Cookie 鍊?
+     * 读取 Cookie。
+     * @param {string} name - Cookie 名
+     * @returns {string|null} Cookie 值
      */
     function getCookie(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -1209,8 +1209,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 搴旂敤涓婚灞炴€?
-     * @param {string} themeValue - 涓婚鍊?
+     * 应用主题属性。
+     * @param {string} themeValue - 主题值
      */
     function applyThemeAttribute(themeValue) {
         const root = document.documentElement;
@@ -1228,8 +1228,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 鏇存柊涓婚鍥炬爣
-     * @param {string} theme - 涓婚鍊?
+     * 更新主题图标。
+     * @param {string} theme - 主题值
      */
     function updateIcon(theme) {
         const iconElement = document.getElementById('theme-icon');
@@ -1247,18 +1247,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 璁剧疆涓婚
-     * @param {string} theme - 涓婚鍊?('light' | 'dark' | 'auto')
+     * 设置主题。
+     * @param {string} theme - 主题值 ('light' | 'dark' | 'auto')
      */
     function applyTheme(theme) {
         if (theme === 'auto') {
-            // 鑷姩妯″紡锛氳窡闅忕郴缁?
+            // 自动模式：跟随系统。
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             applyThemeAttribute(systemTheme);
             localStorage.setItem('theme', 'auto');
             setThemeCookie('auto');
         } else {
-            // 鏄庢殫妯″紡
+            // 固定浅色或深色。
             applyThemeAttribute(theme);
             localStorage.setItem('theme', theme);
             setThemeCookie(theme);
@@ -1283,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 鍒囨崲涓婚
+     * 切换主题。
      */
     function toggleTheme() {
         const currentTheme = localStorage.getItem('theme') || 'auto';
@@ -1292,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (currentTheme === 'light') {
             newTheme = 'dark';
             if (typeof MoxToast === 'function') {
-                MoxToast({ message: '宸插垏鎹㈣嚦娣辫壊妯″紡' });
+                MoxToast({ message: '已切换至深色模式' });
             }
         } else if (currentTheme === 'dark') {
             newTheme = 'auto';
@@ -1302,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             newTheme = 'light';
             if (typeof MoxToast === 'function') {
-                MoxToast({ message: '宸插垏鎹㈣嚦娴呰壊妯″紡' });
+                MoxToast({ message: '已切换至浅色模式' });
             }
         }
 
@@ -1310,17 +1310,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * 鍒濆鍖栦富棰樼郴缁?
+     * 初始化主题系统。
      */
     function initTheme() {
-        // 浼樺厛璇诲彇 Cookie锛堣法绔欏悓姝ワ級
+        // 优先读取 Cookie（跨站点同步）。
         const cookieTheme = getCookie('theme');
         const savedTheme = cookieTheme || localStorage.getItem('theme') || 'auto';
         applyTheme(savedTheme);
     }
 
     /**
-     * 鐩戝惉绯荤粺涓婚鍙樺寲
+     * 监听系统主题变化。
      */
     function watchSystemTheme() {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
@@ -1332,7 +1332,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 瀵煎嚭鍒?PS 鍛藉悕绌洪棿锛堜繚鐣欏叏灞€鍒悕鐢ㄤ簬鍏煎锛?    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+    // 导出到 PS 命名空间，同时保留全局别名以兼容旧代码。
+    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
     if (PS && PS.theme) {
         PS.theme.set = setTheme;
         PS.theme.toggle = toggleTheme;
@@ -1340,7 +1341,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.setTheme = setTheme;
     window.toggleTheme = toggleTheme;
 
-    // 鍒濆鍖?
+    // 自动初始化。
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
@@ -1353,17 +1354,17 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 
 /**
- * 瀵艰埅鎸囩ず鍣?- 鍔ㄦ€佹帶鍒跺鑸珮浜?
+ * 导航指示器：根据当前页面高亮导航项。
  */
 const NavIndicator = (() => {
     let indicator = null;
     let navContainer = null;
     let navItems = [];
-    // 鉁?娣诲姞浣嶇疆缂撳瓨
+    // 导航项位置缓存。
     let metricsCache = new Map();
 
     /**
-     * 鍒涘缓鎸囩ず鍣ㄥ厓绱?
+     * 创建指示器元素。
      */
     function createIndicator() {
         const el = document.createElement('div');
@@ -1372,7 +1373,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 鉁?鎵归噺缂撳瓨鎵€鏈夊鑸」浣嶇疆锛堣鎿嶄綔锛?
+     * 批量缓存导航项位置（读操作）。
      */
     function cacheAllMetrics() {
         if (!navContainer) return;
@@ -1380,7 +1381,7 @@ const NavIndicator = (() => {
         metricsCache.clear();
         const containerRect = navContainer.getBoundingClientRect();
 
-        // 鎵归噺璇诲彇鎵€鏈夊鑸」鐨勪綅缃?
+        // 批量读取所有导航项位置。
         navItems.forEach(item => {
             const rect = item.getBoundingClientRect();
             metricsCache.set(item, {
@@ -1393,16 +1394,16 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 鏇存柊鎸囩ず鍣ㄤ綅缃拰澶у皬锛堝啓鎿嶄綔锛屼娇鐢ㄧ紦瀛橈級
+     * 更新指示器位置和尺寸（写操作，使用缓存）。
      */
     function updateIndicator(targetItem) {
         if (!indicator || !targetItem) return;
 
-        // 浼樺厛浣跨敤缂撳瓨
+        // 优先使用缓存。
         let metrics = metricsCache.get(targetItem);
 
         if (!metrics) {
-            // 缂撳瓨鏈懡涓紝闄嶇骇璇诲彇骞剁紦瀛?
+            // 缓存未命中时回退实时读取并写回。
             const containerRect = navContainer.getBoundingClientRect();
             const itemRect = targetItem.getBoundingClientRect();
             metrics = {
@@ -1414,7 +1415,7 @@ const NavIndicator = (() => {
             metricsCache.set(targetItem, metrics);
         }
 
-        // 鍗曟 RAF 瓒冲锛堝弻閲?RAF 浼氬鑷?2 甯у欢杩燂級
+        // 单次 RAF 即可，避免双 RAF 带来的额外延迟。
         requestAnimationFrame(() => {
             indicator.style.width = `${metrics.width}px`;
             indicator.style.height = `${metrics.height}px`;
@@ -1424,7 +1425,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 闅愯棌鎸囩ず鍣?
+     * 隐藏指示器。
      */
     function hideIndicator() {
         if (!indicator) return;
@@ -1432,7 +1433,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 鑾峰彇褰撳墠婵€娲荤殑瀵艰埅椤?
+     * 获取当前激活的导航项。
      */
     function getActiveNavItem() {
         const currentPath = window.location.pathname;
@@ -1450,42 +1451,42 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 鍒濆鍖栧鑸寚绀哄櫒
+     * 初始化导航指示器。
      */
     function init() {
         navContainer = document.querySelector('.header-nav');
         if (!navContainer) return;
 
-        // 妫€鏌ユ槸鍚﹀凡瀛樺湪鎸囩ず鍣?
+        // 避免重复创建指示器。
         if (navContainer.querySelector('.nav-indicator')) {
             return;
         }
 
-        // 鍒涘缓骞舵坊鍔犳寚绀哄櫒
+        // 创建并挂载指示器。
         indicator = createIndicator();
         navContainer.appendChild(indicator);
 
-        // 鑾峰彇鎵€鏈夊鑸」
+        // 获取所有导航项。
         navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
 
-        // 鉁?鍒濆鍖栨椂鎵归噺缂撳瓨鎵€鏈変綅缃?
+        // 初始化时批量缓存位置。
         requestAnimationFrame(() => {
             cacheAllMetrics();
 
-            // 鍒濆瀹氫綅
+            // 设置初始位置。
             const activeItem = getActiveNavItem();
             if (activeItem) {
                 updateIndicator(activeItem);
             }
         });
 
-        // 鉁?鐩戝惉绐楀彛澶у皬鍙樺寲 - 浣跨敤 200ms 闃叉姈锛宺esize 鏃舵竻闄ゅ苟閲嶅缓缂撳瓨
+        // 监听窗口尺寸变化，200ms 防抖后重建缓存。
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                metricsCache.clear();  // 鉁?娓呴櫎缂撳瓨
-                cacheAllMetrics();     // 鉁?閲嶅缓缂撳瓨
+                metricsCache.clear();  // 清空缓存。
+                cacheAllMetrics();     // 重建缓存。
                 const activeItem = getActiveNavItem();
                 if (activeItem) {
                     updateIndicator(activeItem);
@@ -1495,7 +1496,7 @@ const NavIndicator = (() => {
     }
 
     /**
-     * 鏇存柊鎸囩ず鍣紙渚?Swup 璋冪敤锛?
+     * 更新指示器（供 Swup 切页后调用）。
      */
     function update() {
         if (!navContainer) {
@@ -1503,16 +1504,16 @@ const NavIndicator = (() => {
             return;
         }
 
-        // 閲嶆柊鑾峰彇瀵艰埅椤癸紙Swup 鍙兘浼氭浛鎹㈠唴瀹癸級
+        // 重新获取导航项（Swup 可能替换导航内容）。
         navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
 
-        // 鉁?Swup 鍒囨崲鍚庢竻闄ゅ苟閲嶅缓缂撳瓨
+        // Swup 切页后清空并重建缓存。
         metricsCache.clear();
 
         const activeItem = getActiveNavItem();
         if (activeItem) {
             requestAnimationFrame(() => {
-                cacheAllMetrics();  // 鉁?閲嶅缓缂撳瓨
+                cacheAllMetrics();  // 重建缓存。
                 updateIndicator(activeItem);
             });
         } else {
@@ -1520,7 +1521,8 @@ const NavIndicator = (() => {
         }
     }
 
-    // 瀵煎嚭鍒?PS 鍛藉悕绌洪棿锛堜繚鐣欏叏灞€鍒悕鐢ㄤ簬鍏煎锛?    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
+    // 导出到 PS 命名空间，同时保留全局别名以兼容旧代码。
+    const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
     const navApi = {
         init,
         update
@@ -1531,7 +1533,7 @@ const NavIndicator = (() => {
     }
     window.NavIndicator = navApi;
 
-    // 鑷姩鍒濆鍖?
+    // 自动初始化。
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
