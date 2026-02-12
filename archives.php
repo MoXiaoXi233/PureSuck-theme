@@ -41,7 +41,10 @@ $this->need('header.php');
                         </a>
                     </h1>
                     <div class="inner-post-wrapper">
-
+                        <?php
+                        $GLOBALS['toc_html'] = '';
+                        ob_start();
+                        ?>
                         <?php $totalPosts = (int)getTotalPostsCount(); ?>
                         <div class="meta post-meta">
                             这里会归档一切文章<br>
@@ -94,6 +97,10 @@ $this->need('header.php');
                             }
                             echo '</div>'; // 结束时间线
                         }
+                        ?>
+                        <?php
+                        $archivesContent = ob_get_clean();
+                        echo generateToc($archivesContent);
                         ?>
                     </div>
                 </div>
