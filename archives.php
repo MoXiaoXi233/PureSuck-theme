@@ -104,13 +104,4 @@ $this->need('header.php');
 
 </div>
 
-<div class="nav main-pager" data-js="pager">
-    <div class="nav main-lastinfo">
-        <span class="nav-item-alt">
-        <?php echo $this->options->footerInfo; ?>
-    </span>
-</div>
-</div>
-</main>
-
 <?php $this->need('footer.php'); ?>

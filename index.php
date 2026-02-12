@@ -110,22 +110,4 @@ $this->need('header.php');
     <?php endwhile; ?>
 </div>
 
-<nav class="nav main-pager" role="navigation" aria-label="文章列表分页导航" data-js="pager">
-    <span class="nav-item-alt">
-        第 <?= $this->_currentPage > 1 ? $this->_currentPage : 1; ?> 页 / 共
-        <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页
-    </span>
-    <div class="nav nav--pager">
-        <?php $this->pageLink('上一页'); ?>
-        <i class="icon-record-outline"></i>
-        <?php $this->pageLink('下一页', 'next'); ?>
-    </div>
-</nav>
-
-<div class="nav main-lastinfo">
-    <span class="nav-item-alt">
-        <?php echo $this->options->footerInfo; ?>
-    </span>
-</div>
-</main>
 <?php $this->need('footer.php'); ?>
