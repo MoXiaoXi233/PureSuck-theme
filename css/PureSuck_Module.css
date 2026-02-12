@@ -604,19 +604,6 @@
     flex-direction: column;
 }
 
-.github-card-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: color-mix(in srgb, var(--themecolor) 12%, transparent);
-    color: var(--themecolor);
-    flex-shrink: 0;
-    transition: transform .35s ease, background-color .35s ease;
-}
-
 .github-card-media {
     width: 160px;
     height: 84px;
@@ -652,6 +639,13 @@
     min-width: 0;
 }
 
+.github-card-platform {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--themecolor) 75%, var(--text2-color));
+}
+
 .github-card-title-row {
     display: inline-flex;
     align-items: center;
@@ -669,6 +663,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.github-card-title-repo {
+    font-size: 1.16rem;
 }
 
 .github-card-badge {
@@ -726,9 +724,17 @@
     gap: 6px;
 }
 
+.github-card-source {
+    color: var(--text2-color);
+}
+
 .github-card-meta .icon {
     font-size: 0.9rem;
     opacity: 0.7;
+}
+
+.github-card-source .icon {
+    opacity: 0.92;
 }
 
 .github-card-star {
@@ -751,19 +757,9 @@
     letter-spacing: 0.03em;
 }
 
-.github-card:hover .github-card-icon {
-    transform: scale(1.08);
-    background-color: color-mix(in srgb, var(--themehovercolor) 14%, transparent);
-}
-
 .github-card-error {
     background-color: var(--red-pale-color);
     border-color: var(--red-border-color);
-}
-
-.github-card-error .github-card-icon {
-    color: var(--red-bold-color);
-    background-color: color-mix(in srgb, var(--red-bold-color) 14%, transparent);
 }
 
 .github-card-error .github-card-title,
@@ -811,6 +807,10 @@
 
     .github-card-title-wrap {
         width: 100%;
+    }
+
+    .github-card-title-repo {
+        font-size: 1.25rem;
     }
 
     .github-card-media {
@@ -888,19 +888,6 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 10px;
-}
-
-.ps-post-card-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: color-mix(in srgb, var(--themecolor) 12%, transparent);
-    color: var(--themecolor);
-    flex-shrink: 0;
-    transition: transform .35s ease, background-color .35s ease;
 }
 
 .ps-post-card-title-wrap {
@@ -997,19 +984,9 @@
     letter-spacing: 0.03em;
 }
 
-.ps-post-card:hover .ps-post-card-icon {
-    transform: scale(1.08);
-    background-color: color-mix(in srgb, var(--themehovercolor) 14%, transparent);
-}
-
 .ps-post-card-error {
     background-color: var(--red-pale-color);
     border-color: var(--red-border-color);
-}
-
-.ps-post-card-error .ps-post-card-icon {
-    color: var(--red-bold-color);
-    background-color: color-mix(in srgb, var(--red-bold-color) 14%, transparent);
 }
 
 .ps-post-card-error .ps-post-card-title,
