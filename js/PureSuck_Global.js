@@ -249,10 +249,10 @@
 
             if (typeof window.MoxToast === 'function') {
                 const message = next === 'light'
-                    ? 'Theme switched to light'
+                    ? '已切换至浅色模式'
                     : next === 'dark'
-                        ? 'Theme switched to dark'
-                        : 'Theme follows system';
+                        ? '已切换至深色模式'
+                        : '模式将跟随系统 ㆆᴗㆆ';
                 window.MoxToast({ message: message });
             }
         }

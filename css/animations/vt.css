@@ -9,6 +9,36 @@
     animation: none;
 }
 
+@keyframes ps-theme-root-old {
+    from {
+        opacity: 1;
+        filter: saturate(1);
+    }
+    to {
+        opacity: 0;
+        filter: saturate(0.98);
+    }
+}
+
+@keyframes ps-theme-root-new {
+    from {
+        opacity: 0;
+        filter: saturate(1.02);
+    }
+    to {
+        opacity: 1;
+        filter: saturate(1);
+    }
+}
+
+html.ps-theme-vt::view-transition-old(root) {
+    animation: ps-theme-root-old var(--ps-motion-theme-vt) ease both;
+}
+
+html.ps-theme-vt::view-transition-new(root) {
+    animation: ps-theme-root-new var(--ps-motion-theme-vt) ease both;
+}
+
 [data-ps-vt-name^="ps-post-"] {
     contain: layout style paint;
 }

@@ -5,6 +5,7 @@
     --ps-motion-enter-list: 520ms;
     --ps-motion-exit: 260ms;
     --ps-motion-vt: 380ms;
+    --ps-motion-theme-vt: 320ms;
 
     --ps-ease-enter: cubic-bezier(0.22, 0.68, 0.35, 1);
     --ps-ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
