@@ -1518,6 +1518,11 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     position: relative;
 }
 
+.cloud-section,
+.search-section {
+    contain: layout paint;
+}
+
 .section-header {
     display: flex;
     align-items: center;

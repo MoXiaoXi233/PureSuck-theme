@@ -4,6 +4,50 @@
     const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
     if (!PS || typeof PS.registerModule !== 'function') return;
 
+    function runWhenIdle(task, options) {
+        const cfg = Object.assign({ timeout: 1400, delay: 0 }, options || {});
+        let canceled = false;
+        let delayTimer = 0;
+        let idleId = 0;
+
+        const runTask = function () {
+            if (canceled) return;
+            if (typeof window.requestIdleCallback === 'function') {
+                idleId = window.requestIdleCallback(function () {
+                    if (canceled) return;
+                    task();
+                }, { timeout: cfg.timeout });
+                return;
+            }
+            idleId = window.setTimeout(function () {
+                if (canceled) return;
+                task();
+            }, 0);
+        };
+
+        if (cfg.delay > 0) {
+            delayTimer = window.setTimeout(runTask, cfg.delay);
+        } else {
+            runTask();
+        }
+
+        return function cancelTask() {
+            canceled = true;
+            if (delayTimer) {
+                clearTimeout(delayTimer);
+                delayTimer = 0;
+            }
+            if (idleId) {
+                if (typeof window.cancelIdleCallback === 'function') {
+                    window.cancelIdleCallback(idleId);
+                } else {
+                    clearTimeout(idleId);
+                }
+                idleId = 0;
+            }
+        };
+    }
+
     const GoTop = (function () {
         let button = null;
         let clickBound = false;
@@ -247,6 +291,7 @@
         let metricsCache = new Map();
         let resizeBound = false;
         let resizeTimer = 0;
+        let deferredUpdateCancel = null;
 
         function createIndicator() {
             const el = document.createElement('div');
@@ -254,38 +299,30 @@
             return el;
         }
 
+        function measureItemMetrics(item) {
+            if (!navContainer || !item) return null;
+            const containerRect = navContainer.getBoundingClientRect();
+            const rect = item.getBoundingClientRect();
+            return {
+                width: rect.width,
+                height: rect.height,
+                left: rect.left - containerRect.left,
+                top: rect.top - containerRect.top
+            };
+        }
+
         function cacheAllMetrics() {
             if (!navContainer) return;
             metricsCache.clear();
 
-            const containerRect = navContainer.getBoundingClientRect();
             navItems.forEach(function (item) {
-                const rect = item.getBoundingClientRect();
-                metricsCache.set(item, {
-                    width: rect.width,
-                    height: rect.height,
-                    left: rect.left - containerRect.left,
-                    top: rect.top - containerRect.top
-                });
+                const metrics = measureItemMetrics(item);
+                if (metrics) metricsCache.set(item, metrics);
             });
         }
 
-        function updateIndicator(targetItem) {
-            if (!indicator || !targetItem) return;
-
-            let metrics = metricsCache.get(targetItem);
-            if (!metrics) {
-                const containerRect = navContainer.getBoundingClientRect();
-                const itemRect = targetItem.getBoundingClientRect();
-                metrics = {
-                    width: itemRect.width,
-                    height: itemRect.height,
-                    left: itemRect.left - containerRect.left,
-                    top: itemRect.top - containerRect.top
-                };
-                metricsCache.set(targetItem, metrics);
-            }
-
+        function writeIndicator(metrics) {
+            if (!indicator || !metrics) return;
             window.requestAnimationFrame(function () {
                 indicator.style.width = metrics.width + 'px';
                 indicator.style.height = metrics.height + 'px';
@@ -294,9 +331,45 @@
             });
         }
 
+        function updateIndicator(targetItem) {
+            if (!indicator || !targetItem) return;
+            let metrics = metricsCache.get(targetItem);
+            if (!metrics) {
+                metrics = measureItemMetrics(targetItem);
+                if (!metrics) {
+                    hideIndicator();
+                    return;
+                }
+                metricsCache.set(targetItem, metrics);
+            }
+            writeIndicator(metrics);
+        }
+
         function hideIndicator() {
             if (!indicator) return;
             indicator.classList.remove('active');
+        }
+
+        function refreshActiveIndicator() {
+            if (!navContainer || !navContainer.isConnected) return;
+            navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
+            const active = getActiveNavItem();
+            if (!active) {
+                hideIndicator();
+                return;
+            }
+
+            window.requestAnimationFrame(function () {
+                cacheAllMetrics();
+                const metrics = metricsCache.get(active);
+                if (!metrics) {
+                    hideIndicator();
+                    return;
+                }
+                window.requestAnimationFrame(function () {
+                    writeIndicator(metrics);
+                });
+            });
         }
 
         function getActiveNavItem() {
@@ -346,36 +419,33 @@
                 navContainer.appendChild(indicator);
             }
 
-            navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
-            window.requestAnimationFrame(function () {
-                cacheAllMetrics();
-                const active = getActiveNavItem();
-                if (active) updateIndicator(active);
-                else hideIndicator();
-            });
-
+            refreshActiveIndicator();
             bindResizeListener();
         }
 
-        function update() {
+        function update(options) {
+            const cfg = Object.assign({ defer: false }, options || {});
+            if (deferredUpdateCancel) {
+                deferredUpdateCancel();
+                deferredUpdateCancel = null;
+            }
+
             if (!navContainer || !navContainer.isConnected) {
                 init();
                 return;
             }
 
-            navItems = Array.from(navContainer.querySelectorAll('.nav-item'));
-            metricsCache.clear();
-
-            const active = getActiveNavItem();
-            if (!active) {
-                hideIndicator();
+            if (cfg.defer) {
+                deferredUpdateCancel = runWhenIdle(function () {
+                    deferredUpdateCancel = null;
+                    metricsCache.clear();
+                    refreshActiveIndicator();
+                }, { delay: 220, timeout: 1500 });
                 return;
             }
 
-            window.requestAnimationFrame(function () {
-                cacheAllMetrics();
-                updateIndicator(active);
-            });
+            metricsCache.clear();
+            refreshActiveIndicator();
         }
 
         return {
@@ -397,8 +467,20 @@
     PS.registerModule({
         id: 'ps-global-ui',
         priority: 20,
-        init: function initGlobalUi(root) {
+        init: function initGlobalUi(root, context) {
             GoTop.init(root);
+
+            const isSwupView = Boolean(context && context.isSwup && context.reason === 'page:view');
+            if (isSwupView) {
+                const cancel = runWhenIdle(function () {
+                    NavIndicator.init();
+                    NavIndicator.update({ defer: true });
+                }, { delay: 120, timeout: 1500 });
+                return function cleanupGlobalUi() {
+                    if (typeof cancel === 'function') cancel();
+                };
+            }
+
             NavIndicator.init();
             NavIndicator.update();
         }

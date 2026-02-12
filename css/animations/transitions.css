@@ -21,19 +21,6 @@
     --ps-vt-radius: 0.85rem;
 }
 
-html.ps-animating {
-    scroll-behavior: auto !important;
-    scrollbar-gutter: stable;
-}
-
-/* 仅在动画阶段临时开启 will-change */
-html.ps-animating #swup .post,
-html.ps-animating #swup .archive-title,
-html.ps-animating #swup .main-pager,
-html.ps-animating #swup .main-lastinfo {
-    will-change: transform, opacity;
-}
-
 #swup.ps-enter-prime .main {
     opacity: 0.001;
 }

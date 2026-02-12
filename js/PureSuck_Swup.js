@@ -387,7 +387,7 @@
         });
 
         if (window.NavIndicator && typeof window.NavIndicator.update === 'function') {
-            window.NavIndicator.update();
+            window.NavIndicator.update({ defer: true });
         }
     }
 

@@ -12,6 +12,7 @@ const TOC_SWAP_IN_CLASS = 'toc-swap-in';
 const TOC_SWAP_TIMER_KEY = '__psTocSwapTimer';
 const TOC_SWAP_HANDLER_KEY = '__psTocSwapHandler';
 const TOC_SWAP_FALLBACK_MS = 260;
+const TOC_OBSERVER_DELAY_MS = 260;
 
 function resetTocStickySidebar(sidebar) {
     const target = sidebar && sidebar.classList ? sidebar : document.querySelector('.right-sidebar');
@@ -201,9 +202,25 @@ const initializeTOC = (() => {
         clearTimeout(hashTimer);
         hashTimer = 0;
         isClickScrolling = false;
+        if (state.applyRaf) {
+            window.cancelAnimationFrame(state.applyRaf);
+            state.applyRaf = 0;
+        }
 
         if (state.observer) {
             state.observer.disconnect();
+        }
+        if (state.observerStartTimer) {
+            clearTimeout(state.observerStartTimer);
+            state.observerStartTimer = 0;
+        }
+        if (state.observerIdleId) {
+            if (typeof window.cancelIdleCallback === 'function') {
+                window.cancelIdleCallback(state.observerIdleId);
+            } else {
+                clearTimeout(state.observerIdleId);
+            }
+            state.observerIdleId = 0;
         }
 
         if (state.activeLink) {
@@ -239,21 +256,42 @@ const initializeTOC = (() => {
         state.activeIndex = index;
 
         const li = item && item.li ? item.li : null;
-        if (state.indicator && li) {
-            state.indicator.style.transform = `translateY(${li.offsetTop}px)`;
+        let nextIndicatorTop = 0;
+        let shouldScroll = false;
+        let nextScrollTop = 0;
+        if (li) {
+            nextIndicatorTop = li.offsetTop;
+        }
+        if (state.tocSection && li) {
+            const viewTop = state.tocSection.scrollTop;
+            const viewHeight = state.tocSection.clientHeight;
+            const itemTop = li.offsetTop;
+            const itemHeight = li.offsetHeight;
+            const itemBottom = itemTop + itemHeight;
+            const viewBottom = viewTop + viewHeight;
+            if (itemTop < viewTop || itemBottom > viewBottom) {
+                shouldScroll = true;
+                nextScrollTop = Math.max(0, Math.round(itemTop - viewHeight / 2 + itemHeight / 2));
+            }
         }
 
-        if (state.tocSection && li) {
-            const containerRect = state.tocSection.getBoundingClientRect();
-            const itemRect = li.getBoundingClientRect();
-
-            if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
-                state.tocSection.scrollBy({
-                    top: itemRect.top - containerRect.top - containerRect.height / 2 + itemRect.height / 2,
+        if (state.applyRaf) {
+            window.cancelAnimationFrame(state.applyRaf);
+            state.applyRaf = 0;
+        }
+        state.applyRaf = window.requestAnimationFrame(() => {
+            if (!state) return;
+            if (state.indicator && li) {
+                state.indicator.style.transform = `translateY(${nextIndicatorTop}px)`;
+            }
+            if (state.tocSection && shouldScroll) {
+                state.tocSection.scrollTo({
+                    top: nextScrollTop,
                     behavior: cfg.scrollBehavior
                 });
             }
-        }
+            state.applyRaf = 0;
+        });
     }
 
     function handleIntersect(entries) {
@@ -316,6 +354,39 @@ const initializeTOC = (() => {
         }, 600);
     }
 
+    function attachObserverWhenReady() {
+        if (!state || !state.observer) return;
+
+        const attach = function () {
+            if (!state || !state.observer) return;
+            state.headings.forEach((heading) => state.observer.observe(heading));
+        };
+
+        const runIdle = function () {
+            if (!state) return;
+            if (typeof window.requestIdleCallback === 'function') {
+                state.observerIdleId = window.requestIdleCallback(() => {
+                    if (!state) return;
+                    state.observerIdleId = 0;
+                    attach();
+                }, { timeout: 1200 });
+                return;
+            }
+            attach();
+        };
+
+        if (document.documentElement.classList.contains('ps-animating')) {
+            state.observerStartTimer = window.setTimeout(() => {
+                if (!state) return;
+                state.observerStartTimer = 0;
+                runIdle();
+            }, TOC_OBSERVER_DELAY_MS);
+            return;
+        }
+
+        runIdle();
+    }
+
     return function initializeTOC() {
         destroy();
 
@@ -365,7 +436,10 @@ const initializeTOC = (() => {
             firstVisible: -1,
             activeIndex: -1,
             activeLink: null,
-            observer: null
+            observer: null,
+            applyRaf: 0,
+            observerStartTimer: 0,
+            observerIdleId: 0
         };
 
         showTocSection(tocSection);
@@ -380,18 +454,21 @@ const initializeTOC = (() => {
             rootMargin: '-100px 0px -66% 0px',
             threshold: 0
         });
-
-        headings.forEach((heading) => state.observer.observe(heading));
+        attachObserverWhenReady();
 
         requestAnimationFrame(() => {
             if (!state) return;
-            let initialIndex = 0;
-            for (let i = 0; i < headings.length; i += 1) {
-                if (headings[i].getBoundingClientRect().top <= 120) {
-                    initialIndex = i;
+            if (window.location.hash) {
+                const hashId = decodeURIComponent(window.location.hash.slice(1));
+                const hashIndex = Object.prototype.hasOwnProperty.call(state.idToIndex, hashId)
+                    ? state.idToIndex[hashId]
+                    : -1;
+                if (typeof hashIndex === 'number' && hashIndex >= 0) {
+                    setActive(hashIndex);
+                    return;
                 }
             }
-            setActive(initialIndex);
+            setActive(0);
         });
     };
 })();

@@ -187,12 +187,28 @@
             if (!api || typeof api.ensureRuntimeTocSection !== 'function') return null;
             if (typeof api.initializeTOC !== 'function' || typeof api.initializeStickyTOC !== 'function') return null;
 
+            let idleCancel = null;
             api.ensureRuntimeTocSection(scope, pageType, function () {
-                api.initializeTOC();
-                api.initializeStickyTOC();
+                const runInit = function () {
+                    api.initializeTOC();
+                    api.initializeStickyTOC();
+                };
+
+                const isSwupView = Boolean(context && context.isSwup && context.reason === 'page:view');
+                if (isSwupView) {
+                    idleCancel = runWhenIdle(runInit, { delay: 240, timeout: 2400 });
+                    return;
+                }
+
+                runInit();
             });
 
-            return null;
+            return function cleanupTocTask() {
+                if (typeof idleCancel === 'function') {
+                    idleCancel();
+                    idleCancel = null;
+                }
+            };
         });
     }
 
@@ -244,7 +260,7 @@
         schedule(function () {
             return runTocModule(scope, context);
         }, {
-            delay: context && context.isSwup ? 380 : 120,
+            delay: context && context.isSwup ? 620 : 120,
             timeout: 2400
         });
 

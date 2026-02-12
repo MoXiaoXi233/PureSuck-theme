@@ -340,7 +340,7 @@ h3 {
 	line-height: 30px
 }
 
-.comment-title,
+.response.comment-title,
 .h4,
 .h5,
 .h6,
@@ -359,19 +359,6 @@ h3::before {
 	height: 8px;
 	background-image: linear-gradient(var(--themecolor), transparent);
 	opacity: .55;
-	position: relative;
-	border-radius: 50%;
-	top: 30px;
-}
-
-#comments-list>h1.comment-title::before {
-	content: "";
-	right: 3px;
-	display: block;
-	width: 8px;
-	height: 8px;
-	background-image: linear-gradient(var(--themecolor), transparent);
-	opacity: .65;
 	position: relative;
 	border-radius: 50%;
 	top: 30px;
@@ -426,12 +413,6 @@ small {
 		top: 35px;
 	}
 
-	#comments-list>h1.comment-title::before {
-		width: 10px;
-		height: 10px;
-		top: 35px;
-	}
-
 	.h3,
 	h3 {
 		line-height: 36px
@@ -442,7 +423,7 @@ small {
 		height: 9px;
 	}
 
-	.comment-title,
+	.response.comment-title,
 	.h4,
 	h4 {
 		font-size: 1.375rem;
@@ -467,12 +448,6 @@ small {
 	}
 
 	h2::before {
-		width: 12px;
-		height: 12px;
-		top: 40px;
-	}
-
-	#comments-list>h1.comment-title::before {
 		width: 12px;
 		height: 12px;
 		top: 40px;
@@ -1621,8 +1596,6 @@ strong {
 	margin: 0;
 	padding-left: 0;
 	list-style-type: none;
-	content-visibility: auto;
-	contain-intrinsic-size: auto 150px;
 }
 
 .avatarcc {
@@ -2482,22 +2455,4 @@ input:-webkit-autofill:active {
 .timeline .timeline-title a:hover {
 	color: var(--themehovercolor) !important;
 }
-
-.post-comments,
-#comments-list {
-	content-visibility: auto;
-	contain-intrinsic-size: auto 500px;
-}
-
-/* 长文性能优化：改为块级按需布局，避免整段正文一次性全量 layout */
-.post-content > * {
-	content-visibility: auto;
-	contain-intrinsic-size: auto 140px;
-}
-
-.post-content > figure,
-.post-content > pre,
-.post-content > .table-scroll,
-.post-content > .pic-grid {
-	contain-intrinsic-size: auto 320px;
-}
+/* deferred-render optimization removed */
