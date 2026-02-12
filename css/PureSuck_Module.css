@@ -1,35 +1,35 @@
-/* 一些后期添加的模块样式 **/
-/* 本CSS包含解析项目、右侧边栏及部分小模块 **/
+/* 涓€浜涘悗鏈熸坊鍔犵殑妯″潡鏍峰紡 **/
+/* 鏈珻SS鍖呭惈瑙ｆ瀽椤圭洰銆佸彸渚ц竟鏍忓強閮ㄥ垎灏忔ā鍧?**/
 :root {
-    /* Pale：纸感色相 */
+    /* Pale锛氱焊鎰熻壊鐩?*/
     --blue-pale-color: #f4f7ff;
     --green-pale-color: #f4faf6;
     --yellow-pale-color: #fff9ee;
     --red-pale-color: #fff5f5;
     --pink-pale-color: #fff4f8;
 
-    /* Border：低饱和色 */
+    /* Border锛氫綆楗卞拰鑹?*/
     --blue-border-color: #c3d2f5;
     --green-border-color: #c6e0d0;
     --yellow-border-color: #f0d9b5;
     --red-border-color: #efc2c2;
     --pink-border-color: #eec3d4;
 
-    /* Base：Tab/轻强调 */
+    /* Base锛歍ab/杞诲己璋?*/
     --blue-base-color: #4f6fdc;
     --green-base-color: #4f9b6a;
     --yellow-base-color: #d6a65a;
     --red-base-color: #d46a6a;
     --pink-base-color: #d36b8c;
 
-    /* Bold：标题/关键字 */
+    /* Bold锛氭爣棰?鍏抽敭瀛?*/
     --blue-bold-color: #365acb;
     --green-bold-color: #2f7d4f;
     --yellow-bold-color: #b7791f;
     --red-bold-color: #b84a4a;
     --pink-bold-color: #b94a73;
 
-    /* 饱和度更高 */
+    /* 楗卞拰搴︽洿楂?*/
     --blue-alert-color: #6482db;
     --green-alert-color: #4ead86;
     --yellow-alert-color: #e5b96e;
@@ -39,28 +39,28 @@
 }
 
 [data-theme="dark"] {
-    /* Pale：暗色纸面 */
+    /* Pale锛氭殫鑹茬焊闈?*/
     --blue-pale-color: #1c2230;
     --green-pale-color: #1d2621;
     --yellow-pale-color: #262318;
     --red-pale-color: #261b1b;
     --pink-pale-color: #261b22;
 
-    /* Border：低存在感 */
+    /* Border锛氫綆瀛樺湪鎰?*/
     --blue-border-color: #2a3554;
     --green-border-color: #2a3f35;
     --yellow-border-color: #4a4026;
     --red-border-color: #4a2a2a;
     --pink-border-color: #4a2a3a;
 
-    /* Base：Tab/次强调 */
+    /* Base锛歍ab/娆″己璋?*/
     --blue-base-color: #5f74c8;
     --green-base-color: #5fa37f;
     --yellow-base-color: #c6a25a;
     --red-base-color: #c67a7a;
     --pink-base-color: #c67a9a;
 
-    /* Bold：标题/Tab */
+    /* Bold锛氭爣棰?Tab */
     --blue-bold-color: #8fa2e0;
     --green-bold-color: #8fcfa8;
     --yellow-bold-color: #e0c98a;
@@ -74,7 +74,7 @@
     --pink-alert-color: #bf677a;
 }
 
-/* 回到顶部 **/
+/* 鍥炲埌椤堕儴 **/
 .go-top {
     z-index: 1;
     position: fixed;
@@ -86,9 +86,9 @@
     color: var(--pure-color);
     opacity: 0;
     visibility: hidden;
-    /* 隐藏按钮 */
+    /* 闅愯棌鎸夐挳 */
     pointer-events: none;
-    /* 默认禁用点击 */
+    /* 榛樿绂佺敤鐐瑰嚮 */
     border-radius: 14px;
     cursor: pointer;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -98,9 +98,9 @@
 #go-top.visible {
     opacity: 1;
     visibility: visible;
-    /* 显示 */
+    /* 鏄剧ず */
     pointer-events: auto;
-    /* 启用点击 */
+    /* 鍚敤鐐瑰嚮 */
 }
 
 .go-top:hover {
@@ -117,7 +117,7 @@
     height: 100%;
 }
 
-/* 短代码模块相关 CSS 位于下方 */
+/* 鐭唬鐮佹ā鍧楃浉鍏?CSS 浣嶄簬涓嬫柟 */
 /* ALERT */
 .text-xs.font-semibold {
     margin-top: 0 !important;
@@ -176,7 +176,7 @@
     border: 1px solid var(--pink-alert-color);
 }
 
-/* WINDOW 信息窗 */
+/* WINDOW 淇℃伅绐?*/
 .flex {
     display: flex;
 }
@@ -207,14 +207,14 @@
     }
 }
 
-/* Tab Header 在 hover 时"醒一下" */
+/* Tab Header 鍦?hover 鏃?閱掍竴涓? */
 @media (hover: hover) {
     .window:hover::before {
         opacity: 0.35;
     }
 }
 
-/* 右侧出现极弱的结构提示 */
+/* 鍙充晶鍑虹幇鏋佸急鐨勭粨鏋勬彁绀?*/
 @media (hover: hover) {
     .window:hover::after {
         opacity: 0.14;
@@ -334,7 +334,7 @@
     color: inherit;
 }
 
-/* 友链卡片 **/
+/* 鍙嬮摼鍗＄墖 **/
 .friendsboard-list {
     display: flex;
     flex-flow: row wrap;
@@ -1030,7 +1030,7 @@
         box-shadow: none;
     }
 }
-/* 折叠面板 */
+/* 鎶樺彔闈㈡澘 */
 .collapsible-panel {
     margin: 36px 0;
     border: 1px solid var(--line-color);
@@ -1097,7 +1097,7 @@
 .collapsible-content {
     max-height: 0;
     overflow: hidden;
-    /* 与整体动画节奏协调：480ms + cubic-bezier 缓动 */
+    /* 涓庢暣浣撳姩鐢昏妭濂忓崗璋冿細480ms + cubic-bezier 缂撳姩 */
     transition: max-height .48s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -1107,7 +1107,7 @@
     line-height: 1.85;
     transform: translateY(-6px);
     opacity: 0;
-    /* 内容淡入：略快于容器展开，形成层次感 */
+    /* 鍐呭娣″叆锛氱暐蹇簬瀹瑰櫒灞曞紑锛屽舰鎴愬眰娆℃劅 */
     transition: transform .42s cubic-bezier(0.2, 0.8, 0.2, 1), opacity .42s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -1137,7 +1137,7 @@
 }
 
 
-/* 时间线 */
+/* 鏃堕棿绾?*/
 
 .timeline {
     position: relative;
@@ -1472,12 +1472,12 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 .bilibili-card iframe {
     width: 100%;
     height: 450px;
-    /* 根据需要调整高度 */
+    /* 鏍规嵁闇€瑕佽皟鏁撮珮搴?*/
     border: none;
 }
 
-/* 右侧边栏相关 CSS 位于下方 */
-/* 右侧边栏 */
+/* 鍙充晶杈规爮鐩稿叧 CSS 浣嶄簬涓嬫柟 */
+/* 鍙充晶杈规爮 */
 .right-sidebar {
     box-sizing: border-box;
     width: 100%;
@@ -1487,7 +1487,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     z-index: 1;
 }
 
-/* 分类和标签模块 */
+/* 鍒嗙被鍜屾爣绛炬ā鍧?*/
 .cloud-section,
 .toc-section,
 .search-section {
@@ -1609,7 +1609,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
 }
 
 
-/* TOC 目录**/
+/* TOC 鐩綍**/
 .toc-section {
     overflow: hidden;
     -ms-overflow-style: none;
@@ -1754,7 +1754,7 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     padding-left: 40px;
 }
 
-/* 侧边栏 搜索*/
+/* 渚ц竟鏍?鎼滅储*/
 .search-container {
     display: flex;
     align-items: center;
@@ -1844,4 +1844,53 @@ html[data-theme="dark"] .tab-header.dir-left .tab-indicator {
     .toc-section {
         display: none;
     }
+}
+
+/* 404 椤甸潰 */
+.ps-404-layout .ps-404-body {
+    margin-top: 0;
+}
+
+.ps-404-card {
+    text-align: center;
+    padding-top: 4px;
+    padding-bottom: 10px;
+}
+
+.ps-404-image-wrap {
+    margin: 0 0 8px;
+}
+
+.ps-404-image {
+    display: block;
+    margin: 0 auto;
+    max-height: 190px;
+    width: auto;
+}
+
+.ps-404-code {
+    margin: 2px 0 6px;
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--themecolor);
+}
+
+.ps-404-title {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+.ps-404-desc {
+    margin: 0 auto 10px;
+    max-width: 560px;
+    color: var(--text2-color);
+    line-height: 1.85;
+}
+
+.ps-404-tip {
+    margin: 14px 0 0;
+    color: var(--text2-color);
 }
