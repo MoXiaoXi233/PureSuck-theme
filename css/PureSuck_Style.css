@@ -2455,4 +2455,32 @@ input:-webkit-autofill:active {
 .timeline .timeline-title a:hover {
 	color: var(--themehovercolor) !important;
 }
-/* deferred-render optimization removed */
+/* content-visibility：正文按块，评论按条 */
+@supports (content-visibility: auto) {
+	/* 正文：每个直接子元素一个渲染岛 */
+	.post.post--single .post-content > *,
+	.post[data-ps-page-shell="page"] .post-content > * {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 260px;
+	}
+
+	/* 标题有装饰伪元素，排除避免裁切 */
+	.post.post--single .post-content > :is(h1, h2, h3, h4, h5, h6),
+	.post[data-ps-page-shell="page"] .post-content > :is(h1, h2, h3, h4, h5, h6) {
+		content-visibility: visible;
+		contain: none;
+	}
+
+	/* 手动排除：后续发现裁切加这个类 */
+	.post-content > .ps-cv-exclude,
+	#comments-list > .comment-list > li.ps-cv-exclude {
+		content-visibility: visible;
+		contain: none;
+	}
+
+	/* 评论：单条评论一个渲染岛 */
+	#comments-list > .comment-list > li {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 190px;
+	}
+}
