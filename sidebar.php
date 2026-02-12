@@ -1,4 +1,4 @@
-<div class="right-sidebar" id="right-sidebar">
+<aside class="right-sidebar" id="right-sidebar" aria-label="页面侧边栏">
 
     <!-- 搜索功能 -->
     <?php if ($this->options->showSearch === '1'): ?>
@@ -9,8 +9,8 @@
             </header>
             <section class="section-body">
                 <form method="get" action="<?php $this->options->siteUrl(); ?>" class="search-container" role="search">
-                    <input type="text" name="s" class="search-input" placeholder="输入关键字搜索" aria-label="输入关键字搜索">
-                    <button type="submit" class="search-button" aria-label="搜索">
+                    <input type="text" name="s" class="search-input" placeholder="输入关键字搜索" aria-label="搜索关键词">
+                    <button type="submit" class="search-button" aria-label="提交搜索">
                         <span class="icon-search"></span>
                     </button>
                 </form>
@@ -99,4 +99,4 @@
         </div>
     <?php endif; ?>
 
-</div>
+</aside>

@@ -110,7 +110,7 @@ $this->need('header.php');
     <?php endwhile; ?>
 </div>
 
-<nav class="nav main-pager" data-js="pager">
+<nav class="nav main-pager" role="navigation" aria-label="文章列表分页导航" data-js="pager">
     <span class="nav-item-alt">
         第 <?= $this->_currentPage > 1 ? $this->_currentPage : 1; ?> 页 / 共
         <?= ceil($this->getTotal() / $this->parameter->pageSize); ?> 页

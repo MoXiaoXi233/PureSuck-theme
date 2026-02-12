@@ -143,7 +143,7 @@
         <header class="header" data-js="header">
             <div class="wrapper header-wrapper header-title">
                 <a href="<?= $this->options->logoIndexUrl ?: $this->options->siteUrl; ?>" class="avatar-link"
-                    aria-label="博主名字">
+                    aria-label="博主头像">
                     <span class="el-avatar el-avatar--circle avatar-hover-effect">
                         <img src="<?= $this->options->logoIndex; ?>" style="object-fit:cover;" alt="博主头像" width="120"
                             height="120" data-name="博主名字" draggable="false" fetchpriority="high" decoding="async"
@@ -164,7 +164,7 @@
                     <br>
                     <a href="https://github.com/MoXiaoXi233/PureSuck-theme" target="_blank">Theme PureSuck</a>
                 </div>
-                <nav class="nav header-item header-nav">
+                <nav class="nav header-item header-nav" aria-label="站点主导航栏">
                     <span class="nav-item<?= $this->is('index') ? ' nav-item-current' : ''; ?>">
                         <a href="<?= $this->options->siteUrl(); ?>" title="首页">
                             <span itemprop="name">首页</span>
@@ -182,7 +182,7 @@
                     <!--结束显示页面-->
                 </nav>
                 <div class="theme-toggle-container">
-                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="日夜切换">
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
                         <span id="theme-icon"></span>
                     </button>
                 </div>
@@ -198,7 +198,7 @@
             $psPageType = 'list';
         }
         ?>
-        <div class="content-layout" data-layout="three-column">
-            <div class="content-main">
+        <section class="content-layout" data-layout="three-column" aria-label="页面主内容与侧边栏">
+            <section class="content-main">
                 <div id="swup" data-ps-page-type="<?= $psPageType; ?>">
                     <main class="main">

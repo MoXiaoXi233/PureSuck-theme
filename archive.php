@@ -120,7 +120,7 @@
 
 </div>
 
-<nav class="nav main-pager" data-js="pager">
+<nav class="nav main-pager" role="navigation" aria-label="归档列表分页导航" data-js="pager">
     <span class="nav-item-alt">
         第 <?php if ($this->_currentPage > 1)
             echo $this->_currentPage;

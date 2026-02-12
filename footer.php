@@ -3,9 +3,9 @@
 <?php $this->footer(); ?>
 
                 </div><!-- 关闭 swup -->
-            </div><!-- 关闭 content-main -->
+            </section><!-- 关闭 content-main -->
             <?php $this->need('sidebar.php'); ?>
-        </div><!-- 关闭 content-layout -->
+        </section><!-- 关闭 content-layout -->
     </div><!-- 关闭 site wrapper -->
 
 <!-- 回到顶端 -->
