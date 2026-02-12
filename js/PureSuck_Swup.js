@@ -846,6 +846,11 @@
                 native: true,
                 animateHistoryBrowsing: true,
                 animationSelector: false,
+                ignoreVisit: function ignoreVisit(_url, context) {
+                    const meta = context || {};
+                    if (meta.event && meta.event.defaultPrevented) return true;
+                    return Boolean(meta.el && meta.el.closest('[data-no-swup]'));
+                },
                 resolveUrl: function resolveUrl(url) {
                     const normalized = new URL(url, window.location.origin);
                     return normalized.pathname + normalized.search + normalized.hash;
