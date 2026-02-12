@@ -1590,7 +1590,7 @@ strong {
 
 .comment-form-status {
 	min-height: 1.25rem;
-	margin: -1.2rem 0 1.2rem;
+	margin: -1.05rem 0 1.1rem;
 	display: inline-flex;
 	align-items: center;
 	gap: 0.45rem;
@@ -1666,7 +1666,7 @@ strong {
 .avatarcc {
 	float: left;
 	display: block;
-	margin: 1.2rem 1.4rem 0 0;
+	margin: 1.05rem 1.2rem 0 0;
 	width: 56px;
 	height: 56px;
 	border-radius: 50%;
@@ -1676,24 +1676,25 @@ strong {
 /* comment post **/
 .cp {
 	overflow: hidden;
-	padding: 1.6rem 0;
+	padding: 1.45rem 0 1rem;
 	border-bottom: 1px solid var(--line-color);
 	word-wrap: break-word;
 }
 
 .cp-waiting {
-	margin: 6px 0 10px;
-	padding: 8px 10px;
+	margin: 6px 0 12px;
+	padding: 9px 11px;
 	border-radius: 10px;
 	font-size: 13px;
 	line-height: 1.4;
 	opacity: .9;
 	background: color-mix(in srgb, var(--themecolor) 18%, transparent);
+	border: 1px solid color-mix(in srgb, var(--themecolor) 26%, var(--border-color));
 }
 
 
 .cp p {
-	margin: 0 0 0.6rem 0;
+	margin: 0 0 0.72rem 0;
 	line-height: 1.8;
 	color: var(--text-color);
 }
@@ -1722,7 +1723,7 @@ strong {
 }
 
 .cm {
-	margin-top: 0.6rem;
+	margin-top: 0.72rem;
 	color: var(--text2-color);
 	font-size: 0.75rem;
 }
@@ -1763,8 +1764,8 @@ strong {
 }
 
 .c_p>.children {
-	margin-left: 1rem;
-	padding-left: 56px;
+	margin-left: 0.6rem;
+	padding-left: 58px;
 }
 
 .tbox-container {
@@ -1975,12 +1976,12 @@ textarea:focus-within+.CtBoxBar {
 	.avatarcc {
 		width: 44px;
 		height: 44px;
-		margin: 1rem 1rem 0 0;
+		margin: 1rem 0.9rem 0 0;
 	}
 
 	.c_p>.children {
 		margin-left: 0;
-		padding-left: 0;
+		padding-left: 0.7rem;
 	}
 }
 
