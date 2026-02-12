@@ -412,29 +412,6 @@
         return Boolean(form.querySelector('input[name="s"]'));
     }
 
-    function isTypechoCommentForm(form) {
-        if (!form || form.nodeName !== 'FORM') return false;
-        if (form.id === 'cf') return true;
-        return form.matches('form[no-pjax]') && Boolean(form.querySelector('textarea[name="text"]'));
-    }
-
-    function setBusyButton(form, label) {
-        const submit = form.querySelector('button[type="submit"], input[type="submit"], button.submit, #submit');
-        if (!submit) return function noop() {};
-
-        const prevDisabled = submit.disabled;
-        const prevText = submit.tagName === 'INPUT' ? submit.value : submit.textContent;
-        submit.disabled = true;
-        if (submit.tagName === 'INPUT') submit.value = label;
-        else submit.textContent = label;
-
-        return function restore() {
-            submit.disabled = prevDisabled;
-            if (submit.tagName === 'INPUT') submit.value = prevText;
-            else submit.textContent = prevText;
-        };
-    }
-
     function psToast(message, type) {
         if (typeof window.MoxToast !== 'function') {
             alert(String(message || ''));
@@ -461,181 +438,13 @@
         });
     }
 
-    async function refreshCommentsFromUrl(urlString, options) {
-        const cfg = Object.assign({ restoreScroll: true }, options || {});
-        const currentList = document.getElementById('comments-list');
-        if (!currentList || !isSameOriginUrl(urlString)) return false;
-
-        const beforeY = window.scrollY;
-        const activeId = document.activeElement && document.activeElement.id;
-
-        const respond = document.querySelector('.respond');
-        const holder = document.getElementById('comment-form-place-holder');
-        const respondInsideList = Boolean(respond && currentList.contains(respond));
-
-        const response = await fetch(urlString, {
-            method: 'GET',
-            credentials: 'same-origin',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html,*/*;q=0.8'
-            }
-        });
-        if (!response.ok) return false;
-
-        const html = await response.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const nextList = doc.getElementById('comments-list');
-        if (!nextList) return false;
-
-        if (respondInsideList && respond && holder && holder.parentNode) {
-            holder.parentNode.insertBefore(respond, holder);
-        }
-
-        currentList.replaceWith(nextList);
-
-        if (respondInsideList) {
-            const parentInput = document.getElementById('comment-parent');
-            if (parentInput && parentInput.parentNode) parentInput.parentNode.removeChild(parentInput);
-            const cancelReply = document.getElementById('cancel-comment-reply-link');
-            if (cancelReply) cancelReply.style.display = 'none';
-        }
-
-        requestAnimationFrame(() => {
-            if (cfg.restoreScroll) window.scrollTo(0, beforeY);
-            if (!activeId) return;
-            const activeEl = document.getElementById(activeId);
-            if (!activeEl || typeof activeEl.focus !== 'function') return;
-            try {
-                activeEl.focus({ preventScroll: true });
-            } catch (e) {
-                activeEl.focus();
-            }
-        });
-
-        return true;
-    }
-    function patchTypechoComment() {
-        const reply = function reply(cid, coid) {
-            const comment = document.getElementById(cid);
-            if (!comment) return false;
-
-            const respond = document.querySelector('.respond');
-            if (!respond) return false;
-            const form = respond.tagName === 'FORM' ? respond : respond.querySelector('form');
-            if (!form) return false;
-
-            let input = document.getElementById('comment-parent');
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'hidden';
-                input.id = 'comment-parent';
-                input.name = 'parent';
-                form.appendChild(input);
-            }
-            input.value = coid;
-
-            let holder = document.getElementById('comment-form-place-holder');
-            if (!holder) {
-                holder = document.createElement('div');
-                holder.id = 'comment-form-place-holder';
-                if (respond.parentNode) respond.parentNode.insertBefore(holder, respond);
-            }
-
-            comment.appendChild(respond);
-            const cancel = document.getElementById('cancel-comment-reply-link');
-            if (cancel) cancel.style.display = '';
-
-            const textarea = respond.querySelector('textarea[name="text"]');
-            if (textarea) textarea.focus();
-            return false;
-        };
-
-        const cancelReply = function cancelReply() {
-            const respond = document.querySelector('.respond');
-            const holder = document.getElementById('comment-form-place-holder');
-            const input = document.getElementById('comment-parent');
-            const cancel = document.getElementById('cancel-comment-reply-link');
-
-            if (input && input.parentNode) input.parentNode.removeChild(input);
-            if (!respond || !holder || !holder.parentNode) return false;
-
-            holder.parentNode.insertBefore(respond, holder);
-            if (cancel) cancel.style.display = 'none';
-            return false;
-        };
-
-        if (window.TypechoComment && typeof window.TypechoComment === 'object') {
-            window.TypechoComment.reply = reply;
-            window.TypechoComment.cancelReply = cancelReply;
-        } else {
-            window.TypechoComment = { reply, cancelReply };
-        }
-    }
-
-    async function handleCommentSubmit(form) {
-        const action = form.getAttribute('action') || '';
-        if (!isSameOriginUrl(action)) return;
-        const restore = setBusyButton(form, '提交中...');
-
-        try {
-            const response = await fetch(action, {
-                method: 'POST',
-                body: new FormData(form),
-                credentials: 'same-origin',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json, text/html;q=0.9,*/*;q=0.8'
-                }
-            });
-
-            if (!response.ok) {
-                psToast('评论提交失败，请稍后重试', 'error');
-                return;
-            }
-
-            const contentType = (response.headers.get('content-type') || '').toLowerCase();
-            const fallback = window.location.href.split('#')[0];
-            let refreshUrl = fallback;
-
-            if (contentType.includes('application/json')) {
-                const data = await response.json();
-                const ok = Boolean(
-                    data && (data.success === true || data.success === 1 || data.status === 'success' || data.status === 1)
-                );
-                if (!ok) {
-                    psToast((data && (data.message || data.error)) || '评论提交失败，请检查内容后重试', 'error');
-                    return;
-                }
-                psToast((data && data.message) || '评论已提交', 'success');
-                const redirect = (data && (data.redirect || data.url || data.permalink || (data.comment && data.comment.permalink))) || fallback;
-                refreshUrl = isSameOriginUrl(redirect) ? redirect : fallback;
-            } else {
-                psToast('评论已提交', 'success');
-                refreshUrl = response.url && isSameOriginUrl(response.url) ? response.url : fallback;
-            }
-
-            const refreshed = await refreshCommentsFromUrl(refreshUrl);
-            if (!refreshed) {
-                if (state.swup) state.swup.navigate(fallback + '#comments');
-                else window.location.href = fallback + '#comments';
-            }
-
-            const textarea = form.querySelector('textarea[name="text"], #textarea');
-            if (textarea) textarea.value = '';
-        } catch (error) {
-            psToast('评论提交失败，请稍后重试', 'error');
-        } finally {
-            restore();
-        }
-    }
 
     async function handleProtectedSubmit(form) {
         const submitBtn = form.querySelector('.protected-btn');
         const restore = submitBtn
             ? (() => {
                 const text = submitBtn.textContent;
-                submitBtn.textContent = '解锁中...';
+                submitBtn.textContent = 'Unlocking...';
                 submitBtn.disabled = true;
                 return () => {
                     submitBtn.textContent = text;
@@ -663,7 +472,7 @@
             const checkData = await checkResp.json();
             if (checkData && checkData.hidden) throw new Error('wrong-password');
 
-            psToast('解锁成功', 'success');
+            psToast('Unlocked successfully.', 'success');
             if (state.swup && state.swup.cache && typeof state.swup.cache.clear === 'function') {
                 state.swup.cache.clear();
                 state.swup.navigate(window.location.href);
@@ -671,36 +480,12 @@
                 window.location.reload();
             }
         } catch (error) {
-            psToast('密码错误，请重试', 'error');
+            psToast('Wrong password, please try again.', 'error');
         } finally {
             restore();
         }
     }
 
-    async function handleCommentPageClick(link) {
-        const url = link.getAttribute('href');
-        if (!url) return;
-        const navigator = link.closest('.page-navigator');
-        if (navigator) navigator.classList.add('loading');
-
-        try {
-            const refreshed = await refreshCommentsFromUrl(url, { restoreScroll: false });
-            if (refreshed) {
-                const comments = document.getElementById('comments');
-                if (comments) {
-                    const target = comments.querySelector('.comment-list > li') || comments.querySelector('.comment-title') || comments;
-                    if (target && typeof target.scrollIntoView === 'function') {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-                return;
-            }
-            if (state.swup) state.swup.navigate(url);
-            else window.location.href = url;
-        } finally {
-            if (navigator) navigator.classList.remove('loading');
-        }
-    }
 
     function bindGlobalListeners() {
         if (state.listenersBound) return;
@@ -711,13 +496,6 @@
             const link = event.target && event.target.closest ? event.target.closest('a[href]') : null;
             if (!link) return;
 
-            const pageNavigator = link.closest('.page-navigator');
-            if (pageNavigator) {
-                event.preventDefault();
-                event.stopPropagation();
-                handleCommentPageClick(link);
-                return;
-            }
 
             const href = link.getAttribute('href') || '';
             if (href.indexOf('replyTo') > -1) {
@@ -755,11 +533,6 @@
                 return;
             }
 
-            if (isTypechoCommentForm(form)) {
-                event.preventDefault();
-                handleCommentSubmit(form);
-                return;
-            }
 
             if (form.classList.contains('protected-form')) {
                 event.preventDefault();
@@ -836,7 +609,6 @@
         }
 
         PS.setManagedBySwup(true);
-        patchTypechoComment();
 
         try {
             const swup = new window.Swup({

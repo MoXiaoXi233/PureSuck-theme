@@ -151,7 +151,8 @@ function getPSRuntimeConfig($archive = null)
     $options = Typecho_Widget::widget('Widget_Options');
 
     $features = [
-        'showTOC' => psOptionEnabled($options->showTOC ?? '1', true)
+        'showTOC' => psOptionEnabled($options->showTOC ?? '1', true),
+        'commentsRequireModeration' => psOptionEnabled($options->commentsRequireModeration ?? '0', false)
     ];
 
     $pageType = 'list';

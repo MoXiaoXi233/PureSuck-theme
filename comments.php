@@ -52,7 +52,7 @@
                     <?php $this->commentsNum(_t('暂无评论'), _t('仅有 1 条评论'), _t('已有 %d 条评论')); ?>
                 </h2>
                 <?php $comments->listComments(); ?>
-                <div class="page-navigator">
+                <div class="page-navigator" data-no-swup>
                     <?php $comments->pageNav('上一页', '下一页', 10, '...', array('wrapTag' => 'ul', 'wrapClass' => 'pagination', 'itemTag' => 'li', 'currentClass' => 'active')); ?>
                 </div>
             <?php endif; ?>
@@ -63,6 +63,7 @@
                 <?php $comments->cancelReply('取消'); ?>
             </div>
             <div class="response comment-title icon-chat">发表新评论</div>
+            <div class="comment-form-status" id="comment-form-status" data-require-moderation="<?php echo $this->options->commentsRequireModeration ? '1' : '0'; ?>" aria-live="polite"><?php if (!$this->user->hasLogin() && $this->remember('author', true) != "" && $this->remember('mail', true) != ""): ?>欢迎回来，<?php $this->remember('author'); ?><?php if ($this->options->commentsRequireModeration): ?>。你的评论将在审核后通过<?php endif; ?><?php endif; ?></div>
             <form method="post" action="<?php $this->commentUrl() ?>" id="cf" no-pjax>
                 <?php if ($this->user->hasLogin()): ?>
                     <span>亲爱的<a href="<?php $this->options->profileUrl(); ?>">
@@ -70,9 +71,6 @@
                         </a>~ <a href="<?php $this->options->logoutUrl(); ?>" title="Logout">退出 &raquo;</a>
                     </span>
                 <?php else: ?>
-                    <?php if ($this->remember('author', true) != "" && $this->remember('mail', true) != ""): ?>
-                        <span>欢迎回来，<?php $this->remember('author'); ?></span>
-                    <?php endif; ?>
                     <div class="ainfo">
                         <div class="tbox-container">
                             <div class="tbox">
