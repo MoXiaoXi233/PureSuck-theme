@@ -58,11 +58,33 @@ html.ps-preload-page-enter #swup [data-ps-page-shell] {
         opacity: 1 !important;
         transform: none !important;
     }
-
-    html.ps-animating *,
-    html.ps-animating *::before,
-    html.ps-animating *::after {
+    /* 低动效策略：只禁用页面切换的大动画，不把页面变成“死页面” */
+    html.ps-animating .post.post--index,
+    html.ps-animating .post.post--single,
+    html.ps-animating #swup [data-ps-page-shell],
+    html.ps-animating .archive-title,
+    html.ps-animating .main-pager,
+    html.ps-animating .main-lastinfo {
         animation: none !important;
         transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+
+    /* 保留轻量反馈：链接/按钮仍有短时颜色反馈 */
+    html a,
+    html button,
+    html .nav-item,
+    html .meta-item,
+    html .pagination li a,
+    html .ci,
+    html .submit,
+    html .tab-link,
+    html .cloud-item,
+    html .scroll-button,
+    html .search-container {
+        transition-property: color, background-color, border-color, opacity, box-shadow, text-decoration-color !important;
+        transition-duration: 120ms !important;
+        transition-timing-function: ease-out !important;
     }
 }

@@ -404,13 +404,34 @@ body.mox-modal-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    /* 低动效：仅移除大运动，保留必要的状态反馈 */
     #mox-toast,
     .mox-notification,
     .mox-overlay,
-    .mox-window,
+    .mox-window {
+        animation: none !important;
+        transition-property: opacity, border-color, background-color, color, box-shadow !important;
+        transition-duration: 120ms !important;
+        transition-timing-function: ease-out !important;
+    }
+
+    #mox-toast,
+    .mox-notification,
+    .mox-window {
+        transform: none !important;
+        filter: none !important;
+    }
+
+    .mox-overlay {
+        backdrop-filter: none !important;
+    }
+
+    /* 保留 hover/focus 的轻反馈，避免交互“死板” */
     .mox-close-btn,
     .mox-window-close-btn {
-        transition: none !important;
         animation: none !important;
+        transition-property: color, background-color, border-color, opacity !important;
+        transition-duration: 120ms !important;
+        transition-timing-function: ease-out !important;
     }
 }
