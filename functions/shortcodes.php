@@ -213,6 +213,17 @@ function parseShortcodes($content)
 
     // 用 alt 生成 figure/figcaption
     if (strpos($content, '<img') !== false) {
+        $pictureBlocks = [];
+        $content = preg_replace_callback(
+            '/<picture\b[^>]*>.*?<\/picture>/is',
+            function ($matches) use (&$pictureBlocks) {
+                $token = '__PS_PICTURE_BLOCK_' . count($pictureBlocks) . '__';
+                $pictureBlocks[$token] = $matches[0];
+                return $token;
+            },
+            $content
+        );
+
         $pattern = '/<img.*?src=[\'\"](.*?)[\'\"].*?>/i';
         $content = preg_replace_callback($pattern, function ($matches) {
             if (strpos($matches[0], 'friends-card-avatar') !== false || strpos($matches[0], 'no-figcaption') !== false) {
@@ -229,6 +240,10 @@ function parseShortcodes($content)
 
             return $matches[0];
         }, $content);
+
+        if (!empty($pictureBlocks)) {
+            $content = strtr($content, $pictureBlocks);
+        }
     }
 
     return $content;

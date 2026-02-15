@@ -85,7 +85,7 @@ function renderPostContent($content)
     $version = defined('PS_THEME_VERSION') ? PS_THEME_VERSION : '0';
     $optionFingerprint = psGetRenderOptionFingerprint();
     $contentHash = md5($source);
-    $cacheKey = 'render_post_content:v5:' . $version . ':' . $contentHash . ':' . $optionFingerprint;
+    $cacheKey = 'render_post_content:v6:' . $version . ':' . $contentHash . ':' . $optionFingerprint;
     $ttl = 6 * 3600;
 
     $cache = getCache($cacheKey, $ttl, 'render');
