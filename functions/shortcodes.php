@@ -218,7 +218,28 @@ function parseShortcodes($content)
             '/<picture\b[^>]*>.*?<\/picture>/is',
             function ($matches) use (&$pictureBlocks) {
                 $token = '__PS_PICTURE_BLOCK_' . count($pictureBlocks) . '__';
-                $pictureBlocks[$token] = $matches[0];
+                $pictureHtml = $matches[0];
+
+                $imgTag = '';
+                if (preg_match('/<img\b[^>]*>/i', $pictureHtml, $imgMatches)) {
+                    $imgTag = $imgMatches[0];
+                }
+
+                if (
+                    $imgTag !== '' &&
+                    strpos($imgTag, 'no-figcaption') === false
+                ) {
+                    $caption = '';
+                    if (preg_match('/\balt=[\'"]([^\'"]*)[\'"]/i', $imgTag, $altMatches)) {
+                        $alt = trim((string) $altMatches[1]);
+                        if ($alt !== '') {
+                            $caption = '<figcaption>' . htmlspecialchars($alt, ENT_QUOTES, 'UTF-8') . '</figcaption>';
+                        }
+                    }
+                    $pictureHtml = '<figure>' . $pictureHtml . $caption . '</figure>';
+                }
+
+                $pictureBlocks[$token] = $pictureHtml;
                 return $token;
             },
             $content

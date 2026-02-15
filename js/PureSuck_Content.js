@@ -3,6 +3,7 @@
 
     const PS = window.PS && typeof window.PS === 'object' ? window.PS : null;
     const loadedScripts = new Map();
+    const zoomPreloadCache = new Map();
     let tabObserver = null;
 
     function getThemeUrl() {
@@ -76,6 +77,111 @@
 
         if (fromConfig) return fromConfig;
         return resolveUrl('/js/lib/medium-zoom.min.js');
+    }
+
+    function shouldUseHqZoom() {
+        return Boolean(PS && PS.features && PS.features.zoomUseHQ);
+    }
+
+    function preloadImageSource(src) {
+        if (!src) return Promise.resolve(false);
+        if (zoomPreloadCache.has(src)) return zoomPreloadCache.get(src);
+
+        const task = new Promise(function (resolve) {
+            const img = new Image();
+            img.decoding = 'async';
+
+            const done = function (ok) {
+                resolve(Boolean(ok));
+            };
+
+            img.onload = function () {
+                done(true);
+            };
+            img.onerror = function () {
+                done(false);
+            };
+
+            img.src = src;
+
+            if (typeof img.decode === 'function') {
+                img.decode().then(function () {
+                    done(true);
+                }).catch(function () { });
+            }
+        });
+
+        zoomPreloadCache.set(src, task);
+        return task;
+    }
+
+    function getZoomInstance() {
+        if (PS) {
+            if (!PS.zoom) {
+                PS.zoom = window.mediumZoom({
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    margin: 24
+                });
+            }
+            return PS.zoom;
+        }
+
+        if (!window.__PS_FALLBACK_ZOOM__) {
+            window.__PS_FALLBACK_ZOOM__ = window.mediumZoom({
+                background: 'rgba(0, 0, 0, 0.85)',
+                margin: 24
+            });
+        }
+        return window.__PS_FALLBACK_ZOOM__;
+    }
+
+    function bindHqZoomBehavior(zoomInstance) {
+        if (!zoomInstance || !shouldUseHqZoom()) return;
+        if (zoomInstance.__psHqZoomBound === '1') return;
+        zoomInstance.__psHqZoomBound = '1';
+
+        let cycleToken = 0;
+
+        zoomInstance.on('closed', function () {
+            cycleToken += 1;
+        });
+
+        zoomInstance.on('opened', function (event) {
+            const target = event && event.target instanceof HTMLImageElement ? event.target : null;
+            if (!target) return;
+
+            const zoomSrc = String(target.getAttribute('data-zoom-src') || '').trim();
+            if (!zoomSrc) return;
+
+            const openedImage = document.querySelector('.medium-zoom-image--opened');
+            if (!(openedImage instanceof HTMLImageElement)) return;
+
+            const currentSrc = String(openedImage.currentSrc || openedImage.getAttribute('src') || '').trim();
+            if (!currentSrc || currentSrc === zoomSrc) return;
+
+            const token = cycleToken + 1;
+            cycleToken = token;
+
+            preloadImageSource(zoomSrc).then(function (ok) {
+                if (!ok || token !== cycleToken) return;
+                if (!document.body.contains(openedImage)) return;
+
+                openedImage.style.transition = 'opacity 0.12s ease';
+                openedImage.style.opacity = '0.82';
+
+                const onLoaded = function () {
+                    openedImage.style.opacity = '1';
+                    openedImage.removeEventListener('load', onLoaded);
+                };
+
+                openedImage.addEventListener('load', onLoaded, { once: true });
+                openedImage.setAttribute('src', zoomSrc);
+
+                if (openedImage.complete) {
+                    onLoaded();
+                }
+            });
+        });
     }
 
     function bindCollapsiblePanels(scope) {
@@ -400,18 +506,14 @@
         const src = getMediumZoomSrc();
         return loadScriptOnce(src).then(function (ok) {
             if (!ok || typeof window.mediumZoom !== 'function') return null;
+            const zoomInstance = getZoomInstance();
+            if (!zoomInstance) return null;
 
-            if (!PS.zoom) {
-                PS.zoom = window.mediumZoom({
-                    background: 'rgba(0, 0, 0, 0.85)',
-                    margin: 24
-                });
-            }
-
-            PS.zoom.attach(images);
+            bindHqZoomBehavior(zoomInstance);
+            zoomInstance.attach(images);
             return function cleanupZoom() {
-                if (!PS.zoom || typeof PS.zoom.detach !== 'function') return;
-                PS.zoom.detach(images);
+                if (!zoomInstance || typeof zoomInstance.detach !== 'function') return;
+                zoomInstance.detach(images);
             };
         }).catch(function () {
             return null;

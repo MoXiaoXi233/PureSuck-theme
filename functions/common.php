@@ -152,6 +152,7 @@ function getPSRuntimeConfig($archive = null)
 
     $features = [
         'showTOC' => psOptionEnabled($options->showTOC ?? '1', true),
+        'zoomUseHQ' => psOptionEnabled($options->zoomUseHQ ?? '0', false),
         'commentsRequireModeration' => psOptionEnabled($options->commentsRequireModeration ?? '0', false)
     ];
 
@@ -565,6 +566,15 @@ function themeConfig($form)
         _t('在页面右侧显示一个目录树，如果页面没有对应的目录结构会自动隐藏')
     );
     $form->addInput($showTOC);
+
+    $zoomUseHQ = new Typecho_Widget_Helper_Form_Element_Radio(
+        'zoomUseHQ',
+        array('1' => _t('开启'), '0' => _t('关闭')),
+        '0',
+        _t('图片放大时切换高清图（实验）'),
+        _t('默认关闭。开启后仅对带 data-zoom-src 的图片生效，会在点击放大时预加载高清图并再切换。')
+    );
+    $form->addInput($zoomUseHQ);
 
     // 分类模块显示选项
     $showCategory = new Typecho_Widget_Helper_Form_Element_Radio(

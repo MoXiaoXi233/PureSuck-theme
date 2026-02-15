@@ -17,7 +17,8 @@
     }
 
     const features = {
-        showTOC: toBool(rawFeatures.showTOC, true)
+        showTOC: toBool(rawFeatures.showTOC, true),
+        zoomUseHQ: toBool(rawFeatures.zoomUseHQ, false)
     };
 
     const runtime = {
