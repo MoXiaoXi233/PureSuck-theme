@@ -566,60 +566,75 @@ ul,
 	margin-right: 1px
 }
 
-/* 列表样式 */
-.post-body ol,
-.post-body ul,
+/* Post content list style */
+.post-body .post-content ol,
+.post-body .post-content ul,
 .cp ol,
 .cp ul {
-	margin-left: 20px;
+    margin: 1em 0;
+    padding-left: 1.5em;
+    list-style-position: outside;
 }
 
-.post-body ol,
+.post-body .post-content ol,
 .cp ol {
-	list-style-type: decimal;
+    list-style-type: decimal;
 }
 
-.post-body ul,
+.post-body .post-content ul,
 .cp ul {
-	list-style-type: disc;
+    list-style-type: disc;
 }
 
-.post-body li,
-.post-body li p,
-.cp li,
+.post-body .post-content li,
+.cp li {
+    display: list-item;
+    margin: .38em 0;
+    line-height: 1.85;
+}
+
+.post-body .post-content li p,
 .cp li p {
-	margin-bottom: 5px;
+    margin-bottom: 0;
 }
 
-/* 嵌套列表样式 */
-.post-body ol ol,
-.post-body ul ul,
-.cp ol ol,
+.post-body .post-content li>ol,
+.post-body .post-content li>ul,
+.cp li>ol,
+.cp li>ul {
+    margin-top: .35em;
+    margin-bottom: .35em;
+}
+
+.post-body .post-content ul ul,
 .cp ul ul {
-	margin-left: 20px;
-	padding-left: 20px;
+    list-style-type: circle;
 }
 
-.post-body ol ol,
-.cp ol ol {
-	list-style-type: lower-alpha;
-}
-
-.post-body ul ul,
-.cp ul ul {
-	list-style-type: circle;
-}
-
-.post-body ol ol ol,
-.cp ol ol ol {
-	list-style-type: lower-roman;
-}
-
-.post-body ul ul ul,
+.post-body .post-content ul ul ul,
 .cp ul ul ul {
-	list-style-type: square;
+    list-style-type: square;
 }
 
+/* Keep ordered nesting numeric-first for blog readability */
+.post-body .post-content ol ol,
+.post-body .post-content ul ol,
+.cp ol ol,
+.cp ul ol {
+    list-style-type: decimal;
+}
+
+.post-body .post-content ol ol ol,
+.post-body .post-content ul ol ol,
+.cp ol ol ol,
+.cp ul ol ol {
+    list-style-type: lower-alpha;
+}
+
+.post-body .post-content li::marker,
+.cp li::marker {
+    color: color-mix(in srgb, var(--text-color) 68%, var(--themecolor));
+}
 .post--cover .post-header {
 	position: absolute;
 	z-index: 5;
