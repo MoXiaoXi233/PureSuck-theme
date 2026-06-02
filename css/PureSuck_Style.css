@@ -2545,9 +2545,9 @@ input:-webkit-autofill:active {
 		contain-intrinsic-size: auto 260px;
 	}
 
-	/* 标题有装饰伪元素，排除避免裁切 */
-	.post.post--single .post-content > :is(h1, h2, h3, h4, h5, h6),
-	.post[data-ps-page-shell="page"] .post-content > :is(h1, h2, h3, h4, h5, h6) {
+	/* 标题装饰和列表外置 marker 需要避免裁切 */
+	.post.post--single .post-content > :is(h1, h2, h3, h4, h5, h6, ol, ul),
+	.post[data-ps-page-shell="page"] .post-content > :is(h1, h2, h3, h4, h5, h6, ol, ul) {
 		content-visibility: visible;
 		contain: none;
 	}
