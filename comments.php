@@ -1,13 +1,14 @@
+<?php if (!defined('__TYPECHO_ROOT_DIR__')) exit; ?>
 <?php if ($this->allow('comment')): ?>
-    <?php $this->header('commentReply=1&description=0&keywords=0&generator=0&template=0&pingback=0&xmlrpc=0&wlw=0&rss2=0&rss1=0&antiSpam=0&atom'); ?>
 
     <?php
-    function threadedComments($comments, $options)
-    {
-        $cl = $comments->levels > 0 ? 'c_c' : 'c_p';
-        $isAdmin = $comments->authorId == 1;
-        $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external nofollow">' . $comments->author . '</a>' : $comments->author;
-        ?>
+    if (!function_exists('threadedComments')) {
+        function threadedComments($comments, $options)
+        {
+            $cl = $comments->levels > 0 ? 'c_c' : 'c_p';
+            $isAdmin = $comments->authorId == 1;
+            $author = $comments->url ? '<a href="' . $comments->url . '" target="_blank" rel="external nofollow">' . $comments->author . '</a>' : $comments->author;
+            ?>
         <li id="li-<?php $comments->theId(); ?>" class="<?= $cl; ?>">
             <div id="<?php $comments->theId(); ?>">
                 <?php $avatarUrl = 'https://cn.cravatar.com/avatar/' . md5(strtolower($comments->mail)) . '?s=128&d=mm'; ?>
@@ -41,7 +42,8 @@
                 </div>
             <?php } ?>
         </li>
-    <?php } ?>
+    <?php }
+    } ?>
 
     <div id="comments" class="cf">
         <?php $this->comments()->to($comments); ?>
