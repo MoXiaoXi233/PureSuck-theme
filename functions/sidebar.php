@@ -86,5 +86,24 @@ function getTotalPostsCount()
 function getCcLink()
 {
     $options = Typecho_Widget::widget('Widget_Options');
-    return 'https://creativecommons.org/licenses/' . $options->ccLicense . '/4.0/deed.zh-hans';
+    $license = $options->ccLicense ?: 'by-nc-sa';
+
+    if ($license === 'zero') {
+        return 'https://creativecommons.org/publicdomain/zero/1.0/deed.zh-hans';
+    }
+
+    return 'https://creativecommons.org/licenses/' . $license . '/4.0/deed.zh-hans';
+}
+
+// 获取 CC 协议显示名称
+function getCcLabel()
+{
+    $options = Typecho_Widget::widget('Widget_Options');
+    $license = $options->ccLicense ?: 'by-nc-sa';
+
+    if ($license === 'zero') {
+        return 'CC0 1.0';
+    }
+
+    return 'CC ' . strtoupper($license) . ' 4.0';
 }
