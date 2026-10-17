@@ -24,7 +24,7 @@ require_once __DIR__ . '/functions/sidebar.php';
 // 短代码功能：解析与渲染
 require_once __DIR__ . '/functions/shortcodes.php';
 
-// 通用功能：初始化、配置、CDN、配色
+// 通用功能：初始化、配置、配色
 require_once __DIR__ . '/functions/common.php';
 
 // 渲染管道：协调各模块处理内容
