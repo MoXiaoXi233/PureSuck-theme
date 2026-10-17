@@ -3,7 +3,7 @@ if (!defined('__TYPECHO_ROOT_DIR__'))
     exit;
 
 // ==================== 通用功能模块 ====================
-// 包含：主题初始化、配置管理、CDN、配色、版本检查
+// 包含：主题初始化、配置管理、配色、版本检查
 
 // 主题初始化钩子
 function themeInit($archive)
@@ -35,43 +35,6 @@ function getColorScheme()
 {
     $colorScheme = Typecho_Widget::widget('Widget_Options')->colorScheme;
     return $colorScheme;
-}
-
-// 静态资源 URL 管理
-function resolveStaticURL($path)
-{
-    $options = Typecho_Widget::widget('Widget_Options');
-    $staticCdn = $options->staticCdn;
-
-    $staticMap = [
-        'local' => [
-            'medium-zoom.min.js' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
-            'Swup.umd.min.js' => $options->themeUrl . '/js/lib/Swup/Swup.umd.min.js',
-        ],
-        'bootcdn' => [
-            'medium-zoom.min.js' => "https://cdn.bootcdn.net/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
-            'Swup.umd.min.js' => "https://cdn.bootcdn.net/ajax/libs/swup/4.8.2/Swup.umd.min.js",
-        ],
-        "cdnjs" => [
-            'medium-zoom.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.1.0/medium-zoom.min.js",
-            'Swup.umd.min.js' => "https://cdnjs.cloudflare.com/ajax/libs/swup/4.8.2/Swup.umd.min.js",
-        ]
-    ];
-
-    if ($staticCdn === 'local') {
-        return $staticMap['local'][$path];
-    }
-
-    if (isset($staticMap[$staticCdn][$path])) {
-        return $staticMap[$staticCdn][$path];
-    }
-
-    return $staticMap['local'][$path];
-}
-
-function getStaticURL($path)
-{
-    echo resolveStaticURL($path);
 }
 
 // 生成动态 CSS
@@ -172,7 +135,7 @@ function getPSRuntimeConfig($archive = null)
         'pageType' => $pageType,
         'features' => $features,
         'assets' => [
-            'mediumZoom' => resolveStaticURL('medium-zoom.min.js'),
+            'mediumZoom' => $options->themeUrl . '/js/lib/medium-zoom.min.js',
             'owo' => $options->themeUrl . '/js/OwO.min.js'
         ]
     ];
@@ -497,19 +460,6 @@ function themeConfig($form)
         _t('位于Footer，在这里填入JavaScript代码，需要包含&lt;script&gt;标签！，不要填除了脚本外的其他内容，否则会造成样式错误！<br>如果开启了 Pjax 功能，请自行在 header.php 配置回调函数或者尝试寻求帮助')
     );
     $form->addInput($footerScript);
-
-    $staticCdn = new Typecho_Widget_Helper_Form_Element_Radio(
-        'staticCdn',
-        array(
-            'local' => _t('本地'),
-            'bootcdn' => _t('BootCDN'),
-            'cdnjs' => _t('CDNJS'),
-        ),
-        'local',
-        _t("主题静态资源 CDN"),
-        _t("静态资源 CDN 源选择，默认为本地")
-    );
-    $form->addInput($staticCdn);
 
     // 网页底部信息
     $footerInfo = new \Typecho\Widget\Helper\Form\Element\Textarea(

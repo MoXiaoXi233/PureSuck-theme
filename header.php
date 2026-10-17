@@ -121,7 +121,7 @@
     <script defer src="<?php $this->options->themeUrl('/js/MoxDesign.js'); ?>"></script>
 
         <!-- Swup 4：页面过渡动画 -->
-        <script defer src="<?php getStaticURL('Swup.umd.min.js'); ?>"></script>
+        <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/Swup.umd.min.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/scroll-plugin.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/preload-plugin.js'); ?>"></script>
         <script defer src="<?php $this->options->themeUrl('/js/lib/Swup/head-plugin.js'); ?>"></script>
